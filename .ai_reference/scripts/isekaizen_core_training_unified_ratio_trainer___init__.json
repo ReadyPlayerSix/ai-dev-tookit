@@ -1,0 +1,12 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\training\\unified_ratio_trainer\\__init__.py",
+  "imports": [
+    {
+      "name": "unified_ratio_trainer.UnifiedRatioTrainer",
+      "line": 11
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

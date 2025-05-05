@@ -1,0 +1,984 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\semantic\\validation_metrics.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 8
+    },
+    {
+      "name": "time",
+      "line": 9
+    },
+    {
+      "name": "logging",
+      "line": 10
+    },
+    {
+      "name": "torch",
+      "line": 11
+    },
+    {
+      "name": "torch.nn",
+      "line": 12
+    },
+    {
+      "name": "torch.optim",
+      "line": 13
+    },
+    {
+      "name": "numpy",
+      "line": 14
+    },
+    {
+      "name": "torch.utils.data.DataLoader",
+      "line": 15
+    },
+    {
+      "name": "torch.utils.data.WeightedRandomSampler",
+      "line": 15
+    },
+    {
+      "name": "typing.Dict",
+      "line": 16
+    },
+    {
+      "name": "typing.List",
+      "line": 16
+    },
+    {
+      "name": "typing.Any",
+      "line": 16
+    },
+    {
+      "name": "typing.Optional",
+      "line": 16
+    },
+    {
+      "name": "typing.Union",
+      "line": 16
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 16
+    }
+  ],
+  "classes": {
+    "SimpleCNN": {
+      "start_line": 50,
+      "end_line": 77,
+      "methods": {
+        "__init__": {
+          "start_line": 51,
+          "end_line": 71,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 52
+            },
+            {
+              "name": "nn.Sequential",
+              "line": 53
+            },
+            {
+              "name": "nn.Sequential",
+              "line": 64
+            },
+            {
+              "name": "nn.Conv2d",
+              "line": 54
+            },
+            {
+              "name": "nn.ReLU",
+              "line": 55
+            },
+            {
+              "name": "nn.MaxPool2d",
+              "line": 56
+            },
+            {
+              "name": "nn.Conv2d",
+              "line": 57
+            },
+            {
+              "name": "nn.ReLU",
+              "line": 58
+            },
+            {
+              "name": "nn.MaxPool2d",
+              "line": 59
+            },
+            {
+              "name": "nn.Conv2d",
+              "line": 60
+            },
+            {
+              "name": "nn.ReLU",
+              "line": 61
+            },
+            {
+              "name": "nn.AdaptiveAvgPool2d",
+              "line": 62
+            },
+            {
+              "name": "nn.Flatten",
+              "line": 65
+            },
+            {
+              "name": "nn.Linear",
+              "line": 66
+            },
+            {
+              "name": "nn.ReLU",
+              "line": 67
+            },
+            {
+              "name": "nn.Dropout",
+              "line": 68
+            },
+            {
+              "name": "nn.Linear",
+              "line": 69
+            },
+            {
+              "name": "super",
+              "line": 52
+            }
+          ],
+          "code_snippet": "        # Create simple CNN for image data\n        class SimpleCNN(nn.Module):\n            def __init__(self):\n                super(SimpleCNN, self).__init__()\n                self.features = nn.Sequential(\n                    nn.Conv2d(channels, 32, kernel_size=3, padding=1),\n                    nn.ReLU(inplace=True),\n                    nn.MaxPool2d(kernel_size=2, stride=2),\n                    nn.Conv2d(32, 64, kernel_size=3, padding=1),\n                    nn.ReLU(inplace=True),\n                    nn.MaxPool2d(kernel_size=2, stride=2),\n                    nn.Conv2d(64, 64, kernel_size=3, padding=1),\n                    nn.ReLU(inplace=True),\n                    nn.AdaptiveAvgPool2d((1, 1))\n                )\n                self.classifier = nn.Sequential(\n                    nn.Flatten(),\n                    nn.Linear(64, 128),\n                    nn.ReLU(inplace=True),\n                    nn.Dropout(0.5),\n                    nn.Linear(128, num_classes)\n                )\n                \n            def forward(self, x):\n                x = self.features(x)"
+        },
+        "forward": {
+          "start_line": 72,
+          "end_line": 77,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "x"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.features",
+              "line": 73
+            },
+            {
+              "name": "self.classifier",
+              "line": 74
+            }
+          ],
+          "code_snippet": "                )\n                \n            def forward(self, x):\n                x = self.features(x)\n                x = self.classifier(x)\n                return x\n                \n        return SimpleCNN\n    \n    # For text or other data types, use MLP"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "..."
+      ]
+    },
+    "SimpleMLP": {
+      "start_line": 93,
+      "end_line": 110,
+      "methods": {
+        "__init__": {
+          "start_line": 94,
+          "end_line": 106,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 95
+            },
+            {
+              "name": "nn.Sequential",
+              "line": 96
+            },
+            {
+              "name": "nn.Flatten",
+              "line": 97
+            },
+            {
+              "name": "nn.Linear",
+              "line": 98
+            },
+            {
+              "name": "nn.ReLU",
+              "line": 99
+            },
+            {
+              "name": "nn.Dropout",
+              "line": 100
+            },
+            {
+              "name": "nn.Linear",
+              "line": 101
+            },
+            {
+              "name": "nn.ReLU",
+              "line": 102
+            },
+            {
+              "name": "nn.Dropout",
+              "line": 103
+            },
+            {
+              "name": "nn.Linear",
+              "line": 104
+            },
+            {
+              "name": "super",
+              "line": 95
+            }
+          ],
+          "code_snippet": "        # Create simple MLP\n        class SimpleMLP(nn.Module):\n            def __init__(self):\n                super(SimpleMLP, self).__init__()\n                self.model = nn.Sequential(\n                    nn.Flatten(),\n                    nn.Linear(input_size, 256),\n                    nn.ReLU(inplace=True),\n                    nn.Dropout(0.3),\n                    nn.Linear(256, 128),\n                    nn.ReLU(inplace=True),\n                    nn.Dropout(0.2),\n                    nn.Linear(128, num_classes)\n                )\n                \n            def forward(self, x):\n                return self.model(x)"
+        },
+        "forward": {
+          "start_line": 107,
+          "end_line": 110,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "x"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model",
+              "line": 108
+            }
+          ],
+          "code_snippet": "                )\n                \n            def forward(self, x):\n                return self.model(x)\n                \n        return SimpleMLP\n    \n    # Fallback option"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "..."
+      ]
+    },
+    "FallbackModel": {
+      "start_line": 114,
+      "end_line": 126,
+      "methods": {
+        "__init__": {
+          "start_line": 115,
+          "end_line": 120,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 116
+            },
+            {
+              "name": "logger.warning",
+              "line": 117
+            },
+            {
+              "name": "nn.Linear",
+              "line": 118
+            },
+            {
+              "name": "super",
+              "line": 116
+            }
+          ],
+          "code_snippet": "    else:\n        class FallbackModel(nn.Module):\n            def __init__(self):\n                super(FallbackModel, self).__init__()\n                logger.warning(\"Could not determine appropriate model, using fallback\")\n                self.linear = nn.Linear(10, 10)  # Will likely fail, but it's a fallback\n                \n            def forward(self, x):\n                if isinstance(x, torch.Tensor):\n                    return self.linear(x.view(x.size(0), -1))"
+        },
+        "forward": {
+          "start_line": 120,
+          "end_line": 126,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "x"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 121
+            },
+            {
+              "name": "self.linear",
+              "line": 122
+            },
+            {
+              "name": "self.linear",
+              "line": 124
+            },
+            {
+              "name": "x.view",
+              "line": 122
+            },
+            {
+              "name": "torch.zeros",
+              "line": 124
+            },
+            {
+              "name": "x.size",
+              "line": 122
+            }
+          ],
+          "code_snippet": "                self.linear = nn.Linear(10, 10)  # Will likely fail, but it's a fallback\n                \n            def forward(self, x):\n                if isinstance(x, torch.Tensor):\n                    return self.linear(x.view(x.size(0), -1))\n                else:\n                    return self.linear(torch.zeros(1, 10))\n                    \n        return FallbackModel\n\n"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "..."
+      ]
+    }
+  },
+  "functions": {
+    "create_simple_model_for_dataset": {
+      "start_line": 22,
+      "end_line": 128,
+      "parameters": [
+        {
+          "name": "dataset"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "isinstance",
+          "line": 36
+        },
+        {
+          "name": "isinstance",
+          "line": 41
+        },
+        {
+          "name": "isinstance",
+          "line": 80
+        },
+        {
+          "name": "len",
+          "line": 36
+        },
+        {
+          "name": "max",
+          "line": 43
+        },
+        {
+          "name": "....item",
+          "line": 82
+        },
+        {
+          "name": "isinstance",
+          "line": 85
+        },
+        {
+          "name": "len",
+          "line": 43
+        },
+        {
+          "name": "isinstance",
+          "line": 44
+        },
+        {
+          "name": "....__init__",
+          "line": 52
+        },
+        {
+          "name": "nn.Sequential",
+          "line": 53
+        },
+        {
+          "name": "nn.Sequential",
+          "line": 64
+        },
+        {
+          "name": "self.features",
+          "line": 73
+        },
+        {
+          "name": "self.classifier",
+          "line": 74
+        },
+        {
+          "name": "max",
+          "line": 86
+        },
+        {
+          "name": "set",
+          "line": 43
+        },
+        {
+          "name": "len",
+          "line": 44
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 54
+        },
+        {
+          "name": "nn.ReLU",
+          "line": 55
+        },
+        {
+          "name": "nn.MaxPool2d",
+          "line": 56
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 57
+        },
+        {
+          "name": "nn.ReLU",
+          "line": 58
+        },
+        {
+          "name": "nn.MaxPool2d",
+          "line": 59
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 60
+        },
+        {
+          "name": "nn.ReLU",
+          "line": 61
+        },
+        {
+          "name": "nn.AdaptiveAvgPool2d",
+          "line": 62
+        },
+        {
+          "name": "nn.Flatten",
+          "line": 65
+        },
+        {
+          "name": "nn.Linear",
+          "line": 66
+        },
+        {
+          "name": "nn.ReLU",
+          "line": 67
+        },
+        {
+          "name": "nn.Dropout",
+          "line": 68
+        },
+        {
+          "name": "nn.Linear",
+          "line": 69
+        },
+        {
+          "name": "torch.prod",
+          "line": 82
+        },
+        {
+          "name": "len",
+          "line": 86
+        },
+        {
+          "name": "isinstance",
+          "line": 87
+        },
+        {
+          "name": "....__init__",
+          "line": 95
+        },
+        {
+          "name": "nn.Sequential",
+          "line": 96
+        },
+        {
+          "name": "self.model",
+          "line": 108
+        },
+        {
+          "name": "....__init__",
+          "line": 116
+        },
+        {
+          "name": "logger.warning",
+          "line": 117
+        },
+        {
+          "name": "nn.Linear",
+          "line": 118
+        },
+        {
+          "name": "isinstance",
+          "line": 121
+        },
+        {
+          "name": "super",
+          "line": 52
+        },
+        {
+          "name": "torch.tensor",
+          "line": 82
+        },
+        {
+          "name": "set",
+          "line": 86
+        },
+        {
+          "name": "len",
+          "line": 87
+        },
+        {
+          "name": "nn.Flatten",
+          "line": 97
+        },
+        {
+          "name": "nn.Linear",
+          "line": 98
+        },
+        {
+          "name": "nn.ReLU",
+          "line": 99
+        },
+        {
+          "name": "nn.Dropout",
+          "line": 100
+        },
+        {
+          "name": "nn.Linear",
+          "line": 101
+        },
+        {
+          "name": "nn.ReLU",
+          "line": 102
+        },
+        {
+          "name": "nn.Dropout",
+          "line": 103
+        },
+        {
+          "name": "nn.Linear",
+          "line": 104
+        },
+        {
+          "name": "self.linear",
+          "line": 122
+        },
+        {
+          "name": "self.linear",
+          "line": 124
+        },
+        {
+          "name": "super",
+          "line": 95
+        },
+        {
+          "name": "super",
+          "line": 116
+        },
+        {
+          "name": "x.view",
+          "line": 122
+        },
+        {
+          "name": "torch.zeros",
+          "line": 124
+        },
+        {
+          "name": "range",
+          "line": 43
+        },
+        {
+          "name": "x.size",
+          "line": 122
+        },
+        {
+          "name": "min",
+          "line": 43
+        },
+        {
+          "name": "range",
+          "line": 86
+        },
+        {
+          "name": "len",
+          "line": 43
+        },
+        {
+          "name": "min",
+          "line": 86
+        },
+        {
+          "name": "len",
+          "line": 86
+        }
+      ],
+      "docstring": "\n    Create a simple model appropriate for the dataset type.\n    \n    Args:\n        dataset: The dataset to create a model for\n        \n    Returns:\n        A PyTorch model class\n    ",
+      "code_snippet": "\n\ndef create_simple_model_for_dataset(dataset):\n    \"\"\"\n    Create a simple model appropriate for the dataset type.\n    \n    Args:\n        dataset: The dataset to create a model for\n        \n    Returns:\n        A PyTorch model class\n    \"\"\"\n    # Try to get a sample to determine input shape\n    sample, target = dataset[0]\n    \n    # Determine if this is an image dataset\n    if isinstance(sample, torch.Tensor) and len(sample.shape) == 3:\n        # Image data (C x H x W)\n        channels, height, width = sample.shape\n        \n        # Determine number of classes\n        if isinstance(target, int):\n            # Try to estimate number of classes\n            num_classes = max(10, len(set([dataset[i][1] for i in range(min(1000, len(dataset)))])))\n        elif isinstance(target, torch.Tensor) and len(target.shape) == 1:\n            num_classes = target.shape[0]\n        else:\n            num_classes = 10  # Default\n        \n        # Create simple CNN for image data\n        class SimpleCNN(nn.Module):\n            def __init__(self):\n                super(SimpleCNN, self).__init__()\n                self.features = nn.Sequential(\n                    nn.Conv2d(channels, 32, kernel_size=3, padding=1),\n                    nn.ReLU(inplace=True),\n                    nn.MaxPool2d(kernel_size=2, stride=2),\n                    nn.Conv2d(32, 64, kernel_size=3, padding=1),\n                    nn.ReLU(inplace=True),\n                    nn.MaxPool2d(kernel_size=2, stride=2),\n                    nn.Conv2d(64, 64, kernel_size=3, padding=1),\n                    nn.ReLU(inplace=True),\n                    nn.AdaptiveAvgPool2d((1, 1))\n                )\n                self.classifier = nn.Sequential(\n                    nn.Flatten(),\n                    nn.Linear(64, 128),\n                    nn.ReLU(inplace=True),\n                    nn.Dropout(0.5),\n                    nn.Linear(128, num_classes)\n                )\n                \n            def forward(self, x):\n                x = self.features(x)\n                x = self.classifier(x)\n                return x\n                \n        return SimpleCNN\n    \n    # For text or other data types, use MLP\n    elif isinstance(sample, torch.Tensor):\n        # Flatten input shape\n        input_size = torch.prod(torch.tensor(sample.shape)).item()\n        \n        # Determine output size\n        if isinstance(target, int):\n            num_classes = max(10, len(set([dataset[i][1] for i in range(min(1000, len(dataset)))])))\n        elif isinstance(target, torch.Tensor) and len(target.shape) == 1:\n            num_classes = target.shape[0]\n        else:\n            num_classes = 10  # Default\n        \n        # Create simple MLP\n        class SimpleMLP(nn.Module):\n            def __init__(self):\n                super(SimpleMLP, self).__init__()\n                self.model = nn.Sequential(\n                    nn.Flatten(),\n                    nn.Linear(input_size, 256),\n                    nn.ReLU(inplace=True),\n                    nn.Dropout(0.3),\n                    nn.Linear(256, 128),\n                    nn.ReLU(inplace=True),\n                    nn.Dropout(0.2),\n                    nn.Linear(128, num_classes)\n                )\n                \n            def forward(self, x):\n                return self.model(x)\n                \n        return SimpleMLP\n    \n    # Fallback option\n    else:\n        class FallbackModel(nn.Module):\n            def __init__(self):\n                super(FallbackModel, self).__init__()\n                logger.warning(\"Could not determine appropriate model, using fallback\")\n                self.linear = nn.Linear(10, 10)  # Will likely fail, but it's a fallback\n                \n            def forward(self, x):\n                if isinstance(x, torch.Tensor):\n                    return self.linear(x.view(x.size(0), -1))\n                else:\n                    return self.linear(torch.zeros(1, 10))\n                    \n        return FallbackModel\n\n\ndef train_and_evaluate(model, train_loader, test_loader, epochs=5, device=None):\n    \"\"\""
+    },
+    "train_and_evaluate": {
+      "start_line": 129,
+      "end_line": 238,
+      "parameters": [
+        {
+          "name": "model"
+        },
+        {
+          "name": "train_loader"
+        },
+        {
+          "name": "test_loader"
+        },
+        {
+          "name": "epochs"
+        },
+        {
+          "name": "device"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "model.to",
+          "line": 147
+        },
+        {
+          "name": "optim.Adam",
+          "line": 150
+        },
+        {
+          "name": "nn.CrossEntropyLoss",
+          "line": 151
+        },
+        {
+          "name": "logger.info",
+          "line": 160
+        },
+        {
+          "name": "torch.device",
+          "line": 144
+        },
+        {
+          "name": "model.parameters",
+          "line": 150
+        },
+        {
+          "name": "range",
+          "line": 163
+        },
+        {
+          "name": "model.train",
+          "line": 165
+        },
+        {
+          "name": "time.time",
+          "line": 166
+        },
+        {
+          "name": "....append",
+          "line": 190
+        },
+        {
+          "name": "....append",
+          "line": 191
+        },
+        {
+          "name": "model.eval",
+          "line": 194
+        },
+        {
+          "name": "....append",
+          "line": 213
+        },
+        {
+          "name": "logger.info",
+          "line": 216
+        },
+        {
+          "name": "sum",
+          "line": 224
+        },
+        {
+          "name": "logger.error",
+          "line": 230
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 144
+        },
+        {
+          "name": "optimizer.zero_grad",
+          "line": 174
+        },
+        {
+          "name": "model",
+          "line": 177
+        },
+        {
+          "name": "criterion",
+          "line": 178
+        },
+        {
+          "name": "loss.backward",
+          "line": 181
+        },
+        {
+          "name": "optimizer.step",
+          "line": 182
+        },
+        {
+          "name": "loss.item",
+          "line": 185
+        },
+        {
+          "name": "time.time",
+          "line": 188
+        },
+        {
+          "name": "len",
+          "line": 189
+        },
+        {
+          "name": "torch.no_grad",
+          "line": 198
+        },
+        {
+          "name": "str",
+          "line": 232
+        },
+        {
+          "name": "float",
+          "line": 235
+        },
+        {
+          "name": "inputs.to",
+          "line": 171
+        },
+        {
+          "name": "targets.to",
+          "line": 171
+        },
+        {
+          "name": "model",
+          "line": 204
+        },
+        {
+          "name": "torch.max",
+          "line": 205
+        },
+        {
+          "name": "targets.size",
+          "line": 208
+        },
+        {
+          "name": "....item",
+          "line": 209
+        },
+        {
+          "name": "inputs.to",
+          "line": 201
+        },
+        {
+          "name": "targets.to",
+          "line": 201
+        },
+        {
+          "name": "....sum",
+          "line": 209
+        }
+      ],
+      "docstring": "\n    Train a model and evaluate its performance.\n    \n    Args:\n        model: PyTorch model\n        train_loader: DataLoader for training\n        test_loader: DataLoader for evaluation\n        epochs: Number of training epochs\n        device: Device to use (None = auto-detect)\n        \n    Returns:\n        Dictionary with performance metrics\n    ",
+      "code_snippet": "\n\ndef train_and_evaluate(model, train_loader, test_loader, epochs=5, device=None):\n    \"\"\"\n    Train a model and evaluate its performance.\n    \n    Args:\n        model: PyTorch model\n        train_loader: DataLoader for training\n        test_loader: DataLoader for evaluation\n        epochs: Number of training epochs\n        device: Device to use (None = auto-detect)\n        \n    Returns:\n        Dictionary with performance metrics\n    \"\"\"\n    if device is None:\n        device = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\n    \n    # Move model to device\n    model = model.to(device)\n    \n    # Setup optimizer and criterion\n    optimizer = optim.Adam(model.parameters(), lr=0.001)\n    criterion = nn.CrossEntropyLoss()\n    \n    # Initialize metrics\n    metrics = {\n        \"train_loss\": [],\n        \"test_accuracy\": [],\n        \"epoch_times\": []\n    }\n    \n    logger.info(f\"Starting training for {epochs} epochs on {device}\")\n    \n    try:\n        for epoch in range(epochs):\n            # Training phase\n            model.train()\n            epoch_start = time.time()\n            running_loss = 0.0\n            \n            for inputs, targets in train_loader:\n                # Move data to device\n                inputs, targets = inputs.to(device), targets.to(device)\n                \n                # Zero gradients\n                optimizer.zero_grad()\n                \n                # Forward pass\n                outputs = model(inputs)\n                loss = criterion(outputs, targets)\n                \n                # Backward pass and optimize\n                loss.backward()\n                optimizer.step()\n                \n                # Accumulate loss\n                running_loss += loss.item()\n            \n            # Record metrics\n            epoch_time = time.time() - epoch_start\n            avg_loss = running_loss / len(train_loader)\n            metrics[\"epoch_times\"].append(epoch_time)\n            metrics[\"train_loss\"].append(avg_loss)\n            \n            # Evaluation phase\n            model.eval()\n            correct = 0\n            total = 0\n            \n            with torch.no_grad():\n                for inputs, targets in test_loader:\n                    # Move data to device\n                    inputs, targets = inputs.to(device), targets.to(device)\n                    \n                    # Forward pass\n                    outputs = model(inputs)\n                    _, predicted = torch.max(outputs.data, 1)\n                    \n                    # Count correct\n                    total += targets.size(0)\n                    correct += (predicted == targets).sum().item()\n            \n            # Calculate accuracy\n            test_acc = correct / total\n            metrics[\"test_accuracy\"].append(test_acc)\n            \n            # Log progress\n            logger.info(f\"Epoch {epoch+1}/{epochs} | \"\n                      f\"Loss: {avg_loss:.4f} | \"\n                      f\"Accuracy: {test_acc:.4f} | \"\n                      f\"Time: {epoch_time:.2f}s\")\n        \n        # Calculate final metrics\n        return {\n            \"final_test_accuracy\": metrics[\"test_accuracy\"][-1],\n            \"convergence_time\": sum(metrics[\"epoch_times\"]),\n            \"final_loss\": metrics[\"train_loss\"][-1],\n            \"detailed_metrics\": metrics\n        }\n        \n    except Exception as e:\n        logger.error(f\"Error during training: {e}\")\n        return {\n            \"error\": str(e),\n            \"final_test_accuracy\": 0.0,\n            \"convergence_time\": 0.0,\n            \"final_loss\": float('inf'),\n            \"detailed_metrics\": metrics\n        }\n\n\ndef create_pattern_aware_sampler(trainset, pattern_map):"
+    },
+    "create_pattern_aware_sampler": {
+      "start_line": 240,
+      "end_line": 291,
+      "parameters": [
+        {
+          "name": "trainset"
+        },
+        {
+          "name": "pattern_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.warning",
+          "line": 288
+        },
+        {
+          "name": "range",
+          "line": 262
+        },
+        {
+          "name": "WeightedRandomSampler",
+          "line": 281
+        },
+        {
+          "name": "len",
+          "line": 262
+        },
+        {
+          "name": "str",
+          "line": 263
+        },
+        {
+          "name": "int",
+          "line": 266
+        },
+        {
+          "name": "weights.append",
+          "line": 273
+        },
+        {
+          "name": "indices.append",
+          "line": 274
+        },
+        {
+          "name": "weights.append",
+          "line": 277
+        },
+        {
+          "name": "indices.append",
+          "line": 278
+        },
+        {
+          "name": "len",
+          "line": 283
+        }
+      ],
+      "docstring": "\n    Create a sampler that weights training samples based on pattern difficulty.\n    \n    Args:\n        trainset: Training dataset\n        pattern_map: Pattern map with difficulty information\n        \n    Returns:\n        WeightedRandomSampler instance\n    ",
+      "code_snippet": "\n\ndef create_pattern_aware_sampler(trainset, pattern_map):\n    \"\"\"\n    Create a sampler that weights training samples based on pattern difficulty.\n    \n    Args:\n        trainset: Training dataset\n        pattern_map: Pattern map with difficulty information\n        \n    Returns:\n        WeightedRandomSampler instance\n    \"\"\"\n    # Extract difficulty ratings from pattern map\n    if ('difficulty_map' in pattern_map and \n        'difficulty_ratings' in pattern_map['difficulty_map']):\n        \n        difficulty_ratings = pattern_map['difficulty_map']['difficulty_ratings']\n        \n        # Create weights list (higher difficulty = higher sampling probability)\n        weights = []\n        indices = []\n        \n        # Strategy: Focus more on difficult examples, but still sample everything\n        for idx in range(len(trainset)):\n            str_idx = str(idx)\n            if str_idx in difficulty_ratings:\n                # Get difficulty (0-4)\n                difficulty = int(difficulty_ratings[str_idx])\n                \n                # Calculate weight - balance between focusing on difficult samples\n                # and still training on easier ones\n                # difficulty^1.5 gives a good balance\n                weight = (difficulty + 1) ** 1.5\n                \n                weights.append(weight)\n                indices.append(idx)\n            else:\n                # Default weight for samples without difficulty rating\n                weights.append(1.0)\n                indices.append(idx)\n        \n        # Create sampler\n        return WeightedRandomSampler(\n            weights=weights,\n            num_samples=len(indices),\n            replacement=True\n        )\n    \n    # If no valid difficulty ratings, return None (use random sampling)\n    logger.warning(\"No valid difficulty ratings found in pattern map - using random sampling\")\n    return None\n\n\ndef validate_pattern_mapping(pattern_map, trainset, testset, model_class=None, \n                            epochs=5, batch_size=128, device=None):"
+    },
+    "validate_pattern_mapping": {
+      "start_line": 292,
+      "end_line": 389,
+      "parameters": [
+        {
+          "name": "pattern_map"
+        },
+        {
+          "name": "trainset"
+        },
+        {
+          "name": "testset"
+        },
+        {
+          "name": "model_class"
+        },
+        {
+          "name": "epochs"
+        },
+        {
+          "name": "batch_size"
+        },
+        {
+          "name": "device"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 317
+        },
+        {
+          "name": "DataLoader",
+          "line": 321
+        },
+        {
+          "name": "DataLoader",
+          "line": 327
+        },
+        {
+          "name": "logger.info",
+          "line": 333
+        },
+        {
+          "name": "model_class",
+          "line": 334
+        },
+        {
+          "name": "train_and_evaluate",
+          "line": 335
+        },
+        {
+          "name": "create_pattern_aware_sampler",
+          "line": 341
+        },
+        {
+          "name": "torch.device",
+          "line": 311
+        },
+        {
+          "name": "create_simple_model_for_dataset",
+          "line": 315
+        },
+        {
+          "name": "DataLoader",
+          "line": 345
+        },
+        {
+          "name": "logger.info",
+          "line": 351
+        },
+        {
+          "name": "model_class",
+          "line": 352
+        },
+        {
+          "name": "train_and_evaluate",
+          "line": 353
+        },
+        {
+          "name": "logger.info",
+          "line": 369
+        },
+        {
+          "name": "logger.info",
+          "line": 370
+        },
+        {
+          "name": "logger.info",
+          "line": 371
+        },
+        {
+          "name": "logger.info",
+          "line": 372
+        },
+        {
+          "name": "logger.info",
+          "line": 374
+        },
+        {
+          "name": "logger.warning",
+          "line": 383
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 311
+        },
+        {
+          "name": "max",
+          "line": 364
+        }
+      ],
+      "docstring": "\n    Validate if the pattern mapping improves training outcomes.\n    \n    Args:\n        pattern_map: Generated pattern map\n        trainset: Training dataset\n        testset: Test dataset\n        model_class: Model class to use for validation\n        epochs: Number of training epochs\n        batch_size: Batch size for training\n        device: Device to use for training\n        \n    Returns:\n        Dictionary of validation metrics\n    ",
+      "code_snippet": "\n\ndef validate_pattern_mapping(pattern_map, trainset, testset, model_class=None, \n                            epochs=5, batch_size=128, device=None):\n    \"\"\"\n    Validate if the pattern mapping improves training outcomes.\n    \n    Args:\n        pattern_map: Generated pattern map\n        trainset: Training dataset\n        testset: Test dataset\n        model_class: Model class to use for validation\n        epochs: Number of training epochs\n        batch_size: Batch size for training\n        device: Device to use for training\n        \n    Returns:\n        Dictionary of validation metrics\n    \"\"\"\n    # Auto-detect device if not specified\n    if device is None:\n        device = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\n    \n    # Get a model class if not provided\n    if model_class is None:\n        model_class = create_simple_model_for_dataset(trainset)\n    \n    logger.info(f\"Starting pattern map validation using {model_class.__name__} \"\n              f\"with {epochs} epochs and batch size {batch_size}\")\n    \n    # Create standard data loader for baseline training\n    baseline_loader = DataLoader(\n        trainset, batch_size=batch_size, shuffle=True, \n        num_workers=2, pin_memory=(device.type == 'cuda')\n    )\n    \n    # Create data loader for testing\n    test_loader = DataLoader(\n        testset, batch_size=batch_size, shuffle=False, \n        num_workers=2, pin_memory=(device.type == 'cuda')\n    )\n    \n    # Train baseline model\n    logger.info(\"Training baseline model (without pattern awareness)\")\n    baseline_model = model_class()\n    baseline_metrics = train_and_evaluate(\n        baseline_model, baseline_loader, test_loader, \n        epochs=epochs, device=device\n    )\n    \n    # Create pattern-aware sampler\n    pattern_sampler = create_pattern_aware_sampler(trainset, pattern_map)\n    \n    if pattern_sampler is not None:\n        # Create pattern-aware loader\n        pattern_loader = DataLoader(\n            trainset, batch_size=batch_size, sampler=pattern_sampler,\n            num_workers=2, pin_memory=(device.type == 'cuda')\n        )\n        \n        # Train pattern-guided model\n        logger.info(\"Training pattern-aware model\")\n        pattern_model = model_class()\n        pattern_metrics = train_and_evaluate(\n            pattern_model, pattern_loader, test_loader,\n            epochs=epochs, device=device\n        )\n        \n        # Calculate improvements\n        improvements = {\n            \"accuracy_improvement\": pattern_metrics[\"final_test_accuracy\"] - baseline_metrics[\"final_test_accuracy\"],\n            \"convergence_improvement\": baseline_metrics[\"convergence_time\"] - pattern_metrics[\"convergence_time\"],\n            \"loss_improvement\": baseline_metrics[\"final_loss\"] - pattern_metrics[\"final_loss\"],\n            \"relative_accuracy_improvement\": (\n                (pattern_metrics[\"final_test_accuracy\"] / max(0.001, baseline_metrics[\"final_test_accuracy\"])) - 1.0\n            ) * 100  # Percentage improvement\n        }\n        \n        # Log results\n        logger.info(f\"Validation Results:\")\n        logger.info(f\"  Baseline accuracy: {baseline_metrics['final_test_accuracy']:.4f}\")\n        logger.info(f\"  Pattern-aware accuracy: {pattern_metrics['final_test_accuracy']:.4f}\")\n        logger.info(f\"  Accuracy improvement: {improvements['accuracy_improvement']:.4f} \"\n                  f\"({improvements['relative_accuracy_improvement']:.2f}%)\")\n        logger.info(f\"  Convergence improvement: {improvements['convergence_improvement']:.2f}s\")\n        \n        return {\n            \"baseline\": baseline_metrics,\n            \"pattern_guided\": pattern_metrics,\n            \"improvements\": improvements,\n            \"success\": True\n        }\n    else:\n        logger.warning(\"Could not create pattern-aware sampler - validation incomplete\")\n        return {\n            \"baseline\": baseline_metrics,\n            \"error\": \"Pattern map does not contain required information for validation\",\n            \"success\": False\n        }"
+    }
+  },
+  "constants": {}
+}

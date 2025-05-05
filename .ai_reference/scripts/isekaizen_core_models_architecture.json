@@ -1,0 +1,287 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\models\\architecture.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 10
+    },
+    {
+      "name": "torch.nn",
+      "line": 11
+    },
+    {
+      "name": "torchvision.models",
+      "line": 12
+    },
+    {
+      "name": "logging",
+      "line": 13
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "create_model": {
+      "start_line": 17,
+      "end_line": 59,
+      "parameters": [
+        {
+          "name": "model_type"
+        },
+        {
+          "name": "use_pretrained"
+        },
+        {
+          "name": "num_classes"
+        },
+        {
+          "name": "input_channels"
+        },
+        {
+          "name": "input_size"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 32
+        },
+        {
+          "name": "logger.info",
+          "line": 33
+        },
+        {
+          "name": "logger.info",
+          "line": 34
+        },
+        {
+          "name": "logger.info",
+          "line": 35
+        },
+        {
+          "name": "logger.info",
+          "line": 36
+        },
+        {
+          "name": "model_type.startswith",
+          "line": 39
+        },
+        {
+          "name": "_create_resnet_model",
+          "line": 40
+        },
+        {
+          "name": "model_type.startswith",
+          "line": 43
+        },
+        {
+          "name": "_create_vgg_model",
+          "line": 44
+        },
+        {
+          "name": "model_type.startswith",
+          "line": 47
+        },
+        {
+          "name": "_create_mobilenet_model",
+          "line": 48
+        },
+        {
+          "name": "model_type.startswith",
+          "line": 51
+        },
+        {
+          "name": "_create_efficientnet_model",
+          "line": 52
+        },
+        {
+          "name": "logger.warning",
+          "line": 56
+        },
+        {
+          "name": "_create_resnet_model",
+          "line": 57
+        }
+      ],
+      "docstring": "\n    Create a model with the specified architecture.\n    \n    Args:\n        model_type: Type of model to create (resnet18, resnet34, vgg16, etc.)\n        use_pretrained: Whether to use pre-trained weights from ImageNet\n        num_classes: Number of output classes\n        input_channels: Number of input channels\n        input_size: Input image size\n        \n    Returns:\n        Model instance\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef create_model(model_type=\"resnet18\", use_pretrained=False, \n                num_classes=10, input_channels=3, input_size=32):\n    \"\"\"\n    Create a model with the specified architecture.\n    \n    Args:\n        model_type: Type of model to create (resnet18, resnet34, vgg16, etc.)\n        use_pretrained: Whether to use pre-trained weights from ImageNet\n        num_classes: Number of output classes\n        input_channels: Number of input channels\n        input_size: Input image size\n        \n    Returns:\n        Model instance\n    \"\"\"\n    logger.info(f\"Creating model: {model_type}\")\n    logger.info(f\"  Use pretrained: {use_pretrained}\")\n    logger.info(f\"  Number of classes: {num_classes}\")\n    logger.info(f\"  Input channels: {input_channels}\")\n    logger.info(f\"  Input size: {input_size}\")\n    \n    # ResNet models\n    if model_type.startswith('resnet'):\n        return _create_resnet_model(model_type, use_pretrained, num_classes, input_channels, input_size)\n    \n    # VGG models\n    elif model_type.startswith('vgg'):\n        return _create_vgg_model(model_type, use_pretrained, num_classes, input_channels, input_size)\n    \n    # MobileNet models\n    elif model_type.startswith('mobilenet'):\n        return _create_mobilenet_model(model_type, use_pretrained, num_classes, input_channels, input_size)\n    \n    # EfficientNet models\n    elif model_type.startswith('efficientnet'):\n        return _create_efficientnet_model(model_type, use_pretrained, num_classes, input_channels, input_size)\n    \n    # Default to ResNet-18 if model type is not recognized\n    else:\n        logger.warning(f\"Unknown model type: {model_type}. Defaulting to ResNet-18.\")\n        return _create_resnet_model('resnet18', use_pretrained, num_classes, input_channels, input_size)\n\ndef _create_resnet_model(model_type, use_pretrained, num_classes, input_channels, input_size):\n    \"\"\"Create a ResNet model.\"\"\"\n    # Get the appropriate model function"
+    },
+    "_create_resnet_model": {
+      "start_line": 59,
+      "end_line": 78,
+      "parameters": [
+        {
+          "name": "model_type"
+        },
+        {
+          "name": "use_pretrained"
+        },
+        {
+          "name": "num_classes"
+        },
+        {
+          "name": "input_channels"
+        },
+        {
+          "name": "input_size"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "getattr",
+          "line": 62
+        },
+        {
+          "name": "model_fn",
+          "line": 65
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 69
+        },
+        {
+          "name": "nn.Linear",
+          "line": 74
+        }
+      ],
+      "docstring": "Create a ResNet model.",
+      "code_snippet": "        return _create_resnet_model('resnet18', use_pretrained, num_classes, input_channels, input_size)\n\ndef _create_resnet_model(model_type, use_pretrained, num_classes, input_channels, input_size):\n    \"\"\"Create a ResNet model.\"\"\"\n    # Get the appropriate model function\n    model_fn = getattr(models, model_type, models.resnet18)\n    \n    # Create the model with pretrained weights if requested\n    model = model_fn(pretrained=use_pretrained)\n    \n    # Modify first layer for different input channels\n    if input_channels != 3:\n        model.conv1 = nn.Conv2d(input_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)\n    \n    # Modify the final layer for different number of classes\n    if num_classes != 1000:\n        in_features = model.fc.in_features\n        model.fc = nn.Linear(in_features, num_classes)\n    \n    return model\n\ndef _create_vgg_model(model_type, use_pretrained, num_classes, input_channels, input_size):\n    \"\"\"Create a VGG model.\"\"\"\n    # Get the appropriate model function"
+    },
+    "_create_vgg_model": {
+      "start_line": 78,
+      "end_line": 106,
+      "parameters": [
+        {
+          "name": "model_type"
+        },
+        {
+          "name": "use_pretrained"
+        },
+        {
+          "name": "num_classes"
+        },
+        {
+          "name": "input_channels"
+        },
+        {
+          "name": "input_size"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "model_fn",
+          "line": 94
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 98
+        },
+        {
+          "name": "nn.Linear",
+          "line": 102
+        },
+        {
+          "name": "logger.warning",
+          "line": 90
+        }
+      ],
+      "docstring": "Create a VGG model.",
+      "code_snippet": "    return model\n\ndef _create_vgg_model(model_type, use_pretrained, num_classes, input_channels, input_size):\n    \"\"\"Create a VGG model.\"\"\"\n    # Get the appropriate model function\n    if model_type == 'vgg16':\n        model_fn = models.vgg16\n    elif model_type == 'vgg19':\n        model_fn = models.vgg19\n    elif model_type == 'vgg13':\n        model_fn = models.vgg13\n    elif model_type == 'vgg11':\n        model_fn = models.vgg11\n    else:\n        logger.warning(f\"Unknown VGG model: {model_type}. Defaulting to VGG16.\")\n        model_fn = models.vgg16\n    \n    # Create the model with pretrained weights if requested\n    model = model_fn(pretrained=use_pretrained)\n    \n    # Modify first layer for different input channels\n    if input_channels != 3:\n        model.features[0] = nn.Conv2d(input_channels, 64, kernel_size=3, padding=1)\n    \n    # Modify the final layer for different number of classes\n    if num_classes != 1000:\n        model.classifier[-1] = nn.Linear(model.classifier[-1].in_features, num_classes)\n    \n    return model\n\ndef _create_mobilenet_model(model_type, use_pretrained, num_classes, input_channels, input_size):\n    \"\"\"Create a MobileNet model.\"\"\"\n    # Get the appropriate model function"
+    },
+    "_create_mobilenet_model": {
+      "start_line": 106,
+      "end_line": 136,
+      "parameters": [
+        {
+          "name": "model_type"
+        },
+        {
+          "name": "use_pretrained"
+        },
+        {
+          "name": "num_classes"
+        },
+        {
+          "name": "input_channels"
+        },
+        {
+          "name": "input_size"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "model_fn",
+          "line": 120
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 124
+        },
+        {
+          "name": "hasattr",
+          "line": 128
+        },
+        {
+          "name": "nn.Linear",
+          "line": 130
+        },
+        {
+          "name": "logger.warning",
+          "line": 132
+        },
+        {
+          "name": "logger.warning",
+          "line": 116
+        }
+      ],
+      "docstring": "Create a MobileNet model.",
+      "code_snippet": "    return model\n\ndef _create_mobilenet_model(model_type, use_pretrained, num_classes, input_channels, input_size):\n    \"\"\"Create a MobileNet model.\"\"\"\n    # Get the appropriate model function\n    if model_type == 'mobilenet_v2':\n        model_fn = models.mobilenet_v2\n    elif model_type == 'mobilenet_v3_small':\n        model_fn = models.mobilenet_v3_small\n    elif model_type == 'mobilenet_v3_large':\n        model_fn = models.mobilenet_v3_large\n    else:\n        logger.warning(f\"Unknown MobileNet model: {model_type}. Defaulting to MobileNetV2.\")\n        model_fn = models.mobilenet_v2\n    \n    # Create the model with pretrained weights if requested\n    model = model_fn(pretrained=use_pretrained)\n    \n    # Modify first layer for different input channels\n    if input_channels != 3:\n        model.features[0][0] = nn.Conv2d(input_channels, 32, kernel_size=3, stride=2, padding=1, bias=False)\n    \n    # Modify the final layer for different number of classes\n    if num_classes != 1000:\n        if hasattr(model, 'classifier'):\n            in_features = model.classifier[-1].in_features\n            model.classifier[-1] = nn.Linear(in_features, num_classes)\n        else:\n            logger.warning(\"Could not modify classifier for MobileNet model\")\n    \n    return model\n\ndef _create_efficientnet_model(model_type, use_pretrained, num_classes, input_channels, input_size):\n    \"\"\"Create an EfficientNet model.\"\"\"\n    # Get the appropriate model function"
+    },
+    "_create_efficientnet_model": {
+      "start_line": 136,
+      "end_line": 165,
+      "parameters": [
+        {
+          "name": "model_type"
+        },
+        {
+          "name": "use_pretrained"
+        },
+        {
+          "name": "num_classes"
+        },
+        {
+          "name": "input_channels"
+        },
+        {
+          "name": "input_size"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "model_fn",
+          "line": 152
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 156
+        },
+        {
+          "name": "nn.Linear",
+          "line": 161
+        },
+        {
+          "name": "logger.warning",
+          "line": 148
+        }
+      ],
+      "docstring": "Create an EfficientNet model.",
+      "code_snippet": "    return model\n\ndef _create_efficientnet_model(model_type, use_pretrained, num_classes, input_channels, input_size):\n    \"\"\"Create an EfficientNet model.\"\"\"\n    # Get the appropriate model function\n    if model_type == 'efficientnet_b0':\n        model_fn = models.efficientnet_b0\n    elif model_type == 'efficientnet_b1':\n        model_fn = models.efficientnet_b1\n    elif model_type == 'efficientnet_b2':\n        model_fn = models.efficientnet_b2\n    elif model_type == 'efficientnet_b3':\n        model_fn = models.efficientnet_b3\n    else:\n        logger.warning(f\"Unknown EfficientNet model: {model_type}. Defaulting to EfficientNet-B0.\")\n        model_fn = models.efficientnet_b0\n    \n    # Create the model with pretrained weights if requested\n    model = model_fn(pretrained=use_pretrained)\n    \n    # Modify first layer for different input channels\n    if input_channels != 3:\n        model.features[0][0] = nn.Conv2d(input_channels, 32, kernel_size=3, stride=2, padding=1, bias=False)\n    \n    # Modify the final layer for different number of classes\n    if num_classes != 1000:\n        in_features = model.classifier[-1].in_features\n        model.classifier[-1] = nn.Linear(in_features, num_classes)\n    \n    return model"
+    }
+  },
+  "constants": {}
+}

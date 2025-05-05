@@ -1,0 +1,534 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\modified\\integration-example.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 8
+    },
+    {
+      "name": "sys",
+      "line": 9
+    },
+    {
+      "name": "logging",
+      "line": 10
+    },
+    {
+      "name": "torch",
+      "line": 11
+    },
+    {
+      "name": "torch.nn",
+      "line": 12
+    },
+    {
+      "name": "torchvision",
+      "line": 13
+    },
+    {
+      "name": "typing.Dict",
+      "line": 14
+    },
+    {
+      "name": "typing.List",
+      "line": 14
+    },
+    {
+      "name": "typing.Any",
+      "line": 14
+    },
+    {
+      "name": "typing.Optional",
+      "line": 14
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 14
+    },
+    {
+      "name": "isekaizen.trainer.adaptive_trainer.AdaptiveTrainer",
+      "line": 23
+    },
+    {
+      "name": "isekaizen.pattern.data_loading.load_latest_pattern_map",
+      "line": 24
+    },
+    {
+      "name": "isekaizen.core.optimizer.enhanced_pattern_responsive.EnhancedPatternResponsiveOptimizer",
+      "line": 25
+    },
+    {
+      "name": "isekaizen.optimizers.eve_unified_ratio.EVEUnifiedRatio",
+      "line": 26
+    },
+    {
+      "name": "isekaizen.mediators.factory.create_augmentation_mediator",
+      "line": 29
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 269
+    }
+  ],
+  "classes": {
+    "EnhancedUnifiedRatioTrainer": {
+      "start_line": 35,
+      "end_line": 264,
+      "methods": {
+        "__init__": {
+          "start_line": 40,
+          "end_line": 83,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "criterion"
+            },
+            {
+              "name": "optimizer_class"
+            },
+            {
+              "name": "optimizer"
+            },
+            {
+              "name": "optimizer_kwargs"
+            },
+            {
+              "name": "scheduler_class"
+            },
+            {
+              "name": "scheduler_kwargs"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "batch_optimizer_class"
+            },
+            {
+              "name": "batch_optimizer_kwargs"
+            },
+            {
+              "name": "val_dataset"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 57
+            },
+            {
+              "name": "self._initialize_augmentation_mediator",
+              "line": 81
+            },
+            {
+              "name": "super",
+              "line": 57
+            }
+          ],
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self,\n        model,\n        criterion,\n        optimizer_class,\n        optimizer=None,\n        optimizer_kwargs=None,\n        scheduler_class=None,\n        scheduler_kwargs=None,\n        device=None,\n        pattern_map=None,\n        batch_optimizer_class=None,\n        batch_optimizer_kwargs=None,\n        val_dataset=None,\n        **kwargs\n    ):\n        # Initialize base trainer\n        super().__init__(\n            model=model,\n            criterion=criterion,\n            optimizer_class=optimizer_class,\n            optimizer=optimizer,\n            optimizer_kwargs=optimizer_kwargs, \n            scheduler_class=scheduler_class,\n            scheduler_kwargs=scheduler_kwargs,\n            device=device,\n            pattern_map=pattern_map,\n            batch_optimizer_class=batch_optimizer_class,\n            batch_optimizer_kwargs=batch_optimizer_kwargs,\n            **kwargs\n        )\n        \n        # Store validation dataset reference\n        self.val_dataset = val_dataset\n        \n        # Initialize dataset adaptations tracking\n        self.dataset_adaptations = []\n        \n        # Initialize augmentation mediator\n        self.augmentation_mediator = None\n        if pattern_map:\n            self._initialize_augmentation_mediator(pattern_map)\n    \n    def _initialize_augmentation_mediator(self, pattern_map):\n        \"\"\"Initialize the augmentation mediator with the pattern map.\"\"\"\n        try:"
+        },
+        "_initialize_augmentation_mediator": {
+          "start_line": 83,
+          "end_line": 97,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "create_augmentation_mediator",
+              "line": 87
+            },
+            {
+              "name": "logger.info",
+              "line": 92
+            },
+            {
+              "name": "logger.error",
+              "line": 94
+            },
+            {
+              "name": "logger.warning",
+              "line": 95
+            },
+            {
+              "name": "str",
+              "line": 94
+            }
+          ],
+          "docstring": "Initialize the augmentation mediator with the pattern map.",
+          "code_snippet": "            self._initialize_augmentation_mediator(pattern_map)\n    \n    def _initialize_augmentation_mediator(self, pattern_map):\n        \"\"\"Initialize the augmentation mediator with the pattern map.\"\"\"\n        try:\n            # Create the augmentation mediator\n            self.augmentation_mediator = create_augmentation_mediator(\n                dataset=self.val_dataset,  # Use validation dataset for templates\n                pattern_map=pattern_map,\n                device=self.device\n            )\n            logger.info(\"AugmentationMediator initialized successfully\")\n        except Exception as e:\n            logger.error(f\"Failed to initialize AugmentationMediator: {str(e)}\")\n            logger.warning(\"Dataset augmentation will be unavailable\")\n    \n    def train(\n        self,\n        train_dataset,"
+        },
+        "train": {
+          "start_line": 97,
+          "end_line": 167,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_dataset"
+            },
+            {
+              "name": "val_dataset"
+            },
+            {
+              "name": "epochs"
+            },
+            {
+              "name": "early_stopping"
+            },
+            {
+              "name": "patience"
+            },
+            {
+              "name": "test_interval"
+            },
+            {
+              "name": "checkpoint_interval"
+            },
+            {
+              "name": "checkpoint_path"
+            },
+            {
+              "name": "callbacks"
+            },
+            {
+              "name": "mini_val_interval"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....append",
+              "line": 150
+            },
+            {
+              "name": "range",
+              "line": 153
+            },
+            {
+              "name": "len",
+              "line": 150
+            },
+            {
+              "name": "logger.info",
+              "line": 154
+            },
+            {
+              "name": "self._check_for_adaptation",
+              "line": 157
+            }
+          ],
+          "docstring": "\n        Train the model with dynamic dataset augmentation via the mediator.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Validation dataset\n            epochs: Number of epochs\n            early_stopping: Whether to use early stopping\n            patience: Early stopping patience\n            test_interval: Interval for validation\n            checkpoint_interval: Interval for saving checkpoints\n            checkpoint_path: Path to save checkpoints\n            callbacks: List of callback functions\n            mini_val_interval: Interval for mini-validation during training\n            \n        Returns:\n            Training history\n        ",
+          "code_snippet": "            logger.warning(\"Dataset augmentation will be unavailable\")\n    \n    def train(\n        self,\n        train_dataset,\n        val_dataset=None,\n        epochs=10,\n        early_stopping=None,\n        patience=None,\n        test_interval=1,\n        checkpoint_interval=None,\n        checkpoint_path=None,\n        callbacks=None,\n        mini_val_interval=50\n    ):\n        \"\"\"\n        Train the model with dynamic dataset augmentation via the mediator.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Validation dataset\n            epochs: Number of epochs\n            early_stopping: Whether to use early stopping\n            patience: Early stopping patience\n            test_interval: Interval for validation\n            checkpoint_interval: Interval for saving checkpoints\n            checkpoint_path: Path to save checkpoints\n            callbacks: List of callback functions\n            mini_val_interval: Interval for mini-validation during training\n            \n        Returns:\n            Training history\n        \"\"\"\n        # Initialize history dictionary\n        history = {\n            'train_loss': [], 'train_acc': [],\n            'val_loss': [], 'val_acc': [],\n            'batch_sizes': [], 'epoch_times': [],\n            'dataset_sizes': [], 'memory_usage': [],\n            'pattern_recognition_rates': [],\n            'pattern_risks': [],\n            'risk_accuracy_ratios': {},\n            'weight_adjustments': [],\n            'dynamic_weight_decays': [],\n            'bound_adjustments': {}\n        }\n        \n        # Store reference to original dataset\n        self.train_dataset = train_dataset\n        \n        # Store validation dataset\n        if val_dataset is not None:\n            self.val_dataset = val_dataset\n        \n        # Initial dataset size\n        history['dataset_sizes'].append(len(train_dataset))\n        \n        # Training loop\n        for epoch in range(epochs):\n            logger.info(f\"Epoch {epoch+1}/{epochs}\")\n            \n            # Check if we should adapt the dataset\n            current_dataset = self._check_for_adaptation(train_dataset, epoch, history)\n            \n            # The rest of the training loop continues as before...\n            # (original implementation from UnifiedRatioTrainer)\n            \n            # For example purposes, we'll just return after adaptation check\n            # In the real implementation, you would continue with training\n            \n        return history\n    \n    def _check_for_adaptation(self, train_dataset, epoch, history):\n        \"\"\"\n        Check if dataset adaptation is needed and perform it if required."
+        },
+        "_check_for_adaptation": {
+          "start_line": 167,
+          "end_line": 264,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_dataset"
+            },
+            {
+              "name": "epoch"
+            },
+            {
+              "name": "history"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "hasattr",
+              "line": 180
+            },
+            {
+              "name": "self.batch_optimizer.should_adapt_patterns",
+              "line": 180
+            },
+            {
+              "name": "logger.info",
+              "line": 181
+            },
+            {
+              "name": "hasattr",
+              "line": 190
+            },
+            {
+              "name": "getattr",
+              "line": 198
+            },
+            {
+              "name": "logger.info",
+              "line": 206
+            },
+            {
+              "name": "pattern_risks.items",
+              "line": 212
+            },
+            {
+              "name": "logger.warning",
+              "line": 185
+            },
+            {
+              "name": "self.optimizer.get_pattern_risks",
+              "line": 191
+            },
+            {
+              "name": "logger.warning",
+              "line": 194
+            },
+            {
+              "name": "logger.info",
+              "line": 200
+            },
+            {
+              "name": "int",
+              "line": 214
+            },
+            {
+              "name": "logger.info",
+              "line": 217
+            },
+            {
+              "name": "self.augmentation_mediator.get_augmentations",
+              "line": 220
+            },
+            {
+              "name": "augmented_examples.extend",
+              "line": 226
+            },
+            {
+              "name": "torch.stack",
+              "line": 231
+            },
+            {
+              "name": "torch.tensor",
+              "line": 232
+            },
+            {
+              "name": "torch.utils.data.TensorDataset",
+              "line": 235
+            },
+            {
+              "name": "torch.utils.data.ConcatDataset",
+              "line": 236
+            },
+            {
+              "name": "self.dataset_adaptations.append",
+              "line": 239
+            },
+            {
+              "name": "logger.info",
+              "line": 249
+            },
+            {
+              "name": "logger.info",
+              "line": 250
+            },
+            {
+              "name": "logger.warning",
+              "line": 258
+            },
+            {
+              "name": "sum",
+              "line": 214
+            },
+            {
+              "name": "len",
+              "line": 241
+            },
+            {
+              "name": "len",
+              "line": 244
+            },
+            {
+              "name": "pattern_risks.values",
+              "line": 214
+            },
+            {
+              "name": "sum",
+              "line": 222
+            },
+            {
+              "name": "len",
+              "line": 249
+            },
+            {
+              "name": "len",
+              "line": 250
+            },
+            {
+              "name": "len",
+              "line": 214
+            },
+            {
+              "name": "pattern_risks.values",
+              "line": 222
+            }
+          ],
+          "docstring": "\n        Check if dataset adaptation is needed and perform it if required.\n        \n        Args:\n            train_dataset: Current training dataset\n            epoch: Current epoch number\n            history: Training history dictionary\n            \n        Returns:\n            Dataset to use for this epoch (original or adapted)\n        ",
+          "code_snippet": "        return history\n    \n    def _check_for_adaptation(self, train_dataset, epoch, history):\n        \"\"\"\n        Check if dataset adaptation is needed and perform it if required.\n        \n        Args:\n            train_dataset: Current training dataset\n            epoch: Current epoch number\n            history: Training history dictionary\n            \n        Returns:\n            Dataset to use for this epoch (original or adapted)\n        \"\"\"\n        # Check if adaptation is needed (using existing decision logic)\n        if hasattr(self.batch_optimizer, 'should_adapt_patterns') and self.batch_optimizer.should_adapt_patterns():\n            logger.info(\"Dataset adaptation criteria met - checking for augmentation mediator\")\n            \n            # See if we have the augmentation mediator available\n            if self.augmentation_mediator is None:\n                logger.warning(\"Augmentation mediator not available - skipping adaptation\")\n                return train_dataset\n            \n            # Get pattern risks from optimizer\n            pattern_risks = {}\n            if hasattr(self.optimizer, 'get_pattern_risks'):\n                pattern_risks = self.optimizer.get_pattern_risks()\n            \n            if not pattern_risks:\n                logger.warning(\"No pattern risks available - skipping adaptation\")\n                return train_dataset\n            \n            # Determine how much to augment (using train-test gap from batch optimizer)\n            train_test_gap = getattr(self.batch_optimizer, 'max_train_test_gap', 0.0)\n            if train_test_gap <= 0.5:  # Minimal gap threshold\n                logger.info(f\"Train-test gap {train_test_gap:.2f}% too small - skipping adaptation\")\n                return train_dataset\n            \n            # Convert gap percentage to decimal\n            gap_decimal = train_test_gap / 100.0\n            \n            logger.info(f\"Adapting dataset with augmentation mediator - gap: {train_test_gap:.2f}%\")\n            \n            # Create augmentations for each pattern type based on risk\n            augmented_examples = []\n            examples_per_pattern = {}\n            \n            for pattern_type, risk in pattern_risks.items():\n                # Calculate examples to add based on risk proportion\n                examples_to_add = int(len(train_dataset) * gap_decimal * risk / sum(pattern_risks.values()))\n                examples_per_pattern[pattern_type] = examples_to_add\n                \n                logger.info(f\"Adding {examples_to_add} examples for pattern {pattern_type} (risk: {risk:.2f})\")\n                \n                # Get augmentations from mediator\n                pattern_examples = self.augmentation_mediator.get_augmentations(\n                    pattern_type=pattern_type,\n                    percentage=gap_decimal * risk / sum(pattern_risks.values()),\n                    count=examples_to_add\n                )\n                \n                augmented_examples.extend(pattern_examples)\n            \n            # If we got augmentations, create a new dataset\n            if augmented_examples:\n                # Create tensors from the augmented examples\n                features = torch.stack([ex[0] for ex in augmented_examples])\n                labels = torch.tensor([ex[1] for ex in augmented_examples])\n                \n                # Create dataset and combine with original\n                augmented_dataset = torch.utils.data.TensorDataset(features, labels)\n                combined_dataset = torch.utils.data.ConcatDataset([train_dataset, augmented_dataset])\n                \n                # Record adaptation in history\n                self.dataset_adaptations.append({\n                    \"epoch\": epoch + 1,\n                    \"examples_added\": len(augmented_examples),\n                    \"examples_per_pattern\": examples_per_pattern,\n                    \"pattern_risks\": pattern_risks,\n                    \"total_size\": len(combined_dataset),\n                    \"train_test_gap\": train_test_gap,\n                    \"adapted\": True\n                })\n                \n                logger.info(f\"Dataset adapted successfully - added {len(augmented_examples)} examples\")\n                logger.info(f\"New dataset size: {len(combined_dataset)} examples\")\n                \n                # Update the training dataset reference\n                self.train_dataset = combined_dataset\n                \n                # Return the adapted dataset\n                return combined_dataset\n            else:\n                logger.warning(\"No augmented examples were created - using original dataset\")\n                return train_dataset\n        \n        # No adaptation needed\n        return train_dataset\n\n\n# Example usage\n"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "AdaptiveTrainer"
+      ],
+      "docstring": "\n    Enhanced trainer that integrates the AugmentationMediator for dataset augmentation.\n    "
+    }
+  },
+  "functions": {
+    "load_cifar10_data": {
+      "start_line": 267,
+      "end_line": 293,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "transforms.Compose",
+          "line": 272
+        },
+        {
+          "name": "transforms.Compose",
+          "line": 279
+        },
+        {
+          "name": "torchvision.datasets.CIFAR10",
+          "line": 285
+        },
+        {
+          "name": "torchvision.datasets.CIFAR10",
+          "line": 288
+        },
+        {
+          "name": "transforms.RandomCrop",
+          "line": 273
+        },
+        {
+          "name": "transforms.RandomHorizontalFlip",
+          "line": 274
+        },
+        {
+          "name": "transforms.ToTensor",
+          "line": 275
+        },
+        {
+          "name": "transforms.Normalize",
+          "line": 276
+        },
+        {
+          "name": "transforms.ToTensor",
+          "line": 280
+        },
+        {
+          "name": "transforms.Normalize",
+          "line": 281
+        }
+      ],
+      "docstring": "Load CIFAR-10 dataset for testing.",
+      "code_snippet": "# Example usage\n\ndef load_cifar10_data():\n    \"\"\"Load CIFAR-10 dataset for testing.\"\"\"\n    import torchvision.transforms as transforms\n    \n    # Data transforms\n    transform_train = transforms.Compose([\n        transforms.RandomCrop(32, padding=4),\n        transforms.RandomHorizontalFlip(),\n        transforms.ToTensor(),\n        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),\n    ])\n\n    transform_test = transforms.Compose([\n        transforms.ToTensor(),\n        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),\n    ])\n\n    # Load datasets\n    trainset = torchvision.datasets.CIFAR10(\n        root='./data', train=True, download=True, transform=transform_train)\n\n    testset = torchvision.datasets.CIFAR10(\n        root='./data', train=False, download=True, transform=transform_test)\n\n    return trainset, testset\n\ndef example_usage():\n    \"\"\"Example usage of the enhanced trainer with augmentation mediator.\"\"\"\n    # Load dataset"
+    },
+    "example_usage": {
+      "start_line": 293,
+      "end_line": 349,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "load_cifar10_data",
+          "line": 296
+        },
+        {
+          "name": "load_latest_pattern_map",
+          "line": 299
+        },
+        {
+          "name": "torch.device",
+          "line": 305
+        },
+        {
+          "name": "torchvision.models.resnet18",
+          "line": 308
+        },
+        {
+          "name": "nn.Linear",
+          "line": 309
+        },
+        {
+          "name": "model.to",
+          "line": 310
+        },
+        {
+          "name": "EVEUnifiedRatio",
+          "line": 313
+        },
+        {
+          "name": "EnhancedUnifiedRatioTrainer",
+          "line": 316
+        },
+        {
+          "name": "trainer.train",
+          "line": 333
+        },
+        {
+          "name": "logger.error",
+          "line": 301
+        },
+        {
+          "name": "model.parameters",
+          "line": 313
+        },
+        {
+          "name": "logger.info",
+          "line": 341
+        },
+        {
+          "name": "sum",
+          "line": 342
+        },
+        {
+          "name": "logger.info",
+          "line": 343
+        },
+        {
+          "name": "logger.info",
+          "line": 345
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 305
+        },
+        {
+          "name": "nn.CrossEntropyLoss",
+          "line": 318
+        },
+        {
+          "name": "len",
+          "line": 341
+        }
+      ],
+      "docstring": "Example usage of the enhanced trainer with augmentation mediator.",
+      "code_snippet": "    return trainset, testset\n\ndef example_usage():\n    \"\"\"Example usage of the enhanced trainer with augmentation mediator.\"\"\"\n    # Load dataset\n    trainset, testset = load_cifar10_data()\n    \n    # Load pattern map\n    pattern_map = load_latest_pattern_map()\n    if not pattern_map:\n        logger.error(\"No pattern map found - required for augmentation\")\n        return\n    \n    # Set device\n    device = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\n    \n    # Create a simple model for testing\n    model = torchvision.models.resnet18(pretrained=False)\n    model.fc = nn.Linear(model.fc.in_features, 10)  # Adjust for CIFAR-10\n    model = model.to(device)\n    \n    # Create optimizer\n    optimizer = EVEUnifiedRatio(model.parameters(), lr=0.01, pattern_map=pattern_map)\n    \n    # Create trainer\n    trainer = EnhancedUnifiedRatioTrainer(\n        model=model,\n        criterion=nn.CrossEntropyLoss(),\n        optimizer_class=optimizer.__class__,\n        optimizer=optimizer,\n        device=device,\n        pattern_map=pattern_map,\n        val_dataset=testset,\n        batch_optimizer_class=EnhancedPatternResponsiveOptimizer,\n        batch_optimizer_kwargs={\n            \"pattern_map\": pattern_map,\n            \"run_diagnostics\": True,\n            \"total_epochs\": 5\n        }\n    )\n    \n    # Train the model\n    history = trainer.train(\n        train_dataset=trainset,\n        val_dataset=testset,\n        epochs=5\n    )\n    \n    # Check if we had any adaptations\n    if trainer.dataset_adaptations:\n        logger.info(f\"Model trained with {len(trainer.dataset_adaptations)} dataset adaptations\")\n        total_added = sum(adaptation['examples_added'] for adaptation in trainer.dataset_adaptations)\n        logger.info(f\"Total examples added during training: {total_added}\")\n    else:\n        logger.info(\"Model trained without dataset adaptations\")\n    \n    return history\n\nif __name__ == \"__main__\":\n    # Run example\n    example_usage()"
+    }
+  },
+  "constants": {}
+}

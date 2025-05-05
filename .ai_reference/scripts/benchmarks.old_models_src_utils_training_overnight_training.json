@@ -1,0 +1,82 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\training\\overnight_training.py",
+  "imports": [
+    {
+      "name": "asyncio",
+      "line": 1
+    },
+    {
+      "name": "time",
+      "line": 2
+    },
+    {
+      "name": "random",
+      "line": 3
+    },
+    {
+      "name": "json",
+      "line": 4
+    },
+    {
+      "name": "logging",
+      "line": 5
+    },
+    {
+      "name": "argparse",
+      "line": 6
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 7
+    },
+    {
+      "name": "pathlib.Path",
+      "line": 8
+    },
+    {
+      "name": "src.cortex.coordinator.CortexCoordinator",
+      "line": 10
+    },
+    {
+      "name": "src.cortex.coordinator.ProcessingConfig",
+      "line": 10
+    },
+    {
+      "name": "src.utils.data_fetcher.DataFetcher",
+      "line": 11
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "parse_args": {
+      "start_line": 24,
+      "end_line": 47,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "argparse.ArgumentParser",
+          "line": 25
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 28
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 34
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 39
+        },
+        {
+          "name": "parser.parse_args",
+          "line": 45
+        }
+      ],
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef parse_args():\n    parser = argparse.ArgumentParser(\n        description=\"Cortex-first overnight training with proper data flow\"\n    )\n    parser.add_argument(\n        \"--duration\", \n        type=int, \n        default=21600,\n        help=\"Duration in seconds (default: 21600 for 6 hours)\"\n    )\n    parser.add_argument(\n        \"--test\",\n        action=\"store_true\",\n        help=\"Run in test mode (short duration)\"\n    )\n    parser.add_argument(\n        \"--batch-size\",\n        type=int,\n        default=221,\n        help=\"Initial batch size (default: 221 from K(t) framework)\"\n    )\n    return parser.parse_args()\n\nasync def process_domain_data(\n    coordinator: CortexCoordinator,\n    domain: str,"
+    }
+  },
+  "constants": {}
+}

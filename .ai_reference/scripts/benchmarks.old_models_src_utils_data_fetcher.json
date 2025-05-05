@@ -1,0 +1,167 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\data_fetcher.py",
+  "imports": [
+    {
+      "name": "pathlib.Path",
+      "line": 4
+    },
+    {
+      "name": "asyncio",
+      "line": 5
+    },
+    {
+      "name": "aiohttp",
+      "line": 6
+    },
+    {
+      "name": "json",
+      "line": 7
+    },
+    {
+      "name": "numpy",
+      "line": 8
+    },
+    {
+      "name": "typing.Dict",
+      "line": 9
+    },
+    {
+      "name": "typing.List",
+      "line": 9
+    },
+    {
+      "name": "typing.Any",
+      "line": 9
+    },
+    {
+      "name": "typing.Optional",
+      "line": 9
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 10
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 11
+    }
+  ],
+  "classes": {
+    "TrainingBatch": {
+      "start_line": 14,
+      "end_line": 22,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Represents a batch of training data"
+    },
+    "EnhancedDataFetcher": {
+      "start_line": 22,
+      "end_line": 218,
+      "methods": {
+        "__init__": {
+          "start_line": 25,
+          "end_line": 46,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "base_dir",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "Path",
+              "line": 26
+            },
+            {
+              "name": "dir.mkdir",
+              "line": 33
+            }
+          ],
+          "code_snippet": "    \"\"\"Enhanced data fetcher with training support\"\"\"\n    \n    def __init__(self, base_dir: str = \"data/training\"):\n        self.base_dir = Path(base_dir)\n        self.sources_dir = self.base_dir / \"sources\"\n        self.patterns_dir = self.base_dir / \"patterns\"\n        self.batches_dir = self.base_dir / \"batches\"\n        \n        # Ensure directories exist\n        for dir in [self.sources_dir, self.patterns_dir, self.batches_dir]:\n            dir.mkdir(parents=True, exist_ok=True)\n        \n        # Training batch tracking\n        self.active_batches: Dict[str, TrainingBatch] = {}\n        self.completed_batches: Dict[str, TrainingBatch] = {}\n        \n        # Performance metrics\n        self.metrics = {\n            \"batches_created\": 0,\n            \"patterns_generated\": 0,\n            \"sources_processed\": 0,\n            \"processing_time_ms\": []\n        }\n    \n    async def create_training_batch(self, \n                                  batch_size: int = 32,"
+        },
+        "_extract_features": {
+          "start_line": 171,
+          "end_line": 193,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "domain",
+              "type": "str"
+            },
+            {
+              "name": "source",
+              "type": "Any"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "len",
+              "line": 176
+            },
+            {
+              "name": "np.random.random",
+              "line": 177
+            },
+            {
+              "name": "str",
+              "line": 176
+            },
+            {
+              "name": "np.random.random",
+              "line": 183
+            },
+            {
+              "name": "np.random.random",
+              "line": 188
+            },
+            {
+              "name": "np.random.random",
+              "line": 189
+            }
+          ],
+          "docstring": "Extract domain-specific features",
+          "code_snippet": "        return patterns\n    \n    def _extract_features(self, domain: str, source: Any) -> Dict[str, float]:\n        \"\"\"Extract domain-specific features\"\"\"\n        if domain == \"text\":\n            # Text features (placeholder)\n            return {\n                \"length\": len(str(source)),\n                \"complexity\": np.random.random()  # Placeholder\n            }\n        elif domain == \"visual\":\n            # Visual features (placeholder)\n            return {\n                \"size\": 1.0,  # Placeholder\n                \"intensity\": np.random.random()\n            }\n        elif domain == \"emotional\":\n            # Emotional features (placeholder)\n            return {\n                \"intensity\": np.random.random(),\n                \"valence\": np.random.random()\n            }\n        return {}\n            \n    async def _save_batch(self, batch: TrainingBatch):\n        \"\"\"Save batch to disk\"\"\"\n        batch_path = self.batches_dir / f\"{batch.batch_id}.json\""
+        },
+        "get_metrics": {
+          "start_line": 210,
+          "end_line": 218,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "len",
+              "line": 215
+            },
+            {
+              "name": "len",
+              "line": 216
+            },
+            {
+              "name": "np.mean",
+              "line": 214
+            }
+          ],
+          "docstring": "Get current metrics",
+          "code_snippet": "            json.dump(batch_data, f, indent=2)\n    \n    def get_metrics(self) -> Dict[str, Any]:\n        \"\"\"Get current metrics\"\"\"\n        return {\n            **self.metrics,\n            \"average_processing_time\": np.mean(self.metrics[\"processing_time_ms\"]) if self.metrics[\"processing_time_ms\"] else 0,\n            \"active_batches\": len(self.active_batches),\n            \"completed_batches\": len(self.completed_batches)\n        }"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Enhanced data fetcher with training support"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

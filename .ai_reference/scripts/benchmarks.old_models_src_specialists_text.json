@@ -1,0 +1,214 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\specialists\\text.py",
+  "imports": [
+    {
+      "name": "dataclasses.dataclass",
+      "line": 4
+    },
+    {
+      "name": "typing.Dict",
+      "line": 5
+    },
+    {
+      "name": "typing.List",
+      "line": 5
+    },
+    {
+      "name": "typing.Any",
+      "line": 5
+    },
+    {
+      "name": "typing.Optional",
+      "line": 5
+    },
+    {
+      "name": "torch",
+      "line": 6
+    },
+    {
+      "name": "transformers.DistilBertTokenizer",
+      "line": 7
+    },
+    {
+      "name": "transformers.DistilBertForSequenceClassification",
+      "line": 7
+    },
+    {
+      "name": "numpy",
+      "line": 8
+    },
+    {
+      "name": "base.BaseSpecialist",
+      "line": 9
+    }
+  ],
+  "classes": {
+    "TextPattern": {
+      "start_line": 12,
+      "end_line": 19,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Represents a pure linguistic semantic pattern"
+    },
+    "TextSpecialist": {
+      "start_line": 19,
+      "end_line": 131,
+      "methods": {
+        "__init__": {
+          "start_line": 20,
+          "end_line": 49,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 21
+            },
+            {
+              "name": "torch.device",
+              "line": 22
+            },
+            {
+              "name": "DistilBertTokenizer.from_pretrained",
+              "line": 26
+            },
+            {
+              "name": "....to",
+              "line": 27
+            },
+            {
+              "name": "super",
+              "line": 21
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 22
+            },
+            {
+              "name": "DistilBertForSequenceClassification.from_pretrained",
+              "line": 27
+            }
+          ],
+          "code_snippet": "\nclass TextSpecialist(BaseSpecialist):\n    def __init__(self):\n        super().__init__()\n        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Initialize DistilBERT\n        self.model_name = \"distilbert-base-uncased\"\n        self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_name)\n        self.model = DistilBertForSequenceClassification.from_pretrained(\n            self.model_name\n        ).to(self.device)\n        \n        # Initialize patterns\n        self.linguistic_patterns = {\n            \"structural_pattern\": {\n                \"min_complexity_score\": 0.6,\n                \"min_coherence_score\": 0.7\n            },\n            \"syntactic_pattern\": {\n                \"min_structure_score\": 0.6,\n                \"min_grammar_complexity\": 0.5\n            }\n        }\n        \n        # Metrics tracking\n        self.translation_metrics = {\n            \"patterns_identified\": 0,\n            \"high_confidence_patterns\": 0,\n            \"pattern_preservation_score\": 0.0\n        }\n\n    def _calculate_linguistic_metrics(self, text: str) -> Dict[str, float]:\n        \"\"\"Calculate pure linguistic characteristics\"\"\""
+        },
+        "_calculate_linguistic_metrics": {
+          "start_line": 50,
+          "end_line": 72,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "text",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "text.split",
+              "line": 52
+            },
+            {
+              "name": "len",
+              "line": 53
+            },
+            {
+              "name": "np.mean",
+              "line": 54
+            },
+            {
+              "name": "len",
+              "line": 56
+            },
+            {
+              "name": "min",
+              "line": 59
+            },
+            {
+              "name": "sum",
+              "line": 57
+            },
+            {
+              "name": "max",
+              "line": 57
+            },
+            {
+              "name": "len",
+              "line": 54
+            },
+            {
+              "name": "len",
+              "line": 57
+            }
+          ],
+          "docstring": "Calculate pure linguistic characteristics",
+          "code_snippet": "        }\n\n    def _calculate_linguistic_metrics(self, text: str) -> Dict[str, float]:\n        \"\"\"Calculate pure linguistic characteristics\"\"\"\n        words = text.split()\n        word_count = len(words)\n        avg_word_length = np.mean([len(word) for word in words])\n        \n        sentence_length = len(text)\n        word_complexity = sum(1 for word in words if len(word) > 6) / max(1, word_count)\n        \n        structure_score = min(1.0, (word_count * avg_word_length) / 100)\n        \n        return {\n            \"structural_metrics\": {\n                \"word_count\": word_count,\n                \"avg_word_length\": avg_word_length,\n                \"sentence_length\": sentence_length,\n                \"structure_score\": structure_score\n            },\n            \"complexity_metrics\": {\n                \"word_complexity\": word_complexity,\n                \"relative_complexity\": structure_score * word_complexity\n            }\n        }\n\n    def _identify_patterns(self, text: str) -> Optional[TextPattern]:"
+        },
+        "_identify_patterns": {
+          "start_line": 74,
+          "end_line": 111,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "text",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self._calculate_linguistic_metrics",
+              "line": 76
+            },
+            {
+              "name": "TextPattern",
+              "line": 81
+            },
+            {
+              "name": "TextPattern",
+              "line": 96
+            }
+          ],
+          "docstring": "Identify pure linguistic patterns",
+          "code_snippet": "        }\n\n    def _identify_patterns(self, text: str) -> Optional[TextPattern]:\n        \"\"\"Identify pure linguistic patterns\"\"\"\n        metrics = self._calculate_linguistic_metrics(text)\n        \n        if (metrics['structural_metrics']['structure_score'] >= \n            self.linguistic_patterns[\"structural_pattern\"][\"min_complexity_score\"]):\n            \n            return TextPattern(\n                pattern_type=\"structural_pattern\",\n                linguistic_features={\n                    \"complexity\": metrics['structural_metrics']['structure_score'],\n                    \"text_structure\": {\n                        \"word_count\": metrics['structural_metrics']['word_count'],\n                        \"avg_length\": metrics['structural_metrics']['avg_word_length']\n                    }\n                },\n                confidence=metrics['structural_metrics']['structure_score']\n            )\n        \n        elif (metrics['complexity_metrics']['relative_complexity'] >= \n              self.linguistic_patterns[\"syntactic_pattern\"][\"min_structure_score\"]):\n            \n            return TextPattern(\n                pattern_type=\"syntactic_pattern\",\n                linguistic_features={\n                    \"complexity\": metrics['complexity_metrics']['relative_complexity'],\n                    \"word_complexity\": metrics['complexity_metrics']['word_complexity'],\n                    \"text_structure\": {\n                        \"word_count\": metrics['structural_metrics']['word_count'],\n                        \"avg_length\": metrics['structural_metrics']['avg_word_length']\n                    }\n                },\n                confidence=metrics['complexity_metrics']['relative_complexity']\n            )\n            \n        return None\n\n    def process_text(self, text: str) -> Dict[str, Any]:\n        \"\"\"Process text and identify patterns\"\"\"\n        pattern = self._identify_patterns(text)"
+        },
+        "process_text": {
+          "start_line": 111,
+          "end_line": 131,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "text",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self._identify_patterns",
+              "line": 113
+            }
+          ],
+          "docstring": "Process text and identify patterns",
+          "code_snippet": "        return None\n\n    def process_text(self, text: str) -> Dict[str, Any]:\n        \"\"\"Process text and identify patterns\"\"\"\n        pattern = self._identify_patterns(text)\n        \n        if pattern:\n            self.translation_metrics[\"patterns_identified\"] += 1\n            if pattern.confidence >= 0.85:\n                self.translation_metrics[\"high_confidence_patterns\"] += 1\n        \n        if self.translation_metrics[\"patterns_identified\"] > 0:\n            self.translation_metrics[\"pattern_preservation_score\"] = (\n                self.translation_metrics[\"high_confidence_patterns\"] / \n                self.translation_metrics[\"patterns_identified\"]\n            )\n        \n        return {\n            \"semantic_pattern\": pattern,\n            \"translation_metrics\": self.translation_metrics,\n            \"domain\": \"linguistic\"\n        }"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "BaseSpecialist"
+      ]
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

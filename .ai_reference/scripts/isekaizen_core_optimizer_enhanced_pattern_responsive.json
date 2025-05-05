@@ -1,0 +1,1102 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\optimizer\\enhanced_pattern_responsive.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "time",
+      "line": 10
+    },
+    {
+      "name": "random",
+      "line": 11
+    },
+    {
+      "name": "math",
+      "line": 12
+    },
+    {
+      "name": "numpy",
+      "line": 13
+    },
+    {
+      "name": "typing.Dict",
+      "line": 14
+    },
+    {
+      "name": "typing.List",
+      "line": 14
+    },
+    {
+      "name": "typing.Any",
+      "line": 14
+    },
+    {
+      "name": "typing.Optional",
+      "line": 14
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 14
+    },
+    {
+      "name": "typing.Set",
+      "line": 14
+    },
+    {
+      "name": "isekaizen.core.optimizer.risk_aware_optimizer.RiskAwarePatternIsekaiZen",
+      "line": 16
+    },
+    {
+      "name": "isekaizen.core.optimizer.risk_aware_optimizer.RiskLevel",
+      "line": 16
+    },
+    {
+      "name": "isekaizen.pattern.augmentation.PatternResponsiveAugmenter",
+      "line": 17
+    },
+    {
+      "name": "isekaizen.core.optimizer.pattern_risk_accuracy_tracker.PatternRiskAccuracyTracker",
+      "line": 18
+    },
+    {
+      "name": "time",
+      "line": 174
+    },
+    {
+      "name": "torch.utils.data.ConcatDataset",
+      "line": 393
+    },
+    {
+      "name": "torch.utils.data.TensorDataset",
+      "line": 393
+    },
+    {
+      "name": "isekaizen.mediators.factory.create_augmentation_mediator",
+      "line": 306
+    }
+  ],
+  "classes": {
+    "EnhancedPatternResponsiveOptimizer": {
+      "start_line": 22,
+      "end_line": 673,
+      "methods": {
+        "__init__": {
+          "start_line": 30,
+          "end_line": 105,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "total_epochs"
+            },
+            {
+              "name": "max_epoch_time"
+            },
+            {
+              "name": "run_diagnostics"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "stagnation_window"
+            },
+            {
+              "name": "stagnation_threshold"
+            },
+            {
+              "name": "target_accuracy"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 59
+            },
+            {
+              "name": "PatternRiskAccuracyTracker",
+              "line": 72
+            },
+            {
+              "name": "PatternResponsiveAugmenter",
+              "line": 84
+            },
+            {
+              "name": "logger.info",
+              "line": 101
+            },
+            {
+              "name": "logger.info",
+              "line": 102
+            },
+            {
+              "name": "logger.info",
+              "line": 103
+            },
+            {
+              "name": "max",
+              "line": 75
+            },
+            {
+              "name": "super",
+              "line": 59
+            }
+          ],
+          "docstring": "\n        Initialize the enhanced pattern-responsive optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            stagnation_window: Number of epochs to consider for stagnation detection\n            stagnation_threshold: Minimum accuracy improvement required over the window\n            target_accuracy: Optional target accuracy to dynamically adjust stagnation detection\n            **kwargs: Additional parameters\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self, \n        model,\n        device=None,\n        total_epochs=50,\n        max_epoch_time=None,\n        run_diagnostics=True,\n        pattern_map=None,\n        stagnation_window=None,  # Number of epochs to consider for stagnation detection\n        stagnation_threshold=0.1,  # Minimum accuracy improvement required over the window\n        target_accuracy=None,  # Optional target accuracy to dynamically adjust stagnation detection\n        **kwargs\n    ):\n        \"\"\"\n        Initialize the enhanced pattern-responsive optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            stagnation_window: Number of epochs to consider for stagnation detection\n            stagnation_threshold: Minimum accuracy improvement required over the window\n            target_accuracy: Optional target accuracy to dynamically adjust stagnation detection\n            **kwargs: Additional parameters\n        \"\"\"\n        # Initialize base optimizer\n        super().__init__(\n            model=model,\n            device=device,\n            total_epochs=total_epochs,\n            max_epoch_time=max_epoch_time,\n            run_diagnostics=run_diagnostics,\n            pattern_map=pattern_map,\n            exploration_rate=0.0,  # We are removing random exploration in favor of stagnation-triggered approach\n            risk_aversion=0.0,  # We don't use risk aversion with the risk-accuracy relationship\n            **kwargs\n        )\n        \n        # Replace risk assessment with the unified pattern risk-accuracy tracker\n        self.pattern_tracker = PatternRiskAccuracyTracker(pattern_map)\n        \n        # Stagnation detection parameters\n        self.stagnation_window = stagnation_window if stagnation_window else max(3, total_epochs//10)\n        self.stagnation_threshold = stagnation_threshold\n        self.target_accuracy = target_accuracy\n        \n        # Self-regulating pattern adaptation parameters based on train-test gap\n        self.adaptation_min_epoch = 1  # Need at least one epoch to have validation metrics\n        self.min_epochs_between_adaptations = 1  # Minimum epochs between adaptations\n        \n        # Initialize augmenter\n        self.augmenter = PatternResponsiveAugmenter(pattern_map, device)\n        \n        # Keep track of augmentations\n        self.augmentation_history = []\n        self.augmented_dataset = None\n        \n        # Track epoch-level metrics for risk assessment\n        self.epoch_metrics = {}\n        self.last_batch_indices = []\n        \n        # Track additional training metrics\n        self.training_efficiency_history = []\n        \n        # Track maximum train-test gap for dynamic augmentation\n        self.max_train_test_gap = 0.0\n        self.last_adaptation_epoch = -1  # Initialize to -1 to allow adaptation in first epoch with gap\n        \n        logger.info(\"Enhanced pattern-responsive optimizer (Risk-Accuracy Relationship) initialized\")\n        logger.info(f\"Batch size range: {self.min_batch} - {self.max_batch}\")\n        logger.info(\"Pattern adaptation is fully self-regulating based on accuracy and risk metrics\")\n    \n    def update_with_epoch_metrics(self, epoch_metrics):\n        \"\"\"\n        Update optimizer with epoch-level metrics."
+        },
+        "update_with_epoch_metrics": {
+          "start_line": 105,
+          "end_line": 126,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch_metrics"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._calculate_training_efficiency",
+              "line": 116
+            },
+            {
+              "name": "self.training_efficiency_history.append",
+              "line": 117
+            },
+            {
+              "name": "self.pattern_tracker.update_with_epoch_results",
+              "line": 120
+            },
+            {
+              "name": "self.pattern_tracker.get_overall_risk",
+              "line": 123
+            },
+            {
+              "name": "logger.info",
+              "line": 124
+            }
+          ],
+          "docstring": "\n        Update optimizer with epoch-level metrics.\n        \n        Args:\n            epoch_metrics: Dictionary of epoch metrics (loss, accuracy, time, etc.)\n        ",
+          "code_snippet": "        logger.info(\"Pattern adaptation is fully self-regulating based on accuracy and risk metrics\")\n    \n    def update_with_epoch_metrics(self, epoch_metrics):\n        \"\"\"\n        Update optimizer with epoch-level metrics.\n        \n        Args:\n            epoch_metrics: Dictionary of epoch metrics (loss, accuracy, time, etc.)\n        \"\"\"\n        # Store epoch metrics\n        self.epoch_metrics = epoch_metrics\n        \n        # Calculate training efficiency\n        efficiency = self._calculate_training_efficiency(epoch_metrics)\n        self.training_efficiency_history.append(efficiency)\n        \n        # Update pattern risk-accuracy tracker with epoch results\n        self.pattern_tracker.update_with_epoch_results(self.epoch)\n        \n        # Log overall risk and efficiency\n        overall_risk = self.pattern_tracker.get_overall_risk()\n        logger.info(f\"Epoch {self.epoch} - Training efficiency: {efficiency:.4f}, Overall risk: {overall_risk:.2f}\")\n    \n    def _calculate_training_efficiency(self, epoch_metrics):\n        \"\"\"\n        Calculate training efficiency based on epoch metrics."
+        },
+        "_calculate_training_efficiency": {
+          "start_line": 126,
+          "end_line": 169,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch_metrics"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "epoch_metrics.get",
+              "line": 137
+            },
+            {
+              "name": "epoch_metrics.get",
+              "line": 138
+            },
+            {
+              "name": "epoch_metrics.get",
+              "line": 139
+            },
+            {
+              "name": "epoch_metrics.get",
+              "line": 140
+            },
+            {
+              "name": "min",
+              "line": 143
+            },
+            {
+              "name": "max",
+              "line": 147
+            },
+            {
+              "name": "min",
+              "line": 167
+            },
+            {
+              "name": "float",
+              "line": 138
+            },
+            {
+              "name": "max",
+              "line": 167
+            },
+            {
+              "name": "min",
+              "line": 147
+            },
+            {
+              "name": "math.exp",
+              "line": 157
+            }
+          ],
+          "docstring": "\n        Calculate training efficiency based on epoch metrics.\n        \n        Args:\n            epoch_metrics: Dictionary of epoch metrics\n            \n        Returns:\n            Efficiency score (0-1 range)\n        ",
+          "code_snippet": "        logger.info(f\"Epoch {self.epoch} - Training efficiency: {efficiency:.4f}, Overall risk: {overall_risk:.2f}\")\n    \n    def _calculate_training_efficiency(self, epoch_metrics):\n        \"\"\"\n        Calculate training efficiency based on epoch metrics.\n        \n        Args:\n            epoch_metrics: Dictionary of epoch metrics\n            \n        Returns:\n            Efficiency score (0-1 range)\n        \"\"\"\n        # Extract metrics\n        accuracy = epoch_metrics.get('accuracy', 0.0)\n        loss = epoch_metrics.get('loss', float('inf'))\n        time_taken = epoch_metrics.get('time', 0.0)\n        batch_size = epoch_metrics.get('batch_size', 0)\n        \n        # Normalized accuracy (0-1)\n        norm_accuracy = min(1.0, accuracy / 100.0)\n        \n        # Normalized loss (closer to 0 is better)\n        # Map typical loss range (0-5) to 0-1 range, invert so higher is better\n        norm_loss = max(0.0, 1.0 - min(1.0, loss / 5.0))\n        \n        # Time efficiency\n        # For an adaptive framework, this needs to account for total epochs\n        # and batch size - larger batches process more examples per unit time\n        time_efficiency = 1.0\n        if time_taken > 0 and batch_size > 0:\n            # Process more examples per second = more efficient\n            examples_per_second = batch_size / time_taken\n            # Map to 0-1 range using sigmoid (adjust scale factor for your hardware)\n            time_efficiency = 1.0 / (1.0 + math.exp(-0.01 * examples_per_second + 2.0))\n        \n        # Calculate overall efficiency\n        # Weighted combination of metrics - adjust weights based on importance\n        efficiency = (\n            norm_accuracy * 0.4 +  # Accuracy is important\n            norm_loss * 0.3 +      # Loss is important\n            time_efficiency * 0.3  # Time efficiency matters too\n        )\n        \n        return min(1.0, max(0.0, efficiency))\n    \n    def should_adapt_patterns(self) -> bool:\n        \"\"\"\n        Determine if dataset adaptation is needed based on the train-test accuracy gap."
+        },
+        "should_adapt_patterns": {
+          "start_line": 169,
+          "end_line": 247,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 175
+            },
+            {
+              "name": "self.epoch_metrics.get",
+              "line": 194
+            },
+            {
+              "name": "self.epoch_metrics.get",
+              "line": 200
+            },
+            {
+              "name": "logger.info",
+              "line": 216
+            },
+            {
+              "name": "logger.info",
+              "line": 233
+            },
+            {
+              "name": "logger.info",
+              "line": 244
+            },
+            {
+              "name": "hasattr",
+              "line": 178
+            },
+            {
+              "name": "logger.info",
+              "line": 179
+            },
+            {
+              "name": "hasattr",
+              "line": 183
+            },
+            {
+              "name": "logger.info",
+              "line": 184
+            },
+            {
+              "name": "logger.info",
+              "line": 189
+            },
+            {
+              "name": "logger.info",
+              "line": 190
+            },
+            {
+              "name": "logger.info",
+              "line": 195
+            },
+            {
+              "name": "logger.info",
+              "line": 196
+            },
+            {
+              "name": "self.epoch_metrics.get",
+              "line": 205
+            },
+            {
+              "name": "logger.info",
+              "line": 211
+            },
+            {
+              "name": "logger.info",
+              "line": 221
+            },
+            {
+              "name": "logger.info",
+              "line": 226
+            },
+            {
+              "name": "logger.info",
+              "line": 239
+            },
+            {
+              "name": "self.epoch_metrics.get",
+              "line": 207
+            },
+            {
+              "name": "logger.info",
+              "line": 228
+            },
+            {
+              "name": "logger.info",
+              "line": 230
+            },
+            {
+              "name": "time.time",
+              "line": 179
+            },
+            {
+              "name": "time.time",
+              "line": 184
+            },
+            {
+              "name": "time.time",
+              "line": 190
+            },
+            {
+              "name": "time.time",
+              "line": 196
+            }
+          ],
+          "docstring": "\n        Determine if dataset adaptation is needed based on the train-test accuracy gap.\n        Adaptation is triggered when the gap increases beyond previous maximum.\n        ",
+          "code_snippet": "        return min(1.0, max(0.0, efficiency))\n    \n    def should_adapt_patterns(self) -> bool:\n        \"\"\"\n        Determine if dataset adaptation is needed based on the train-test accuracy gap.\n        Adaptation is triggered when the gap increases beyond previous maximum.\n        \"\"\"\n        import time\n        start_time = time.time()\n        \n        # Check if we've already adapted in this epoch\n        if hasattr(self, 'last_adaptation_epoch') and self.last_adaptation_epoch == self.epoch:\n            logger.info(f\"Quick return (already adapted in this epoch) took {time.time() - start_time:.4f} seconds\")\n            return False\n        \n        # Check if enough epochs have passed since last adaptation\n        if hasattr(self, 'last_adaptation_epoch') and self.epoch - self.last_adaptation_epoch < self.min_epochs_between_adaptations:\n            logger.info(f\"Quick return (min epochs between adaptations not passed) took {time.time() - start_time:.4f} seconds\")\n            return False\n        \n        # Need at least one epoch to have meaningful accuracy data\n        if self.epoch < self.adaptation_min_epoch:\n            logger.info(f\"Not adapting patterns yet - need at least {self.adaptation_min_epoch} epochs (current: {self.epoch})\")\n            logger.info(f\"Quick return (min epoch check) took {time.time() - start_time:.4f} seconds\")\n            return False\n            \n        # Check for forced adaptation due to external request\n        if self.epoch_metrics.get('force_high_risk', False):\n            logger.info(\"Adapting patterns due to external forced request\")\n            logger.info(f\"Quick return (forced adaptation) took {time.time() - start_time:.4f} seconds\")\n            return True\n        \n        # Get train and validation accuracy from epoch metrics\n        train_acc = self.epoch_metrics.get('accuracy', 0.0)\n        val_acc = None\n        \n        # Check for validation accuracy in metrics\n        if 'val_accuracy' in self.epoch_metrics:\n            val_acc = self.epoch_metrics.get('val_accuracy')\n        elif 'validation_accuracy' in self.epoch_metrics:\n            val_acc = self.epoch_metrics.get('validation_accuracy')\n        \n        # If no validation accuracy available, cannot determine gap\n        if val_acc is None:\n            logger.info(\"No validation accuracy available - cannot determine train-test gap\")\n            return False\n        \n        # Calculate train-test gap (positive when train > test, indicating potential overfitting)\n        train_test_gap = train_acc - val_acc\n        logger.info(f\"Current train-test gap: {train_test_gap:.2f}% (train: {train_acc:.2f}%, test: {val_acc:.2f}%)\")\n        \n        # Only consider adaptation when train accuracy exceeds test accuracy by a meaningful amount\n        min_gap_threshold = 0.5  # Minimal gap threshold to filter out noise\n        if train_test_gap <= min_gap_threshold:\n            logger.info(f\"Train-test gap {train_test_gap:.2f}% too small (below threshold {min_gap_threshold}%) - no adaptation needed\")\n            return False\n        \n        # Log gap severity for debugging\n        if train_test_gap > 3.0:\n            logger.info(f\"Very large train-test gap detected: {train_test_gap:.2f}% (severe overfitting)\")\n        elif train_test_gap > 2.0:\n            logger.info(f\"Large train-test gap detected: {train_test_gap:.2f}% (significant overfitting)\")\n        elif train_test_gap > 1.0:\n            logger.info(f\"Moderate train-test gap detected: {train_test_gap:.2f}% (mild overfitting)\")\n        \n        # At this point, we have a meaningful gap - trigger adaptation\n        logger.info(f\"Train-test gap {train_test_gap:.2f}% exceeds threshold ({min_gap_threshold}%)\")\n        \n        # Track maximum gap for reference\n        if train_test_gap > self.max_train_test_gap:\n            previous_max = self.max_train_test_gap\n            self.max_train_test_gap = train_test_gap\n            logger.info(f\"New maximum train-test gap detected: {train_test_gap:.2f}% (previous: {previous_max:.2f}%)\")\n        \n        # Record the adaptation epoch\n        self.last_adaptation_epoch = self.epoch\n        \n        logger.info(f\"Dataset adaptation triggered - will increase dataset by {train_test_gap:.2f}%\")\n        return True\n    \n    def adapt_dataset(self, dataset) -> Tuple[Any, Dict[str, Any]]:\n        \"\"\"\n        Adapt the dataset based on the train-test accuracy gap percentage."
+        },
+        "adapt_dataset": {
+          "start_line": 247,
+          "end_line": 449,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 260
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_risks",
+              "line": 263
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_accuracies",
+              "line": 264
+            },
+            {
+              "name": "len",
+              "line": 267
+            },
+            {
+              "name": "int",
+              "line": 268
+            },
+            {
+              "name": "logger.info",
+              "line": 269
+            },
+            {
+              "name": "logger.info",
+              "line": 302
+            },
+            {
+              "name": "self.augmentation_history.append",
+              "line": 420
+            },
+            {
+              "name": "len",
+              "line": 430
+            },
+            {
+              "name": "len",
+              "line": 431
+            },
+            {
+              "name": "logger.info",
+              "line": 434
+            },
+            {
+              "name": "logger.info",
+              "line": 435
+            },
+            {
+              "name": "logger.info",
+              "line": 436
+            },
+            {
+              "name": "sum",
+              "line": 276
+            },
+            {
+              "name": "list",
+              "line": 293
+            },
+            {
+              "name": "examples_per_pattern.items",
+              "line": 321
+            },
+            {
+              "name": "logger.info",
+              "line": 341
+            },
+            {
+              "name": "logger.warning",
+              "line": 386
+            },
+            {
+              "name": "logger.warning",
+              "line": 387
+            },
+            {
+              "name": "logger.warning",
+              "line": 388
+            },
+            {
+              "name": "logger.warning",
+              "line": 389
+            },
+            {
+              "name": "torch.stack",
+              "line": 398
+            },
+            {
+              "name": "torch.tensor",
+              "line": 399
+            },
+            {
+              "name": "TensorDataset",
+              "line": 400
+            },
+            {
+              "name": "ConcatDataset",
+              "line": 403
+            },
+            {
+              "name": "torch.stack",
+              "line": 406
+            },
+            {
+              "name": "torch.tensor",
+              "line": 407
+            },
+            {
+              "name": "TensorDataset",
+              "line": 408
+            },
+            {
+              "name": "ConcatDataset",
+              "line": 411
+            },
+            {
+              "name": "hasattr",
+              "line": 415
+            },
+            {
+              "name": "self.augmentation_mediator.get_metrics",
+              "line": 416
+            },
+            {
+              "name": "hasattr",
+              "line": 417
+            },
+            {
+              "name": "pattern_risks.values",
+              "line": 276
+            },
+            {
+              "name": "pattern_risks.items",
+              "line": 280
+            },
+            {
+              "name": "pattern_risks.keys",
+              "line": 288
+            },
+            {
+              "name": "self.augmenter.augmentation_strategies.keys",
+              "line": 293
+            },
+            {
+              "name": "logger.info",
+              "line": 297
+            },
+            {
+              "name": "logger.error",
+              "line": 299
+            },
+            {
+              "name": "logger.info",
+              "line": 310
+            },
+            {
+              "name": "create_augmentation_mediator",
+              "line": 311
+            },
+            {
+              "name": "logger.info",
+              "line": 316
+            },
+            {
+              "name": "logger.warning",
+              "line": 344
+            },
+            {
+              "name": "logger.info",
+              "line": 345
+            },
+            {
+              "name": "examples_per_pattern.items",
+              "line": 349
+            },
+            {
+              "name": "logger.error",
+              "line": 364
+            },
+            {
+              "name": "logger.error",
+              "line": 365
+            },
+            {
+              "name": "examples_per_pattern.items",
+              "line": 369
+            },
+            {
+              "name": "self.augmenter.metrics.copy",
+              "line": 418
+            },
+            {
+              "name": "len",
+              "line": 424
+            },
+            {
+              "name": "len",
+              "line": 442
+            },
+            {
+              "name": "len",
+              "line": 443
+            },
+            {
+              "name": "int",
+              "line": 284
+            },
+            {
+              "name": "logger.info",
+              "line": 285
+            },
+            {
+              "name": "logger.info",
+              "line": 290
+            },
+            {
+              "name": "hasattr",
+              "line": 309
+            },
+            {
+              "name": "logger.info",
+              "line": 323
+            },
+            {
+              "name": "self.augmentation_mediator.get_augmentations",
+              "line": 329
+            },
+            {
+              "name": "hasattr",
+              "line": 427
+            },
+            {
+              "name": "len",
+              "line": 434
+            },
+            {
+              "name": "hasattr",
+              "line": 447
+            },
+            {
+              "name": "len",
+              "line": 289
+            },
+            {
+              "name": "len",
+              "line": 296
+            },
+            {
+              "name": "len",
+              "line": 326
+            },
+            {
+              "name": "augmented_examples.extend",
+              "line": 336
+            },
+            {
+              "name": "logger.info",
+              "line": 337
+            },
+            {
+              "name": "logger.warning",
+              "line": 339
+            },
+            {
+              "name": "len",
+              "line": 341
+            },
+            {
+              "name": "logger.info",
+              "line": 351
+            },
+            {
+              "name": "self.augmenter.augment_pattern",
+              "line": 352
+            },
+            {
+              "name": "logger.info",
+              "line": 371
+            },
+            {
+              "name": "self.augmenter.augment_pattern",
+              "line": 372
+            },
+            {
+              "name": "str",
+              "line": 344
+            },
+            {
+              "name": "logger.warning",
+              "line": 359
+            },
+            {
+              "name": "augmented_examples.extend",
+              "line": 361
+            },
+            {
+              "name": "logger.info",
+              "line": 362
+            },
+            {
+              "name": "str",
+              "line": 364
+            },
+            {
+              "name": "logger.warning",
+              "line": 379
+            },
+            {
+              "name": "augmented_examples.extend",
+              "line": 381
+            },
+            {
+              "name": "logger.info",
+              "line": 382
+            },
+            {
+              "name": "len",
+              "line": 337
+            },
+            {
+              "name": "len",
+              "line": 362
+            },
+            {
+              "name": "len",
+              "line": 382
+            }
+          ],
+          "docstring": "\n        Adapt the dataset based on the train-test accuracy gap percentage.\n        \n        Args:\n            dataset: Dataset to adapt\n            \n        Returns:\n            Tuple of (adapted dataset, adaptation metrics)\n        ",
+          "code_snippet": "        return True\n    \n    def adapt_dataset(self, dataset) -> Tuple[Any, Dict[str, Any]]:\n        \"\"\"\n        Adapt the dataset based on the train-test accuracy gap percentage.\n        \n        Args:\n            dataset: Dataset to adapt\n            \n        Returns:\n            Tuple of (adapted dataset, adaptation metrics)\n        \"\"\"\n        # The train-test gap percentage is stored in self.max_train_test_gap\n        train_test_gap = self.max_train_test_gap\n        \n        logger.info(f\"Adapting dataset based on train-test gap: {train_test_gap:.2f}%\")\n        \n        # Get pattern information for distribution\n        pattern_risks = self.pattern_tracker.get_pattern_risks()\n        pattern_accuracies = self.pattern_tracker.get_pattern_accuracies()\n        \n        # Calculate the total number of examples to add based on the gap percentage\n        dataset_size = len(dataset)\n        examples_to_add_total = int(dataset_size * (train_test_gap / 100.0))\n        logger.info(f\"Increasing dataset by {train_test_gap:.2f}% - Adding {examples_to_add_total} new examples\")\n        \n        # Distribute the examples across patterns\n        examples_per_pattern = {}\n        \n        if pattern_risks:\n            # If we have pattern information, distribute proportionally to risk\n            total_risk = sum(pattern_risks.values())\n            \n            if total_risk > 0:\n                # Distribute examples based on each pattern's risk proportion\n                for pattern_type, risk in pattern_risks.items():\n                    # Calculate proportion of total risk\n                    risk_proportion = risk / total_risk\n                    # Calculate examples for this pattern\n                    examples_per_pattern[pattern_type] = int(examples_to_add_total * risk_proportion)\n                    logger.info(f\"Pattern {pattern_type}: risk={risk:.4f}, examples to add={examples_per_pattern[pattern_type]}\")\n            else:\n                # Distribute evenly if risks are all zero\n                for pattern_type in pattern_risks.keys():\n                    examples_per_pattern[pattern_type] = examples_to_add_total // len(pattern_risks)\n                    logger.info(f\"Pattern {pattern_type}: equal distribution, examples to add={examples_per_pattern[pattern_type]}\")\n        else:\n            # If we don't have pattern information, use patterns from the augmenter\n            available_patterns = list(self.augmenter.augmentation_strategies.keys())\n            \n            if available_patterns:\n                examples_per_pattern = {p: examples_to_add_total // len(available_patterns) for p in available_patterns}\n                logger.info(f\"No pattern risk information, distributing equally across available patterns\")\n            else:\n                logger.error(\"No pattern information available for adaptation\")\n                return dataset, {\"adapted\": False, \"reason\": \"no_pattern_information\"}\n        \n        logger.info(f\"Examples to add per pattern: {examples_per_pattern}\")\n        \n        # Try to use the new AugmentationMediator if available\n        try:\n            from isekaizen.mediators.factory import create_augmentation_mediator\n            \n            # Create the augmentation mediator if we don't have one yet\n            if not hasattr(self, 'augmentation_mediator') or self.augmentation_mediator is None:\n                logger.info(\"Creating AugmentationMediator for dataset augmentation...\")\n                self.augmentation_mediator = create_augmentation_mediator(\n                    dataset=dataset,\n                    pattern_map=self.pattern_map,\n                    device=self.device\n                )\n                logger.info(\"AugmentationMediator created successfully\")\n            \n            # Use the mediator to generate augmentations\n            augmented_examples = []\n            \n            for pattern_type, count in examples_per_pattern.items():\n                if count > 0:\n                    logger.info(f\"Generating {count} augmentations for pattern {pattern_type} using mediator\")\n                    \n                    # Calculate percentage for this pattern\n                    pattern_percentage = count / len(dataset)\n                    \n                    # Get augmentations from mediator\n                    pattern_examples = self.augmentation_mediator.get_augmentations(\n                        pattern_type=pattern_type,\n                        percentage=pattern_percentage,\n                        count=count\n                    )\n                    \n                    if pattern_examples:\n                        augmented_examples.extend(pattern_examples)\n                        logger.info(f\"Added {len(pattern_examples)} examples for pattern {pattern_type} using mediator\")\n                    else:\n                        logger.warning(f\"No augmentations generated for pattern {pattern_type}\")\n            \n            logger.info(f\"Generated {len(augmented_examples)} total augmentations using AugmentationMediator\")\n            \n        except ImportError as e:\n            logger.warning(f\"AugmentationMediator not available: {str(e)}\")\n            logger.info(\"Falling back to legacy augmentation method...\")\n            \n            # Fallback to the original augmentation method\n            augmented_examples = []\n            for pattern_type, count in examples_per_pattern.items():\n                if count > 0:\n                    logger.info(f\"Attempting to create {count} examples for pattern {pattern_type}\")\n                    pattern_examples = self.augmenter.augment_pattern(\n                        dataset,\n                        pattern_type,\n                        count=count\n                    )\n                    \n                    if not pattern_examples:\n                        logger.warning(f\"Failed to create examples for pattern {pattern_type}\")\n                    else:\n                        augmented_examples.extend(pattern_examples)\n                        logger.info(f\"Added {len(pattern_examples)} examples for pattern {pattern_type}\")\n        except Exception as e:\n            logger.error(f\"Error using AugmentationMediator: {str(e)}\")\n            logger.error(\"Falling back to legacy augmentation method...\")\n            \n            # Fallback to the original augmentation method\n            augmented_examples = []\n            for pattern_type, count in examples_per_pattern.items():\n                if count > 0:\n                    logger.info(f\"Attempting to create {count} examples for pattern {pattern_type}\")\n                    pattern_examples = self.augmenter.augment_pattern(\n                        dataset,\n                        pattern_type,\n                        count=count\n                    )\n                    \n                    if not pattern_examples:\n                        logger.warning(f\"Failed to create examples for pattern {pattern_type}\")\n                    else:\n                        augmented_examples.extend(pattern_examples)\n                        logger.info(f\"Added {len(pattern_examples)} examples for pattern {pattern_type}\")\n        \n        # Return if no augmentations were created\n        if not augmented_examples:\n            logger.warning(\"No augmentations were created. Reasons could include:\")\n            logger.warning(\"1. augment_pattern method implementation issues\")\n            logger.warning(\"2. Pattern recognition issues (no examples assigned to patterns)\")\n            logger.warning(\"3. Failed transformations for all attempted examples\")\n            return dataset, {\"adapted\": False, \"reason\": \"no_augmentations_created\", \"attempted_patterns\": examples_per_pattern}\n        \n        # Create a combined dataset\n        from torch.utils.data import ConcatDataset, TensorDataset\n        \n        # If we already have an augmented dataset, update it\n        if self.augmented_dataset is None:\n            # Create a dataset from the augmented examples\n            features = torch.stack([item[0] for item in augmented_examples])\n            labels = torch.tensor([item[1] for item in augmented_examples])\n            augmented_dataset = TensorDataset(features, labels)\n            \n            # Combine with original dataset\n            self.augmented_dataset = ConcatDataset([dataset, augmented_dataset])\n        else:\n            # Add new examples to existing augmented dataset\n            features = torch.stack([item[0] for item in augmented_examples])\n            labels = torch.tensor([item[1] for item in augmented_examples])\n            new_augmented_dataset = TensorDataset(features, labels)\n            \n            # Create a new combined dataset\n            self.augmented_dataset = ConcatDataset([dataset, new_augmented_dataset])\n        \n        # Record augmentation history\n        augmentation_metrics = {}\n        if hasattr(self, 'augmentation_mediator') and self.augmentation_mediator is not None:\n            augmentation_metrics = self.augmentation_mediator.get_metrics()\n        elif hasattr(self.augmenter, 'metrics'):\n            augmentation_metrics = self.augmenter.metrics.copy()\n        \n        self.augmentation_history.append({\n            \"epoch\": self.epoch,\n            \"train_test_gap\": train_test_gap,\n            \"examples_per_pattern\": examples_per_pattern,\n            \"examples_added\": len(augmented_examples),\n            \"pattern_risks\": pattern_risks,\n            \"augmentation_metrics\": augmentation_metrics,\n            \"using_mediator\": hasattr(self, 'augmentation_mediator') and self.augmentation_mediator is not None\n        })\n        \n        original_size = len(dataset)\n        new_size = len(self.augmented_dataset)\n        actual_increase_pct = ((new_size - original_size) / original_size) * 100.0\n        \n        logger.info(f\"Dataset adapted. Added {len(augmented_examples)} examples.\")\n        logger.info(f\"Original size: {original_size}, New size: {new_size}\")\n        logger.info(f\"Actual percentage increase: {actual_increase_pct:.2f}%\")\n        \n        return self.augmented_dataset, {\n            \"adapted\": True,\n            \"train_test_gap\": train_test_gap,\n            \"examples_per_pattern\": examples_per_pattern,\n            \"examples_added\": len(augmented_examples),\n            \"total_size\": len(self.augmented_dataset),\n            \"pattern_risks\": pattern_risks,\n            \"original_size\": original_size,\n            \"actual_increase_percent\": actual_increase_pct,\n            \"using_mediator\": hasattr(self, 'augmentation_mediator') and self.augmentation_mediator is not None\n        }\n    \n    def update_with_batch_results(self, batch_indices, batch_size, loss_decreased):\n        \"\"\""
+        },
+        "update_with_batch_results": {
+          "start_line": 450,
+          "end_line": 468,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_indices"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "loss_decreased"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....update_with_batch_results",
+              "line": 466
+            },
+            {
+              "name": "super",
+              "line": 466
+            }
+          ],
+          "docstring": "\n        Update risk assessment based on batch training results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            batch_size: Current batch size\n            loss_decreased: Whether the loss decreased from the previous batch\n        ",
+          "code_snippet": "        }\n    \n    def update_with_batch_results(self, batch_indices, batch_size, loss_decreased):\n        \"\"\"\n        Update risk assessment based on batch training results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            batch_size: Current batch size\n            loss_decreased: Whether the loss decreased from the previous batch\n        \"\"\"\n        # Store latest batch indices\n        self.last_batch_indices = batch_indices\n        \n        # We don't use the loss_decreased signal in the risk-accuracy relationship approach\n        # Instead, we use correct/incorrect predictions for each example\n        \n        # Call base implementation for other updates\n        super().update_with_batch_results(batch_indices, batch_size, loss_decreased)\n    \n    def update_with_pattern_recognition(self, batch_indices, correct_mask):\n        \"\"\"\n        Update pattern risk-accuracy tracking based on batch results."
+        },
+        "update_with_pattern_recognition": {
+          "start_line": 468,
+          "end_line": 482,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_indices"
+            },
+            {
+              "name": "correct_mask"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....update_with_pattern_recognition",
+              "line": 477
+            },
+            {
+              "name": "self.pattern_tracker.update_with_batch_results",
+              "line": 480
+            },
+            {
+              "name": "super",
+              "line": 477
+            }
+          ],
+          "docstring": "\n        Update pattern risk-accuracy tracking based on batch results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        ",
+          "code_snippet": "        super().update_with_batch_results(batch_indices, batch_size, loss_decreased)\n    \n    def update_with_pattern_recognition(self, batch_indices, correct_mask):\n        \"\"\"\n        Update pattern risk-accuracy tracking based on batch results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        \"\"\"\n        # Update pattern recognition tracker\n        super().update_with_pattern_recognition(batch_indices, correct_mask)\n        \n        # Also update our unified pattern risk-accuracy tracker\n        self.pattern_tracker.update_with_batch_results(batch_indices, correct_mask)\n    \n    def adjust_batch_size_for_risk(self, calculated_batch):\n        \"\"\"\n        Adjust batch size based on unified risk/accuracy ratio."
+        },
+        "adjust_batch_size_for_risk": {
+          "start_line": 482,
+          "end_line": 526,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "calculated_batch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.get_optimizer",
+              "line": 493
+            },
+            {
+              "name": "hasattr",
+              "line": 494
+            },
+            {
+              "name": "max",
+              "line": 517
+            },
+            {
+              "name": "optimizer.calculate_risk_accuracy_ratios",
+              "line": 495
+            },
+            {
+              "name": "self.pattern_tracker.get_overall_risk",
+              "line": 502
+            },
+            {
+              "name": "min",
+              "line": 510
+            },
+            {
+              "name": "int",
+              "line": 511
+            },
+            {
+              "name": "min",
+              "line": 513
+            },
+            {
+              "name": "int",
+              "line": 514
+            },
+            {
+              "name": "min",
+              "line": 517
+            },
+            {
+              "name": "abs",
+              "line": 520
+            },
+            {
+              "name": "logger.info",
+              "line": 521
+            },
+            {
+              "name": "sum",
+              "line": 497
+            },
+            {
+              "name": "len",
+              "line": 497
+            },
+            {
+              "name": "ratios.values",
+              "line": 497
+            }
+          ],
+          "docstring": "\n        Adjust batch size based on unified risk/accuracy ratio.\n        \n        Args:\n            calculated_batch: Batch size calculated by pattern recognition\n            \n        Returns:\n            Adjusted batch size\n        ",
+          "code_snippet": "        self.pattern_tracker.update_with_batch_results(batch_indices, correct_mask)\n    \n    def adjust_batch_size_for_risk(self, calculated_batch):\n        \"\"\"\n        Adjust batch size based on unified risk/accuracy ratio.\n        \n        Args:\n            calculated_batch: Batch size calculated by pattern recognition\n            \n        Returns:\n            Adjusted batch size\n        \"\"\"\n        # Get the average risk/accuracy ratio across all patterns\n        optimizer = self.get_optimizer()\n        if hasattr(optimizer, 'calculate_risk_accuracy_ratios'):\n            ratios = optimizer.calculate_risk_accuracy_ratios()\n            if ratios:\n                avg_ratio = sum(ratios.values()) / len(ratios)\n            else:\n                avg_ratio = 1.0  # Default balanced ratio\n        else:\n            # Fallback to overall risk from pattern tracker\n            overall_risk = self.pattern_tracker.get_overall_risk()\n            # Convert risk to ratio (higher risk = higher ratio)\n            avg_ratio = 1.0 + (overall_risk - 0.5)\n        \n        # Use the average ratio to adjust batch size\n        # Higher ratio (risk > accuracy) = smaller batch size\n        # Lower ratio (risk < accuracy) = larger batch size\n        if avg_ratio > 1.0:\n            reduction_factor = min(0.7, (avg_ratio - 1.0) * 0.8)\n            adjusted_batch = int(calculated_batch * (1.0 - reduction_factor))\n        else:\n            increase_factor = min(0.5, (1.0 - avg_ratio) * 0.6)\n            adjusted_batch = int(calculated_batch * (1.0 + increase_factor))\n        \n        # Ensure batch size is within bounds\n        adjusted_batch = max(self.min_batch, min(self.max_batch, adjusted_batch))\n        \n        # Log significant adjustments\n        if abs(adjusted_batch - calculated_batch) > calculated_batch * 0.1:  # More than 10% change\n            logger.info(f\"Risk/accuracy ratio-based batch adjustment: {calculated_batch} \u2192 {adjusted_batch} \"\n                      f\"(ratio: {avg_ratio:.2f})\")\n        \n        return adjusted_batch\n    \n    def get_optimal_batch_size(self):\n        \"\"\"\n        Get the optimal batch size for the current training state."
+        },
+        "get_optimal_batch_size": {
+          "start_line": 526,
+          "end_line": 582,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._detect_training_stagnation",
+              "line": 537
+            },
+            {
+              "name": "self.adjust_batch_size_for_patterns",
+              "line": 562
+            },
+            {
+              "name": "self.adjust_batch_size_for_risk",
+              "line": 565
+            },
+            {
+              "name": "self.adjust_batch_size_for_stability",
+              "line": 568
+            },
+            {
+              "name": "max",
+              "line": 571
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 578
+            },
+            {
+              "name": "logger.info",
+              "line": 539
+            },
+            {
+              "name": "self._find_risk_optimized_batch_size",
+              "line": 540
+            },
+            {
+              "name": "logger.info",
+              "line": 541
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 542
+            },
+            {
+              "name": "logger.info",
+              "line": 548
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 549
+            },
+            {
+              "name": "len",
+              "line": 553
+            },
+            {
+              "name": "min",
+              "line": 571
+            },
+            {
+              "name": "abs",
+              "line": 574
+            },
+            {
+              "name": "logger.info",
+              "line": 575
+            }
+          ],
+          "docstring": "\n        Get the optimal batch size for the current training state.\n        \n        Returns:\n            Optimal batch size\n        ",
+          "code_snippet": "        return adjusted_batch\n    \n    def get_optimal_batch_size(self):\n        \"\"\"\n        Get the optimal batch size for the current training state.\n        \n        Returns:\n            Optimal batch size\n        \"\"\"\n        # Increment epoch counter\n        self.epoch += 1\n        \n        # Check for training stagnation\n        if self._detect_training_stagnation():\n            # Use risk assessment to find a potentially better batch size\n            logger.info(f\"Training stagnation detected - adjusting batch size using risk assessment\")\n            batch_size = self._find_risk_optimized_batch_size()\n            logger.info(f\"Risk assessment recommends batch size {batch_size}\")\n            self.batch_history.append(batch_size)\n            return batch_size\n        \n        # For the first epoch, use half of the max bound\n        if self.epoch == 1:\n            base_batch = self.max_batch // 2\n            logger.info(f\"First epoch: Using half of max batch bound: {base_batch} (max_batch={self.max_batch})\")\n            self.batch_history.append(base_batch)\n            return base_batch\n        \n        # If no stagnation, continue with previous batch size with minor adjustments\n        if len(self.batch_history) > 0:\n            # Continue with similar batch size if it's working well\n            base_batch = self.batch_history[-1]\n        else:\n            # Default to middle of the range\n            base_batch = (self.min_batch + self.max_batch) // 2\n        \n        # Apply adjustments in sequence\n        # 1. Adjust based on pattern recognition\n        pattern_adjusted_batch = self.adjust_batch_size_for_patterns(base_batch)\n        \n        # 2. Adjust based on risk-accuracy relationship\n        risk_adjusted_batch = self.adjust_batch_size_for_risk(pattern_adjusted_batch)\n        \n        # 3. Adjust based on stability\n        stability_adjusted_batch = self.adjust_batch_size_for_stability(risk_adjusted_batch)\n        \n        # Final adjustment - ensure within bounds\n        final_batch = max(self.min_batch, min(self.max_batch, stability_adjusted_batch))\n        \n        # Log the thought process if significant adjustments were made\n        if abs(final_batch - base_batch) > 4:\n            logger.info(f\"Batch adjustment: Base:{base_batch} \u2192 Pattern:{pattern_adjusted_batch} \u2192 Risk:{risk_adjusted_batch} \u2192 Stability:{stability_adjusted_batch} \u2192 Final:{final_batch}\")\n        \n        # Store batch for history\n        self.batch_history.append(final_batch)\n        \n        return final_batch\n    \n    def get_status(self):\n        \"\"\"\n        Get comprehensive status of the optimizer."
+        },
+        "get_status": {
+          "start_line": 582,
+          "end_line": 605,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....get_status",
+              "line": 590
+            },
+            {
+              "name": "state.update",
+              "line": 593
+            },
+            {
+              "name": "super",
+              "line": 590
+            },
+            {
+              "name": "self.pattern_tracker.get_overall_risk",
+              "line": 598
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_risks",
+              "line": 599
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_accuracies",
+              "line": 600
+            }
+          ],
+          "docstring": "\n        Get comprehensive status of the optimizer.\n        \n        Returns:\n            Dictionary with status information\n        ",
+          "code_snippet": "        return final_batch\n    \n    def get_status(self):\n        \"\"\"\n        Get comprehensive status of the optimizer.\n        \n        Returns:\n            Dictionary with status information\n        \"\"\"\n        # Get base state\n        state = super().get_status()\n        \n        # Add risk-accuracy specific state\n        state.update({\n            \"adaptation_self_regulating\": True,\n            \"augmentation_history\": self.augmentation_history,\n            \"training_efficiency\": self.training_efficiency_history[-1] if self.training_efficiency_history else 0.0,\n            \"efficiency_history\": self.training_efficiency_history,\n            \"overall_risk\": self.pattern_tracker.get_overall_risk(),\n            \"pattern_risks\": self.pattern_tracker.get_pattern_risks(),\n            \"pattern_accuracies\": self.pattern_tracker.get_pattern_accuracies()\n        })\n        \n        return state\n    \n    def _detect_training_stagnation(self):\n        \"\"\"\n        Detect if training progress has stagnated."
+        },
+        "_detect_training_stagnation": {
+          "start_line": 605,
+          "end_line": 634,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 613
+            },
+            {
+              "name": "max",
+              "line": 623
+            },
+            {
+              "name": "max",
+              "line": 626
+            }
+          ],
+          "docstring": "\n        Detect if training progress has stagnated.\n        \n        Returns:\n            True if stagnation is detected, False otherwise\n        ",
+          "code_snippet": "        return state\n    \n    def _detect_training_stagnation(self):\n        \"\"\"\n        Detect if training progress has stagnated.\n        \n        Returns:\n            True if stagnation is detected, False otherwise\n        \"\"\"\n        # Need enough history to detect stagnation\n        if len(self.accuracy_history) < self.stagnation_window:\n            return False\n        \n        # Calculate improvement over the window\n        recent_accuracies = self.accuracy_history[-self.stagnation_window:]\n        improvement = recent_accuracies[-1] - recent_accuracies[0]\n        \n        # If target accuracy is set, scale minimum improvement relative to remaining gap\n        if self.target_accuracy is not None and self.target_accuracy > 0:\n            current_acc = recent_accuracies[-1]\n            remaining_gap = max(0, self.target_accuracy - current_acc)\n            # Expect more improvement when we're further from the target\n            expected_improvement = (remaining_gap / 100.0) * self.stagnation_window * 0.1\n            min_improvement = max(0.05, expected_improvement)  # At least 0.05% improvement\n        else:\n            # Default minimum improvement of 0.1% per epoch in the window\n            min_improvement = 0.1 * self.stagnation_window\n        \n        # Stagnation detected if improvement is below threshold\n        return improvement < min_improvement\n    \n    def _find_risk_optimized_batch_size(self):\n        \"\"\"\n        Find a batch size optimized for current risk levels."
+        },
+        "_find_risk_optimized_batch_size": {
+          "start_line": 634,
+          "end_line": 673,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_tracker.get_overall_risk",
+              "line": 645
+            },
+            {
+              "name": "logger.info",
+              "line": 670
+            },
+            {
+              "name": "max",
+              "line": 651
+            },
+            {
+              "name": "int",
+              "line": 651
+            },
+            {
+              "name": "max",
+              "line": 655
+            },
+            {
+              "name": "random.random",
+              "line": 650
+            },
+            {
+              "name": "int",
+              "line": 655
+            },
+            {
+              "name": "min",
+              "line": 659
+            },
+            {
+              "name": "random.random",
+              "line": 654
+            },
+            {
+              "name": "int",
+              "line": 659
+            },
+            {
+              "name": "min",
+              "line": 663
+            },
+            {
+              "name": "int",
+              "line": 667
+            },
+            {
+              "name": "max",
+              "line": 668
+            },
+            {
+              "name": "random.random",
+              "line": 658
+            },
+            {
+              "name": "int",
+              "line": 663
+            },
+            {
+              "name": "min",
+              "line": 668
+            },
+            {
+              "name": "random.random",
+              "line": 662
+            },
+            {
+              "name": "random.random",
+              "line": 666
+            }
+          ],
+          "docstring": "\n        Find a batch size optimized for current risk levels.\n        \n        Returns:\n            Risk-optimized batch size\n        ",
+          "code_snippet": "        return improvement < min_improvement\n    \n    def _find_risk_optimized_batch_size(self):\n        \"\"\"\n        Find a batch size optimized for current risk levels.\n        \n        Returns:\n            Risk-optimized batch size\n        \"\"\"\n        # Start with current batch size\n        current_batch = self.batch_history[-1] if self.batch_history else (self.min_batch + self.max_batch) // 2\n        \n        # Get overall risk from pattern tracker\n        overall_risk = self.pattern_tracker.get_overall_risk()\n        \n        # Calculate batch size based on risk level\n        if overall_risk > 0.75:  # High risk\n            # Try a significantly smaller batch size (30-50% of current)\n            adjustment = 0.3 + 0.2 * random.random()  # Random between 0.3-0.5\n            new_batch = max(self.min_batch, int(current_batch * adjustment))\n        elif overall_risk > 0.5:  # Medium-high risk\n            # Try a moderately smaller batch size (50-70% of current)\n            adjustment = 0.5 + 0.2 * random.random()  # Random between 0.5-0.7\n            new_batch = max(self.min_batch, int(current_batch * adjustment))\n        elif overall_risk < 0.25:  # Low risk\n            # Try a significantly larger batch size (150-200% of current)\n            adjustment = 1.5 + 0.5 * random.random()  # Random between 1.5-2.0\n            new_batch = min(self.max_batch, int(current_batch * adjustment))\n        elif overall_risk < 0.5:  # Medium-low risk\n            # Try a moderately larger batch size (120-150% of current)\n            adjustment = 1.2 + 0.3 * random.random()  # Random between 1.2-1.5\n            new_batch = min(self.max_batch, int(current_batch * adjustment))\n        else:  # Medium risk\n            # Try a slightly different batch size (80-120% of current)\n            adjustment = 0.8 + 0.4 * random.random()  # Random between 0.8-1.2\n            new_batch = int(current_batch * adjustment)\n            new_batch = max(self.min_batch, min(self.max_batch, new_batch))\n        \n        logger.info(f\"Risk-optimized batch size: {new_batch} (current: {current_batch}, risk: {overall_risk:.2f})\")\n        return new_batch"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "RiskAwarePatternIsekaiZen"
+      ],
+      "docstring": "\n    Enhanced pattern-responsive risk-aware optimizer.\n    \n    This optimizer implements the risk-accuracy relationship approach, viewing\n    risk and accuracy as two sides of the same coin.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

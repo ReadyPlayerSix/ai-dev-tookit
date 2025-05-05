@@ -1,0 +1,424 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\benchmarking.py",
+  "imports": [
+    {
+      "name": "time",
+      "line": 18
+    },
+    {
+      "name": "torch",
+      "line": 19
+    },
+    {
+      "name": "math",
+      "line": 20
+    },
+    {
+      "name": "pandas",
+      "line": 21
+    },
+    {
+      "name": "matplotlib.pyplot",
+      "line": 22
+    },
+    {
+      "name": "typing.Dict",
+      "line": 23
+    },
+    {
+      "name": "typing.List",
+      "line": 23
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 23
+    },
+    {
+      "name": "typing.Optional",
+      "line": 23
+    },
+    {
+      "name": "typing.Union",
+      "line": 23
+    },
+    {
+      "name": "typing.Any",
+      "line": 23
+    },
+    {
+      "name": "logging",
+      "line": 24
+    }
+  ],
+  "classes": {
+    "ModelBenchmark": {
+      "start_line": 28,
+      "end_line": 264,
+      "methods": {
+        "__init__": {
+          "start_line": 33,
+          "end_line": 50,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.to",
+              "line": 47
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 46
+            },
+            {
+              "name": "torch.device",
+              "line": 46
+            },
+            {
+              "name": "torch.device",
+              "line": 46
+            }
+          ],
+          "docstring": "\n        Initialize the benchmark tool.\n        \n        Args:\n            model: PyTorch model to benchmark\n            device: Device to run benchmark on\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self, \n        model: torch.nn.Module,\n        device: Optional[torch.device] = None,\n    ):\n        \"\"\"\n        Initialize the benchmark tool.\n        \n        Args:\n            model: PyTorch model to benchmark\n            device: Device to run benchmark on\n        \"\"\"\n        self.model = model\n        self.device = device or (torch.device(\"cuda\") if torch.cuda.is_available() else torch.device(\"cpu\"))\n        self.model.to(self.device)\n        self.results = {}\n        \n    def run_inference_benchmark(\n        self,\n        input_shape: Tuple[int, ...],"
+        },
+        "run_inference_benchmark": {
+          "start_line": 50,
+          "end_line": 129,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "input_shape"
+            },
+            {
+              "name": "batch_sizes"
+            },
+            {
+              "name": "warmup_iterations",
+              "type": "int"
+            },
+            {
+              "name": "benchmark_iterations",
+              "type": "int"
+            },
+            {
+              "name": "dtype"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.eval",
+              "line": 74
+            },
+            {
+              "name": "pd.DataFrame",
+              "line": 124
+            },
+            {
+              "name": "torch.randn",
+              "line": 78
+            },
+            {
+              "name": "time.time",
+              "line": 90
+            },
+            {
+              "name": "time.time",
+              "line": 99
+            },
+            {
+              "name": "results.append",
+              "line": 113
+            },
+            {
+              "name": "logger.info",
+              "line": 121
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 81
+            },
+            {
+              "name": "range",
+              "line": 82
+            },
+            {
+              "name": "torch.cuda.synchronize",
+              "line": 87
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 91
+            },
+            {
+              "name": "range",
+              "line": 92
+            },
+            {
+              "name": "torch.cuda.reset_peak_memory_stats",
+              "line": 109
+            },
+            {
+              "name": "self.model",
+              "line": 83
+            },
+            {
+              "name": "self.model",
+              "line": 93
+            },
+            {
+              "name": "torch.cuda.max_memory_allocated",
+              "line": 108
+            },
+            {
+              "name": "torch.cuda.synchronize",
+              "line": 97
+            }
+          ],
+          "docstring": "\n        Benchmark inference performance across different batch sizes.\n        \n        Args:\n            input_shape: Shape of a single input (excluding batch dimension)\n            batch_sizes: List of batch sizes to benchmark\n            warmup_iterations: Number of warmup iterations\n            benchmark_iterations: Number of iterations to measure\n            dtype: Data type for benchmark inputs\n            \n        Returns:\n            DataFrame with benchmark results\n        ",
+          "code_snippet": "        self.results = {}\n        \n    def run_inference_benchmark(\n        self,\n        input_shape: Tuple[int, ...],\n        batch_sizes: List[int],\n        warmup_iterations: int = 5,\n        benchmark_iterations: int = 20,\n        dtype: torch.dtype = torch.float32,\n    ) -> pd.DataFrame:\n        \"\"\"\n        Benchmark inference performance across different batch sizes.\n        \n        Args:\n            input_shape: Shape of a single input (excluding batch dimension)\n            batch_sizes: List of batch sizes to benchmark\n            warmup_iterations: Number of warmup iterations\n            benchmark_iterations: Number of iterations to measure\n            dtype: Data type for benchmark inputs\n            \n        Returns:\n            DataFrame with benchmark results\n        \"\"\"\n        results = []\n        \n        # Set model to evaluation mode\n        self.model.eval()\n        \n        for batch_size in batch_sizes:\n            # Create dummy input\n            dummy_input = torch.randn(batch_size, *input_shape, dtype=dtype, device=self.device)\n            \n            # Warmup\n            with torch.no_grad():\n                for _ in range(warmup_iterations):\n                    _ = self.model(dummy_input)\n            \n            # Synchronize before benchmarking\n            if self.device.type == \"cuda\":\n                torch.cuda.synchronize()\n            \n            # Benchmark\n            start_time = time.time()\n            with torch.no_grad():\n                for _ in range(benchmark_iterations):\n                    _ = self.model(dummy_input)\n                    \n                    # Synchronize after each iteration for accurate timing\n                    if self.device.type == \"cuda\":\n                        torch.cuda.synchronize()\n            \n            end_time = time.time()\n            \n            # Calculate metrics\n            total_time = end_time - start_time\n            avg_time = total_time / benchmark_iterations\n            throughput = batch_size / avg_time\n            \n            # Track peak memory usage\n            if self.device.type == \"cuda\":\n                memory_used = torch.cuda.max_memory_allocated(self.device) / (1024 ** 2)  # MB\n                torch.cuda.reset_peak_memory_stats(self.device)\n            else:\n                memory_used = 0  # Not easily measurable for CPU\n            \n            results.append({\n                \"batch_size\": batch_size,\n                \"avg_time_ms\": avg_time * 1000,\n                \"throughput\": throughput,\n                \"memory_mb\": memory_used,\n                \"samples_per_second\": throughput,\n            })\n            \n            logger.info(f\"Batch size {batch_size}: {throughput:.2f} samples/s, {memory_used:.2f} MB\")\n        \n        # Create DataFrame\n        df_results = pd.DataFrame(results)\n        self.results[\"inference\"] = df_results\n        \n        return df_results\n    \n    def run_training_benchmark(\n        self,\n        input_shape: Tuple[int, ...],"
+        },
+        "run_training_benchmark": {
+          "start_line": 129,
+          "end_line": 227,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "input_shape"
+            },
+            {
+              "name": "target_shape"
+            },
+            {
+              "name": "batch_sizes"
+            },
+            {
+              "name": "loss_fn"
+            },
+            {
+              "name": "optimizer_class"
+            },
+            {
+              "name": "optimizer_kwargs"
+            },
+            {
+              "name": "warmup_iterations",
+              "type": "int"
+            },
+            {
+              "name": "benchmark_iterations",
+              "type": "int"
+            },
+            {
+              "name": "dtype"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.train",
+              "line": 161
+            },
+            {
+              "name": "pd.DataFrame",
+              "line": 222
+            },
+            {
+              "name": "optimizer_class",
+              "line": 165
+            },
+            {
+              "name": "torch.randn",
+              "line": 168
+            },
+            {
+              "name": "torch.randn",
+              "line": 169
+            },
+            {
+              "name": "range",
+              "line": 172
+            },
+            {
+              "name": "time.time",
+              "line": 185
+            },
+            {
+              "name": "range",
+              "line": 186
+            },
+            {
+              "name": "time.time",
+              "line": 197
+            },
+            {
+              "name": "results.append",
+              "line": 211
+            },
+            {
+              "name": "logger.info",
+              "line": 219
+            },
+            {
+              "name": "self.model.parameters",
+              "line": 165
+            },
+            {
+              "name": "optimizer.zero_grad",
+              "line": 173
+            },
+            {
+              "name": "self.model",
+              "line": 174
+            },
+            {
+              "name": "loss_fn",
+              "line": 175
+            },
+            {
+              "name": "loss.backward",
+              "line": 176
+            },
+            {
+              "name": "optimizer.step",
+              "line": 177
+            },
+            {
+              "name": "torch.cuda.synchronize",
+              "line": 181
+            },
+            {
+              "name": "torch.cuda.reset_peak_memory_stats",
+              "line": 182
+            },
+            {
+              "name": "optimizer.zero_grad",
+              "line": 187
+            },
+            {
+              "name": "self.model",
+              "line": 188
+            },
+            {
+              "name": "loss_fn",
+              "line": 189
+            },
+            {
+              "name": "loss.backward",
+              "line": 190
+            },
+            {
+              "name": "optimizer.step",
+              "line": 191
+            },
+            {
+              "name": "torch.cuda.reset_peak_memory_stats",
+              "line": 207
+            },
+            {
+              "name": "torch.cuda.synchronize",
+              "line": 195
+            },
+            {
+              "name": "torch.cuda.max_memory_allocated",
+              "line": 206
+            }
+          ],
+          "docstring": "\n        Benchmark training performance across different batch sizes.\n        \n        Args:\n            input_shape: Shape of a single input (excluding batch dimension)\n            target_shape: Shape of a single target (excluding batch dimension)\n            batch_sizes: List of batch sizes to benchmark\n            loss_fn: Loss function to use\n            optimizer_class: Optimizer class to use\n            optimizer_kwargs: Optimizer parameters\n            warmup_iterations: Number of warmup iterations\n            benchmark_iterations: Number of iterations to measure\n            dtype: Data type for benchmark inputs\n            \n        Returns:\n            DataFrame with benchmark results\n        ",
+          "code_snippet": "        return df_results\n    \n    def run_training_benchmark(\n        self,\n        input_shape: Tuple[int, ...],\n        target_shape: Tuple[int, ...],\n        batch_sizes: List[int],\n        loss_fn: torch.nn.Module,\n        optimizer_class: torch.optim.Optimizer = torch.optim.Adam,\n        optimizer_kwargs: Dict[str, Any] = {\"lr\": 0.001},\n        warmup_iterations: int = 3,\n        benchmark_iterations: int = 10,\n        dtype: torch.dtype = torch.float32,\n    ) -> pd.DataFrame:\n        \"\"\"\n        Benchmark training performance across different batch sizes.\n        \n        Args:\n            input_shape: Shape of a single input (excluding batch dimension)\n            target_shape: Shape of a single target (excluding batch dimension)\n            batch_sizes: List of batch sizes to benchmark\n            loss_fn: Loss function to use\n            optimizer_class: Optimizer class to use\n            optimizer_kwargs: Optimizer parameters\n            warmup_iterations: Number of warmup iterations\n            benchmark_iterations: Number of iterations to measure\n            dtype: Data type for benchmark inputs\n            \n        Returns:\n            DataFrame with benchmark results\n        \"\"\"\n        results = []\n        \n        # Set model to training mode\n        self.model.train()\n        \n        for batch_size in batch_sizes:\n            # Create optimizer\n            optimizer = optimizer_class(self.model.parameters(), **optimizer_kwargs)\n            \n            # Create dummy input and target\n            dummy_input = torch.randn(batch_size, *input_shape, dtype=dtype, device=self.device)\n            dummy_target = torch.randn(batch_size, *target_shape, dtype=dtype, device=self.device)\n            \n            # Warmup\n            for _ in range(warmup_iterations):\n                optimizer.zero_grad()\n                outputs = self.model(dummy_input)\n                loss = loss_fn(outputs, dummy_target)\n                loss.backward()\n                optimizer.step()\n            \n            # Synchronize before benchmarking\n            if self.device.type == \"cuda\":\n                torch.cuda.synchronize()\n                torch.cuda.reset_peak_memory_stats(self.device)\n            \n            # Benchmark\n            start_time = time.time()\n            for _ in range(benchmark_iterations):\n                optimizer.zero_grad()\n                outputs = self.model(dummy_input)\n                loss = loss_fn(outputs, dummy_target)\n                loss.backward()\n                optimizer.step()\n                \n                # Synchronize after each iteration for accurate timing\n                if self.device.type == \"cuda\":\n                    torch.cuda.synchronize()\n            \n            end_time = time.time()\n            \n            # Calculate metrics\n            total_time = end_time - start_time\n            avg_time = total_time / benchmark_iterations\n            throughput = batch_size / avg_time\n            \n            # Track peak memory usage\n            if self.device.type == \"cuda\":\n                memory_used = torch.cuda.max_memory_allocated(self.device) / (1024 ** 2)  # MB\n                torch.cuda.reset_peak_memory_stats(self.device)\n            else:\n                memory_used = 0  # Not easily measurable for CPU\n            \n            results.append({\n                \"batch_size\": batch_size,\n                \"avg_time_ms\": avg_time * 1000,\n                \"throughput\": throughput,\n                \"memory_mb\": memory_used,\n                \"samples_per_second\": throughput,\n            })\n            \n            logger.info(f\"Batch size {batch_size}: {throughput:.2f} samples/s, {memory_used:.2f} MB\")\n        \n        # Create DataFrame\n        df_results = pd.DataFrame(results)\n        self.results[\"training\"] = df_results\n        \n        return df_results\n    \n    def plot_results(\n        self, \n        result_type: str = \"inference\","
+        },
+        "plot_results": {
+          "start_line": 227,
+          "end_line": 264,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "result_type",
+              "type": "str"
+            },
+            {
+              "name": "metrics"
+            },
+            {
+              "name": "save_path"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.error",
+              "line": 242
+            },
+            {
+              "name": "plt.figure",
+              "line": 252
+            },
+            {
+              "name": "plt.plot",
+              "line": 253
+            },
+            {
+              "name": "plt.title",
+              "line": 254
+            },
+            {
+              "name": "plt.xlabel",
+              "line": 255
+            },
+            {
+              "name": "plt.ylabel",
+              "line": 256
+            },
+            {
+              "name": "plt.grid",
+              "line": 257
+            },
+            {
+              "name": "logger.warning",
+              "line": 249
+            },
+            {
+              "name": "metric.capitalize",
+              "line": 256
+            },
+            {
+              "name": "plt.savefig",
+              "line": 260
+            },
+            {
+              "name": "plt.show",
+              "line": 262
+            },
+            {
+              "name": "metric.capitalize",
+              "line": 254
+            }
+          ],
+          "docstring": "\n        Plot benchmark results.\n        \n        Args:\n            result_type: Type of results to plot (\"inference\" or \"training\")\n            metrics: List of metrics to plot\n            save_path: Path to save plot to (optional)\n        ",
+          "code_snippet": "        return df_results\n    \n    def plot_results(\n        self, \n        result_type: str = \"inference\",\n        metrics: List[str] = [\"throughput\", \"memory_mb\"],\n        save_path: Optional[str] = None\n    ):\n        \"\"\"\n        Plot benchmark results.\n        \n        Args:\n            result_type: Type of results to plot (\"inference\" or \"training\")\n            metrics: List of metrics to plot\n            save_path: Path to save plot to (optional)\n        \"\"\"\n        if result_type not in self.results:\n            logger.error(f\"No {result_type} results available\")\n            return\n        \n        df = self.results[result_type]\n        \n        for metric in metrics:\n            if metric not in df.columns:\n                logger.warning(f\"Metric {metric} not found in results\")\n                continue\n            \n            plt.figure(figsize=(10, 6))\n            plt.plot(df[\"batch_size\"], df[metric], marker=\"o\")\n            plt.title(f\"{metric.capitalize()} vs Batch Size ({result_type})\")\n            plt.xlabel(\"Batch Size\")\n            plt.ylabel(metric.capitalize())\n            plt.grid(True)\n            \n            if save_path:\n                plt.savefig(f\"{save_path}_{result_type}_{metric}.png\")\n            else:\n                plt.show()"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Benchmark PyTorch models for performance optimization.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

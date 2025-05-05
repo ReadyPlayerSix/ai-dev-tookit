@@ -1,0 +1,906 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\modified\\baseline_tests\\run_eve_baseline_metrics_fixed.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 10
+    },
+    {
+      "name": "sys",
+      "line": 11
+    },
+    {
+      "name": "time",
+      "line": 12
+    },
+    {
+      "name": "logging",
+      "line": 13
+    },
+    {
+      "name": "argparse",
+      "line": 14
+    },
+    {
+      "name": "json",
+      "line": 15
+    },
+    {
+      "name": "torch",
+      "line": 16
+    },
+    {
+      "name": "torch.nn",
+      "line": 17
+    },
+    {
+      "name": "torch.optim",
+      "line": 18
+    },
+    {
+      "name": "torchvision",
+      "line": 19
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 20
+    },
+    {
+      "name": "torchvision.models",
+      "line": 21
+    },
+    {
+      "name": "matplotlib.pyplot",
+      "line": 22
+    },
+    {
+      "name": "numpy",
+      "line": 23
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 24
+    },
+    {
+      "name": "isekaizen.trainer.adaptive_trainer.AdaptiveTrainer",
+      "line": 30
+    },
+    {
+      "name": "isekaizen.pattern.data_loading.load_latest_pattern_map",
+      "line": 31
+    },
+    {
+      "name": "isekaizen.core.optimizer.enhanced_pattern_responsive.EnhancedPatternResponsiveOptimizer",
+      "line": 32
+    },
+    {
+      "name": "isekaizen.optimizers.eve.EVENaturalWeights",
+      "line": 33
+    },
+    {
+      "name": "isekaizen.optimizers.lr_boundary.LRBoundaryCalculator",
+      "line": 34
+    },
+    {
+      "name": "optimizer_utils.configure_optimizer",
+      "line": 38
+    },
+    {
+      "name": "optimizer_utils.print_available_optimizers",
+      "line": 38
+    },
+    {
+      "name": "optimizer_configs.get_optimizer_config",
+      "line": 39
+    },
+    {
+      "name": "optimizer_configs.ALL_CONFIGS",
+      "line": 39
+    },
+    {
+      "name": "fix_pattern_tracking.apply_all_patches",
+      "line": 42
+    },
+    {
+      "name": "os",
+      "line": 251
+    },
+    {
+      "name": "sys",
+      "line": 252
+    },
+    {
+      "name": "run_streamlined_responsive_optimized_eve.StreamlinedPatternTrainer",
+      "line": 256
+    },
+    {
+      "name": "run_streamlined_responsive_optimized_eve.load_cifar10_data",
+      "line": 256
+    },
+    {
+      "name": "run_streamlined_responsive_optimized_eve.create_model",
+      "line": 256
+    },
+    {
+      "name": "run_streamlined_responsive_optimized_eve.patch_eve_optimizer",
+      "line": 256
+    },
+    {
+      "name": "isekaizen.utils.pattern_map_utils.translate_pattern_map_to_standard_format",
+      "line": 299
+    },
+    {
+      "name": "traceback",
+      "line": 437
+    }
+  ],
+  "classes": {
+    "BaselineMetricsCollector": {
+      "start_line": 51,
+      "end_line": 207,
+      "methods": {
+        "__init__": {
+          "start_line": 54,
+          "end_line": 64,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "    \"\"\"Collects comprehensive baseline metrics for EVE optimizer analysis.\"\"\"\n    \n    def __init__(self):\n        self.metrics = {\n            'train_test_ratios': [],\n            'risk_levels': {},\n            'pattern_accuracies': {},\n            'weight_adjustments': {},\n            'learning_rates': [],\n            'loss_values': {'train': [], 'val': []},\n            'accuracy_values': {'train': [], 'val': []}\n        }\n        \n    def update(self, epoch, train_acc, test_acc, pattern_risks, pattern_accuracies, weight_adjustments, learning_rate, train_loss, val_loss):\n        \"\"\"Update all metrics for the current epoch.\"\"\""
+        },
+        "update": {
+          "start_line": 65,
+          "end_line": 121,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            },
+            {
+              "name": "train_acc"
+            },
+            {
+              "name": "test_acc"
+            },
+            {
+              "name": "pattern_risks"
+            },
+            {
+              "name": "pattern_accuracies"
+            },
+            {
+              "name": "weight_adjustments"
+            },
+            {
+              "name": "learning_rate"
+            },
+            {
+              "name": "train_loss"
+            },
+            {
+              "name": "val_loss"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....append",
+              "line": 70
+            },
+            {
+              "name": "pattern_risks.items",
+              "line": 73
+            },
+            {
+              "name": "pattern_accuracies.items",
+              "line": 79
+            },
+            {
+              "name": "weight_adjustments.items",
+              "line": 85
+            },
+            {
+              "name": "....append",
+              "line": 91
+            },
+            {
+              "name": "....append",
+              "line": 94
+            },
+            {
+              "name": "....append",
+              "line": 95
+            },
+            {
+              "name": "....append",
+              "line": 96
+            },
+            {
+              "name": "....append",
+              "line": 97
+            },
+            {
+              "name": "logger.info",
+              "line": 100
+            },
+            {
+              "name": "logger.info",
+              "line": 101
+            },
+            {
+              "name": "pattern_risks.keys",
+              "line": 104
+            },
+            {
+              "name": "risk_acc_ratios.items",
+              "line": 116
+            },
+            {
+              "name": "max",
+              "line": 69
+            },
+            {
+              "name": "....append",
+              "line": 76
+            },
+            {
+              "name": "....append",
+              "line": 82
+            },
+            {
+              "name": "....append",
+              "line": 88
+            },
+            {
+              "name": "....append",
+              "line": 119
+            },
+            {
+              "name": "logger.info",
+              "line": 110
+            },
+            {
+              "name": "max",
+              "line": 108
+            }
+          ],
+          "docstring": "Update all metrics for the current epoch.",
+          "code_snippet": "        }\n        \n    def update(self, epoch, train_acc, test_acc, pattern_risks, pattern_accuracies, weight_adjustments, learning_rate, train_loss, val_loss):\n        \"\"\"Update all metrics for the current epoch.\"\"\"\n        \n        # Calculate train/test ratio\n        train_test_ratio = train_acc / max(test_acc, 0.1)\n        self.metrics['train_test_ratios'].append(train_test_ratio)\n        \n        # Store pattern risks\n        for pattern_type, risk in pattern_risks.items():\n            if pattern_type not in self.metrics['risk_levels']:\n                self.metrics['risk_levels'][pattern_type] = []\n            self.metrics['risk_levels'][pattern_type].append(risk)\n        \n        # Store pattern accuracies\n        for pattern_type, accuracy in pattern_accuracies.items():\n            if pattern_type not in self.metrics['pattern_accuracies']:\n                self.metrics['pattern_accuracies'][pattern_type] = []\n            self.metrics['pattern_accuracies'][pattern_type].append(accuracy)\n        \n        # Store weight adjustments\n        for pattern_type, weight in weight_adjustments.items():\n            if pattern_type not in self.metrics['weight_adjustments']:\n                self.metrics['weight_adjustments'][pattern_type] = []\n            self.metrics['weight_adjustments'][pattern_type].append(weight)\n        \n        # Store learning rate\n        self.metrics['learning_rates'].append(learning_rate)\n        \n        # Store accuracy and loss values\n        self.metrics['accuracy_values']['train'].append(train_acc)\n        self.metrics['accuracy_values']['val'].append(test_acc)\n        self.metrics['loss_values']['train'].append(train_loss)\n        self.metrics['loss_values']['val'].append(val_loss)\n        \n        # Calculate and log risk/accuracy ratios\n        logger.info(f\"Epoch {epoch+1} Metrics:\")\n        logger.info(f\"  Train/Test Ratio: {train_test_ratio:.3f}\")\n        \n        risk_acc_ratios = {}\n        for pattern_type in pattern_risks.keys():\n            if pattern_type in pattern_accuracies:\n                risk = pattern_risks[pattern_type]\n                accuracy = pattern_accuracies[pattern_type]\n                ratio = risk / max(accuracy, 0.1)\n                risk_acc_ratios[pattern_type] = ratio\n                logger.info(f\"  {pattern_type} Risk/Accuracy Ratio: {ratio:.3f}\")\n        \n        # Store risk/accuracy ratios\n        if 'risk_accuracy_ratios' not in self.metrics:\n            self.metrics['risk_accuracy_ratios'] = {}\n        \n        for pattern_type, ratio in risk_acc_ratios.items():\n            if pattern_type not in self.metrics['risk_accuracy_ratios']:\n                self.metrics['risk_accuracy_ratios'][pattern_type] = []\n            self.metrics['risk_accuracy_ratios'][pattern_type].append(ratio)\n    \n    def save(self, output_path):\n        \"\"\"Save collected metrics to a JSON file.\"\"\"\n        with open(output_path, 'w') as f:"
+        },
+        "save": {
+          "start_line": 121,
+          "end_line": 127,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "output_path"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 125
+            },
+            {
+              "name": "open",
+              "line": 123
+            },
+            {
+              "name": "json.dump",
+              "line": 124
+            }
+          ],
+          "docstring": "Save collected metrics to a JSON file.",
+          "code_snippet": "            self.metrics['risk_accuracy_ratios'][pattern_type].append(ratio)\n    \n    def save(self, output_path):\n        \"\"\"Save collected metrics to a JSON file.\"\"\"\n        with open(output_path, 'w') as f:\n            json.dump(self.metrics, f, indent=2)\n        logger.info(f\"Baseline metrics saved to: {output_path}\")\n        \n    def visualize(self, output_path):\n        \"\"\"Create comprehensive visualizations of collected metrics.\"\"\"\n        epochs = range(1, len(self.metrics['train_test_ratios']) + 1)"
+        },
+        "visualize": {
+          "start_line": 127,
+          "end_line": 207,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "output_path"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "range",
+              "line": 129
+            },
+            {
+              "name": "plt.figure",
+              "line": 131
+            },
+            {
+              "name": "plt.subplot",
+              "line": 134
+            },
+            {
+              "name": "plt.plot",
+              "line": 135
+            },
+            {
+              "name": "plt.axhline",
+              "line": 136
+            },
+            {
+              "name": "plt.title",
+              "line": 137
+            },
+            {
+              "name": "plt.xlabel",
+              "line": 138
+            },
+            {
+              "name": "plt.ylabel",
+              "line": 139
+            },
+            {
+              "name": "plt.grid",
+              "line": 140
+            },
+            {
+              "name": "plt.subplot",
+              "line": 143
+            },
+            {
+              "name": "....items",
+              "line": 144
+            },
+            {
+              "name": "plt.axhline",
+              "line": 146
+            },
+            {
+              "name": "plt.title",
+              "line": 147
+            },
+            {
+              "name": "plt.xlabel",
+              "line": 148
+            },
+            {
+              "name": "plt.ylabel",
+              "line": 149
+            },
+            {
+              "name": "plt.legend",
+              "line": 150
+            },
+            {
+              "name": "plt.grid",
+              "line": 151
+            },
+            {
+              "name": "plt.subplot",
+              "line": 154
+            },
+            {
+              "name": "plt.plot",
+              "line": 155
+            },
+            {
+              "name": "plt.title",
+              "line": 156
+            },
+            {
+              "name": "plt.xlabel",
+              "line": 157
+            },
+            {
+              "name": "plt.ylabel",
+              "line": 158
+            },
+            {
+              "name": "plt.yscale",
+              "line": 159
+            },
+            {
+              "name": "plt.grid",
+              "line": 160
+            },
+            {
+              "name": "plt.subplot",
+              "line": 163
+            },
+            {
+              "name": "....items",
+              "line": 164
+            },
+            {
+              "name": "plt.axhline",
+              "line": 166
+            },
+            {
+              "name": "plt.title",
+              "line": 167
+            },
+            {
+              "name": "plt.xlabel",
+              "line": 168
+            },
+            {
+              "name": "plt.ylabel",
+              "line": 169
+            },
+            {
+              "name": "plt.legend",
+              "line": 170
+            },
+            {
+              "name": "plt.grid",
+              "line": 171
+            },
+            {
+              "name": "plt.subplot",
+              "line": 174
+            },
+            {
+              "name": "range",
+              "line": 178
+            },
+            {
+              "name": "plt.scatter",
+              "line": 185
+            },
+            {
+              "name": "plt.colorbar",
+              "line": 186
+            },
+            {
+              "name": "plt.xlabel",
+              "line": 187
+            },
+            {
+              "name": "plt.ylabel",
+              "line": 188
+            },
+            {
+              "name": "plt.title",
+              "line": 189
+            },
+            {
+              "name": "plt.grid",
+              "line": 190
+            },
+            {
+              "name": "plt.subplot",
+              "line": 193
+            },
+            {
+              "name": "plt.plot",
+              "line": 194
+            },
+            {
+              "name": "plt.plot",
+              "line": 195
+            },
+            {
+              "name": "plt.xlabel",
+              "line": 196
+            },
+            {
+              "name": "plt.ylabel",
+              "line": 197
+            },
+            {
+              "name": "plt.title",
+              "line": 198
+            },
+            {
+              "name": "plt.legend",
+              "line": 199
+            },
+            {
+              "name": "plt.grid",
+              "line": 200
+            },
+            {
+              "name": "plt.tight_layout",
+              "line": 202
+            },
+            {
+              "name": "plt.savefig",
+              "line": 203
+            },
+            {
+              "name": "plt.close",
+              "line": 204
+            },
+            {
+              "name": "logger.info",
+              "line": 205
+            },
+            {
+              "name": "plt.plot",
+              "line": 145
+            },
+            {
+              "name": "plt.plot",
+              "line": 165
+            },
+            {
+              "name": "len",
+              "line": 178
+            },
+            {
+              "name": "....values",
+              "line": 180
+            },
+            {
+              "name": "avg_risk_acc_ratios.append",
+              "line": 183
+            },
+            {
+              "name": "len",
+              "line": 129
+            },
+            {
+              "name": "len",
+              "line": 181
+            },
+            {
+              "name": "ratios.append",
+              "line": 182
+            },
+            {
+              "name": "np.mean",
+              "line": 183
+            }
+          ],
+          "docstring": "Create comprehensive visualizations of collected metrics.",
+          "code_snippet": "        logger.info(f\"Baseline metrics saved to: {output_path}\")\n        \n    def visualize(self, output_path):\n        \"\"\"Create comprehensive visualizations of collected metrics.\"\"\"\n        epochs = range(1, len(self.metrics['train_test_ratios']) + 1)\n        \n        plt.figure(figsize=(20, 15))\n        \n        # 1. Train/Test Ratio Over Time\n        plt.subplot(3, 2, 1)\n        plt.plot(epochs, self.metrics['train_test_ratios'], 'b-', linewidth=2)\n        plt.axhline(y=1.0, color='r', linestyle='--', alpha=0.5)\n        plt.title('Train/Test Accuracy Ratio Over Time')\n        plt.xlabel('Epoch')\n        plt.ylabel('Ratio')\n        plt.grid(True)\n        \n        # 2. Risk/Accuracy Ratios Per Pattern\n        plt.subplot(3, 2, 2)\n        for pattern_type, ratios in self.metrics['risk_accuracy_ratios'].items():\n            plt.plot(epochs, ratios, label=pattern_type, marker='o')\n        plt.axhline(y=1.0, color='r', linestyle='--', alpha=0.5)\n        plt.title('Risk/Accuracy Ratios by Pattern')\n        plt.xlabel('Epoch')\n        plt.ylabel('Ratio')\n        plt.legend()\n        plt.grid(True)\n        \n        # 3. Learning Rate History\n        plt.subplot(3, 2, 3)\n        plt.plot(epochs, self.metrics['learning_rates'], 'g-', linewidth=2)\n        plt.title('Learning Rate Over Time')\n        plt.xlabel('Epoch')\n        plt.ylabel('Learning Rate')\n        plt.yscale('log')\n        plt.grid(True)\n        \n        # 4. Weight Adjustments by Pattern\n        plt.subplot(3, 2, 4)\n        for pattern_type, weights in self.metrics['weight_adjustments'].items():\n            plt.plot(epochs, weights, label=pattern_type, marker='o')\n        plt.axhline(y=1.0, color='r', linestyle='--', alpha=0.5)\n        plt.title('Weight Adjustments by Pattern')\n        plt.xlabel('Epoch')\n        plt.ylabel('Weight Adjustment')\n        plt.legend()\n        plt.grid(True)\n        \n        # 5. Correlation Between Ratios\n        plt.subplot(3, 2, 5)\n        tt_ratios = self.metrics['train_test_ratios']\n        # Average risk/accuracy ratios across patterns\n        avg_risk_acc_ratios = []\n        for i in range(len(epochs)):\n            ratios = []\n            for pattern_ratios in self.metrics['risk_accuracy_ratios'].values():\n                if i < len(pattern_ratios):\n                    ratios.append(pattern_ratios[i])\n            avg_risk_acc_ratios.append(np.mean(ratios) if ratios else 0)\n        \n        plt.scatter(tt_ratios, avg_risk_acc_ratios, c=epochs, cmap='viridis')\n        plt.colorbar(label='Epoch')\n        plt.xlabel('Train/Test Ratio')\n        plt.ylabel('Average Risk/Accuracy Ratio')\n        plt.title('Correlation Between Ratios')\n        plt.grid(True)\n        \n        # 6. Training and Validation Performance\n        plt.subplot(3, 2, 6)\n        plt.plot(epochs, self.metrics['accuracy_values']['train'], 'b-', label='Train Accuracy')\n        plt.plot(epochs, self.metrics['accuracy_values']['val'], 'r-', label='Validation Accuracy')\n        plt.xlabel('Epoch')\n        plt.ylabel('Accuracy (%)')\n        plt.title('Training Progress')\n        plt.legend()\n        plt.grid(True)\n        \n        plt.tight_layout()\n        plt.savefig(output_path)\n        plt.close()\n        logger.info(f\"Baseline visualization saved to: {output_path}\")\n\n# Patch EVENaturalWeights to expose more metrics\ndef patch_eve_for_metrics():\n    \"\"\"Patch EVE optimizer to expose metrics for baseline collection.\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Collects comprehensive baseline metrics for EVE optimizer analysis."
+    }
+  },
+  "functions": {
+    "patch_eve_for_metrics": {
+      "start_line": 208,
+      "end_line": 249,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 247
+        },
+        {
+          "name": "hasattr",
+          "line": 218
+        },
+        {
+          "name": "hasattr",
+          "line": 218
+        },
+        {
+          "name": "self.pattern_tracker.pattern_stats.keys",
+          "line": 219
+        },
+        {
+          "name": "self.calculate_natural_weight_adjustment",
+          "line": 225
+        },
+        {
+          "name": "hasattr",
+          "line": 233
+        },
+        {
+          "name": "hasattr",
+          "line": 233
+        },
+        {
+          "name": "self.pattern_tracker.pattern_stats.keys",
+          "line": 234
+        },
+        {
+          "name": "self.calculate_dynamic_weight_decay",
+          "line": 240
+        }
+      ],
+      "docstring": "Patch EVE optimizer to expose metrics for baseline collection.",
+      "code_snippet": "\n# Patch EVENaturalWeights to expose more metrics\ndef patch_eve_for_metrics():\n    \"\"\"Patch EVE optimizer to expose metrics for baseline collection.\"\"\"\n    # Store original methods\n    original_step = EVENaturalWeights.step\n    \n    # Add a method to get current weight adjustments\n    def get_current_weight_adjustments(self):\n        \"\"\"Get current weight adjustments for all pattern types.\"\"\"\n        adjustments = {}\n        # Get pattern types from pattern tracker\n        if hasattr(self, 'pattern_tracker') and hasattr(self.pattern_tracker, 'pattern_stats'):\n            pattern_types = self.pattern_tracker.pattern_stats.keys()\n        else:\n            # Fallback to default pattern types\n            pattern_types = [\"structure\", \"relationship\", \"intensity\", \"dominance\", \"temporal\"]\n            \n        for pattern_type in pattern_types:\n            adjustments[pattern_type] = self.calculate_natural_weight_adjustment(pattern_type)\n        return adjustments\n    \n    # Add a method to get pattern weight decays\n    def get_pattern_weight_decays(self):\n        \"\"\"Get current weight decays for all pattern types.\"\"\"\n        decays = {}\n        # Get pattern types from pattern tracker\n        if hasattr(self, 'pattern_tracker') and hasattr(self.pattern_tracker, 'pattern_stats'):\n            pattern_types = self.pattern_tracker.pattern_stats.keys()\n        else:\n            # Fallback to default pattern types\n            pattern_types = [\"structure\", \"relationship\", \"intensity\", \"dominance\", \"temporal\"]\n            \n        for pattern_type in pattern_types:\n            decays[pattern_type] = self.calculate_dynamic_weight_decay(pattern_type)\n        return decays\n    \n    # Patch methods\n    EVENaturalWeights.get_current_weight_adjustments = get_current_weight_adjustments\n    EVENaturalWeights.get_pattern_weight_decays = get_pattern_weight_decays\n    \n    logger.info(\"EVE optimizer patched for metrics collection\")\n\n\n# Import necessary components\nimport os"
+    },
+    "main": {
+      "start_line": 259,
+      "end_line": 429,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 262
+        },
+        {
+          "name": "apply_all_patches",
+          "line": 263
+        },
+        {
+          "name": "logger.info",
+          "line": 264
+        },
+        {
+          "name": "argparse.ArgumentParser",
+          "line": 267
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 268
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 269
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 270
+        },
+        {
+          "name": "parser.parse_args",
+          "line": 271
+        },
+        {
+          "name": "patch_eve_optimizer",
+          "line": 274
+        },
+        {
+          "name": "patch_eve_for_metrics",
+          "line": 275
+        },
+        {
+          "name": "os.makedirs",
+          "line": 287
+        },
+        {
+          "name": "torch.device",
+          "line": 290
+        },
+        {
+          "name": "logger.info",
+          "line": 291
+        },
+        {
+          "name": "logger.info",
+          "line": 294
+        },
+        {
+          "name": "load_latest_pattern_map",
+          "line": 295
+        },
+        {
+          "name": "logger.info",
+          "line": 312
+        },
+        {
+          "name": "load_cifar10_data",
+          "line": 313
+        },
+        {
+          "name": "logger.info",
+          "line": 316
+        },
+        {
+          "name": "create_model",
+          "line": 317
+        },
+        {
+          "name": "model.to",
+          "line": 318
+        },
+        {
+          "name": "logger.info",
+          "line": 321
+        },
+        {
+          "name": "configure_optimizer",
+          "line": 322
+        },
+        {
+          "name": "isinstance",
+          "line": 330
+        },
+        {
+          "name": "BaselineMetricsCollector",
+          "line": 348
+        },
+        {
+          "name": "StreamlinedPatternTrainer",
+          "line": 386
+        },
+        {
+          "name": "logger.info",
+          "line": 404
+        },
+        {
+          "name": "trainer.train",
+          "line": 405
+        },
+        {
+          "name": "os.path.join",
+          "line": 413
+        },
+        {
+          "name": "os.path.join",
+          "line": 414
+        },
+        {
+          "name": "metrics_collector.save",
+          "line": 416
+        },
+        {
+          "name": "metrics_collector.visualize",
+          "line": 417
+        },
+        {
+          "name": "os.path.join",
+          "line": 420
+        },
+        {
+          "name": "logger.info",
+          "line": 424
+        },
+        {
+          "name": "logger.info",
+          "line": 425
+        },
+        {
+          "name": "logger.info",
+          "line": 426
+        },
+        {
+          "name": "logger.info",
+          "line": 427
+        },
+        {
+          "name": "....strftime",
+          "line": 279
+        },
+        {
+          "name": "os.path.isabs",
+          "line": 282
+        },
+        {
+          "name": "os.path.join",
+          "line": 284
+        },
+        {
+          "name": "optimizer.initialize_from_pattern_map",
+          "line": 331
+        },
+        {
+          "name": "hasattr",
+          "line": 334
+        },
+        {
+          "name": "hasattr",
+          "line": 360
+        },
+        {
+          "name": "optimizer.get_current_weight_adjustments",
+          "line": 368
+        },
+        {
+          "name": "metrics_collector.update",
+          "line": 371
+        },
+        {
+          "name": "open",
+          "line": 421
+        },
+        {
+          "name": "json.dump",
+          "line": 422
+        },
+        {
+          "name": "os.path.dirname",
+          "line": 284
+        },
+        {
+          "name": "args.output_dir.replace",
+          "line": 284
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 290
+        },
+        {
+          "name": "translate_pattern_map_to_standard_format",
+          "line": 301
+        },
+        {
+          "name": "logger.info",
+          "line": 303
+        },
+        {
+          "name": "hasattr",
+          "line": 335
+        },
+        {
+          "name": "optimizer.pattern_tracker.get_pattern_risks",
+          "line": 342
+        },
+        {
+          "name": "optimizer.pattern_tracker.get_current_recognition_rates",
+          "line": 343
+        },
+        {
+          "name": "logger.info",
+          "line": 344
+        },
+        {
+          "name": "logger.info",
+          "line": 345
+        },
+        {
+          "name": "isinstance",
+          "line": 353
+        },
+        {
+          "name": "optimizer.pattern_tracker.get_pattern_risks",
+          "line": 361
+        },
+        {
+          "name": "optimizer.pattern_tracker.get_current_recognition_rates",
+          "line": 362
+        },
+        {
+          "name": "nn.CrossEntropyLoss",
+          "line": 388
+        },
+        {
+          "name": "datetime.now",
+          "line": 279
+        },
+        {
+          "name": "logger.info",
+          "line": 307
+        },
+        {
+          "name": "logger.error",
+          "line": 309
+        },
+        {
+          "name": "logger.info",
+          "line": 337
+        },
+        {
+          "name": "stats.items",
+          "line": 338
+        },
+        {
+          "name": "logger.info",
+          "line": 339
+        },
+        {
+          "name": "str",
+          "line": 309
+        },
+        {
+          "name": "len",
+          "line": 337
+        },
+        {
+          "name": "stat.get",
+          "line": 339
+        }
+      ],
+      "docstring": "Run baseline metrics collection for EVE optimizer.",
+      "code_snippet": "\n\ndef main():\n    \"\"\"Run baseline metrics collection for EVE optimizer.\"\"\"\n    # Apply pattern tracking fixes first\n    logger.info(\"Applying pattern tracking fixes...\")\n    apply_all_patches()\n    logger.info(\"Pattern tracking fixes applied successfully\")\n    \n    # Parse command line arguments\n    parser = argparse.ArgumentParser(description=\"Collect baseline metrics for EVE optimizer\")\n    parser.add_argument(\"--epochs\", type=int, default=15, help=\"Number of epochs for training\")\n    parser.add_argument(\"--run-id\", type=str, default=None, help=\"Custom run identifier\")\n    parser.add_argument(\"--output-dir\", type=str, default=\"baseline_tests/results\", help=\"Output directory for metrics\")\n    args = parser.parse_args()\n    \n    # Apply patches to EVE optimizer\n    patch_eve_optimizer()\n    patch_eve_for_metrics()\n    \n    # Generate run ID if not provided\n    if args.run_id is None:\n        args.run_id = datetime.now().strftime('%Y%m%d_%H%M%S')\n    \n    # Create output directory\n    if not os.path.isabs(args.output_dir):\n        # Make path relative to the script directory if not absolute\n        output_dir = os.path.join(os.path.dirname(__file__), args.output_dir.replace('baseline_tests/', ''))\n    else:\n        output_dir = args.output_dir\n    os.makedirs(output_dir, exist_ok=True)\n    \n    # Set device\n    device = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\n    logger.info(f\"Using device: {device}\")\n    \n    # Load pattern map\n    logger.info(\"Loading pattern map...\")\n    pattern_map = load_latest_pattern_map()\n    \n    if pattern_map:\n        # Convert to standardized format\n        from isekaizen.utils.pattern_map_utils import translate_pattern_map_to_standard_format\n        try:\n            standardized_pattern_map = translate_pattern_map_to_standard_format(pattern_map)\n            pattern_map = standardized_pattern_map\n            logger.info(\"Pattern map successfully standardized\")\n            \n            # Log pattern risks after standardization\n            if 'pattern_risks' in pattern_map:\n                logger.info(f\"Standardized pattern risks: {pattern_map['pattern_risks']}\")\n        except Exception as e:\n            logger.error(f\"Error converting pattern map: {str(e)}\")\n    \n    # Load dataset\n    logger.info(\"Loading CIFAR-10 dataset...\")\n    trainset, testset = load_cifar10_data()\n    \n    # Create model\n    logger.info(\"Creating model...\")\n    model = create_model()\n    model = model.to(device)\n    \n    # Configure optimizer\n    logger.info(\"Configuring EVE optimizer...\")\n    optimizer, scheduler = configure_optimizer(\n        model, \n        optimizer_type=\"eve\",\n        optimizer_variant=\"natural\",\n        custom_params={}\n    )\n    \n    # Initialize optimizer with pattern data\n    if isinstance(optimizer, EVENaturalWeights):\n        optimizer.initialize_from_pattern_map(pattern_map)\n        \n        # Verify pattern tracking is working\n        if hasattr(optimizer, 'pattern_tracker'):\n            if hasattr(optimizer.pattern_tracker, 'pattern_stats'):\n                stats = optimizer.pattern_tracker.pattern_stats\n                logger.info(f\"Pattern tracker initialized with {len(stats)} patterns\")\n                for pattern_type, stat in stats.items():\n                    logger.info(f\"  {pattern_type}: risk={stat.get('risk', 'N/A')}\")\n            \n            # Get initial risks and accuracies\n            risks = optimizer.pattern_tracker.get_pattern_risks()\n            accuracies = optimizer.pattern_tracker.get_current_recognition_rates()\n            logger.info(f\"Initial pattern risks: {risks}\")\n            logger.info(f\"Initial pattern accuracies: {accuracies}\")\n    \n    # Create metrics collector\n    metrics_collector = BaselineMetricsCollector()\n    \n    # Custom callback to collect metrics\n    def metrics_collection_callback(epoch, history, model, optimizer):\n        \"\"\"Callback to collect comprehensive metrics.\"\"\"\n        if not isinstance(optimizer, EVENaturalWeights):\n            return False\n        \n        # Get current learning rate\n        current_lr = optimizer.param_groups[0]['lr']\n        \n        # Get pattern risks and accuracies from pattern tracker\n        if hasattr(optimizer, 'pattern_tracker'):\n            pattern_risks = optimizer.pattern_tracker.get_pattern_risks()\n            pattern_accuracies = optimizer.pattern_tracker.get_current_recognition_rates()\n        else:\n            pattern_risks = {}\n            pattern_accuracies = {}\n        \n        # Get weight adjustments\n        weight_adjustments = optimizer.get_current_weight_adjustments()\n        \n        # Update metrics collector\n        metrics_collector.update(\n            epoch=epoch,\n            train_acc=history['train_acc'][-1] if history['train_acc'] else 0,\n            test_acc=history['val_acc'][-1] if history['val_acc'] else 0,\n            pattern_risks=pattern_risks,\n            pattern_accuracies=pattern_accuracies,\n            weight_adjustments=weight_adjustments,\n            learning_rate=current_lr,\n            train_loss=history['train_loss'][-1] if history['train_loss'] else 0,\n            val_loss=history['val_loss'][-1] if history['val_loss'] else 0\n        )\n        \n        return False  # Continue training\n    \n    # Create trainer\n    trainer = StreamlinedPatternTrainer(\n        model=model,\n        criterion=nn.CrossEntropyLoss(),\n        optimizer_class=optimizer.__class__,\n        optimizer=optimizer,\n        scheduler=scheduler,\n        device=device,\n        pattern_map=pattern_map,\n        val_dataset=testset,\n        batch_optimizer_class=EnhancedPatternResponsiveOptimizer,\n        batch_optimizer_kwargs={\n            \"pattern_map\": pattern_map,\n            \"run_diagnostics\": True,\n            \"total_epochs\": args.epochs\n        }\n    )\n    \n    # Train the model with metrics collection\n    logger.info(\"Starting baseline metrics collection...\")\n    history = trainer.train(\n        train_dataset=trainset,\n        val_dataset=testset,\n        epochs=args.epochs,\n        callbacks=[metrics_collection_callback]\n    )\n    \n    # Save metrics and visualizations\n    metrics_path = os.path.join(output_dir, f\"baseline_metrics_{args.run_id}.json\")\n    visualization_path = os.path.join(output_dir, f\"baseline_visualization_{args.run_id}.png\")\n    \n    metrics_collector.save(metrics_path)\n    metrics_collector.visualize(visualization_path)\n    \n    # Save training history\n    history_path = os.path.join(output_dir, f\"training_history_{args.run_id}.json\")\n    with open(history_path, 'w') as f:\n        json.dump(history, f, indent=2)\n    \n    logger.info(\"Baseline metrics collection completed successfully\")\n    logger.info(f\"Metrics saved to: {metrics_path}\")\n    logger.info(f\"Visualization saved to: {visualization_path}\")\n    logger.info(f\"Training history saved to: {history_path}\")\n\n\nif __name__ == \"__main__\":\n    try:"
+    }
+  },
+  "constants": {}
+}

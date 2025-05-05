@@ -1,0 +1,264 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\research\\model_swapping\\model_fingerprinting.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 13
+    },
+    {
+      "name": "json",
+      "line": 14
+    },
+    {
+      "name": "os",
+      "line": 15
+    },
+    {
+      "name": "logging",
+      "line": 16
+    },
+    {
+      "name": "numpy",
+      "line": 17
+    },
+    {
+      "name": "collections.OrderedDict",
+      "line": 18
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "save_model_fingerprint": {
+      "start_line": 23,
+      "end_line": 90,
+      "parameters": [
+        {
+          "name": "model"
+        },
+        {
+          "name": "fingerprint_path"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "model.named_modules",
+          "line": 46
+        },
+        {
+          "name": "logger.info",
+          "line": 83
+        },
+        {
+          "name": "isinstance",
+          "line": 47
+        },
+        {
+          "name": "open",
+          "line": 80
+        },
+        {
+          "name": "json.dump",
+          "line": 81
+        },
+        {
+          "name": "logger.error",
+          "line": 87
+        },
+        {
+          "name": "....append",
+          "line": 68
+        },
+        {
+          "name": "str",
+          "line": 74
+        },
+        {
+          "name": "hasattr",
+          "line": 54
+        },
+        {
+          "name": "list",
+          "line": 55
+        },
+        {
+          "name": "torch.datetime.now",
+          "line": 74
+        },
+        {
+          "name": "torch.no_grad",
+          "line": 58
+        },
+        {
+          "name": "....numpy",
+          "line": 59
+        },
+        {
+          "name": "str",
+          "line": 87
+        },
+        {
+          "name": "float",
+          "line": 61
+        },
+        {
+          "name": "float",
+          "line": 62
+        },
+        {
+          "name": "float",
+          "line": 63
+        },
+        {
+          "name": "float",
+          "line": 64
+        },
+        {
+          "name": "float",
+          "line": 65
+        },
+        {
+          "name": "....cpu",
+          "line": 59
+        },
+        {
+          "name": "np.mean",
+          "line": 61
+        },
+        {
+          "name": "np.std",
+          "line": 62
+        },
+        {
+          "name": "np.min",
+          "line": 63
+        },
+        {
+          "name": "np.max",
+          "line": 64
+        },
+        {
+          "name": "np.linalg.norm",
+          "line": 65
+        },
+        {
+          "name": "module.weight.detach",
+          "line": 59
+        }
+      ],
+      "docstring": "\n    Save a model fingerprint to disk.\n    \n    A model fingerprint is a JSON representation of key model characteristics,\n    including layer structure, weight statistics, and activation patterns.\n    This is used for future research on transferring model characteristics.\n    \n    Args:\n        model (torch.nn.Module): Model to fingerprint\n        fingerprint_path (str): Path to save the fingerprint JSON\n        \n    Returns:\n        bool: True if fingerprint was saved successfully, False otherwise\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef save_model_fingerprint(model, fingerprint_path):\n    \"\"\"\n    Save a model fingerprint to disk.\n    \n    A model fingerprint is a JSON representation of key model characteristics,\n    including layer structure, weight statistics, and activation patterns.\n    This is used for future research on transferring model characteristics.\n    \n    Args:\n        model (torch.nn.Module): Model to fingerprint\n        fingerprint_path (str): Path to save the fingerprint JSON\n        \n    Returns:\n        bool: True if fingerprint was saved successfully, False otherwise\n    \"\"\"\n    try:\n        # Extract model architecture information\n        architecture_info = {\n            'type': model.__class__.__name__,\n            'layers': []\n        }\n        \n        # Extract layer information\n        for name, module in model.named_modules():\n            if isinstance(module, (torch.nn.Conv2d, torch.nn.Linear, torch.nn.BatchNorm2d)):\n                layer_info = {\n                    'name': name,\n                    'type': module.__class__.__name__,\n                }\n                \n                # Add shape information for layers with parameters\n                if hasattr(module, 'weight') and module.weight is not None:\n                    layer_info['weight_shape'] = list(module.weight.shape)\n                    \n                    # Calculate weight statistics\n                    with torch.no_grad():\n                        weights = module.weight.detach().cpu().numpy()\n                        layer_info['weight_stats'] = {\n                            'mean': float(np.mean(weights)),\n                            'std': float(np.std(weights)),\n                            'min': float(np.min(weights)),\n                            'max': float(np.max(weights)),\n                            'l2_norm': float(np.linalg.norm(weights))\n                        }\n                \n                architecture_info['layers'].append(layer_info)\n        \n        # Create the fingerprint\n        fingerprint = {\n            'architecture': architecture_info,\n            'metadata': {\n                'date_created': str(torch.datetime.now()),\n                'framework_version': 'isekaiZen Research 0.1'\n            }\n        }\n        \n        # Save to JSON file\n        with open(fingerprint_path, 'w') as f:\n            json.dump(fingerprint, f, indent=2)\n            \n        logger.info(f\"Successfully saved model fingerprint to {fingerprint_path}\")\n        return True\n        \n    except Exception as e:\n        logger.error(f\"Error saving model fingerprint: {str(e)}\")\n        return False\n\ndef load_model_fingerprint(fingerprint_path):\n    \"\"\"\n    Load a model fingerprint from disk."
+    },
+    "load_model_fingerprint": {
+      "start_line": 90,
+      "end_line": 115,
+      "parameters": [
+        {
+          "name": "fingerprint_path"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 108
+        },
+        {
+          "name": "os.path.exists",
+          "line": 101
+        },
+        {
+          "name": "logger.error",
+          "line": 102
+        },
+        {
+          "name": "open",
+          "line": 105
+        },
+        {
+          "name": "json.load",
+          "line": 106
+        },
+        {
+          "name": "logger.error",
+          "line": 112
+        },
+        {
+          "name": "str",
+          "line": 112
+        }
+      ],
+      "docstring": "\n    Load a model fingerprint from disk.\n    \n    Args:\n        fingerprint_path (str): Path to the fingerprint JSON file\n        \n    Returns:\n        dict: The model fingerprint or None if loading failed\n    ",
+      "code_snippet": "        return False\n\ndef load_model_fingerprint(fingerprint_path):\n    \"\"\"\n    Load a model fingerprint from disk.\n    \n    Args:\n        fingerprint_path (str): Path to the fingerprint JSON file\n        \n    Returns:\n        dict: The model fingerprint or None if loading failed\n    \"\"\"\n    try:\n        if not os.path.exists(fingerprint_path):\n            logger.error(f\"Fingerprint file not found: {fingerprint_path}\")\n            return None\n            \n        with open(fingerprint_path, 'r') as f:\n            fingerprint = json.load(f)\n            \n        logger.info(f\"Successfully loaded model fingerprint from {fingerprint_path}\")\n        return fingerprint\n        \n    except Exception as e:\n        logger.error(f\"Error loading model fingerprint: {str(e)}\")\n        return None\n\ndef apply_fingerprint_to_model(target_model, fingerprint, adaptation_strength=0.5):\n    \"\"\"\n    Apply a model fingerprint to a target model."
+    },
+    "apply_fingerprint_to_model": {
+      "start_line": 115,
+      "end_line": 179,
+      "parameters": [
+        {
+          "name": "target_model"
+        },
+        {
+          "name": "fingerprint"
+        },
+        {
+          "name": "adaptation_strength"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.warning",
+          "line": 140
+        },
+        {
+          "name": "logger.info",
+          "line": 141
+        },
+        {
+          "name": "target_model.named_modules",
+          "line": 149
+        },
+        {
+          "name": "logger.info",
+          "line": 171
+        },
+        {
+          "name": "logger.error",
+          "line": 133
+        },
+        {
+          "name": "isinstance",
+          "line": 150
+        },
+        {
+          "name": "logger.error",
+          "line": 176
+        },
+        {
+          "name": "hasattr",
+          "line": 151
+        },
+        {
+          "name": "....append",
+          "line": 152
+        },
+        {
+          "name": "len",
+          "line": 171
+        },
+        {
+          "name": "str",
+          "line": 176
+        },
+        {
+          "name": "list",
+          "line": 155
+        }
+      ],
+      "docstring": "\n    Apply a model fingerprint to a target model.\n    \n    This experimental function attempts to transfer characteristics from a\n    fingerprinted model to another model. This is a research feature for\n    exploring model characteristic transfer.\n    \n    Args:\n        target_model (torch.nn.Module): Model to apply the fingerprint to\n        fingerprint (dict): Model fingerprint to apply\n        adaptation_strength (float): Strength of the adaptation (0.0-1.0)\n        \n    Returns:\n        bool: True if fingerprint was applied successfully, False otherwise\n    ",
+      "code_snippet": "        return None\n\ndef apply_fingerprint_to_model(target_model, fingerprint, adaptation_strength=0.5):\n    \"\"\"\n    Apply a model fingerprint to a target model.\n    \n    This experimental function attempts to transfer characteristics from a\n    fingerprinted model to another model. This is a research feature for\n    exploring model characteristic transfer.\n    \n    Args:\n        target_model (torch.nn.Module): Model to apply the fingerprint to\n        fingerprint (dict): Model fingerprint to apply\n        adaptation_strength (float): Strength of the adaptation (0.0-1.0)\n        \n    Returns:\n        bool: True if fingerprint was applied successfully, False otherwise\n    \"\"\"\n    try:\n        if fingerprint is None:\n            logger.error(\"Cannot apply None fingerprint\")\n            return False\n            \n        # This is a placeholder for future research\n        # The actual implementation would involve sophisticated techniques\n        # for transferring characteristics between models\n        \n        logger.warning(\"Fingerprint application is an experimental feature and not fully implemented\")\n        logger.info(f\"Would apply fingerprint with adaptation strength {adaptation_strength}\")\n        \n        # Extract target model information for comparison\n        target_info = {\n            'type': target_model.__class__.__name__,\n            'layers': []\n        }\n        \n        for name, module in target_model.named_modules():\n            if isinstance(module, (torch.nn.Conv2d, torch.nn.Linear, torch.nn.BatchNorm2d)):\n                if hasattr(module, 'weight') and module.weight is not None:\n                    target_info['layers'].append({\n                        'name': name,\n                        'type': module.__class__.__name__,\n                        'weight_shape': list(module.weight.shape)\n                    })\n        \n        # Count compatible layers for information purposes\n        compatible_count = 0\n        source_layers = fingerprint['architecture']['layers']\n        \n        for target_layer in target_info['layers']:\n            for source_layer in source_layers:\n                if (target_layer['type'] == source_layer['type'] and \n                    'weight_shape' in target_layer and \n                    'weight_shape' in source_layer and\n                    target_layer['weight_shape'] == source_layer['weight_shape']):\n                    compatible_count += 1\n                    break\n        \n        logger.info(f\"Found {compatible_count}/{len(target_info['layers'])} compatible layers\")\n        \n        return True\n        \n    except Exception as e:\n        logger.error(f\"Error applying fingerprint: {str(e)}\")\n        return False"
+    }
+  },
+  "constants": {}
+}

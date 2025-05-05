@@ -1,0 +1,145 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\optimizers\\static.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 7
+    },
+    {
+      "name": "logging",
+      "line": 8
+    },
+    {
+      "name": "typing.Union",
+      "line": 9
+    },
+    {
+      "name": "typing.Optional",
+      "line": 9
+    },
+    {
+      "name": "typing.Dict",
+      "line": 9
+    },
+    {
+      "name": "typing.List",
+      "line": 9
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 9
+    },
+    {
+      "name": "typing.Any",
+      "line": 9
+    },
+    {
+      "name": "core.optimizers.BatchSizeSelector",
+      "line": 10
+    }
+  ],
+  "classes": {
+    "StaticBatchSelector": {
+      "start_line": 14,
+      "end_line": 66,
+      "methods": {
+        "__init__": {
+          "start_line": 21,
+          "end_line": 46,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "min_batch",
+              "type": "int"
+            },
+            {
+              "name": "max_batch",
+              "type": "int"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 39
+            },
+            {
+              "name": "max",
+              "line": 42
+            },
+            {
+              "name": "logger.info",
+              "line": 44
+            },
+            {
+              "name": "min",
+              "line": 42
+            },
+            {
+              "name": "super",
+              "line": 39
+            }
+          ],
+          "docstring": "\n        Initialize static batch optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            batch_size: Fixed batch size to use\n            device: Target device for optimization (default: auto-detect)\n            min_batch: Minimum batch size (ignored for static optimizer)\n            max_batch: Maximum batch size (ignored for static optimizer)\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self, \n        model: torch.nn.Module, \n        batch_size: int = 64,\n        device: Optional[torch.device] = None,\n        min_batch: int = 4,\n        max_batch: int = 512,\n    ):\n        \"\"\"\n        Initialize static batch optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            batch_size: Fixed batch size to use\n            device: Target device for optimization (default: auto-detect)\n            min_batch: Minimum batch size (ignored for static optimizer)\n            max_batch: Maximum batch size (ignored for static optimizer)\n        \"\"\"\n        super().__init__(model, device, min_batch, max_batch)\n        \n        # Ensure batch size is within bounds\n        self.batch_size = max(min_batch, min(max_batch, batch_size))\n        \n        logger.info(f\"Initialized static batch optimizer with batch size: {self.batch_size}\")\n    \n    def update_training_state(self, loss: float, gradient_norm: float, batch_accuracy: Optional[float] = None):\n        \"\"\"\n        Update training state - no-op for static batch sizes."
+        },
+        "update_training_state": {
+          "start_line": 46,
+          "end_line": 57,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "loss",
+              "type": "float"
+            },
+            {
+              "name": "gradient_norm",
+              "type": "float"
+            },
+            {
+              "name": "batch_accuracy"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Update training state - no-op for static batch sizes.\n        \n        Args:\n            loss: Current loss value\n            gradient_norm: Norm of current gradients\n        ",
+          "code_snippet": "        logger.info(f\"Initialized static batch optimizer with batch size: {self.batch_size}\")\n    \n    def update_training_state(self, loss: float, gradient_norm: float, batch_accuracy: Optional[float] = None):\n        \"\"\"\n        Update training state - no-op for static batch sizes.\n        \n        Args:\n            loss: Current loss value\n            gradient_norm: Norm of current gradients\n        \"\"\"\n        # Static batch sizes don't change based on training metrics\n        self.iteration += 1\n    \n    def get_optimal_batch_size(self) -> int:\n        \"\"\"\n        Return the fixed batch size."
+        },
+        "get_optimal_batch_size": {
+          "start_line": 57,
+          "end_line": 66,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "int",
+          "calls": [],
+          "docstring": "\n        Return the fixed batch size.\n        \n        Returns:\n            Fixed batch size\n        ",
+          "code_snippet": "        self.iteration += 1\n    \n    def get_optimal_batch_size(self) -> int:\n        \"\"\"\n        Return the fixed batch size.\n        \n        Returns:\n            Fixed batch size\n        \"\"\"\n        return self.batch_size"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "BatchSizeSelector"
+      ],
+      "docstring": "\n    Static batch size selector that maintains a fixed batch size.\n    \n    This selector is useful as a baseline for comparison with dynamic approaches.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

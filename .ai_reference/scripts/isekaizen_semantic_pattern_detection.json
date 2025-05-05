@@ -1,0 +1,505 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\semantic\\pattern_detection.py",
+  "imports": [
+    {
+      "name": "numpy",
+      "line": 8
+    },
+    {
+      "name": "cv2",
+      "line": 9
+    },
+    {
+      "name": "enum.Enum",
+      "line": 10
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 11
+    },
+    {
+      "name": "typing.Dict",
+      "line": 12
+    },
+    {
+      "name": "typing.Any",
+      "line": 12
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 12
+    },
+    {
+      "name": "typing.List",
+      "line": 12
+    },
+    {
+      "name": "typing.Optional",
+      "line": 12
+    },
+    {
+      "name": "isekaizen.core.cortex.semantic_core.SemanticType",
+      "line": 16
+    },
+    {
+      "name": "isekaizen.core.cortex.semantic_core.SemanticPattern",
+      "line": 16
+    },
+    {
+      "name": "torch",
+      "line": 217
+    },
+    {
+      "name": "numpy",
+      "line": 218
+    }
+  ],
+  "classes": {
+    "SemanticType": {
+      "start_line": 19,
+      "end_line": 27,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "STRUCTURE",
+          "line": 21
+        },
+        {
+          "name": "RELATIONSHIP",
+          "line": 22
+        },
+        {
+          "name": "INTENSITY",
+          "line": 23
+        },
+        {
+          "name": "DOMINANCE",
+          "line": 24
+        },
+        {
+          "name": "TEMPORAL",
+          "line": 25
+        }
+      ],
+      "bases": [
+        "Enum"
+      ],
+      "docstring": "Semantic pattern types"
+    },
+    "SemanticPattern": {
+      "start_line": 28,
+      "end_line": 37,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "A semantic pattern with type and features"
+    }
+  },
+  "functions": {
+    "calculate_entropy": {
+      "start_line": 38,
+      "end_line": 60,
+      "parameters": [
+        {
+          "name": "values"
+        }
+      ],
+      "return_type": "float",
+      "calls": [
+        {
+          "name": "np.histogram",
+          "line": 50
+        },
+        {
+          "name": "len",
+          "line": 56
+        },
+        {
+          "name": "np.log2",
+          "line": 56
+        },
+        {
+          "name": "np.sum",
+          "line": 56
+        },
+        {
+          "name": "len",
+          "line": 56
+        },
+        {
+          "name": "np.log2",
+          "line": 56
+        }
+      ],
+      "docstring": "\n    Calculate Shannon entropy of a list of values.\n    This is a domain-agnostic complexity measure.\n    \n    Args:\n        values: List of normalized values (0-1 range)\n        \n    Returns:\n        Entropy value (0-1 range)\n    ",
+      "code_snippet": "\n\ndef calculate_entropy(values: List[float]) -> float:\n    \"\"\"\n    Calculate Shannon entropy of a list of values.\n    This is a domain-agnostic complexity measure.\n    \n    Args:\n        values: List of normalized values (0-1 range)\n        \n    Returns:\n        Entropy value (0-1 range)\n    \"\"\"\n    # Create histogram bins for entropy calculation\n    hist, _ = np.histogram(values, bins=10, range=(0, 1), density=True)\n    \n    # Filter out empty bins\n    hist = hist[hist > 0]\n    \n    # Calculate entropy\n    entropy = -np.sum(hist * np.log2(hist)) / np.log2(len(hist)) if len(hist) > 0 else 0\n    \n    return entropy\n\n\ndef calculate_centrality(features: Dict[str, Any]) -> float:\n    \"\"\""
+    },
+    "calculate_centrality": {
+      "start_line": 61,
+      "end_line": 100,
+      "parameters": [
+        {
+          "name": "features"
+        }
+      ],
+      "return_type": "float",
+      "calls": [
+        {
+          "name": "all",
+          "line": 73
+        },
+        {
+          "name": "np.sqrt",
+          "line": 78
+        },
+        {
+          "name": "min",
+          "line": 86
+        }
+      ],
+      "docstring": "\n    Calculate centrality from features.\n    This is a domain-agnostic concept though implementation varies by domain.\n    \n    Args:\n        features: Dictionary of extracted features\n        \n    Returns:\n        Centrality score (0-1 range)\n    ",
+      "code_snippet": "\n\ndef calculate_centrality(features: Dict[str, Any]) -> float:\n    \"\"\"\n    Calculate centrality from features.\n    This is a domain-agnostic concept though implementation varies by domain.\n    \n    Args:\n        features: Dictionary of extracted features\n        \n    Returns:\n        Centrality score (0-1 range)\n    \"\"\"\n    # For spatial data (images)\n    if all(k in features for k in ['center_of_mass_x', 'center_of_mass_y']):\n        # Distance from center (0,0 is top-left, 1,1 is bottom-right)\n        x = features['center_of_mass_x']\n        y = features['center_of_mass_y']\n        # Distance from center (0.5, 0.5), normalize by max possible distance\n        distance_from_center = np.sqrt((x - 0.5)**2 + (y - 0.5)**2) / 0.7071\n        # Convert to centrality (1 = center, 0 = corner)\n        return 1.0 - distance_from_center\n    \n    # For audio data (if frequency centrality is available)\n    elif 'spectral_centroid' in features:\n        # Normalize spectral centroid to 0-1 range\n        # Assuming typical range is 0-10000 Hz\n        return min(1.0, features['spectral_centroid'] / 10000.0)\n    \n    # For text data (if available)\n    elif 'importance_score' in features:\n        return features['importance_score']\n    \n    # Default fallback\n    elif 'intensity' in features:\n        # Use intensity as a proxy for centrality\n        return features['intensity']\n    \n    # No suitable feature found\n    return 0.5  # Default middle value\n\n\ndef determine_pattern_type(features: Dict[str, Any]) -> Tuple[SemanticType, float]:\n    \"\"\""
+    },
+    "determine_pattern_type": {
+      "start_line": 101,
+      "end_line": 149,
+      "parameters": [
+        {
+          "name": "features"
+        }
+      ],
+      "return_type": "complex_type",
+      "calls": [
+        {
+          "name": "features.get",
+          "line": 113
+        },
+        {
+          "name": "features.get",
+          "line": 114
+        },
+        {
+          "name": "features.get",
+          "line": 115
+        },
+        {
+          "name": "calculate_centrality",
+          "line": 118
+        },
+        {
+          "name": "features.get",
+          "line": 127
+        },
+        {
+          "name": "sum",
+          "line": 141
+        },
+        {
+          "name": "max",
+          "line": 139
+        },
+        {
+          "name": "pattern_scores.values",
+          "line": 141
+        },
+        {
+          "name": "min",
+          "line": 145
+        },
+        {
+          "name": "pattern_scores.items",
+          "line": 139
+        }
+      ],
+      "docstring": "\n    Determine pattern type using a balanced scoring approach\n    that works across domains.\n    \n    Args:\n        features: Dictionary of extracted features\n        \n    Returns:\n        Tuple of (pattern_type, confidence)\n    ",
+      "code_snippet": "\n\ndef determine_pattern_type(features: Dict[str, Any]) -> Tuple[SemanticType, float]:\n    \"\"\"\n    Determine pattern type using a balanced scoring approach\n    that works across domains.\n    \n    Args:\n        features: Dictionary of extracted features\n        \n    Returns:\n        Tuple of (pattern_type, confidence)\n    \"\"\"\n    # Extract core features (these concepts apply across domains)\n    edge_density = features.get('edge_density', 0.0)\n    texture_complexity = features.get('texture_complexity', 0.0)\n    contrast = features.get('contrast', 0.0)\n    \n    # Calculate centrality (a domain-agnostic concept)\n    centrality = calculate_centrality(features)\n    \n    # Calculate scores for each pattern type - domain-agnostic weightings\n    structure_score = edge_density * 2.0\n    relationship_score = texture_complexity * 3.0\n    intensity_score = contrast * 2.0\n    dominance_score = centrality * 1.5\n    \n    # Temporal pattern is less common in static data - low default score\n    temporal_score = features.get('temporal_score', 0.1)\n    \n    # Find highest scoring pattern type\n    pattern_scores = {\n        SemanticType.STRUCTURE: structure_score,\n        SemanticType.RELATIONSHIP: relationship_score,\n        SemanticType.INTENSITY: intensity_score,\n        SemanticType.DOMINANCE: dominance_score,\n        SemanticType.TEMPORAL: temporal_score\n    }\n    \n    # Determine winner and calculate confidence\n    pattern_type = max(pattern_scores.items(), key=lambda x: x[1])[0]\n    winning_score = pattern_scores[pattern_type]\n    total_score = sum(pattern_scores.values())\n    \n    # Confidence based on how much this pattern dominates others\n    # Scale factor of 0.5 ensures reasonable confidence values\n    confidence = min(0.95, winning_score / (total_score * 0.5)) if total_score > 0 else 0.5\n    \n    return pattern_type, confidence\n\n\ndef calculate_sample_complexity(features: Dict[str, Any]) -> float:\n    \"\"\""
+    },
+    "calculate_sample_complexity": {
+      "start_line": 150,
+      "end_line": 203,
+      "parameters": [
+        {
+          "name": "features"
+        }
+      ],
+      "return_type": "float",
+      "calls": [
+        {
+          "name": "min",
+          "line": 201
+        },
+        {
+          "name": "min",
+          "line": 165
+        },
+        {
+          "name": "max",
+          "line": 166
+        },
+        {
+          "name": "len",
+          "line": 177
+        },
+        {
+          "name": "np.var",
+          "line": 178
+        },
+        {
+          "name": "min",
+          "line": 180
+        },
+        {
+          "name": "max",
+          "line": 201
+        },
+        {
+          "name": "features.items",
+          "line": 161
+        },
+        {
+          "name": "calculate_entropy",
+          "line": 170
+        },
+        {
+          "name": "isinstance",
+          "line": 162
+        }
+      ],
+      "docstring": "\n    Calculate sample complexity using domain-agnostic principles.\n    \n    Args:\n        features: Dictionary of extracted features\n        \n    Returns:\n        Difficulty score from 0.1 to 4.9\n    ",
+      "code_snippet": "\n\ndef calculate_sample_complexity(features: Dict[str, Any]) -> float:\n    \"\"\"\n    Calculate sample complexity using domain-agnostic principles.\n    \n    Args:\n        features: Dictionary of extracted features\n        \n    Returns:\n        Difficulty score from 0.1 to 4.9\n    \"\"\"\n    # Calculate information entropy (works across domains)\n    feature_values = [v for k, v in features.items() \n                    if isinstance(v, (int, float)) and k not in ['confidence']]\n    \n    if feature_values:\n        feature_min = min(feature_values)\n        feature_max = max(feature_values)\n        if feature_max > feature_min:\n            normalized_values = [(v - feature_min) / (feature_max - feature_min) \n                               for v in feature_values]\n            entropy = calculate_entropy(normalized_values)\n        else:\n            entropy = 0.5  # Default for constant features\n    else:\n        entropy = 0.5  # Default\n    \n    # Calculate feature variance (higher variance = more complex)\n    if len(feature_values) > 1:\n        variance = np.var(feature_values)\n        # Scale variance to a reasonable range (0-1)\n        normalized_variance = min(1.0, variance * 10.0) \n    else:\n        normalized_variance = 0.5  # Default\n    \n    # Calculate structural complexity based on available features\n    if 'edge_density' in features and 'texture_complexity' in features:\n        structural_complexity = (features['edge_density'] + features['texture_complexity']) / 2.0\n    elif 'edge_density' in features:\n        structural_complexity = features['edge_density']\n    elif 'texture_complexity' in features:\n        structural_complexity = features['texture_complexity']\n    else:\n        structural_complexity = 0.5  # Default\n    \n    # Combine metrics (weights can be adjusted)\n    complexity = (\n        entropy * 0.4 +\n        normalized_variance * 0.3 +\n        structural_complexity * 0.3\n    ) * 5.0  # Scale to 0-5 range\n    \n    return min(4.9, max(0.1, complexity))  # Ensure range between 0.1 and 4.9\n\n\ndef extract_visual_patterns(image, idx, device=None):\n    \"\"\""
+    },
+    "extract_visual_patterns": {
+      "start_line": 204,
+      "end_line": 319,
+      "parameters": [
+        {
+          "name": "image"
+        },
+        {
+          "name": "idx"
+        },
+        {
+          "name": "device"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "isinstance",
+          "line": 221
+        },
+        {
+          "name": "np.mean",
+          "line": 239
+        },
+        {
+          "name": "np.std",
+          "line": 240
+        },
+        {
+          "name": "float",
+          "line": 242
+        },
+        {
+          "name": "float",
+          "line": 243
+        },
+        {
+          "name": "float",
+          "line": 244
+        },
+        {
+          "name": "float",
+          "line": 245
+        },
+        {
+          "name": "float",
+          "line": 246
+        },
+        {
+          "name": "float",
+          "line": 247
+        },
+        {
+          "name": "np.mean",
+          "line": 250
+        },
+        {
+          "name": "float",
+          "line": 251
+        },
+        {
+          "name": "np.mean",
+          "line": 254
+        },
+        {
+          "name": "float",
+          "line": 255
+        },
+        {
+          "name": "cv2.Sobel",
+          "line": 267
+        },
+        {
+          "name": "cv2.Sobel",
+          "line": 268
+        },
+        {
+          "name": "cv2.cartToPolar",
+          "line": 271
+        },
+        {
+          "name": "float",
+          "line": 275
+        },
+        {
+          "name": "np.std",
+          "line": 280
+        },
+        {
+          "name": "float",
+          "line": 281
+        },
+        {
+          "name": "cv2.Canny",
+          "line": 285
+        },
+        {
+          "name": "float",
+          "line": 287
+        },
+        {
+          "name": "np.indices",
+          "line": 290
+        },
+        {
+          "name": "float",
+          "line": 299
+        },
+        {
+          "name": "float",
+          "line": 300
+        },
+        {
+          "name": "determine_pattern_type",
+          "line": 303
+        },
+        {
+          "name": "SemanticPattern",
+          "line": 306
+        },
+        {
+          "name": "torch.clamp",
+          "line": 229
+        },
+        {
+          "name": "....numpy",
+          "line": 231
+        },
+        {
+          "name": "np.array",
+          "line": 233
+        },
+        {
+          "name": "cv2.cvtColor",
+          "line": 261
+        },
+        {
+          "name": "np.mean",
+          "line": 274
+        },
+        {
+          "name": "np.histogram",
+          "line": 278
+        },
+        {
+          "name": "np.sum",
+          "line": 279
+        },
+        {
+          "name": "np.sum",
+          "line": 286
+        },
+        {
+          "name": "np.sum",
+          "line": 292
+        },
+        {
+          "name": "image.cpu",
+          "line": 224
+        },
+        {
+          "name": "....view",
+          "line": 227
+        },
+        {
+          "name": "len",
+          "line": 259
+        },
+        {
+          "name": "np.uint8",
+          "line": 261
+        },
+        {
+          "name": "np.uint8",
+          "line": 264
+        },
+        {
+          "name": "np.uint8",
+          "line": 264
+        },
+        {
+          "name": "np.sum",
+          "line": 293
+        },
+        {
+          "name": "np.sum",
+          "line": 294
+        },
+        {
+          "name": "str",
+          "line": 314
+        },
+        {
+          "name": "torch.device",
+          "line": 223
+        },
+        {
+          "name": "....view",
+          "line": 226
+        },
+        {
+          "name": "image.permute",
+          "line": 231
+        },
+        {
+          "name": "len",
+          "line": 264
+        },
+        {
+          "name": "np.sum",
+          "line": 293
+        },
+        {
+          "name": "np.sum",
+          "line": 294
+        },
+        {
+          "name": "torch.tensor",
+          "line": 227
+        },
+        {
+          "name": "np.mean",
+          "line": 264
+        },
+        {
+          "name": "torch.tensor",
+          "line": 226
+        }
+      ],
+      "docstring": "\n    Enhanced version of extract_visual_patterns_from_cifar that uses\n    the improved pattern detection algorithm.\n    \n    Args:\n        image: The image tensor or array\n        idx: Example index\n        device: Computation device (optional)\n        \n    Returns:\n        Semantic pattern\n    ",
+      "code_snippet": "\n\ndef extract_visual_patterns(image, idx, device=None):\n    \"\"\"\n    Enhanced version of extract_visual_patterns_from_cifar that uses\n    the improved pattern detection algorithm.\n    \n    Args:\n        image: The image tensor or array\n        idx: Example index\n        device: Computation device (optional)\n        \n    Returns:\n        Semantic pattern\n    \"\"\"\n    import torch\n    import numpy as np\n    \n    # Convert image to numpy for processing\n    if isinstance(image, torch.Tensor):\n        # Convert from CxHxW to HxWxC and move to CPU if needed\n        if device is not None and image.device != torch.device('cpu'):\n            image = image.cpu()\n        # Remove normalization approximately (for CIFAR-10)\n        image = image * torch.tensor([0.2023, 0.1994, 0.2010]).view(3, 1, 1) + \\\n                torch.tensor([0.4914, 0.4822, 0.4465]).view(3, 1, 1)\n        # Clamp to [0, 1] range\n        image = torch.clamp(image, 0, 1)\n        # Convert to numpy\n        image_np = image.permute(1, 2, 0).numpy()\n    else:\n        image_np = np.array(image)\n    \n    # Extract basic features\n    features = {}\n    \n    # 1. Color features\n    mean_color = np.mean(image_np, axis=(0, 1))\n    std_color = np.std(image_np, axis=(0, 1))\n    \n    features['color_mean_r'] = float(mean_color[0])\n    features['color_mean_g'] = float(mean_color[1])\n    features['color_mean_b'] = float(mean_color[2])\n    features['color_std_r'] = float(std_color[0])\n    features['color_std_g'] = float(std_color[1])\n    features['color_std_b'] = float(std_color[2])\n    \n    # Calculate color intensity\n    intensity = np.mean(mean_color)\n    features['intensity'] = float(intensity)\n    \n    # Calculate color variance (contrast)\n    contrast = np.mean(std_color)\n    features['contrast'] = float(contrast)\n    \n    # 2. Texture features\n    # Convert to grayscale\n    if len(image_np.shape) == 3 and image_np.shape[2] == 3:\n        # For RGB images\n        gray = cv2.cvtColor(np.uint8(image_np * 255), cv2.COLOR_RGB2GRAY)\n    else:\n        # For grayscale or other formats\n        gray = np.uint8(np.mean(image_np, axis=2) * 255) if len(image_np.shape) == 3 else np.uint8(image_np * 255)\n    \n    # Compute gradients\n    gx = cv2.Sobel(gray, cv2.CV_32F, 1, 0, ksize=3)\n    gy = cv2.Sobel(gray, cv2.CV_32F, 0, 1, ksize=3)\n    \n    # Compute gradient magnitude and direction\n    mag, angle = cv2.cartToPolar(gx, gy)\n    \n    # Texture complexity (mean gradient magnitude)\n    texture_complexity = np.mean(mag) / 255.0\n    features['texture_complexity'] = float(texture_complexity)\n    \n    # Texture directionality (directional variance)\n    direction_hist = np.histogram(angle, bins=8, range=(0, 2*np.pi))[0]\n    direction_hist = direction_hist / np.sum(direction_hist)\n    directionality = np.std(direction_hist)\n    features['directionality'] = float(directionality)\n    \n    # 3. Structure features\n    # Edge detection\n    edges = cv2.Canny(gray, 100, 200)\n    edge_density = np.sum(edges > 0) / (gray.shape[0] * gray.shape[1])\n    features['edge_density'] = float(edge_density)\n    \n    # 4. Calculate center of mass for centrality\n    y_indices, x_indices = np.indices(gray.shape)\n    # Normalized center of mass (0-1 range)\n    if np.sum(gray) > 0:\n        center_x = np.sum(x_indices * gray) / (np.sum(gray) * gray.shape[1])\n        center_y = np.sum(y_indices * gray) / (np.sum(gray) * gray.shape[0])\n    else:\n        center_x = 0.5\n        center_y = 0.5\n    \n    features['center_of_mass_x'] = float(center_x)\n    features['center_of_mass_y'] = float(center_y)\n    \n    # Determine pattern type using the new balanced approach\n    pattern_type, confidence = determine_pattern_type(features)\n    \n    # Create semantic pattern\n    pattern = SemanticPattern(\n        pattern_type=pattern_type,\n        features=features,\n        confidence=confidence,\n        source_domain=\"visual\",\n        context={\n            \"image_idx\": idx,\n        },\n        cortex_flow_id=str(idx)\n    )\n    \n    return pattern"
+    }
+  },
+  "constants": {}
+}

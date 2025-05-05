@@ -1,0 +1,24 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\tests\\test_batch_optimizer.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 5
+    },
+    {
+      "name": "torch",
+      "line": 6
+    },
+    {
+      "name": "isekaizen.core.optimization.batch_sizing.BatchSizeOptimizer",
+      "line": 16
+    },
+    {
+      "name": "traceback",
+      "line": 29
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

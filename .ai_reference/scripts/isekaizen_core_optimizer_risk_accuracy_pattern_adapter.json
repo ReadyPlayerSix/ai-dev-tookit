@@ -1,0 +1,327 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\optimizer\\risk_accuracy\\pattern_adapter.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "typing.Dict",
+      "line": 10
+    },
+    {
+      "name": "typing.List",
+      "line": 10
+    },
+    {
+      "name": "typing.Any",
+      "line": 10
+    },
+    {
+      "name": "typing.Optional",
+      "line": 10
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 10
+    },
+    {
+      "name": "typing.Set",
+      "line": 10
+    },
+    {
+      "name": "typing.Union",
+      "line": 10
+    },
+    {
+      "name": "isekaizen.pattern.augmentation.PatternResponsiveAugmenter",
+      "line": 12
+    },
+    {
+      "name": "pattern_risk_accuracy_tracker.PatternRiskAccuracyTracker",
+      "line": 13
+    },
+    {
+      "name": "torch.utils.data.ConcatDataset",
+      "line": 168
+    },
+    {
+      "name": "torch.utils.data.TensorDataset",
+      "line": 168
+    }
+  ],
+  "classes": {
+    "PatternRiskAccuracyAdapter": {
+      "start_line": 17,
+      "end_line": 211,
+      "methods": {
+        "__init__": {
+          "start_line": 25,
+          "end_line": 69,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "augmentation_strength"
+            },
+            {
+              "name": "adaptation_start_epoch"
+            },
+            {
+              "name": "adaptation_frequency"
+            },
+            {
+              "name": "risk_scale_factor"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "min",
+              "line": 47
+            },
+            {
+              "name": "PatternRiskAccuracyTracker",
+              "line": 52
+            },
+            {
+              "name": "PatternResponsiveAugmenter",
+              "line": 58
+            },
+            {
+              "name": "logger.info",
+              "line": 64
+            },
+            {
+              "name": "logger.info",
+              "line": 65
+            },
+            {
+              "name": "logger.info",
+              "line": 66
+            },
+            {
+              "name": "logger.info",
+              "line": 67
+            },
+            {
+              "name": "max",
+              "line": 47
+            }
+          ],
+          "docstring": "\n        Initialize the pattern adapter.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            device: Computation device\n            augmentation_strength: Strength of augmentation (0.0-1.0)\n            adaptation_start_epoch: Epoch to start adaptation\n            adaptation_frequency: How often to adapt patterns\n            risk_scale_factor: Factor to scale risk values\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self,\n        pattern_map=None,\n        device=None,\n        augmentation_strength=0.5,\n        adaptation_start_epoch=5,\n        adaptation_frequency=3,\n        risk_scale_factor=1.0\n    ):\n        \"\"\"\n        Initialize the pattern adapter.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            device: Computation device\n            augmentation_strength: Strength of augmentation (0.0-1.0)\n            adaptation_start_epoch: Epoch to start adaptation\n            adaptation_frequency: How often to adapt patterns\n            risk_scale_factor: Factor to scale risk values\n        \"\"\"\n        self.pattern_map = pattern_map or {}\n        self.device = device\n        self.augmentation_strength = min(1.0, max(0.0, augmentation_strength))\n        self.adaptation_start_epoch = adaptation_start_epoch\n        self.adaptation_frequency = adaptation_frequency\n        \n        # Initialize risk-accuracy tracker\n        self.pattern_tracker = PatternRiskAccuracyTracker(\n            pattern_map=pattern_map,\n            risk_scale_factor=risk_scale_factor\n        )\n        \n        # Initialize augmenter\n        self.augmenter = PatternResponsiveAugmenter(pattern_map, device)\n        \n        # Track adaptations\n        self.adaptation_history = []\n        self.current_epoch = 0\n        \n        logger.info(\"Pattern Risk-Accuracy Adapter initialized\")\n        logger.info(f\"Adaptation will start at epoch {adaptation_start_epoch}\")\n        logger.info(f\"Adaptation frequency: every {adaptation_frequency} epochs\")\n        logger.info(f\"Augmentation strength: {augmentation_strength}\")\n    \n    def should_adapt_dataset(self):\n        \"\"\"\n        Determine if the dataset should be adapted in the current epoch."
+        },
+        "should_adapt_dataset": {
+          "start_line": 69,
+          "end_line": 80,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Determine if the dataset should be adapted in the current epoch.\n        \n        Returns:\n            True if adaptation should occur, False otherwise\n        ",
+          "code_snippet": "        logger.info(f\"Augmentation strength: {augmentation_strength}\")\n    \n    def should_adapt_dataset(self):\n        \"\"\"\n        Determine if the dataset should be adapted in the current epoch.\n        \n        Returns:\n            True if adaptation should occur, False otherwise\n        \"\"\"\n        return (\n            self.current_epoch >= self.adaptation_start_epoch and\n            (self.current_epoch - self.adaptation_start_epoch) % self.adaptation_frequency == 0\n        )\n    \n    def update_with_batch_results(self, batch_indices, correct_mask):\n        \"\"\""
+        },
+        "update_with_batch_results": {
+          "start_line": 81,
+          "end_line": 91,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_indices"
+            },
+            {
+              "name": "correct_mask"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_tracker.update_with_batch_results",
+              "line": 89
+            }
+          ],
+          "docstring": "\n        Update pattern tracking with batch results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        ",
+          "code_snippet": "        )\n    \n    def update_with_batch_results(self, batch_indices, correct_mask):\n        \"\"\"\n        Update pattern tracking with batch results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        \"\"\"\n        self.pattern_tracker.update_with_batch_results(batch_indices, correct_mask)\n    \n    def update_with_epoch_results(self, epoch):\n        \"\"\"\n        Update pattern tracking with epoch results."
+        },
+        "update_with_epoch_results": {
+          "start_line": 91,
+          "end_line": 101,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_tracker.update_with_epoch_results",
+              "line": 99
+            }
+          ],
+          "docstring": "\n        Update pattern tracking with epoch results.\n        \n        Args:\n            epoch: Current epoch number\n        ",
+          "code_snippet": "        self.pattern_tracker.update_with_batch_results(batch_indices, correct_mask)\n    \n    def update_with_epoch_results(self, epoch):\n        \"\"\"\n        Update pattern tracking with epoch results.\n        \n        Args:\n            epoch: Current epoch number\n        \"\"\"\n        self.current_epoch = epoch\n        self.pattern_tracker.update_with_epoch_results(epoch)\n    \n    def adapt_dataset(self, dataset):\n        \"\"\"\n        Adapt the dataset based on pattern risks and accuracies."
+        },
+        "adapt_dataset": {
+          "start_line": 101,
+          "end_line": 195,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_tracker.get_pattern_risks",
+              "line": 112
+            },
+            {
+              "name": "logger.info",
+              "line": 118
+            },
+            {
+              "name": "pattern_risks.items",
+              "line": 123
+            },
+            {
+              "name": "sum",
+              "line": 131
+            },
+            {
+              "name": "pattern_risks.items",
+              "line": 136
+            },
+            {
+              "name": "logger.info",
+              "line": 148
+            },
+            {
+              "name": "examples_per_pattern.items",
+              "line": 152
+            },
+            {
+              "name": "torch.stack",
+              "line": 171
+            },
+            {
+              "name": "torch.tensor",
+              "line": 172
+            },
+            {
+              "name": "TensorDataset",
+              "line": 173
+            },
+            {
+              "name": "ConcatDataset",
+              "line": 176
+            },
+            {
+              "name": "self.adaptation_history.append",
+              "line": 186
+            },
+            {
+              "name": "logger.info",
+              "line": 115
+            },
+            {
+              "name": "pattern_risks.values",
+              "line": 131
+            },
+            {
+              "name": "int",
+              "line": 145
+            },
+            {
+              "name": "logger.info",
+              "line": 164
+            },
+            {
+              "name": "len",
+              "line": 181
+            },
+            {
+              "name": "len",
+              "line": 184
+            },
+            {
+              "name": "self.augmenter.augment_pattern",
+              "line": 154
+            },
+            {
+              "name": "augmented_examples.extend",
+              "line": 159
+            },
+            {
+              "name": "logger.info",
+              "line": 160
+            },
+            {
+              "name": "len",
+              "line": 190
+            },
+            {
+              "name": "len",
+              "line": 193
+            },
+            {
+              "name": "len",
+              "line": 141
+            },
+            {
+              "name": "len",
+              "line": 160
+            }
+          ],
+          "docstring": "\n        Adapt the dataset based on pattern risks and accuracies.\n        \n        Args:\n            dataset: Original dataset to adapt\n        \n        Returns:\n            Tuple of (adapted dataset, adaptation metrics)\n        ",
+          "code_snippet": "        self.pattern_tracker.update_with_epoch_results(epoch)\n    \n    def adapt_dataset(self, dataset):\n        \"\"\"\n        Adapt the dataset based on pattern risks and accuracies.\n        \n        Args:\n            dataset: Original dataset to adapt\n        \n        Returns:\n            Tuple of (adapted dataset, adaptation metrics)\n        \"\"\"\n        # Get pattern risks\n        pattern_risks = self.pattern_tracker.get_pattern_risks()\n        \n        if not pattern_risks:\n            logger.info(\"No pattern risk information available for adaptation\")\n            return dataset, {\"adapted\": False, \"reason\": \"no_risk_information\"}\n        \n        logger.info(f\"Adapting dataset based on pattern risks: {pattern_risks}\")\n        \n        # Calculate adaptation intensity for each pattern\n        # Higher risk (lower accuracy) = more adaptation\n        adaptation_intensities = {}\n        for pattern_type, risk in pattern_risks.items():\n            # Scale adaptation intensity from 0.1-2.0 based on risk\n            # 0.0 risk \u2192 0.1 intensity, 1.0 risk \u2192 2.0 intensity\n            intensity = 0.1 + risk * 1.9\n            adaptation_intensities[pattern_type] = intensity\n        \n        # Calculate examples to add for each pattern type\n        examples_per_pattern = {}\n        total_risk = sum(pattern_risks.values())\n        \n        # Base number of examples to add per epoch\n        base_examples = 100\n        \n        for pattern_type, risk in pattern_risks.items():\n            # Calculate proportion of total risk\n            if total_risk > 0:\n                risk_proportion = risk / total_risk\n            else:\n                risk_proportion = 1.0 / len(pattern_risks)\n            \n            # Calculate number of examples based on risk proportion and intensity\n            intensity = adaptation_intensities[pattern_type]\n            examples_to_add = int(base_examples * risk_proportion * intensity * self.augmentation_strength)\n            examples_per_pattern[pattern_type] = examples_to_add\n        \n        logger.info(f\"Examples to add per pattern: {examples_per_pattern}\")\n        \n        # Create augmented examples for each pattern type\n        augmented_examples = []\n        for pattern_type, count in examples_per_pattern.items():\n            if count > 0:\n                pattern_examples = self.augmenter.augment_pattern(\n                    dataset,\n                    pattern_type,\n                    count=count\n                )\n                augmented_examples.extend(pattern_examples)\n                logger.info(f\"Added {len(pattern_examples)} examples for pattern {pattern_type}\")\n        \n        # Return if no augmentations were created\n        if not augmented_examples:\n            logger.info(\"No augmentations were created\")\n            return dataset, {\"adapted\": False, \"reason\": \"no_augmentations_created\"}\n        \n        # Create a combined dataset\n        from torch.utils.data import ConcatDataset, TensorDataset\n        \n        # Create a dataset from the augmented examples\n        features = torch.stack([item[0] for item in augmented_examples])\n        labels = torch.tensor([item[1] for item in augmented_examples])\n        augmented_dataset = TensorDataset(features, labels)\n        \n        # Combine with original dataset\n        combined_dataset = ConcatDataset([dataset, augmented_dataset])\n        \n        # Record adaptation\n        adaptation_record = {\n            \"epoch\": self.current_epoch,\n            \"examples_added\": len(augmented_examples),\n            \"examples_per_pattern\": examples_per_pattern,\n            \"pattern_risks\": pattern_risks,\n            \"total_size\": len(combined_dataset)\n        }\n        self.adaptation_history.append(adaptation_record)\n        \n        return combined_dataset, {\n            \"adapted\": True,\n            \"examples_added\": len(augmented_examples),\n            \"examples_per_pattern\": examples_per_pattern,\n            \"pattern_risks\": pattern_risks,\n            \"total_size\": len(combined_dataset)\n        }\n    \n    def get_status(self):\n        \"\"\""
+        },
+        "get_status": {
+          "start_line": 196,
+          "end_line": 211,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_tracker.get_status",
+              "line": 209
+            }
+          ],
+          "docstring": "\n        Get comprehensive status of the adapter.\n        \n        Returns:\n            Dictionary with status information\n        ",
+          "code_snippet": "        }\n    \n    def get_status(self):\n        \"\"\"\n        Get comprehensive status of the adapter.\n        \n        Returns:\n            Dictionary with status information\n        \"\"\"\n        return {\n            'current_epoch': self.current_epoch,\n            'adaptation_start_epoch': self.adaptation_start_epoch,\n            'adaptation_frequency': self.adaptation_frequency,\n            'augmentation_strength': self.augmentation_strength,\n            'adaptation_history': self.adaptation_history,\n            'pattern_tracker_status': self.pattern_tracker.get_status()\n        }"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Pattern adapter that uses the risk-accuracy relationship to adapt datasets.\n    \n    This class provides dataset adaptation based on pattern risks derived directly\n    from accuracy measurements during training.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

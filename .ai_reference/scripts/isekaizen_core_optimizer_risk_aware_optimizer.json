@@ -1,0 +1,1621 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\optimizer\\risk_aware_optimizer.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 9
+    },
+    {
+      "name": "logging",
+      "line": 10
+    },
+    {
+      "name": "time",
+      "line": 11
+    },
+    {
+      "name": "random",
+      "line": 12
+    },
+    {
+      "name": "math",
+      "line": 13
+    },
+    {
+      "name": "numpy",
+      "line": 14
+    },
+    {
+      "name": "typing.Union",
+      "line": 15
+    },
+    {
+      "name": "typing.Optional",
+      "line": 15
+    },
+    {
+      "name": "typing.Dict",
+      "line": 15
+    },
+    {
+      "name": "typing.List",
+      "line": 15
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 15
+    },
+    {
+      "name": "typing.Any",
+      "line": 15
+    },
+    {
+      "name": "typing.Set",
+      "line": 15
+    },
+    {
+      "name": "enum.Enum",
+      "line": 16
+    },
+    {
+      "name": "base_optimizer.IsekaiZenOptimizer",
+      "line": 18
+    },
+    {
+      "name": "base_optimizer.cortex_components_available",
+      "line": 18
+    },
+    {
+      "name": "base_optimizer.PatternType",
+      "line": 18
+    },
+    {
+      "name": "base_optimizer.SkillTree",
+      "line": 18
+    },
+    {
+      "name": "isekaizen.core.cortex.semantic_core.Pattern",
+      "line": 463
+    }
+  ],
+  "classes": {
+    "RiskLevel": {
+      "start_line": 22,
+      "end_line": 29,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "LOW",
+          "line": 24
+        },
+        {
+          "name": "MEDIUM",
+          "line": 25
+        },
+        {
+          "name": "HIGH",
+          "line": 26
+        },
+        {
+          "name": "CRITICAL",
+          "line": 27
+        }
+      ],
+      "bases": [
+        "Enum"
+      ],
+      "docstring": "Risk levels for batch size selection"
+    },
+    "RiskPattern": {
+      "start_line": 29,
+      "end_line": 58,
+      "methods": {
+        "__init__": {
+          "start_line": 31,
+          "end_line": 40,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type"
+            },
+            {
+              "name": "risk_level"
+            },
+            {
+              "name": "risk_factor"
+            },
+            {
+              "name": "pattern_id"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "class RiskPattern:\n    \"\"\"Pattern with associated risk information\"\"\"\n    def __init__(self, pattern_type, risk_level, risk_factor, pattern_id):\n        self.pattern_type = pattern_type\n        self.risk_level = risk_level\n        self.risk_factor = risk_factor\n        self.pattern_id = pattern_id\n        self.times_encountered = 0\n        self.times_mitigated = 0\n        self.mitigation_success_rate = 0.0\n    \n    def update_mitigation(self, success):\n        \"\"\"Update mitigation statistics\"\"\"\n        self.times_encountered += 1"
+        },
+        "update_mitigation": {
+          "start_line": 40,
+          "end_line": 47,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "success"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "Update mitigation statistics",
+          "code_snippet": "        self.mitigation_success_rate = 0.0\n    \n    def update_mitigation(self, success):\n        \"\"\"Update mitigation statistics\"\"\"\n        self.times_encountered += 1\n        if success:\n            self.times_mitigated += 1\n        self.mitigation_success_rate = self.times_mitigated / self.times_encountered if self.times_encountered > 0 else 0.0\n    \n    def to_dict(self):\n        \"\"\"Convert to dictionary for serialization\"\"\"\n        return {"
+        },
+        "to_dict": {
+          "start_line": 47,
+          "end_line": 58,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "Convert to dictionary for serialization",
+          "code_snippet": "        self.mitigation_success_rate = self.times_mitigated / self.times_encountered if self.times_encountered > 0 else 0.0\n    \n    def to_dict(self):\n        \"\"\"Convert to dictionary for serialization\"\"\"\n        return {\n            \"pattern_type\": self.pattern_type,\n            \"risk_level\": self.risk_level,\n            \"risk_factor\": self.risk_factor,\n            \"pattern_id\": self.pattern_id,\n            \"times_encountered\": self.times_encountered,\n            \"times_mitigated\": self.times_mitigated,\n            \"mitigation_success_rate\": self.mitigation_success_rate\n        }\n\nclass PatternRecognitionTracker:\n    \"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Pattern with associated risk information"
+    },
+    "PatternRecognitionTracker": {
+      "start_line": 59,
+      "end_line": 273,
+      "methods": {
+        "__init__": {
+          "start_line": 67,
+          "end_line": 118,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "pattern_types"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_types.update",
+              "line": 92
+            },
+            {
+              "name": "self._extract_example_patterns",
+              "line": 95
+            },
+            {
+              "name": "set",
+              "line": 111
+            },
+            {
+              "name": "set",
+              "line": 112
+            },
+            {
+              "name": "set",
+              "line": 82
+            },
+            {
+              "name": "set",
+              "line": 115
+            },
+            {
+              "name": "set",
+              "line": 116
+            },
+            {
+              "name": "set",
+              "line": 86
+            },
+            {
+              "name": "base_pattern_types.copy",
+              "line": 89
+            },
+            {
+              "name": "preferences.get",
+              "line": 115
+            },
+            {
+              "name": "preferences.get",
+              "line": 116
+            },
+            {
+              "name": "preferences.get",
+              "line": 86
+            }
+          ],
+          "docstring": "\n        Initialize the pattern recognition tracker.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            pattern_types: List of pattern types to track (if None, uses all from map)\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, pattern_map=None, pattern_types=None):\n        \"\"\"\n        Initialize the pattern recognition tracker.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            pattern_types: List of pattern types to track (if None, uses all from map)\n        \"\"\"\n        self.pattern_map = pattern_map or {}\n        \n        # Core pattern domains that must always be included\n        base_pattern_types = {\"structural\", \"statistical\", \"temporal\"}\n        \n        # Initialize pattern types to track\n        if pattern_types:\n            self.pattern_types = set(pattern_types)\n        elif 'pattern_map' in self.pattern_map and 'pattern_preferences' in self.pattern_map['pattern_map']:\n            # Extract from pattern map\n            preferences = self.pattern_map['pattern_map']['pattern_preferences']\n            self.pattern_types = set(preferences.get('pattern_difficulty_ranking', []))\n        else:\n            # Use base pattern types\n            self.pattern_types = base_pattern_types.copy()\n            \n        # Ensure all base types are always included\n        self.pattern_types.update(base_pattern_types)\n        \n        # Extract example patterns from map\n        self.example_patterns = self._extract_example_patterns()\n        \n        # Initialize recognition stats\n        self.recognition_stats = {\n            pattern_type: {\n                'correct': 0,\n                'total': 0,\n                'accuracy': 0.0\n            }\n            for pattern_type in self.pattern_types\n        }\n        \n        # Track pattern recognition over time\n        self.recognition_history = []\n        \n        # Track preferred patterns\n        self.preferred_patterns = set()\n        self.challenging_patterns = set()\n        if 'pattern_map' in self.pattern_map and 'pattern_preferences' in self.pattern_map['pattern_map']:\n            preferences = self.pattern_map['pattern_map']['pattern_preferences']\n            self.preferred_patterns = set(preferences.get('preferred_patterns', []))\n            self.challenging_patterns = set(preferences.get('challenging_patterns', []))\n    \n    def _extract_example_patterns(self):\n        \"\"\"Extract example patterns from pattern map\"\"\"\n        example_patterns = {}"
+        },
+        "_extract_example_patterns": {
+          "start_line": 118,
+          "end_line": 141,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "pattern_data.items",
+              "line": 131
+            },
+            {
+              "name": "pattern_info.get",
+              "line": 132
+            },
+            {
+              "name": "....append",
+              "line": 137
+            },
+            {
+              "name": "int",
+              "line": 137
+            }
+          ],
+          "docstring": "Extract example patterns from pattern map",
+          "code_snippet": "            self.challenging_patterns = set(preferences.get('challenging_patterns', []))\n    \n    def _extract_example_patterns(self):\n        \"\"\"Extract example patterns from pattern map\"\"\"\n        example_patterns = {}\n        \n        # Only extract if pattern map is available\n        if not self.pattern_map:\n            return example_patterns\n            \n        # Extract patterns from the pattern map\n        if 'pattern_map' in self.pattern_map and 'pattern_map' in self.pattern_map['pattern_map']:\n            pattern_data = self.pattern_map['pattern_map']['pattern_map']\n            \n            # Group examples by pattern type\n            for idx_str, pattern_info in pattern_data.items():\n                pattern_type = pattern_info.get('pattern_type')\n                if pattern_type and pattern_type in self.pattern_types:\n                    if pattern_type not in example_patterns:\n                        example_patterns[pattern_type] = []\n                        \n                    example_patterns[pattern_type].append(int(idx_str))\n        \n        return example_patterns\n    \n    def update_recognition(self, example_idx, is_correct):\n        \"\"\"\n        Update pattern recognition stats for an example."
+        },
+        "update_recognition": {
+          "start_line": 141,
+          "end_line": 164,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example_idx"
+            },
+            {
+              "name": "is_correct"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._get_pattern_type",
+              "line": 150
+            }
+          ],
+          "docstring": "\n        Update pattern recognition stats for an example.\n        \n        Args:\n            example_idx: Index of the example\n            is_correct: Whether the model's prediction was correct\n        ",
+          "code_snippet": "        return example_patterns\n    \n    def update_recognition(self, example_idx, is_correct):\n        \"\"\"\n        Update pattern recognition stats for an example.\n        \n        Args:\n            example_idx: Index of the example\n            is_correct: Whether the model's prediction was correct\n        \"\"\"\n        # Get pattern type for this example\n        pattern_type = self._get_pattern_type(example_idx)\n        \n        if pattern_type and pattern_type in self.recognition_stats:\n            # Update stats for this pattern type\n            self.recognition_stats[pattern_type]['total'] += 1\n            if is_correct:\n                self.recognition_stats[pattern_type]['correct'] += 1\n                \n            # Update accuracy\n            total = self.recognition_stats[pattern_type]['total']\n            correct = self.recognition_stats[pattern_type]['correct']\n            if total > 0:\n                self.recognition_stats[pattern_type]['accuracy'] = correct / total\n    \n    def update_batch_recognition(self, example_indices, correct_mask):\n        \"\"\"\n        Update pattern recognition stats for a batch of examples."
+        },
+        "update_batch_recognition": {
+          "start_line": 164,
+          "end_line": 176,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example_indices"
+            },
+            {
+              "name": "correct_mask"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "enumerate",
+              "line": 172
+            },
+            {
+              "name": "self.update_recognition",
+              "line": 174
+            },
+            {
+              "name": "isinstance",
+              "line": 173
+            },
+            {
+              "name": "....item",
+              "line": 173
+            }
+          ],
+          "docstring": "\n        Update pattern recognition stats for a batch of examples.\n        \n        Args:\n            example_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        ",
+          "code_snippet": "                self.recognition_stats[pattern_type]['accuracy'] = correct / total\n    \n    def update_batch_recognition(self, example_indices, correct_mask):\n        \"\"\"\n        Update pattern recognition stats for a batch of examples.\n        \n        Args:\n            example_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        \"\"\"\n        for i, example_idx in enumerate(example_indices):\n            is_correct = correct_mask[i].item() if isinstance(correct_mask[i], torch.Tensor) else correct_mask[i]\n            self.update_recognition(example_idx, is_correct)\n    \n    def _get_pattern_type(self, example_idx):\n        \"\"\"\n        Get the pattern type for an example."
+        },
+        "_get_pattern_type": {
+          "start_line": 176,
+          "end_line": 201,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example_idx"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "str",
+              "line": 191
+            },
+            {
+              "name": "....get",
+              "line": 197
+            }
+          ],
+          "docstring": "\n        Get the pattern type for an example.\n        \n        Args:\n            example_idx: Index of the example\n            \n        Returns:\n            Pattern type or None if not found\n        ",
+          "code_snippet": "            self.update_recognition(example_idx, is_correct)\n    \n    def _get_pattern_type(self, example_idx):\n        \"\"\"\n        Get the pattern type for an example.\n        \n        Args:\n            example_idx: Index of the example\n            \n        Returns:\n            Pattern type or None if not found\n        \"\"\"\n        # Check if we have a pattern map\n        if not self.pattern_map:\n            return None\n            \n        # Convert to string for lookup\n        idx_str = str(example_idx)\n        \n        # Try to look up directly in pattern map\n        if 'pattern_map' in self.pattern_map and 'pattern_map' in self.pattern_map['pattern_map']:\n            pattern_data = self.pattern_map['pattern_map']['pattern_map']\n            if idx_str in pattern_data:\n                return pattern_data[idx_str].get('pattern_type')\n        \n        return None\n    \n    def get_current_recognition_rates(self):\n        \"\"\"\n        Get current recognition rates for all pattern types."
+        },
+        "get_current_recognition_rates": {
+          "start_line": 201,
+          "end_line": 213,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.recognition_stats.items",
+              "line": 210
+            }
+          ],
+          "docstring": "\n        Get current recognition rates for all pattern types.\n        \n        Returns:\n            Dictionary mapping pattern types to recognition rates\n        ",
+          "code_snippet": "        return None\n    \n    def get_current_recognition_rates(self):\n        \"\"\"\n        Get current recognition rates for all pattern types.\n        \n        Returns:\n            Dictionary mapping pattern types to recognition rates\n        \"\"\"\n        return {\n            pattern_type: stats['accuracy']\n            for pattern_type, stats in self.recognition_stats.items()\n            if stats['total'] > 0\n        }\n    \n    def get_preferred_pattern_recognition_rate(self):\n        \"\"\""
+        },
+        "get_preferred_pattern_recognition_rate": {
+          "start_line": 214,
+          "end_line": 232,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "sum",
+              "line": 230
+            },
+            {
+              "name": "len",
+              "line": 230
+            }
+          ],
+          "docstring": "\n        Get the average recognition rate for preferred patterns.\n        \n        Returns:\n            Average recognition rate or 0.0 if no preferred patterns\n        ",
+          "code_snippet": "        }\n    \n    def get_preferred_pattern_recognition_rate(self):\n        \"\"\"\n        Get the average recognition rate for preferred patterns.\n        \n        Returns:\n            Average recognition rate or 0.0 if no preferred patterns\n        \"\"\"\n        if not self.preferred_patterns:\n            return 0.0\n            \n        rates = [\n            self.recognition_stats[pattern_type]['accuracy']\n            for pattern_type in self.preferred_patterns\n            if pattern_type in self.recognition_stats and self.recognition_stats[pattern_type]['total'] > 0\n        ]\n        \n        return sum(rates) / len(rates) if rates else 0.0\n    \n    def get_challenging_pattern_recognition_rate(self):\n        \"\"\"\n        Get the average recognition rate for challenging patterns."
+        },
+        "get_challenging_pattern_recognition_rate": {
+          "start_line": 232,
+          "end_line": 250,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "sum",
+              "line": 248
+            },
+            {
+              "name": "len",
+              "line": 248
+            }
+          ],
+          "docstring": "\n        Get the average recognition rate for challenging patterns.\n        \n        Returns:\n            Average recognition rate or 0.0 if no challenging patterns\n        ",
+          "code_snippet": "        return sum(rates) / len(rates) if rates else 0.0\n    \n    def get_challenging_pattern_recognition_rate(self):\n        \"\"\"\n        Get the average recognition rate for challenging patterns.\n        \n        Returns:\n            Average recognition rate or 0.0 if no challenging patterns\n        \"\"\"\n        if not self.challenging_patterns:\n            return 0.0\n            \n        rates = [\n            self.recognition_stats[pattern_type]['accuracy']\n            for pattern_type in self.challenging_patterns\n            if pattern_type in self.recognition_stats and self.recognition_stats[pattern_type]['total'] > 0\n        ]\n        \n        return sum(rates) / len(rates) if rates else 0.0\n    \n    def snapshot_recognition_stats(self):\n        \"\"\"\n        Take a snapshot of current recognition stats for history tracking."
+        },
+        "snapshot_recognition_stats": {
+          "start_line": 250,
+          "end_line": 273,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.recognition_history.append",
+              "line": 270
+            },
+            {
+              "name": "time.time",
+              "line": 258
+            },
+            {
+              "name": "self.get_preferred_pattern_recognition_rate",
+              "line": 266
+            },
+            {
+              "name": "self.get_challenging_pattern_recognition_rate",
+              "line": 267
+            },
+            {
+              "name": "self.recognition_stats.items",
+              "line": 264
+            }
+          ],
+          "docstring": "\n        Take a snapshot of current recognition stats for history tracking.\n        \n        Returns:\n            Snapshot of current recognition stats\n        ",
+          "code_snippet": "        return sum(rates) / len(rates) if rates else 0.0\n    \n    def snapshot_recognition_stats(self):\n        \"\"\"\n        Take a snapshot of current recognition stats for history tracking.\n        \n        Returns:\n            Snapshot of current recognition stats\n        \"\"\"\n        snapshot = {\n            'timestamp': time.time(),\n            'pattern_stats': {\n                pattern_type: {\n                    'accuracy': stats['accuracy'],\n                    'total': stats['total']\n                }\n                for pattern_type, stats in self.recognition_stats.items()\n            },\n            'preferred_recognition_rate': self.get_preferred_pattern_recognition_rate(),\n            'challenging_recognition_rate': self.get_challenging_pattern_recognition_rate()\n        }\n        \n        self.recognition_history.append(snapshot)\n        return snapshot\n\nclass RiskAssessmentTracker:\n    \"\"\"\n    Tracks and manages risk assessment for patterns during training."
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Tracks the model's pattern recognition capabilities during training.\n    \n    This class monitors how well the model recognizes different pattern types,\n    allowing the batch optimizer to adjust batch sizes based on pattern recognition.\n    "
+    },
+    "RiskAssessmentTracker": {
+      "start_line": 273,
+      "end_line": 587,
+      "methods": {
+        "__init__": {
+          "start_line": 281,
+          "end_line": 322,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "rpg_manager"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._calculate_risk_thresholds",
+              "line": 297
+            },
+            {
+              "name": "self._extract_risk_patterns",
+              "line": 320
+            }
+          ],
+          "docstring": "\n        Initialize the risk assessment tracker.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            rpg_manager: RPG manager instance for risk assessment\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, pattern_map=None, rpg_manager=None):\n        \"\"\"\n        Initialize the risk assessment tracker.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            rpg_manager: RPG manager instance for risk assessment\n        \"\"\"\n        self.pattern_map = pattern_map or {}\n        self.rpg_manager = rpg_manager\n        \n        # Initialize pattern registry\n        self.pattern_registry = {}\n        self.risk_patterns = {}\n        \n        # Risk thresholds\n        self.risk_thresholds = self._calculate_risk_thresholds()\n        \n        # Risk factors by pattern type\n        self.pattern_risk_factors = {\n            \"structural\": 0.4,  # Spatial organization and relationships\n            \"statistical\": 0.6,  # Distribution and variance patterns\n            \"temporal\": 0.8      # Time-related patterns\n        }\n        \n        # Initialize risk metrics\n        self.risk_metrics = {\n            \"total_risks_identified\": 0,\n            \"risks_by_level\": {level.value: 0 for level in RiskLevel},\n            \"risks_by_pattern_type\": {},\n            \"mitigated_risks\": 0,\n            \"mitigation_success_rate\": 0.0,\n            \"average_risk_factor\": 0.0\n        }\n        \n        # Track risk assessment history\n        self.risk_history = []\n        \n        # Extract risk patterns from pattern map\n        self._extract_risk_patterns()\n    \n    def _calculate_risk_thresholds(self):\n        \"\"\"\n        Dynamically calculate risk thresholds based on model complexity."
+        },
+        "_calculate_risk_thresholds": {
+          "start_line": 322,
+          "end_line": 338,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Dynamically calculate risk thresholds based on model complexity.\n        \n        Returns:\n            Dictionary of risk thresholds by risk level\n        ",
+          "code_snippet": "        self._extract_risk_patterns()\n    \n    def _calculate_risk_thresholds(self):\n        \"\"\"\n        Dynamically calculate risk thresholds based on model complexity.\n        \n        Returns:\n            Dictionary of risk thresholds by risk level\n        \"\"\"\n        # Default thresholds for medium complexity models\n        base_threshold = 0.5\n        \n        return {\n            RiskLevel.LOW: base_threshold * 0.5,\n            RiskLevel.MEDIUM: base_threshold,\n            RiskLevel.HIGH: base_threshold * 1.5,\n            RiskLevel.CRITICAL: base_threshold * 1.8\n        }\n    \n    def _extract_risk_patterns(self):\n        \"\"\"Extract risk patterns from pattern map\"\"\""
+        },
+        "_extract_risk_patterns": {
+          "start_line": 339,
+          "end_line": 396,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 393
+            },
+            {
+              "name": "logger.info",
+              "line": 394
+            },
+            {
+              "name": "pattern_data.items",
+              "line": 350
+            },
+            {
+              "name": "pattern_info.get",
+              "line": 351
+            },
+            {
+              "name": "pattern_info.get",
+              "line": 362
+            },
+            {
+              "name": "sorted",
+              "line": 367
+            },
+            {
+              "name": "RiskPattern",
+              "line": 375
+            },
+            {
+              "name": "self.risk_thresholds.items",
+              "line": 367
+            },
+            {
+              "name": "len",
+              "line": 393
+            }
+          ],
+          "docstring": "Extract risk patterns from pattern map",
+          "code_snippet": "        }\n    \n    def _extract_risk_patterns(self):\n        \"\"\"Extract risk patterns from pattern map\"\"\"\n        # Only extract if pattern map is available\n        if not self.pattern_map:\n            return\n            \n        # Extract patterns from the pattern map\n        if 'pattern_map' in self.pattern_map and 'pattern_map' in self.pattern_map['pattern_map']:\n            pattern_data = self.pattern_map['pattern_map']['pattern_map']\n            \n            # Check each pattern for risk factors\n            for idx_str, pattern_info in pattern_data.items():\n                pattern_type = pattern_info.get('pattern_type')\n                if not pattern_type:\n                    continue\n                \n                # Get base risk factor for this pattern type\n                if pattern_type in self.pattern_risk_factors:\n                    base_risk = self.pattern_risk_factors[pattern_type]\n                else:\n                    base_risk = 0.3  # Default risk factor\n                \n                # Adjust for pattern difficulty\n                difficulty = pattern_info.get('difficulty', 1)\n                adjusted_risk = base_risk * difficulty\n                \n                # Determine risk level\n                risk_level = RiskLevel.LOW\n                for level, threshold in sorted(self.risk_thresholds.items(), \n                                           key=lambda x: x[1], reverse=True):\n                    if adjusted_risk >= threshold:\n                        risk_level = level\n                        break\n                \n                # Create risk pattern\n                pattern_id = idx_str\n                risk_pattern = RiskPattern(\n                    pattern_type=pattern_type,\n                    risk_level=risk_level,\n                    risk_factor=adjusted_risk,\n                    pattern_id=pattern_id\n                )\n                \n                # Store in registry\n                self.risk_patterns[pattern_id] = risk_pattern\n                \n                # Update metrics\n                self.risk_metrics[\"total_risks_identified\"] += 1\n                self.risk_metrics[\"risks_by_level\"][risk_level.value] += 1\n                \n                if pattern_type not in self.risk_metrics[\"risks_by_pattern_type\"]:\n                    self.risk_metrics[\"risks_by_pattern_type\"][pattern_type] = 0\n                self.risk_metrics[\"risks_by_pattern_type\"][pattern_type] += 1\n        \n        logger.info(f\"Extracted {len(self.risk_patterns)} risk patterns from pattern map\")\n        logger.info(f\"Risk distribution: {self.risk_metrics['risks_by_level']}\")\n    \n    def assess_risk(self, batch_indices, batch_size):\n        \"\"\"\n        Assess risk for a batch of examples with RPG integration."
+        },
+        "assess_risk": {
+          "start_line": 396,
+          "end_line": 493,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_indices"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "str",
+              "line": 419
+            },
+            {
+              "name": "self.rpg_manager._skill_check",
+              "line": 439
+            },
+            {
+              "name": "max",
+              "line": 485
+            },
+            {
+              "name": "batch_risk_patterns.append",
+              "line": 422
+            },
+            {
+              "name": "....append",
+              "line": 423
+            },
+            {
+              "name": "....append",
+              "line": 424
+            },
+            {
+              "name": "....append",
+              "line": 425
+            },
+            {
+              "name": "sum",
+              "line": 435
+            },
+            {
+              "name": "len",
+              "line": 435
+            },
+            {
+              "name": "self.rpg_manager.process_pattern",
+              "line": 473
+            },
+            {
+              "name": "np.array",
+              "line": 466
+            },
+            {
+              "name": "Pattern",
+              "line": 473
+            },
+            {
+              "name": "logger.warning",
+              "line": 482
+            },
+            {
+              "name": "int",
+              "line": 470
+            }
+          ],
+          "docstring": "\n        Assess risk for a batch of examples with RPG integration.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            batch_size: Current batch size\n            \n        Returns:\n            Dictionary with risk assessment results\n        ",
+          "code_snippet": "        logger.info(f\"Risk distribution: {self.risk_metrics['risks_by_level']}\")\n    \n    def assess_risk(self, batch_indices, batch_size):\n        \"\"\"\n        Assess risk for a batch of examples with RPG integration.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            batch_size: Current batch size\n            \n        Returns:\n            Dictionary with risk assessment results\n        \"\"\"\n        # Initialize risk assessment\n        risk_assessment = {\n            \"highest_risk_level\": RiskLevel.LOW,\n            \"risk_factors\": [],\n            \"recommended_batch_size\": batch_size,\n            \"risky_indices\": [],\n            \"patterns_by_risk\": {level.value: [] for level in RiskLevel}\n        }\n        \n        # Identify risk patterns in batch\n        batch_risk_patterns = []\n        for idx in batch_indices:\n            pattern_id = str(idx)\n            if pattern_id in self.risk_patterns:\n                risk_pattern = self.risk_patterns[pattern_id]\n                batch_risk_patterns.append(risk_pattern)\n                risk_assessment[\"risk_factors\"].append(risk_pattern.risk_factor)\n                risk_assessment[\"risky_indices\"].append(idx)\n                risk_assessment[\"patterns_by_risk\"][risk_pattern.risk_level.value].append(idx)\n        \n        # If no risk patterns found, return original batch size\n        if not batch_risk_patterns:\n            return risk_assessment\n        \n        # Get RPG manager stats to influence risk assessment if available\n        if self.rpg_manager:\n            # Use RPG skill check for risk assessment\n            # This aligns with the original implementation's approach\n            avg_risk = sum(p.risk_factor for p in batch_risk_patterns) / len(batch_risk_patterns)\n            avg_complexity = avg_risk * 5.0  # Scale to 0-5 complexity\n            \n            # Perform skill check\n            success = self.rpg_manager._skill_check(\n                avg_complexity,\n                SkillTree.RISK_ASSESSMENT\n            )\n            \n            # Determine risk level based on skill check and complexity\n            if success:\n                # Successfully assessed the risk\n                if avg_complexity < 2.0:\n                    risk_level = RiskLevel.LOW\n                elif avg_complexity < 3.5:\n                    risk_level = RiskLevel.MEDIUM\n                else:\n                    risk_level = RiskLevel.HIGH\n            else:\n                # Failed to assess the risk - be more cautious\n                if avg_complexity < 1.5:\n                    risk_level = RiskLevel.MEDIUM\n                else:\n                    risk_level = RiskLevel.CRITICAL\n                    \n            # Update RPG with risk pattern\n            if cortex_components_available:\n                try:\n                    from isekaizen.core.cortex.semantic_core import Pattern\n                    \n                    pattern_data = {\n                        'signature': np.array([avg_risk]),\n                        'weight': 1.0,\n                        'complexity': avg_complexity,\n                        'xp_value': avg_complexity * 10,\n                        'power_level': int(avg_complexity * 2) + 1\n                    }\n                    \n                    self.rpg_manager.process_pattern(Pattern(\n                        signature=pattern_data['signature'],\n                        weight=pattern_data['weight'],\n                        pattern_type=PatternType.RISK,\n                        complexity=pattern_data['complexity'],\n                        xp_value=pattern_data['xp_value'],\n                        power_level=pattern_data['power_level']\n                    ))\n                except Exception as e:\n                    logger.warning(f\"Failed to update RPG with risk pattern: {e}\")\n        else:\n            # Without RPG, just use the highest risk factor\n            highest_risk = max(batch_risk_patterns, key=lambda p: p.risk_factor)\n            risk_level = highest_risk.risk_level\n        \n        # Set the highest risk level\n        risk_assessment[\"highest_risk_level\"] = risk_level\n        \n        return risk_assessment\n    \n    def update_mitigation_results(self, assessment, success):\n        \"\"\"\n        Update mitigation results based on training success."
+        },
+        "update_mitigation_results": {
+          "start_line": 493,
+          "end_line": 516,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "assessment"
+            },
+            {
+              "name": "success"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "str",
+              "line": 503
+            },
+            {
+              "name": "....update_mitigation",
+              "line": 505
+            }
+          ],
+          "docstring": "\n        Update mitigation results based on training success.\n        \n        Args:\n            assessment: Risk assessment from assess_risk\n            success: Whether training was successful (e.g., loss decreased)\n        ",
+          "code_snippet": "        return risk_assessment\n    \n    def update_mitigation_results(self, assessment, success):\n        \"\"\"\n        Update mitigation results based on training success.\n        \n        Args:\n            assessment: Risk assessment from assess_risk\n            success: Whether training was successful (e.g., loss decreased)\n        \"\"\"\n        # Update risk patterns with mitigation results\n        for idx in assessment[\"risky_indices\"]:\n            pattern_id = str(idx)\n            if pattern_id in self.risk_patterns:\n                self.risk_patterns[pattern_id].update_mitigation(success)\n        \n        # Update metrics\n        if assessment[\"risky_indices\"]:\n            if success:\n                self.risk_metrics[\"mitigated_risks\"] += 1\n            \n            total_attempts = self.risk_metrics[\"total_risks_identified\"]\n            if total_attempts > 0:\n                self.risk_metrics[\"mitigation_success_rate\"] = self.risk_metrics[\"mitigated_risks\"] / total_attempts\n    \n    def get_current_risk_metrics(self):\n        \"\"\"\n        Get current risk metrics."
+        },
+        "get_current_risk_metrics": {
+          "start_line": 516,
+          "end_line": 531,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "sum",
+              "line": 525
+            },
+            {
+              "name": "len",
+              "line": 527
+            },
+            {
+              "name": "self.risk_patterns.values",
+              "line": 526
+            }
+          ],
+          "docstring": "\n        Get current risk metrics.\n        \n        Returns:\n            Dictionary with current risk metrics\n        ",
+          "code_snippet": "                self.risk_metrics[\"mitigation_success_rate\"] = self.risk_metrics[\"mitigated_risks\"] / total_attempts\n    \n    def get_current_risk_metrics(self):\n        \"\"\"\n        Get current risk metrics.\n        \n        Returns:\n            Dictionary with current risk metrics\n        \"\"\"\n        # Calculate average risk factor across all patterns\n        if self.risk_patterns:\n            self.risk_metrics[\"average_risk_factor\"] = sum(\n                pattern.risk_factor for pattern in self.risk_patterns.values()\n            ) / len(self.risk_patterns)\n        \n        return self.risk_metrics\n    \n    def snapshot_risk_metrics(self):\n        \"\"\"\n        Take a snapshot of current risk metrics for history tracking."
+        },
+        "snapshot_risk_metrics": {
+          "start_line": 531,
+          "end_line": 551,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.risk_history.append",
+              "line": 548
+            },
+            {
+              "name": "time.time",
+              "line": 539
+            },
+            {
+              "name": "....copy",
+              "line": 540
+            },
+            {
+              "name": "self.get_current_risk_metrics",
+              "line": 540
+            }
+          ],
+          "docstring": "\n        Take a snapshot of current risk metrics for history tracking.\n        \n        Returns:\n            Snapshot of current risk metrics\n        ",
+          "code_snippet": "        return self.risk_metrics\n    \n    def snapshot_risk_metrics(self):\n        \"\"\"\n        Take a snapshot of current risk metrics for history tracking.\n        \n        Returns:\n            Snapshot of current risk metrics\n        \"\"\"\n        snapshot = {\n            \"timestamp\": time.time(),\n            \"metrics\": self.get_current_risk_metrics().copy(),\n            \"rpg_level\": self.rpg_manager.level if self.rpg_manager else 1,\n            \"risk_assessment_skill\": (\n                self.rpg_manager.skills[SkillTree.RISK_ASSESSMENT] \n                if self.rpg_manager else 1\n            )\n        }\n        \n        self.risk_history.append(snapshot)\n        return snapshot\n    \n    def calculate_mitigation_adjustment(self, batch_size, risk_level):\n        \"\"\"\n        Calculate batch size adjustment for risk mitigation."
+        },
+        "calculate_mitigation_adjustment": {
+          "start_line": 551,
+          "end_line": 587,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "risk_level"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "mitigation_factors.get",
+              "line": 571
+            },
+            {
+              "name": "max",
+              "line": 584
+            },
+            {
+              "name": "min",
+              "line": 582
+            },
+            {
+              "name": "int",
+              "line": 584
+            }
+          ],
+          "docstring": "\n        Calculate batch size adjustment for risk mitigation.\n        \n        Args:\n            batch_size: Current batch size\n            risk_level: Current risk level\n            \n        Returns:\n            Adjusted batch size\n        ",
+          "code_snippet": "        return snapshot\n    \n    def calculate_mitigation_adjustment(self, batch_size, risk_level):\n        \"\"\"\n        Calculate batch size adjustment for risk mitigation.\n        \n        Args:\n            batch_size: Current batch size\n            risk_level: Current risk level\n            \n        Returns:\n            Adjusted batch size\n        \"\"\"\n        # Default mitigation strategies\n        mitigation_factors = {\n            RiskLevel.LOW: 0.95,\n            RiskLevel.MEDIUM: 0.85,\n            RiskLevel.HIGH: 0.7,\n            RiskLevel.CRITICAL: 0.5\n        }\n        \n        # Apply risk mitigation factor\n        factor = mitigation_factors.get(risk_level, 0.9)\n        \n        # Adjust factor based on batch size - be more conservative with smaller batches\n        if batch_size < 64:\n            factor = (factor + 1) / 2  # Less aggressive reduction\n        \n        # Apply RPG skill bonuses if available\n        if self.rpg_manager:\n            risk_skill = self.rpg_manager.skills[SkillTree.RISK_ASSESSMENT]\n            # Better risk assessment skill means less aggressive reductions\n            skill_bonus = risk_skill * 0.05\n            factor = min(0.95, factor + skill_bonus)\n        \n        adjusted_batch = max(4, int(batch_size * factor))\n        return adjusted_batch\n\nclass RiskAwarePatternIsekaiZen(IsekaiZenOptimizer):\n    \"\"\"\n    Risk-aware pattern IsekaiZen optimizer."
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Tracks and manages risk assessment for patterns during training.\n    \n    This class monitors, classifies, and mitigates risks associated with\n    different pattern types during the training process.\n    "
+    },
+    "RiskAwarePatternIsekaiZen": {
+      "start_line": 587,
+      "end_line": 1212,
+      "methods": {
+        "__init__": {
+          "start_line": 596,
+          "end_line": 656,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "total_epochs"
+            },
+            {
+              "name": "max_epoch_time"
+            },
+            {
+              "name": "run_diagnostics"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "exploration_rate"
+            },
+            {
+              "name": "risk_aversion"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 623
+            },
+            {
+              "name": "min",
+              "line": 635
+            },
+            {
+              "name": "PatternRecognitionTracker",
+              "line": 638
+            },
+            {
+              "name": "RiskAssessmentTracker",
+              "line": 639
+            },
+            {
+              "name": "set",
+              "line": 647
+            },
+            {
+              "name": "set",
+              "line": 648
+            },
+            {
+              "name": "logger.info",
+              "line": 651
+            },
+            {
+              "name": "logger.info",
+              "line": 652
+            },
+            {
+              "name": "logger.info",
+              "line": 653
+            },
+            {
+              "name": "logger.info",
+              "line": 654
+            },
+            {
+              "name": "max",
+              "line": 635
+            },
+            {
+              "name": "super",
+              "line": 623
+            },
+            {
+              "name": "....join",
+              "line": 653
+            }
+          ],
+          "docstring": "\n        Initialize the risk-aware pattern IsekaiZen optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            exploration_rate: Rate of random exploration\n            risk_aversion: Factor determining how cautious the optimizer is (0.0-1.0)\n            **kwargs: Additional parameters\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self, \n        model,\n        device=None,\n        total_epochs=50,\n        max_epoch_time=None,\n        run_diagnostics=True,\n        pattern_map=None,\n        exploration_rate=0.1,\n        risk_aversion=0.5,\n        **kwargs\n    ):\n        \"\"\"\n        Initialize the risk-aware pattern IsekaiZen optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            exploration_rate: Rate of random exploration\n            risk_aversion: Factor determining how cautious the optimizer is (0.0-1.0)\n            **kwargs: Additional parameters\n        \"\"\"\n        # Initialize base optimizer\n        super().__init__(\n            model=model,\n            device=device,\n            total_epochs=total_epochs,\n            max_epoch_time=max_epoch_time,\n            run_diagnostics=run_diagnostics,\n            **kwargs\n        )\n        \n        # Set risk-aware specific parameters\n        self.pattern_map = pattern_map\n        self.exploration_rate = exploration_rate\n        self.risk_aversion = min(1.0, max(0.0, risk_aversion))\n        \n        # Create pattern recognition and risk assessment trackers\n        self.pattern_recognition_tracker = PatternRecognitionTracker(pattern_map)\n        self.risk_assessment_tracker = RiskAssessmentTracker(pattern_map, self.rpg_manager)\n        \n        # Track pattern recognition and risk history\n        self.pattern_recognition_history = []\n        self.risk_assessment_history = []\n        \n        # Additional state for risk-guided optimization\n        self.current_risk_level = RiskLevel.LOW\n        self.recognizing_well = set()\n        self.recognizing_poorly = set()\n        self.pattern_batch_preferences = {}\n        \n        logger.info(\"Risk-aware pattern IsekaiZen optimizer initialized\")\n        logger.info(f\"Batch size range: {self.min_batch} - {self.max_batch}\")\n        logger.info(f\"Pattern types being tracked: {', '.join(self.pattern_recognition_tracker.pattern_types)}\")\n        logger.info(f\"Risk aversion factor: {self.risk_aversion}\")\n    \n    def update_with_pattern_recognition(self, batch_indices, correct_mask):\n        \"\"\"\n        Update pattern recognition stats based on batch results."
+        },
+        "update_with_pattern_recognition": {
+          "start_line": 656,
+          "end_line": 686,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_indices"
+            },
+            {
+              "name": "correct_mask"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_recognition_tracker.update_batch_recognition",
+              "line": 665
+            },
+            {
+              "name": "self.pattern_recognition_tracker.snapshot_recognition_stats",
+              "line": 669
+            },
+            {
+              "name": "self.pattern_recognition_history.append",
+              "line": 670
+            },
+            {
+              "name": "self.pattern_recognition_tracker.get_current_recognition_rates",
+              "line": 673
+            },
+            {
+              "name": "self._update_batch_preferences",
+              "line": 684
+            },
+            {
+              "name": "len",
+              "line": 668
+            },
+            {
+              "name": "recognition_rates.items",
+              "line": 675
+            },
+            {
+              "name": "recognition_rates.items",
+              "line": 679
+            }
+          ],
+          "docstring": "\n        Update pattern recognition stats based on batch results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        ",
+          "code_snippet": "        logger.info(f\"Risk aversion factor: {self.risk_aversion}\")\n    \n    def update_with_pattern_recognition(self, batch_indices, correct_mask):\n        \"\"\"\n        Update pattern recognition stats based on batch results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        \"\"\"\n        # Update pattern recognition tracker\n        self.pattern_recognition_tracker.update_batch_recognition(batch_indices, correct_mask)\n        \n        # Take a snapshot periodically\n        if len(self.pattern_recognition_history) % 10 == 0:\n            snapshot = self.pattern_recognition_tracker.snapshot_recognition_stats()\n            self.pattern_recognition_history.append(snapshot)\n            \n            # Update which patterns we're recognizing well/poorly\n            recognition_rates = self.pattern_recognition_tracker.get_current_recognition_rates()\n            self.recognizing_well = {\n                pattern_type for pattern_type, rate in recognition_rates.items()\n                if rate >= 0.8\n            }\n            self.recognizing_poorly = {\n                pattern_type for pattern_type, rate in recognition_rates.items()\n                if rate <= 0.5 and rate > 0.0\n            }\n            \n            # Update batch preferences based on recognition rates\n            self._update_batch_preferences(recognition_rates)\n    \n    def update_with_batch_results(self, batch_indices, batch_size, loss_decreased):\n        \"\"\"\n        Update risk assessment based on batch training results."
+        },
+        "update_with_batch_results": {
+          "start_line": 686,
+          "end_line": 709,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_indices"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "loss_decreased"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.risk_assessment_tracker.assess_risk",
+              "line": 696
+            },
+            {
+              "name": "self.risk_assessment_tracker.update_mitigation_results",
+              "line": 702
+            },
+            {
+              "name": "self.risk_assessment_tracker.snapshot_risk_metrics",
+              "line": 706
+            },
+            {
+              "name": "self.risk_assessment_history.append",
+              "line": 707
+            },
+            {
+              "name": "len",
+              "line": 705
+            }
+          ],
+          "docstring": "\n        Update risk assessment based on batch training results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            batch_size: Current batch size\n            loss_decreased: Whether the loss decreased from the previous batch\n        ",
+          "code_snippet": "            self._update_batch_preferences(recognition_rates)\n    \n    def update_with_batch_results(self, batch_indices, batch_size, loss_decreased):\n        \"\"\"\n        Update risk assessment based on batch training results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            batch_size: Current batch size\n            loss_decreased: Whether the loss decreased from the previous batch\n        \"\"\"\n        # Assess risk for this batch\n        risk_assessment = self.risk_assessment_tracker.assess_risk(batch_indices, batch_size)\n        \n        # Update risk level\n        self.current_risk_level = risk_assessment[\"highest_risk_level\"]\n        \n        # Update mitigation results\n        self.risk_assessment_tracker.update_mitigation_results(risk_assessment, loss_decreased)\n        \n        # Take a snapshot periodically\n        if len(self.risk_assessment_history) % 10 == 0:\n            snapshot = self.risk_assessment_tracker.snapshot_risk_metrics()\n            self.risk_assessment_history.append(snapshot)\n    \n    def _update_batch_preferences(self, recognition_rates):\n        \"\"\"\n        Update batch size preferences based on pattern recognition rates."
+        },
+        "_update_batch_preferences": {
+          "start_line": 709,
+          "end_line": 760,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "recognition_rates"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "recognition_rates.items",
+              "line": 721
+            },
+            {
+              "name": "len",
+              "line": 717
+            },
+            {
+              "name": "range",
+              "line": 736
+            },
+            {
+              "name": "len",
+              "line": 732
+            },
+            {
+              "name": "len",
+              "line": 736
+            },
+            {
+              "name": "....get",
+              "line": 739
+            },
+            {
+              "name": "....get",
+              "line": 740
+            },
+            {
+              "name": "str",
+              "line": 746
+            },
+            {
+              "name": "....append",
+              "line": 750
+            },
+            {
+              "name": "....get",
+              "line": 739
+            },
+            {
+              "name": "....get",
+              "line": 740
+            },
+            {
+              "name": "sum",
+              "line": 753
+            },
+            {
+              "name": "len",
+              "line": 753
+            },
+            {
+              "name": "len",
+              "line": 737
+            },
+            {
+              "name": "len",
+              "line": 737
+            }
+          ],
+          "docstring": "\n        Update batch size preferences based on pattern recognition rates.\n        \n        Args:\n            recognition_rates: Current pattern recognition rates\n        ",
+          "code_snippet": "            self.risk_assessment_history.append(snapshot)\n    \n    def _update_batch_preferences(self, recognition_rates):\n        \"\"\"\n        Update batch size preferences based on pattern recognition rates.\n        \n        Args:\n            recognition_rates: Current pattern recognition rates\n        \"\"\"\n        # Only update if we have some history\n        if len(self.batch_history) < 10:\n            return\n            \n        # Analyze batch size performance for each pattern type\n        for pattern_type, rate in recognition_rates.items():\n            if pattern_type not in self.pattern_batch_preferences:\n                self.pattern_batch_preferences[pattern_type] = {\n                    'best_batch_size': None,\n                    'best_improvement_rate': 0.0,\n                    'batch_performance': {}\n                }\n                \n            # Look at recent history to find which batch sizes improved recognition\n            # of this pattern type the most\n            prev_snapshots = self.pattern_recognition_tracker.recognition_history[-10:]\n            if len(prev_snapshots) < 2:\n                continue\n                \n            # Calculate improvement rates for different batch sizes\n            for i in range(1, len(prev_snapshots)):\n                prev_batch = self.batch_history[len(self.batch_history) - len(prev_snapshots) + i - 1]\n                \n                prev_rate = prev_snapshots[i-1]['pattern_stats'].get(pattern_type, {}).get('accuracy', 0.0)\n                curr_rate = prev_snapshots[i]['pattern_stats'].get(pattern_type, {}).get('accuracy', 0.0)\n                \n                if prev_rate > 0.0:\n                    improvement_rate = (curr_rate - prev_rate) / prev_rate\n                    \n                    # Update batch performance tracking\n                    batch_str = str(prev_batch)\n                    if batch_str not in self.pattern_batch_preferences[pattern_type]['batch_performance']:\n                        self.pattern_batch_preferences[pattern_type]['batch_performance'][batch_str] = []\n                        \n                    self.pattern_batch_preferences[pattern_type]['batch_performance'][batch_str].append(improvement_rate)\n                    \n                    # Calculate average improvement for this batch size\n                    avg_improvement = sum(self.pattern_batch_preferences[pattern_type]['batch_performance'][batch_str]) / len(self.pattern_batch_preferences[pattern_type]['batch_performance'][batch_str])\n                    \n                    # Update best batch size if this one performs better\n                    if avg_improvement > self.pattern_batch_preferences[pattern_type]['best_improvement_rate']:\n                        self.pattern_batch_preferences[pattern_type]['best_batch_size'] = prev_batch\n                        self.pattern_batch_preferences[pattern_type]['best_improvement_rate'] = avg_improvement\n    \n    def adjust_batch_size_for_patterns(self, calculated_batch):\n        \"\"\"\n        Adjust batch size based on pattern recognition capabilities."
+        },
+        "adjust_batch_size_for_patterns": {
+          "start_line": 760,
+          "end_line": 831,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "calculated_batch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_recognition_tracker.get_current_recognition_rates",
+              "line": 775
+            },
+            {
+              "name": "max",
+              "line": 829
+            },
+            {
+              "name": "len",
+              "line": 771
+            },
+            {
+              "name": "all",
+              "line": 778
+            },
+            {
+              "name": "hasattr",
+              "line": 782
+            },
+            {
+              "name": "min",
+              "line": 829
+            },
+            {
+              "name": "len",
+              "line": 782
+            },
+            {
+              "name": "logger.info",
+              "line": 788
+            },
+            {
+              "name": "float",
+              "line": 796
+            },
+            {
+              "name": "logger.info",
+              "line": 807
+            },
+            {
+              "name": "float",
+              "line": 815
+            },
+            {
+              "name": "logger.info",
+              "line": 825
+            },
+            {
+              "name": "abs",
+              "line": 806
+            },
+            {
+              "name": "abs",
+              "line": 824
+            },
+            {
+              "name": "recognition_rates.values",
+              "line": 778
+            }
+          ],
+          "docstring": "\n        Adjust batch size based on pattern recognition capabilities.\n        \n        Args:\n            calculated_batch: Batch size calculated by base optimizer\n            \n        Returns:\n            Adjusted batch size\n        ",
+          "code_snippet": "                        self.pattern_batch_preferences[pattern_type]['best_improvement_rate'] = avg_improvement\n    \n    def adjust_batch_size_for_patterns(self, calculated_batch):\n        \"\"\"\n        Adjust batch size based on pattern recognition capabilities.\n        \n        Args:\n            calculated_batch: Batch size calculated by base optimizer\n            \n        Returns:\n            Adjusted batch size\n        \"\"\"\n        # Only adjust if we have enough history\n        if len(self.batch_history) < 10:\n            return calculated_batch\n            \n        # Get current recognition rates\n        recognition_rates = self.pattern_recognition_tracker.get_current_recognition_rates()\n        \n        # If we're recognizing all patterns well or if no patterns recognized yet, stick with calculated batch\n        if not recognition_rates or all(rate >= 0.8 for rate in recognition_rates.values()):\n            return calculated_batch\n            \n        # Check for underfitting scenario - never decrease batch size\n        if hasattr(self, 'train_test_gap') and self.train_test_gap < -1.0 and self.batch_history and len(self.batch_history) > 0:\n            # Get the most recent batch size\n            prev_batch = self.batch_history[-1]\n            \n            # If new batch would be smaller, keep the current size to prevent decreasing\n            if calculated_batch < prev_batch:\n                logger.info(f\"Preventing pattern-based batch size decrease during underfitting. Keeping size: {prev_batch}\")\n                return prev_batch\n            \n        # If we're struggling with a challenging pattern, use the batch size that works best for it\n        struggling_patterns = self.recognizing_poorly & self.pattern_recognition_tracker.challenging_patterns\n        \n        if struggling_patterns:\n            # Find which struggling pattern has the best-performing batch size\n            best_improvement = -float('inf')\n            best_batch = None\n            \n            for pattern_type in struggling_patterns:\n                if pattern_type in self.pattern_batch_preferences:\n                    if self.pattern_batch_preferences[pattern_type]['best_improvement_rate'] > best_improvement:\n                        best_improvement = self.pattern_batch_preferences[pattern_type]['best_improvement_rate']\n                        best_batch = self.pattern_batch_preferences[pattern_type]['best_batch_size']\n            \n            # Use this batch size if we found one and it's significantly different\n            if best_batch and abs(best_batch - calculated_batch) > 4:\n                logger.info(f\"Adjusting batch size from {calculated_batch} to {best_batch} to help with challenging pattern {pattern_type}\")\n                return best_batch\n        \n        # If we're recognizing preferred patterns poorly, prioritize them\n        struggling_preferred = self.recognizing_poorly & self.pattern_recognition_tracker.preferred_patterns\n        \n        if struggling_preferred:\n            # Similar logic as above, but for preferred patterns\n            best_improvement = -float('inf')\n            best_batch = None\n            \n            for pattern_type in struggling_preferred:\n                if pattern_type in self.pattern_batch_preferences:\n                    if self.pattern_batch_preferences[pattern_type]['best_improvement_rate'] > best_improvement:\n                        best_improvement = self.pattern_batch_preferences[pattern_type]['best_improvement_rate']\n                        best_batch = self.pattern_batch_preferences[pattern_type]['best_batch_size']\n            \n            if best_batch and abs(best_batch - calculated_batch) > 4:\n                logger.info(f\"Adjusting batch size from {calculated_batch} to {best_batch} to help with preferred pattern {pattern_type}\")\n                return best_batch\n        \n        # Default: ensure batch size is within bounds\n        return max(self.min_batch, min(self.max_batch, calculated_batch))\n    \n    def adjust_batch_size_for_risk(self, calculated_batch):\n        \"\"\"\n        Adjust batch size based on current risk level."
+        },
+        "adjust_batch_size_for_risk": {
+          "start_line": 831,
+          "end_line": 887,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "calculated_batch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.risk_assessment_tracker.get_current_risk_metrics",
+              "line": 842
+            },
+            {
+              "name": "self.risk_assessment_tracker.calculate_mitigation_adjustment",
+              "line": 858
+            },
+            {
+              "name": "max",
+              "line": 879
+            },
+            {
+              "name": "hasattr",
+              "line": 849
+            },
+            {
+              "name": "min",
+              "line": 879
+            },
+            {
+              "name": "abs",
+              "line": 882
+            },
+            {
+              "name": "logger.info",
+              "line": 883
+            },
+            {
+              "name": "len",
+              "line": 849
+            },
+            {
+              "name": "logger.info",
+              "line": 854
+            },
+            {
+              "name": "int",
+              "line": 879
+            }
+          ],
+          "docstring": "\n        Adjust batch size based on current risk level.\n        \n        Args:\n            calculated_batch: Batch size calculated by pattern recognition\n            \n        Returns:\n            Adjusted batch size\n        ",
+          "code_snippet": "        return max(self.min_batch, min(self.max_batch, calculated_batch))\n    \n    def adjust_batch_size_for_risk(self, calculated_batch):\n        \"\"\"\n        Adjust batch size based on current risk level.\n        \n        Args:\n            calculated_batch: Batch size calculated by pattern recognition\n            \n        Returns:\n            Adjusted batch size\n        \"\"\"\n        # Get risk metrics\n        risk_metrics = self.risk_assessment_tracker.get_current_risk_metrics()\n        \n        # If no risks identified, stick with calculated batch\n        if risk_metrics[\"total_risks_identified\"] == 0:\n            return calculated_batch\n            \n        # For underfitting scenario, check current batch size and don't decrease\n        if hasattr(self, 'train_test_gap') and self.train_test_gap < -1.0 and self.batch_history and len(self.batch_history) > 0:\n            prev_batch = self.batch_history[-1]\n            \n            # Only allow increases during underfitting, never decreases\n            if calculated_batch < prev_batch:\n                logger.info(f\"Preventing risk-based batch size decrease during underfitting. Keeping size: {prev_batch}\")\n                return prev_batch\n        \n        # Calculate adjusted batch size for current risk level\n        adjusted_batch = self.risk_assessment_tracker.calculate_mitigation_adjustment(\n            calculated_batch, self.current_risk_level)\n        \n        # Apply risk aversion factor - with dynamic scaling based on batch size\n        if self.risk_aversion > 0:\n            # Scale risk adjustment based on batch size - larger batches can tolerate more adjustment\n            if calculated_batch > 512:  # Very large batches\n                scale_factor = 2.0  # Much more aggressive adjustment\n            elif calculated_batch > 256:  # Large batches\n                scale_factor = 1.5  # More aggressive adjustment\n            elif calculated_batch > 64:  # Medium batches\n                scale_factor = 1.0  # Normal adjustment\n            else:  # Small batches\n                scale_factor = 0.7  # More conservative adjustment\n                \n            risk_adjustment = scale_factor * self.risk_aversion * (calculated_batch - adjusted_batch)\n            final_batch = calculated_batch - risk_adjustment\n        else:\n            final_batch = adjusted_batch\n        \n        # Ensure batch size is within bounds\n        final_batch = max(self.min_batch, min(self.max_batch, int(final_batch)))\n        \n        # Log adjustment if significant\n        if abs(final_batch - calculated_batch) > 4:\n            logger.info(f\"Risk assessment adjusted batch size from {calculated_batch} to {final_batch} based on {self.current_risk_level.value} risk level\")\n        \n        return final_batch\n    \n    def adjust_batch_size_for_stability(self, calculated_batch):\n        \"\"\"\n        Adjust batch size based on training stability."
+        },
+        "adjust_batch_size_for_stability": {
+          "start_line": 887,
+          "end_line": 939,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "calculated_batch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 898
+            },
+            {
+              "name": "max",
+              "line": 912
+            },
+            {
+              "name": "max",
+              "line": 929
+            },
+            {
+              "name": "max",
+              "line": 917
+            },
+            {
+              "name": "int",
+              "line": 929
+            },
+            {
+              "name": "abs",
+              "line": 932
+            },
+            {
+              "name": "logger.info",
+              "line": 933
+            },
+            {
+              "name": "max",
+              "line": 920
+            },
+            {
+              "name": "max",
+              "line": 923
+            },
+            {
+              "name": "max",
+              "line": 926
+            }
+          ],
+          "docstring": "\n        Adjust batch size based on training stability.\n        \n        Args:\n            calculated_batch: Batch size calculated after pattern and risk adjustments\n            \n        Returns:\n            Adjusted batch size\n        ",
+          "code_snippet": "        return final_batch\n    \n    def adjust_batch_size_for_stability(self, calculated_batch):\n        \"\"\"\n        Adjust batch size based on training stability.\n        \n        Args:\n            calculated_batch: Batch size calculated after pattern and risk adjustments\n            \n        Returns:\n            Adjusted batch size\n        \"\"\"\n        # Only adjust if we have enough history\n        if len(self.loss_history) < 5:\n            return calculated_batch\n        \n        # Get stability metrics\n        stability_score = self.stability_metrics[\"stability_score\"]\n        unstable_epochs = self.stability_metrics[\"unstable_epochs\"]\n        \n        # If training is stable, stick with calculated batch\n        if stability_score > 0.8 and unstable_epochs == 0:\n            return calculated_batch\n        \n        # If training is unstable, reduce batch size with dynamic reduction factor\n        if stability_score < 0.5 or unstable_epochs > 2:\n            # Calculate reduction factor based on stability and batch size\n            base_reduction = max(0.3, stability_score)  # Base reduction factor \n            \n            # Apply less aggressive reduction to smaller batches and more aggressive to larger batches\n            if calculated_batch < 32:\n                # For very small batches, minimal reduction\n                reduction_factor = max(0.75, base_reduction + 0.3)\n            elif calculated_batch < 128:\n                # For moderate batches, medium reduction\n                reduction_factor = max(0.6, base_reduction + 0.1) \n            elif calculated_batch < 512:\n                # For large batches, aggressive reduction\n                reduction_factor = max(0.4, base_reduction)\n            else:\n                # For very large batches, very aggressive reduction  \n                reduction_factor = max(0.3, base_reduction - 0.1)\n            \n            # Apply reduction\n            adjusted_batch = max(self.min_batch, int(calculated_batch * reduction_factor))\n            \n            # Log adjustment if significant\n            if abs(adjusted_batch - calculated_batch) > 4:\n                logger.info(f\"Stability monitor adjusted batch size from {calculated_batch} to {adjusted_batch} (stability score: {stability_score:.2f})\")\n            \n            return adjusted_batch\n        \n        return calculated_batch\n    \n    def get_optimal_batch_size(self):\n        \"\"\"\n        Get the optimal batch size for the current training state."
+        },
+        "get_optimal_batch_size": {
+          "start_line": 939,
+          "end_line": 1004,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.adjust_batch_size_for_patterns",
+              "line": 984
+            },
+            {
+              "name": "self.adjust_batch_size_for_risk",
+              "line": 987
+            },
+            {
+              "name": "self.adjust_batch_size_for_stability",
+              "line": 990
+            },
+            {
+              "name": "max",
+              "line": 993
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 1000
+            },
+            {
+              "name": "random.randint",
+              "line": 952
+            },
+            {
+              "name": "logger.debug",
+              "line": 953
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 954
+            },
+            {
+              "name": "logger.info",
+              "line": 963
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 964
+            },
+            {
+              "name": "min",
+              "line": 993
+            },
+            {
+              "name": "abs",
+              "line": 996
+            },
+            {
+              "name": "logger.info",
+              "line": 997
+            },
+            {
+              "name": "random.random",
+              "line": 950
+            },
+            {
+              "name": "len",
+              "line": 968
+            },
+            {
+              "name": "len",
+              "line": 968
+            },
+            {
+              "name": "max",
+              "line": 977
+            },
+            {
+              "name": "min",
+              "line": 980
+            }
+          ],
+          "docstring": "\n        Get the optimal batch size for the current training state.\n        \n        Returns:\n            Optimal batch size\n        ",
+          "code_snippet": "        return calculated_batch\n    \n    def get_optimal_batch_size(self):\n        \"\"\"\n        Get the optimal batch size for the current training state.\n        \n        Returns:\n            Optimal batch size\n        \"\"\"\n        # Increment epoch counter\n        self.epoch += 1\n        \n        # Random exploration with probability self.exploration_rate, but not on the last epoch\n        if self.epoch < self.total_epochs and random.random() < self.exploration_rate:\n            # Calculate a random batch size within allowed range\n            batch_size = random.randint(self.min_batch, self.max_batch)\n            logger.debug(f\"Exploration: Using random batch size {batch_size} (epoch {self.epoch}/{self.total_epochs})\")\n            self.batch_history.append(batch_size)\n            return batch_size\n        \n        # Start with medium batch size\n        base_batch = (self.min_batch + self.max_batch) // 2\n        \n        # For the first epoch, use the middle of the range for a neutral starting point\n        if self.epoch == 1:\n            base_batch = (self.min_batch + self.max_batch) // 2\n            logger.info(f\"First epoch: Using middle of batch range: {base_batch}\")\n            self.batch_history.append(base_batch)\n            return base_batch\n        \n        # Consider recent performance to adjust base batch size\n        if len(self.batch_history) > 0 and len(self.accuracy_history) >= 2:\n            recent_change = self.accuracy_history[-1] - self.accuracy_history[-2]\n            if recent_change > 0.02:  # Significant improvement\n                # Continue with similar batch size\n                base_batch = self.batch_history[-1]\n            elif recent_change < -0.02:  # Significant degradation\n                # Try a different batch size\n                if self.batch_history[-1] > (self.min_batch + self.max_batch) // 2:\n                    # If we were using larger batches, try smaller\n                    base_batch = max(self.min_batch, self.batch_history[-1] // 2)\n                else:\n                    # If we were using smaller batches, try larger\n                    base_batch = min(self.max_batch, self.batch_history[-1] * 2)\n        \n        # Apply adjustments in sequence\n        # 1. Adjust based on pattern recognition\n        pattern_adjusted_batch = self.adjust_batch_size_for_patterns(base_batch)\n        \n        # 2. Adjust based on risk assessment\n        risk_adjusted_batch = self.adjust_batch_size_for_risk(pattern_adjusted_batch)\n        \n        # 3. Adjust based on stability\n        stability_adjusted_batch = self.adjust_batch_size_for_stability(risk_adjusted_batch)\n        \n        # Final adjustment - ensure within bounds\n        final_batch = max(self.min_batch, min(self.max_batch, stability_adjusted_batch))\n        \n        # Log the thought process if significant adjustments were made\n        if abs(final_batch - base_batch) > 4:\n            logger.info(f\"Batch adjustment: Base:{base_batch} \u2192 Pattern:{pattern_adjusted_batch} \u2192 Risk:{risk_adjusted_batch} \u2192 Stability:{stability_adjusted_batch} \u2192 Final:{final_batch}\")\n        \n        # Store batch for history\n        self.batch_history.append(final_batch)\n        \n        return final_batch\n    \n    def evaluate(self, testset):\n        \"\"\"\n        Evaluate model and update accuracy history."
+        },
+        "evaluate": {
+          "start_line": 1004,
+          "end_line": 1047,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "testset"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.eval",
+              "line": 1015
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 1018
+            },
+            {
+              "name": "self.accuracy_history.append",
+              "line": 1042
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 1026
+            },
+            {
+              "name": "self.model",
+              "line": 1031
+            },
+            {
+              "name": "outputs.max",
+              "line": 1034
+            },
+            {
+              "name": "targets.size",
+              "line": 1035
+            },
+            {
+              "name": "....item",
+              "line": 1036
+            },
+            {
+              "name": "inputs.to",
+              "line": 1028
+            },
+            {
+              "name": "targets.to",
+              "line": 1028
+            },
+            {
+              "name": "....sum",
+              "line": 1036
+            },
+            {
+              "name": "predicted.eq",
+              "line": 1036
+            }
+          ],
+          "docstring": "\n        Evaluate model and update accuracy history.\n        \n        Args:\n            testset: Test dataset\n            \n        Returns:\n            Dictionary with evaluation metrics\n        ",
+          "code_snippet": "        return final_batch\n    \n    def evaluate(self, testset):\n        \"\"\"\n        Evaluate model and update accuracy history.\n        \n        Args:\n            testset: Test dataset\n            \n        Returns:\n            Dictionary with evaluation metrics\n        \"\"\"\n        # Set model to evaluation mode\n        self.model.eval()\n        \n        # Create DataLoader\n        dataloader = torch.utils.data.DataLoader(\n            testset, batch_size=128, shuffle=False, num_workers=2)\n        \n        # Tracking metrics\n        correct = 0\n        total = 0\n        \n        # Disable gradient calculation\n        with torch.no_grad():\n            for inputs, targets in dataloader:\n                inputs, targets = inputs.to(self.device), targets.to(self.device)\n                \n                # Forward pass\n                outputs = self.model(inputs)\n                \n                # Calculate accuracy\n                _, predicted = outputs.max(1)\n                total += targets.size(0)\n                correct += predicted.eq(targets).sum().item()\n        \n        # Calculate accuracy percentage\n        accuracy = 100. * correct / total\n        \n        # Update accuracy history\n        self.accuracy_history.append(accuracy)\n        \n        # Return metrics\n        return {'accuracy': accuracy}\n    \n    def get_status(self):\n        \"\"\"\n        Get comprehensive status of the optimizer."
+        },
+        "get_status": {
+          "start_line": 1047,
+          "end_line": 1072,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....get_current_state",
+              "line": 1055
+            },
+            {
+              "name": "self.risk_assessment_tracker.get_current_risk_metrics",
+              "line": 1058
+            },
+            {
+              "name": "self.pattern_recognition_tracker.get_current_recognition_rates",
+              "line": 1059
+            },
+            {
+              "name": "state.update",
+              "line": 1062
+            },
+            {
+              "name": "super",
+              "line": 1055
+            },
+            {
+              "name": "self.pattern_recognition_tracker.get_preferred_pattern_recognition_rate",
+              "line": 1066
+            },
+            {
+              "name": "self.pattern_recognition_tracker.get_challenging_pattern_recognition_rate",
+              "line": 1067
+            }
+          ],
+          "docstring": "\n        Get comprehensive status of the optimizer.\n        \n        Returns:\n            Dictionary with status information\n        ",
+          "code_snippet": "        return {'accuracy': accuracy}\n    \n    def get_status(self):\n        \"\"\"\n        Get comprehensive status of the optimizer.\n        \n        Returns:\n            Dictionary with status information\n        \"\"\"\n        # Get base state\n        state = super().get_current_state()\n        \n        # Add risk-aware specific state\n        risk_metrics = self.risk_assessment_tracker.get_current_risk_metrics()\n        recognition_rates = self.pattern_recognition_tracker.get_current_recognition_rates()\n        \n        # Add to state\n        state.update({\n            \"current_risk_level\": self.current_risk_level.value,\n            \"risk_metrics\": risk_metrics,\n            \"recognition_rates\": recognition_rates,\n            \"preferred_recognition_rate\": self.pattern_recognition_tracker.get_preferred_pattern_recognition_rate(),\n            \"challenging_recognition_rate\": self.pattern_recognition_tracker.get_challenging_pattern_recognition_rate()\n        })\n        \n        return state\n    \n    def train_epoch(self, dataset, batch_size, shuffle=True, max_epoch_time=None):\n        \"\"\"\n        Train one epoch with active time tracking and monitoring."
+        },
+        "train_epoch": {
+          "start_line": 1072,
+          "end_line": 1212,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "shuffle"
+            },
+            {
+              "name": "max_epoch_time"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 1089
+            },
+            {
+              "name": "self.start_epoch_timer",
+              "line": 1093
+            },
+            {
+              "name": "time.time",
+              "line": 1094
+            },
+            {
+              "name": "getattr",
+              "line": 1106
+            },
+            {
+              "name": "getattr",
+              "line": 1107
+            },
+            {
+              "name": "self.model.train",
+              "line": 1120
+            },
+            {
+              "name": "enumerate",
+              "line": 1126
+            },
+            {
+              "name": "self.end_epoch_timer",
+              "line": 1193
+            },
+            {
+              "name": "logger.warning",
+              "line": 1110
+            },
+            {
+              "name": "time.time",
+              "line": 1128
+            },
+            {
+              "name": "list",
+              "line": 1144
+            },
+            {
+              "name": "optimizer.zero_grad",
+              "line": 1147
+            },
+            {
+              "name": "self.model",
+              "line": 1150
+            },
+            {
+              "name": "criterion",
+              "line": 1151
+            },
+            {
+              "name": "loss.item",
+              "line": 1155
+            },
+            {
+              "name": "outputs.max",
+              "line": 1159
+            },
+            {
+              "name": "predicted.eq",
+              "line": 1160
+            },
+            {
+              "name": "self.update_with_pattern_recognition",
+              "line": 1163
+            },
+            {
+              "name": "self.update_with_batch_results",
+              "line": 1166
+            },
+            {
+              "name": "loss.item",
+              "line": 1169
+            },
+            {
+              "name": "....item",
+              "line": 1170
+            },
+            {
+              "name": "targets.size",
+              "line": 1172
+            },
+            {
+              "name": "loss.backward",
+              "line": 1175
+            },
+            {
+              "name": "self.model.parameters",
+              "line": 1179
+            },
+            {
+              "name": "optimizer.step",
+              "line": 1185
+            },
+            {
+              "name": "self.update_training_state",
+              "line": 1188
+            },
+            {
+              "name": "max",
+              "line": 1196
+            },
+            {
+              "name": "self.pattern_recognition_tracker.get_preferred_pattern_recognition_rate",
+              "line": 1207
+            },
+            {
+              "name": "self.pattern_recognition_tracker.get_challenging_pattern_recognition_rate",
+              "line": 1208
+            },
+            {
+              "name": "logger.info",
+              "line": 1130
+            },
+            {
+              "name": "logger.info",
+              "line": 1137
+            },
+            {
+              "name": "inputs.to",
+              "line": 1141
+            },
+            {
+              "name": "targets.to",
+              "line": 1141
+            },
+            {
+              "name": "range",
+              "line": 1144
+            },
+            {
+              "name": "max",
+              "line": 1154
+            },
+            {
+              "name": "min",
+              "line": 1144
+            },
+            {
+              "name": "....sum",
+              "line": 1170
+            },
+            {
+              "name": "p.grad.data.norm",
+              "line": 1181
+            },
+            {
+              "name": "len",
+              "line": 1144
+            },
+            {
+              "name": "param_norm.item",
+              "line": 1182
+            },
+            {
+              "name": "targets.size",
+              "line": 1188
+            },
+            {
+              "name": "len",
+              "line": 1130
+            },
+            {
+              "name": "len",
+              "line": 1136
+            },
+            {
+              "name": "len",
+              "line": 1137
+            },
+            {
+              "name": "predicted.eq",
+              "line": 1170
+            }
+          ],
+          "docstring": "\n        Train one epoch with active time tracking and monitoring.\n        \n        Args:\n            dataset: Training dataset\n            batch_size: Batch size to use\n            shuffle: Whether to shuffle the dataset\n            max_epoch_time: Maximum time for this epoch (overrides instance default)\n            \n        Returns:\n            Training metrics\n        ",
+          "code_snippet": "        return state\n    \n    def train_epoch(self, dataset, batch_size, shuffle=True, max_epoch_time=None):\n        \"\"\"\n        Train one epoch with active time tracking and monitoring.\n        \n        Args:\n            dataset: Training dataset\n            batch_size: Batch size to use\n            shuffle: Whether to shuffle the dataset\n            max_epoch_time: Maximum time for this epoch (overrides instance default)\n            \n        Returns:\n            Training metrics\n        \"\"\"\n        # Set time constraint for this epoch\n        time_limit = max_epoch_time if max_epoch_time is not None else self.max_epoch_time\n        \n        # Create DataLoader\n        dataloader = torch.utils.data.DataLoader(\n            dataset, batch_size=batch_size, shuffle=shuffle, num_workers=2)\n        \n        # Start timing\n        self.start_epoch_timer()\n        start_time = time.time()\n        last_update_time = start_time\n        update_interval = 5  # seconds\n        \n        # Training metrics\n        total_loss = 0.0\n        correct = 0\n        total = 0\n        \n        # Check if we can access optimizer and criterion from model\n        # This assumes the model is being trained with a framework that\n        # attaches optimizer and criterion to the model\n        optimizer = getattr(self.model, 'optimizer', None)\n        criterion = getattr(self.model, 'criterion', None)\n        \n        if optimizer is None or criterion is None:\n            logger.warning(\"Model does not have attached optimizer or criterion. Cannot train directly.\")\n            return {\n                \"loss\": 0.0,\n                \"accuracy\": 0.0,\n                \"time\": 0.0,\n                \"batch_size\": batch_size,\n                \"batches_processed\": 0\n            }\n        \n        # Set model to training mode\n        self.model.train()\n        \n        # Track batches processed\n        batches_processed = 0\n        \n        # Training loop\n        for i, (inputs, targets) in enumerate(dataloader):\n            # Check time constraint\n            current_time = time.time()\n            if time_limit and (current_time - start_time) > time_limit:\n                logger.info(f\"Epoch time limit reached ({time_limit}s). Processed {i}/{len(dataloader)} batches.\")\n                break\n                \n            # Show progress periodically\n            if current_time - last_update_time >= update_interval:\n                elapsed = current_time - start_time\n                remaining = (elapsed / (i+1)) * (len(dataloader) - (i+1)) if i > 0 else 0\n                logger.info(f\"Batch {i+1}/{len(dataloader)} | Elapsed: {elapsed:.1f}s | Remaining: {remaining:.1f}s\")\n                last_update_time = current_time\n            \n            # Move data to device\n            inputs, targets = inputs.to(self.device), targets.to(self.device)\n            \n            # Get batch indices for pattern tracking\n            batch_indices = list(range(i * batch_size, min((i + 1) * batch_size, len(dataset))))\n            \n            # Zero the parameter gradients\n            optimizer.zero_grad()\n            \n            # Forward pass\n            outputs = self.model(inputs)\n            loss = criterion(outputs, targets)\n            \n            # Check loss change for risk assessment\n            prev_loss = total_loss / max(1, i)\n            current_loss = loss.item()\n            loss_decreased = i == 0 or current_loss <= prev_loss\n            \n            # Calculate per-example correctness for pattern recognition\n            _, predicted = outputs.max(1)\n            correct_mask = predicted.eq(targets)\n            \n            # Update pattern recognition tracking\n            self.update_with_pattern_recognition(batch_indices, correct_mask)\n            \n            # Update risk assessment\n            self.update_with_batch_results(batch_indices, batch_size, loss_decreased)\n            \n            # Update metrics\n            total_loss += loss.item()\n            batch_correct = predicted.eq(targets).sum().item()\n            correct += batch_correct\n            total += targets.size(0)\n            \n            # Backward pass and optimize\n            loss.backward()\n            \n            # Calculate gradient norm for stability monitoring\n            total_norm = 0.0\n            for p in self.model.parameters():\n                if p.grad is not None:\n                    param_norm = p.grad.data.norm(2)\n                    total_norm += param_norm.item() ** 2\n            total_norm = total_norm ** 0.5\n            \n            optimizer.step()\n            \n            # Update training state\n            self.update_training_state(current_loss, total_norm, batch_correct / targets.size(0) * 100)\n            \n            batches_processed += 1\n        \n        # End timing\n        epoch_time = self.end_epoch_timer()\n        \n        # Calculate final metrics\n        avg_loss = total_loss / max(1, batches_processed)\n        accuracy = 100. * correct / total if total > 0 else 0.0\n        \n        # Return metrics\n        return {\n            \"loss\": avg_loss,\n            \"accuracy\": accuracy,\n            \"time\": epoch_time,\n            \"batch_size\": batch_size,\n            \"batches_processed\": batches_processed,\n            \"total_samples\": total,\n            \"preferred_pattern_recognition\": self.pattern_recognition_tracker.get_preferred_pattern_recognition_rate(),\n            \"challenging_pattern_recognition\": self.pattern_recognition_tracker.get_challenging_pattern_recognition_rate(),\n            \"risk_level\": self.current_risk_level.value,\n            \"stability_score\": self.stability_metrics[\"stability_score\"]\n        }"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "IsekaiZenOptimizer"
+      ],
+      "docstring": "\n    Risk-aware pattern IsekaiZen optimizer.\n    \n    This optimizer extends the base IsekaiZen optimizer with risk assessment and\n    pattern recognition capabilities, allowing it to identify and mitigate risks\n    during training while adapting to the model's pattern recognition abilities.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

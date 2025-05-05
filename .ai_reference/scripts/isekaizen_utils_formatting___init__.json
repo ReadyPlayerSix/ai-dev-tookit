@@ -1,0 +1,16 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\formatting\\__init__.py",
+  "imports": [
+    {
+      "name": "metrics_formatting.format_metrics_table",
+      "line": 10
+    },
+    {
+      "name": "metrics_formatting.log_section",
+      "line": 10
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

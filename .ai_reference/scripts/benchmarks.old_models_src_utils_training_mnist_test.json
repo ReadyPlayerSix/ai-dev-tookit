@@ -1,0 +1,374 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\training\\mnist_test.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 1
+    },
+    {
+      "name": "torchvision.datasets",
+      "line": 2
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 2
+    },
+    {
+      "name": "torch.utils.data.DataLoader",
+      "line": 3
+    },
+    {
+      "name": "logging",
+      "line": 4
+    },
+    {
+      "name": "pathlib.Path",
+      "line": 5
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 6
+    },
+    {
+      "name": "src.utils.training.progressive_learning_test.ProgressiveLearningTest",
+      "line": 8
+    },
+    {
+      "name": "urllib.request",
+      "line": 61
+    },
+    {
+      "name": "gzip",
+      "line": 62
+    },
+    {
+      "name": "numpy",
+      "line": 63
+    },
+    {
+      "name": "os",
+      "line": 64
+    }
+  ],
+  "classes": {
+    "MNISTPatternTest": {
+      "start_line": 10,
+      "end_line": 167,
+      "methods": {
+        "__init__": {
+          "start_line": 13,
+          "end_line": 38,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "data_dir",
+              "type": "str"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "Path",
+              "line": 16
+            },
+            {
+              "name": "torch.device",
+              "line": 18
+            },
+            {
+              "name": "logging.getLogger",
+              "line": 21
+            },
+            {
+              "name": "self.logger.setLevel",
+              "line": 22
+            },
+            {
+              "name": "Path",
+              "line": 25
+            },
+            {
+              "name": "log_dir.mkdir",
+              "line": 26
+            },
+            {
+              "name": "logging.FileHandler",
+              "line": 29
+            },
+            {
+              "name": "fh.setFormatter",
+              "line": 30
+            },
+            {
+              "name": "self.logger.addHandler",
+              "line": 31
+            },
+            {
+              "name": "logging.StreamHandler",
+              "line": 34
+            },
+            {
+              "name": "ch.setFormatter",
+              "line": 35
+            },
+            {
+              "name": "self.logger.addHandler",
+              "line": 36
+            },
+            {
+              "name": "logging.Formatter",
+              "line": 30
+            },
+            {
+              "name": "logging.Formatter",
+              "line": 35
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 18
+            },
+            {
+              "name": "datetime.now",
+              "line": 29
+            }
+          ],
+          "code_snippet": "    \"\"\"Test runner for MNIST pattern learning experiments\"\"\"\n    \n    def __init__(self, \n                 data_dir: str = \"./data\",\n                 batch_size: int = 221):\n        self.data_dir = Path(data_dir)\n        self.batch_size = batch_size\n        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Setup logging\n        self.logger = logging.getLogger(\"mnist_pattern_test\")\n        self.logger.setLevel(logging.INFO)\n        \n        # Create log directory\n        log_dir = Path(\"logs/mnist_tests\")\n        log_dir.mkdir(parents=True, exist_ok=True)\n        \n        # Add file handler\n        fh = logging.FileHandler(log_dir / f\"mnist_test_{datetime.now():%Y%m%d_%H%M%S}.log\")\n        fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))\n        self.logger.addHandler(fh)\n        \n        # Add console handler\n        ch = logging.StreamHandler()\n        ch.setFormatter(logging.Formatter('%(message)s'))\n        self.logger.addHandler(ch)\n    \n    def prepare_data(self):\n        \"\"\"Download and prepare MNIST dataset\"\"\"\n        self.logger.info(\"Preparing MNIST dataset...\")"
+        },
+        "prepare_data": {
+          "start_line": 38,
+          "end_line": 103,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.logger.info",
+              "line": 40
+            },
+            {
+              "name": "transforms.Compose",
+              "line": 43
+            },
+            {
+              "name": "DataLoader",
+              "line": 90
+            },
+            {
+              "name": "self.logger.info",
+              "line": 96
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 44
+            },
+            {
+              "name": "transforms.Normalize",
+              "line": 45
+            },
+            {
+              "name": "datasets.MNIST",
+              "line": 51
+            },
+            {
+              "name": "self.logger.error",
+              "line": 100
+            },
+            {
+              "name": "self.logger.error",
+              "line": 58
+            },
+            {
+              "name": "self.logger.info",
+              "line": 59
+            },
+            {
+              "name": "mnist_dir.mkdir",
+              "line": 73
+            },
+            {
+              "name": "urls.items",
+              "line": 75
+            },
+            {
+              "name": "datasets.MNIST",
+              "line": 82
+            },
+            {
+              "name": "len",
+              "line": 96
+            },
+            {
+              "name": "Path",
+              "line": 72
+            },
+            {
+              "name": "url.split",
+              "line": 76
+            },
+            {
+              "name": "filepath.exists",
+              "line": 78
+            },
+            {
+              "name": "self.logger.info",
+              "line": 79
+            },
+            {
+              "name": "urllib.request.urlretrieve",
+              "line": 80
+            },
+            {
+              "name": "str",
+              "line": 100
+            },
+            {
+              "name": "str",
+              "line": 58
+            }
+          ],
+          "docstring": "Download and prepare MNIST dataset",
+          "code_snippet": "        self.logger.addHandler(ch)\n    \n    def prepare_data(self):\n        \"\"\"Download and prepare MNIST dataset\"\"\"\n        self.logger.info(\"Preparing MNIST dataset...\")\n        \n        # Define transformations\n        transform = transforms.Compose([\n            transforms.ToTensor(),\n            transforms.Normalize((0.1307,), (0.3081,))  # MNIST mean and std\n        ])\n        \n        try:\n            # Download training data with better error handling\n            try:\n                train_dataset = datasets.MNIST(\n                    root=self.data_dir,\n                    train=True,\n                    download=True,\n                    transform=transform\n                )\n            except Exception as download_error:\n                self.logger.error(f\"Error downloading from primary source: {str(download_error)}\")\n                self.logger.info(\"Trying alternative download method...\")\n                # Add alternative download method if first fails\n                import urllib.request\n                import gzip\n                import numpy as np\n                import os\n                \n                # MNIST files\n                urls = {\n                    'train_images': 'http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz',\n                    'train_labels': 'http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz'\n                }\n                \n                mnist_dir = Path(self.data_dir) / 'MNIST' / 'raw'\n                mnist_dir.mkdir(parents=True, exist_ok=True)\n                \n                for name, url in urls.items():\n                    filename = url.split('/')[-1]\n                    filepath = mnist_dir / filename\n                    if not filepath.exists():\n                        self.logger.info(f\"Downloading {filename}...\")\n                        urllib.request.urlretrieve(url, filepath)\n                \n                train_dataset = datasets.MNIST(\n                    root=self.data_dir,\n                    train=True,\n                    download=False,  # Already downloaded\n                    transform=transform\n                )\n            \n            # Create data loader\n            self.train_loader = DataLoader(\n                train_dataset,\n                batch_size=self.batch_size,\n                shuffle=True\n            )\n            \n            self.logger.info(f\"Dataset prepared: {len(train_dataset)} images\")\n            return True\n            \n        except Exception as e:\n            self.logger.error(f\"Error preparing dataset: {str(e)}\")\n            return False\n    \n    def run_test(self, num_batches: int = 100):\n        \"\"\"Run pattern learning test on MNIST data\"\"\"\n        self.logger.info(f\"\\nStarting MNIST Pattern Learning Test\")"
+        },
+        "run_test": {
+          "start_line": 103,
+          "end_line": 167,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "num_batches",
+              "type": "int"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.logger.info",
+              "line": 105
+            },
+            {
+              "name": "self.logger.info",
+              "line": 106
+            },
+            {
+              "name": "self.logger.info",
+              "line": 107
+            },
+            {
+              "name": "self.logger.info",
+              "line": 108
+            },
+            {
+              "name": "ProgressiveLearningTest",
+              "line": 111
+            },
+            {
+              "name": "enumerate",
+              "line": 119
+            },
+            {
+              "name": "test_framework.save_results",
+              "line": 151
+            },
+            {
+              "name": "test_framework.generate_progression_report",
+              "line": 152
+            },
+            {
+              "name": "self.logger.info",
+              "line": 154
+            },
+            {
+              "name": "self.logger.info",
+              "line": 155
+            },
+            {
+              "name": "self.logger.info",
+              "line": 156
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 164
+            },
+            {
+              "name": "data.to",
+              "line": 124
+            },
+            {
+              "name": "target.to",
+              "line": 125
+            },
+            {
+              "name": "test_framework.process_batch",
+              "line": 135
+            },
+            {
+              "name": "self.logger.error",
+              "line": 159
+            },
+            {
+              "name": "torch.cuda.empty_cache",
+              "line": 165
+            },
+            {
+              "name": "len",
+              "line": 131
+            },
+            {
+              "name": "self.logger.info",
+              "line": 144
+            },
+            {
+              "name": "str",
+              "line": 159
+            }
+          ],
+          "docstring": "Run pattern learning test on MNIST data",
+          "code_snippet": "            return False\n    \n    def run_test(self, num_batches: int = 100):\n        \"\"\"Run pattern learning test on MNIST data\"\"\"\n        self.logger.info(f\"\\nStarting MNIST Pattern Learning Test\")\n        self.logger.info(f\"Batch Size: {self.batch_size}\")\n        self.logger.info(f\"Number of Batches: {num_batches}\")\n        self.logger.info(f\"Device: {self.device}\")\n        \n        # Initialize learning test framework\n        test_framework = ProgressiveLearningTest(\n            test_name=\"mnist_pattern_test\",\n            batch_size=self.batch_size\n        )\n        \n        try:\n            batches_processed = 0\n            \n            for batch_idx, (data, target) in enumerate(self.train_loader):\n                if batch_idx >= num_batches:\n                    break\n                    \n                # Prepare batch data\n                data = data.to(self.device)\n                target = target.to(self.device)\n                \n                # Convert to format expected by pattern orchestrator\n                batch_data = {\n                    \"images\": data,\n                    \"labels\": target,\n                    \"batch_size\": len(data)\n                }\n                \n                # Process batch\n                results = test_framework.process_batch(\n                    batch_data=batch_data,\n                    domain=\"vision\"\n                )\n                \n                batches_processed += 1\n                \n                # Log progress\n                if (batch_idx + 1) % 10 == 0:\n                    self.logger.info(\n                        f\"Processed {batch_idx + 1}/{num_batches} batches\\n\"\n                        f\"Current Stage: {results['stage']}\\n\"\n                        f\"Learning Rate: {results['learning_rate']:.4f}\"\n                    )\n            \n            # Generate and save final report\n            test_framework.save_results()\n            report = test_framework.generate_progression_report()\n            \n            self.logger.info(\"\\nTest Complete!\")\n            self.logger.info(\"\\nProgression Report:\")\n            self.logger.info(report)\n            \n        except Exception as e:\n            self.logger.error(f\"Error during test: {str(e)}\")\n            raise\n        \n        finally:\n            # Cleanup\n            if torch.cuda.is_available():\n                torch.cuda.empty_cache()\n\ndef main():\n    \"\"\"Run MNIST pattern learning test\"\"\"\n    # Initialize test"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Test runner for MNIST pattern learning experiments"
+    }
+  },
+  "functions": {
+    "main": {
+      "start_line": 167,
+      "end_line": 180,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "MNISTPatternTest",
+          "line": 170
+        },
+        {
+          "name": "test.run_test",
+          "line": 178
+        },
+        {
+          "name": "test.prepare_data",
+          "line": 173
+        },
+        {
+          "name": "print",
+          "line": 174
+        }
+      ],
+      "docstring": "Run MNIST pattern learning test",
+      "code_snippet": "                torch.cuda.empty_cache()\n\ndef main():\n    \"\"\"Run MNIST pattern learning test\"\"\"\n    # Initialize test\n    test = MNISTPatternTest()\n    \n    # Prepare data\n    if not test.prepare_data():\n        print(\"Failed to prepare dataset. Exiting.\")\n        return\n    \n    # Run test with 100 batches\n    test.run_test(num_batches=100)\n\nif __name__ == \"__main__\":\n    main()"
+    }
+  },
+  "constants": {}
+}

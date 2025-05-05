@@ -1,0 +1,202 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\semantic\\augment.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 5
+    },
+    {
+      "name": "json",
+      "line": 6
+    },
+    {
+      "name": "logging",
+      "line": 7
+    },
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 9
+    },
+    {
+      "name": "numpy",
+      "line": 10
+    },
+    {
+      "name": "torch.utils.data.Dataset",
+      "line": 11
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 12
+    },
+    {
+      "name": "augmented_datasets.CIFAR10Augmented",
+      "line": 32
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "augment_dataset_directly": {
+      "start_line": 16,
+      "end_line": 46,
+      "parameters": [
+        {
+          "name": "original_dataset"
+        },
+        {
+          "name": "semantic_map"
+        },
+        {
+          "name": "augmentation_factor"
+        },
+        {
+          "name": "difficulty_threshold"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 29
+        },
+        {
+          "name": "CIFAR10Augmented",
+          "line": 33
+        },
+        {
+          "name": "logger.info",
+          "line": 40
+        },
+        {
+          "name": "logger.info",
+          "line": 41
+        },
+        {
+          "name": "logger.info",
+          "line": 42
+        },
+        {
+          "name": "len",
+          "line": 40
+        },
+        {
+          "name": "len",
+          "line": 41
+        },
+        {
+          "name": "len",
+          "line": 42
+        },
+        {
+          "name": "len",
+          "line": 42
+        }
+      ],
+      "docstring": "\n    Directly augment a dataset based on a semantic map without saving to disk.\n    \n    Args:\n        original_dataset: The dataset to augment\n        semantic_map: Semantic difficulty map\n        augmentation_factor: Factor to increase dataset size (e.g., 1.5 = 50% more data)\n        difficulty_threshold: Minimum difficulty level for examples to be augmented\n        \n    Returns:\n        Augmented dataset\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef augment_dataset_directly(original_dataset, semantic_map, augmentation_factor=1.5, difficulty_threshold=3):\n    \"\"\"\n    Directly augment a dataset based on a semantic map without saving to disk.\n    \n    Args:\n        original_dataset: The dataset to augment\n        semantic_map: Semantic difficulty map\n        augmentation_factor: Factor to increase dataset size (e.g., 1.5 = 50% more data)\n        difficulty_threshold: Minimum difficulty level for examples to be augmented\n        \n    Returns:\n        Augmented dataset\n    \"\"\"\n    logger.info(f\"Directly augmenting dataset with factor={augmentation_factor}, threshold={difficulty_threshold}\")\n    \n    # Create augmented dataset\n    from .augmented_datasets import CIFAR10Augmented\n    augmented_dataset = CIFAR10Augmented(\n        original_dataset,\n        semantic_map,\n        augmentation_factor=augmentation_factor,\n        difficulty_threshold=difficulty_threshold\n    )\n    \n    logger.info(f\"Created augmented dataset with {len(augmented_dataset)} total examples\")\n    logger.info(f\"Original size: {len(original_dataset)}\")\n    logger.info(f\"Added augmentations: {len(augmented_dataset) - len(original_dataset)}\")\n    \n    return augmented_dataset\n\n\ndef load_and_augment_dataset(trainset, map_path=None, augmentation_factor=1.5, difficulty_threshold=3, \n                             maps_dir=\"benchmarks/semantic_maps\"):"
+    },
+    "load_and_augment_dataset": {
+      "start_line": 47,
+      "end_line": 100,
+      "parameters": [
+        {
+          "name": "trainset"
+        },
+        {
+          "name": "map_path"
+        },
+        {
+          "name": "augmentation_factor"
+        },
+        {
+          "name": "difficulty_threshold"
+        },
+        {
+          "name": "maps_dir"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 78
+        },
+        {
+          "name": "os.path.join",
+          "line": 65
+        },
+        {
+          "name": "os.path.exists",
+          "line": 74
+        },
+        {
+          "name": "logger.error",
+          "line": 75
+        },
+        {
+          "name": "augment_dataset_directly",
+          "line": 88
+        },
+        {
+          "name": "os.path.exists",
+          "line": 66
+        },
+        {
+          "name": "logger.error",
+          "line": 67
+        },
+        {
+          "name": "logger.error",
+          "line": 68
+        },
+        {
+          "name": "open",
+          "line": 71
+        },
+        {
+          "name": "....strip",
+          "line": 72
+        },
+        {
+          "name": "open",
+          "line": 80
+        },
+        {
+          "name": "json.load",
+          "line": 81
+        },
+        {
+          "name": "logger.info",
+          "line": 85
+        },
+        {
+          "name": "logger.error",
+          "line": 96
+        },
+        {
+          "name": "logger.warning",
+          "line": 97
+        },
+        {
+          "name": "f.read",
+          "line": 72
+        },
+        {
+          "name": "semantic_map.get",
+          "line": 85
+        },
+        {
+          "name": "str",
+          "line": 96
+        }
+      ],
+      "docstring": "\n    Load a semantic map and augment a dataset directly.\n    \n    Args:\n        trainset: Training dataset to augment\n        map_path: Path to semantic map file (if None, uses latest)\n        augmentation_factor: Factor to increase dataset size (e.g., 1.5 = 50% more data)\n        difficulty_threshold: Minimum difficulty level for examples to be augmented\n        maps_dir: Directory containing semantic maps\n        \n    Returns:\n        Augmented dataset or original dataset if augmentation fails\n    ",
+      "code_snippet": "\n\ndef load_and_augment_dataset(trainset, map_path=None, augmentation_factor=1.5, difficulty_threshold=3, \n                             maps_dir=\"benchmarks/semantic_maps\"):\n    \"\"\"\n    Load a semantic map and augment a dataset directly.\n    \n    Args:\n        trainset: Training dataset to augment\n        map_path: Path to semantic map file (if None, uses latest)\n        augmentation_factor: Factor to increase dataset size (e.g., 1.5 = 50% more data)\n        difficulty_threshold: Minimum difficulty level for examples to be augmented\n        maps_dir: Directory containing semantic maps\n        \n    Returns:\n        Augmented dataset or original dataset if augmentation fails\n    \"\"\"\n    # Load the semantic map\n    if map_path is None:\n        # Use the latest map\n        latest_path_file = os.path.join(maps_dir, \"latest_map_path.txt\")\n        if not os.path.exists(latest_path_file):\n            logger.error(f\"Latest map path file not found: {latest_path_file}\")\n            logger.error(\"Run run_semantic_mapping.py first to generate a map\")\n            return trainset\n            \n        with open(latest_path_file, 'r') as f:\n            map_path = f.read().strip()\n    \n    if not os.path.exists(map_path):\n        logger.error(f\"Map file not found: {map_path}\")\n        return trainset\n    \n    logger.info(f\"Loading semantic map from {map_path}\")\n    try:\n        with open(map_path, 'r') as f:\n            semantic_map = json.load(f)\n        \n        # Log semantic map info\n        if 'metadata' in semantic_map:\n            logger.info(f\"Map metadata: {semantic_map.get('metadata', {})}\")\n            \n        # Augment the dataset directly\n        return augment_dataset_directly(\n            trainset,\n            semantic_map,\n            augmentation_factor=augmentation_factor,\n            difficulty_threshold=difficulty_threshold\n        )\n        \n    except Exception as e:\n        logger.error(f\"Failed to load semantic map or augment dataset: {str(e)}\")\n        logger.warning(\"Using original dataset instead\")\n        return trainset"
+    }
+  },
+  "constants": {}
+}

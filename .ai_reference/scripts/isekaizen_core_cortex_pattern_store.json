@@ -1,0 +1,328 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\cortex\\pattern_store.py",
+  "imports": [
+    {
+      "name": "__future__.annotations",
+      "line": 23
+    },
+    {
+      "name": "typing.Dict",
+      "line": 24
+    },
+    {
+      "name": "typing.List",
+      "line": 24
+    },
+    {
+      "name": "typing.Optional",
+      "line": 24
+    },
+    {
+      "name": "typing.Any",
+      "line": 24
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 25
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 26
+    },
+    {
+      "name": "json",
+      "line": 27
+    },
+    {
+      "name": "hashlib",
+      "line": 28
+    },
+    {
+      "name": "logging",
+      "line": 29
+    },
+    {
+      "name": "pathlib.Path",
+      "line": 30
+    },
+    {
+      "name": "asyncio",
+      "line": 31
+    },
+    {
+      "name": "enum.Enum",
+      "line": 32
+    },
+    {
+      "name": "src.utils.scil.memory_pool.MemoryPoolManager",
+      "line": 34
+    },
+    {
+      "name": "src.utils.scil.memory_pool.ChunkSize",
+      "line": 34
+    },
+    {
+      "name": "src.utils.kt_batch_optimizer_v3.KTBatchOptimizer",
+      "line": 35
+    },
+    {
+      "name": "src.cortex.semantic_core.SemanticPattern",
+      "line": 36
+    },
+    {
+      "name": "src.cortex.semantic_core.SemanticType",
+      "line": 36
+    },
+    {
+      "name": "src.cortex.pattern_orchestrator.OrchestrationMode",
+      "line": 37
+    },
+    {
+      "name": "src.utils.types.ProcessingStage",
+      "line": 38
+    }
+  ],
+  "classes": {
+    "ValidationStatus": {
+      "start_line": 40,
+      "end_line": 45,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "ACTIVE",
+          "line": 41
+        },
+        {
+          "name": "PURGATORY",
+          "line": 42
+        },
+        {
+          "name": "ARCHIVED",
+          "line": 43
+        }
+      ],
+      "bases": [
+        "Enum"
+      ]
+    },
+    "PatternMetrics": {
+      "start_line": 46,
+      "end_line": 53,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Tracks performance metrics for pattern classification"
+    },
+    "Pattern": {
+      "start_line": 54,
+      "end_line": 121,
+      "methods": {
+        "validation_status": {
+          "start_line": 68,
+          "end_line": 96,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "ValidationStatus",
+          "calls": [
+            {
+              "name": "len",
+              "line": 78
+            },
+            {
+              "name": "self._get_all_patterns",
+              "line": 78
+            },
+            {
+              "name": "self.get_value_threshold",
+              "line": 83
+            }
+          ],
+          "docstring": "Determine status based on system value and capacity",
+          "code_snippet": "    \n    @property\n    def validation_status(self) -> ValidationStatus:\n        \"\"\"Determine status based on system value and capacity\"\"\"\n        # Calculate value score (0-1)\n        value_score = (\n            self.metrics.success_rate * 0.4 +\n            self.metrics.relative_importance * 0.4 +\n            self.metrics.network_strength * 0.2\n        )\n        \n        # Get current system capacity metrics\n        total_patterns = len(self._get_all_patterns())\n        capacity_threshold = self.system_capacity * 0.9  # 90% capacity mark\n        \n        if total_patterns > capacity_threshold:\n            # System near capacity - only keep highest value patterns\n            if value_score > self.get_value_threshold():\n                return ValidationStatus.ACTIVE\n            else:\n                return ValidationStatus.ARCHIVED\n        else:\n            # System has space - keep more patterns in active state\n            if value_score > 0.3:\n                return ValidationStatus.ACTIVE\n            elif value_score > 0.1:\n                return ValidationStatus.PURGATORY\n            else:\n                return ValidationStatus.ARCHIVED\n    \n    @classmethod\n    def create(cls, \n               pattern_data: Dict[str, Any],"
+        },
+        "create": {
+          "start_line": 97,
+          "end_line": 121,
+          "parameters": [
+            {
+              "name": "cls"
+            },
+            {
+              "name": "pattern_data"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            },
+            {
+              "name": "confidence",
+              "type": "float"
+            }
+          ],
+          "return_type": "Pattern",
+          "calls": [
+            {
+              "name": "....isoformat",
+              "line": 102
+            },
+            {
+              "name": "hashlib.sha256",
+              "line": 105
+            },
+            {
+              "name": "hasher.update",
+              "line": 106
+            },
+            {
+              "name": "cls",
+              "line": 109
+            },
+            {
+              "name": "....encode",
+              "line": 106
+            },
+            {
+              "name": "hasher.hexdigest",
+              "line": 107
+            },
+            {
+              "name": "datetime.now",
+              "line": 102
+            },
+            {
+              "name": "PatternMetrics",
+              "line": 119
+            },
+            {
+              "name": "json.dumps",
+              "line": 106
+            }
+          ],
+          "docstring": "Create a new pattern with initial metrics",
+          "code_snippet": "    \n    @classmethod\n    def create(cls, \n               pattern_data: Dict[str, Any],\n               pattern_type: str,\n               confidence: float) -> Pattern:\n        \"\"\"Create a new pattern with initial metrics\"\"\"\n        now = datetime.now().isoformat()\n        \n        # Generate unique hash from pattern data\n        hasher = hashlib.sha256()\n        hasher.update(json.dumps(pattern_data, sort_keys=True).encode())\n        pattern_id = hasher.hexdigest()[:16]\n        \n        return cls(\n            pattern_id=pattern_id,\n            type=pattern_type,\n            confidence=confidence,\n            risk_score=0.0,  # Initial risk score\n            creation_timestamp=now,\n            last_accessed=now,\n            access_count=0,\n            data_locations=[],\n            relationships=[],\n            metrics=PatternMetrics()  # Initialize with default metrics\n        )\n\nclass PatternStore:\n    \"\"\"Manages pattern storage with dynamic validation and orchestrator integration\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Represents a single pattern in the system with semantic compatibility"
+    },
+    "PatternStore": {
+      "start_line": 122,
+      "end_line": 422,
+      "methods": {
+        "__init__": {
+          "start_line": 134,
+          "end_line": 156,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "base_path",
+              "type": "str"
+            },
+            {
+              "name": "memory_pool"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "Path",
+              "line": 137
+            },
+            {
+              "name": "logging.getLogger",
+              "line": 138
+            },
+            {
+              "name": "KTBatchOptimizer",
+              "line": 141
+            },
+            {
+              "name": "self._initialize_directories",
+              "line": 150
+            },
+            {
+              "name": "self.kt_optimizer.optimize_batch_size",
+              "line": 153
+            },
+            {
+              "name": "MemoryPoolManager",
+              "line": 142
+            }
+          ],
+          "code_snippet": "        self.processing_stage = ProcessingStage.INPUT\n    \n    def __init__(self, \n                 base_path: str = \"memory/patterns\",\n                 memory_pool: Optional[MemoryPoolManager] = None):\n        self.base_path = Path(base_path)\n        self.logger = logging.getLogger(__name__)\n        \n        # Initialize K(t) optimization\n        self.kt_optimizer = KTBatchOptimizer()\n        self.memory_pool = memory_pool or MemoryPoolManager()\n        \n        # Initialize storage directories\n        self.paths = {\n            ValidationStatus.ACTIVE: self.base_path / \"active\",\n            ValidationStatus.PURGATORY: self.base_path / \"purgatory\",\n            ValidationStatus.ARCHIVED: self.base_path / \"archived\"\n        }\n        self._initialize_directories()\n        \n        # Get optimal chunk size from K(t)\n        kt_results = self.kt_optimizer.optimize_batch_size()\n        self.optimal_batch_size = kt_results[\"optimal_batch_size\"]\n        \n    def _initialize_directories(self):\n        \"\"\"Create necessary directory structure\"\"\"\n        for path in self.paths.values():"
+        },
+        "_initialize_directories": {
+          "start_line": 156,
+          "end_line": 163,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.paths.values",
+              "line": 158
+            },
+            {
+              "name": "self.logger.debug",
+              "line": 161
+            },
+            {
+              "name": "path.mkdir",
+              "line": 159
+            }
+          ],
+          "docstring": "Create necessary directory structure",
+          "code_snippet": "        self.optimal_batch_size = kt_results[\"optimal_batch_size\"]\n        \n    def _initialize_directories(self):\n        \"\"\"Create necessary directory structure\"\"\"\n        for path in self.paths.values():\n            path.mkdir(parents=True, exist_ok=True)\n            \n        self.logger.debug(f\"Initialized pattern directories at {self.base_path}\")\n        \n    def get_value_threshold(self) -> float:\n        \"\"\"Calculate current value threshold for pattern retention\"\"\"\n        return 0.5  # Base threshold, can be made dynamic based on system state"
+        },
+        "get_value_threshold": {
+          "start_line": 163,
+          "end_line": 167,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "float",
+          "calls": [],
+          "docstring": "Calculate current value threshold for pattern retention",
+          "code_snippet": "        self.logger.debug(f\"Initialized pattern directories at {self.base_path}\")\n        \n    def get_value_threshold(self) -> float:\n        \"\"\"Calculate current value threshold for pattern retention\"\"\"\n        return 0.5  # Base threshold, can be made dynamic based on system state\n\n    def _get_pattern_path(self, pattern_id: str, status: ValidationStatus) -> Path:\n        \"\"\"Get full path for a pattern file\"\"\"\n        return self.paths[status] / f\"{pattern_id}.json\""
+        },
+        "_get_pattern_path": {
+          "start_line": 167,
+          "end_line": 171,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_id",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "ValidationStatus"
+            }
+          ],
+          "return_type": "Path",
+          "calls": [],
+          "docstring": "Get full path for a pattern file",
+          "code_snippet": "        return 0.5  # Base threshold, can be made dynamic based on system state\n\n    def _get_pattern_path(self, pattern_id: str, status: ValidationStatus) -> Path:\n        \"\"\"Get full path for a pattern file\"\"\"\n        return self.paths[status] / f\"{pattern_id}.json\"\n    \n    async def _handle_capacity_limit(self, new_pattern: Pattern):\n        \"\"\"Handle pattern storage when at capacity\"\"\"\n        current_patterns = await self.get_patterns_by_status(ValidationStatus.ACTIVE)"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Manages pattern storage with dynamic validation and orchestrator integration"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

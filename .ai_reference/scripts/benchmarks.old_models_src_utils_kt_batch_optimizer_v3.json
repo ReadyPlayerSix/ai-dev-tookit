@@ -1,0 +1,715 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\kt_batch_optimizer_v3.py",
+  "imports": [
+    {
+      "name": "numpy",
+      "line": 4
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 5
+    },
+    {
+      "name": "cortex.resource_manager.ResourceManager",
+      "line": 6
+    },
+    {
+      "name": "typing.Dict",
+      "line": 7
+    },
+    {
+      "name": "typing.List",
+      "line": 7
+    },
+    {
+      "name": "typing.Optional",
+      "line": 7
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 7
+    },
+    {
+      "name": "typing.Any",
+      "line": 7
+    },
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "math",
+      "line": 9
+    },
+    {
+      "name": "logging",
+      "line": 10
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 11
+    },
+    {
+      "name": "os",
+      "line": 12
+    },
+    {
+      "name": "json",
+      "line": 13
+    }
+  ],
+  "classes": {
+    "KTParameters": {
+      "start_line": 16,
+      "end_line": 24,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Parameters from the K(t) framework"
+    },
+    "GPUSpecs": {
+      "start_line": 25,
+      "end_line": 32,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "RTX 4070 SUPER specifications"
+    },
+    "KTBatchOptimizer": {
+      "start_line": 32,
+      "end_line": 294,
+      "methods": {
+        "__init__": {
+          "start_line": 33,
+          "end_line": 60,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "log_dir",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "KTParameters",
+              "line": 35
+            },
+            {
+              "name": "GPUSpecs",
+              "line": 36
+            },
+            {
+              "name": "torch.device",
+              "line": 37
+            },
+            {
+              "name": "os.makedirs",
+              "line": 41
+            },
+            {
+              "name": "....strftime",
+              "line": 43
+            },
+            {
+              "name": "os.path.join",
+              "line": 44
+            },
+            {
+              "name": "logging.basicConfig",
+              "line": 47
+            },
+            {
+              "name": "logging.getLogger",
+              "line": 55
+            },
+            {
+              "name": "os.path.join",
+              "line": 58
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 37
+            },
+            {
+              "name": "datetime.now",
+              "line": 43
+            },
+            {
+              "name": "logging.FileHandler",
+              "line": 51
+            },
+            {
+              "name": "logging.StreamHandler",
+              "line": 52
+            }
+          ],
+          "code_snippet": "\nclass KTBatchOptimizer:\n    def __init__(self, log_dir: str = \"logs\"):\n        # Initialize previous parameters...\n        self.kt_params = KTParameters()\n        self.gpu_specs = GPUSpecs()\n        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Set up logging\n        self.log_dir = log_dir\n        os.makedirs(log_dir, exist_ok=True)\n        \n        timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n        log_file = os.path.join(log_dir, f\"batch_optimizer_{timestamp}.log\")\n        \n        # Configure logging\n        logging.basicConfig(\n            level=logging.INFO,\n            format='%(message)s',\n            handlers=[\n                logging.FileHandler(log_file),\n                logging.StreamHandler()\n            ]\n        )\n        self.logger = logging.getLogger(__name__)\n        \n        # Create JSON results file\n        self.results_file = os.path.join(log_dir, f\"results_{timestamp}.json\")\n    \n    def _calculate_cognitive_load(self, batch_size: int) -> float:\n        \"\"\"Revised cognitive load calculation\"\"\"\n        # Base load from batch size"
+        },
+        "_calculate_cognitive_load": {
+          "start_line": 60,
+          "end_line": 77,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "max",
+              "line": 73
+            },
+            {
+              "name": "max",
+              "line": 75
+            },
+            {
+              "name": "np.log2",
+              "line": 66
+            },
+            {
+              "name": "np.sqrt",
+              "line": 69
+            },
+            {
+              "name": "np.exp",
+              "line": 73
+            }
+          ],
+          "docstring": "Revised cognitive load calculation",
+          "code_snippet": "        self.results_file = os.path.join(log_dir, f\"results_{timestamp}.json\")\n    \n    def _calculate_cognitive_load(self, batch_size: int) -> float:\n        \"\"\"Revised cognitive load calculation\"\"\"\n        # Base load from batch size\n        base_load = batch_size / self.kt_params.Lc\n        \n        # Enhanced sync cost with better scaling\n        sync_cost = self.kt_params.sync_cost * np.log2(batch_size + 1)\n        \n        # Improved complexity scaling\n        complexity_factor = 1 + np.sqrt(batch_size) * 0.025  # Reduced factor\n        \n        # Apply soft dampening to maintain meaningful non-zero values\n        load = (base_load + sync_cost) * complexity_factor\n        dampening = max(0.1, 1 / (1 + np.exp((load - self.kt_params.Lc * 1.5) / 4)))\n        \n        return max(0.001, load * dampening)  # Ensure minimum meaningful value\n    \n    def _log_batch_metrics(self, \n                          batch_size: int, \n                          metrics: Dict[str, float],"
+        },
+        "_log_batch_metrics": {
+          "start_line": 77,
+          "end_line": 93,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            },
+            {
+              "name": "metrics"
+            },
+            {
+              "name": "full_log",
+              "type": "bool"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.logger.info",
+              "line": 83
+            },
+            {
+              "name": "self.logger.info",
+              "line": 84
+            },
+            {
+              "name": "self.logger.info",
+              "line": 85
+            },
+            {
+              "name": "self.logger.info",
+              "line": 86
+            },
+            {
+              "name": "self.logger.info",
+              "line": 90
+            },
+            {
+              "name": "self.logger.info",
+              "line": 91
+            }
+          ],
+          "docstring": "Log batch processing metrics",
+          "code_snippet": "        return max(0.001, load * dampening)  # Ensure minimum meaningful value\n    \n    def _log_batch_metrics(self, \n                          batch_size: int, \n                          metrics: Dict[str, float],\n                          full_log: bool = False) -> None:\n        \"\"\"Log batch processing metrics\"\"\"\n        if full_log or batch_size % 8 == 0 or batch_size == 1:\n            self.logger.info(f\"\\nBatch {batch_size:3d}:\")\n            self.logger.info(f\"  Efficiency: {metrics['efficiency']:.3f}\")\n            self.logger.info(f\"  Load: {metrics['cognitive_load']:.3f}\")\n            self.logger.info(f\"  Est. Memory: {metrics['estimated_memory']:.1f}MB\")\n            \n            # Additional detailed metrics\n            if full_log:\n                self.logger.info(f\"  Memory Utilization: {metrics['memory_utilization']:.1%}\")\n                self.logger.info(f\"  Theoretical Max Efficiency: {metrics['max_theoretical_efficiency']:.3f}\")\n    \n    def _save_results(self, results: Dict[str, Any]) -> None:\n        \"\"\"Save detailed results to JSON file\"\"\"\n        with open(self.results_file, 'w') as f:"
+        },
+        "_save_results": {
+          "start_line": 93,
+          "end_line": 111,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "results"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "open",
+              "line": 95
+            },
+            {
+              "name": "json.dump",
+              "line": 96
+            },
+            {
+              "name": "....isoformat",
+              "line": 97
+            },
+            {
+              "name": "datetime.now",
+              "line": 97
+            }
+          ],
+          "docstring": "Save detailed results to JSON file",
+          "code_snippet": "                self.logger.info(f\"  Theoretical Max Efficiency: {metrics['max_theoretical_efficiency']:.3f}\")\n    \n    def _save_results(self, results: Dict[str, Any]) -> None:\n        \"\"\"Save detailed results to JSON file\"\"\"\n        with open(self.results_file, 'w') as f:\n            json.dump({\n                \"timestamp\": datetime.now().isoformat(),\n                \"gpu_specs\": {\n                    \"total_memory\": self.gpu_specs.total_memory,\n                    \"clock_speed\": self.gpu_specs.clock_speed,\n                    \"memory_clock\": self.gpu_specs.memory_clock\n                },\n                \"optimization_results\": results,\n                \"kt_parameters\": {\n                    \"Lc\": self.kt_params.Lc,\n                    \"efficiency_coefficient\": self.kt_params.efficiency_coefficient,\n                    \"sync_cost\": self.kt_params.sync_cost\n                }\n            }, f, indent=2)\n    \n    def _calculate_theoretical_max_efficiency(self, batch_size: int) -> float:\n        \"\"\"Calculate theoretical maximum efficiency for a given batch size\"\"\"\n        memory_requirement = self._estimate_memory_requirement(batch_size)"
+        },
+        "_calculate_theoretical_max_efficiency": {
+          "start_line": 111,
+          "end_line": 116,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "self._estimate_memory_requirement",
+              "line": 113
+            }
+          ],
+          "docstring": "Calculate theoretical maximum efficiency for a given batch size",
+          "code_snippet": "            }, f, indent=2)\n    \n    def _calculate_theoretical_max_efficiency(self, batch_size: int) -> float:\n        \"\"\"Calculate theoretical maximum efficiency for a given batch size\"\"\"\n        memory_requirement = self._estimate_memory_requirement(batch_size)\n        return 1.0 - (memory_requirement / self.gpu_specs.total_memory)\n    \n    def _calculate_efficiency(self, memory_used: float, cognitive_load: float) -> float:\n        \"\"\"Enhanced efficiency calculation incorporating GPU specs\"\"\"\n        # GPU efficiency component"
+        },
+        "_calculate_efficiency": {
+          "start_line": 116,
+          "end_line": 129,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "memory_used",
+              "type": "float"
+            },
+            {
+              "name": "cognitive_load",
+              "type": "float"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "np.exp",
+              "line": 120
+            },
+            {
+              "name": "np.exp",
+              "line": 123
+            }
+          ],
+          "docstring": "Enhanced efficiency calculation incorporating GPU specs",
+          "code_snippet": "        return 1.0 - (memory_requirement / self.gpu_specs.total_memory)\n    \n    def _calculate_efficiency(self, memory_used: float, cognitive_load: float) -> float:\n        \"\"\"Enhanced efficiency calculation incorporating GPU specs\"\"\"\n        # GPU efficiency component\n        memory_factor = memory_used / self.gpu_specs.total_memory\n        gpu_efficiency = 1 / (1 + np.exp(-10 * (memory_factor - 0.5)))\n        \n        # Cognitive efficiency component (from K(t) framework)\n        cognitive_efficiency = 1 / (1 + np.exp((cognitive_load - self.kt_params.Lc) / \n                                             self.kt_params.efficiency_coefficient))\n        \n        # Combine both factors with GPU-specific weighting\n        return (gpu_efficiency * 0.7 + cognitive_efficiency * 0.3)\n    \n    def _estimate_memory_requirement(self, batch_size: int) -> float:\n        \"\"\"Estimate memory requirement for a given batch size\"\"\"\n        # Base memory for input tensor (batch_size, 3, 640, 640)"
+        },
+        "_estimate_memory_requirement": {
+          "start_line": 129,
+          "end_line": 142,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [],
+          "docstring": "Estimate memory requirement for a given batch size",
+          "code_snippet": "        return (gpu_efficiency * 0.7 + cognitive_efficiency * 0.3)\n    \n    def _estimate_memory_requirement(self, batch_size: int) -> float:\n        \"\"\"Estimate memory requirement for a given batch size\"\"\"\n        # Base memory for input tensor (batch_size, 3, 640, 640)\n        input_memory = batch_size * 3 * 640 * 640 * 4  # 4 bytes per float32\n        \n        # Estimate YOLO model memory (based on typical requirements)\n        model_memory = 250 * 1024 * 1024  # ~250MB base model size\n        \n        # Estimate intermediate activations\n        activations_memory = input_memory * 2.5  # Typical multiplication factor\n        \n        return (input_memory + model_memory + activations_memory) / (1024 * 1024)  # Convert to MB\n    \n    def optimize_batch_size(self) -> Dict[str, Any]:\n        \"\"\"Enhanced batch size optimization with detailed logging\"\"\"\n        self.logger.info(\"\\nOptimizing batch size using enhanced K(t) framework...\")"
+        },
+        "optimize_batch_size": {
+          "start_line": 142,
+          "end_line": 217,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.logger.info",
+              "line": 144
+            },
+            {
+              "name": "self.logger.info",
+              "line": 145
+            },
+            {
+              "name": "self.logger.info",
+              "line": 146
+            },
+            {
+              "name": "self.logger.info",
+              "line": 147
+            },
+            {
+              "name": "self.logger.info",
+              "line": 148
+            },
+            {
+              "name": "min",
+              "line": 155
+            },
+            {
+              "name": "range",
+              "line": 164
+            },
+            {
+              "name": "self._log_final_results",
+              "line": 210
+            },
+            {
+              "name": "self._save_results",
+              "line": 213
+            },
+            {
+              "name": "int",
+              "line": 157
+            },
+            {
+              "name": "self._estimate_memory_requirement",
+              "line": 165
+            },
+            {
+              "name": "self._calculate_cognitive_load",
+              "line": 171
+            },
+            {
+              "name": "self._calculate_efficiency",
+              "line": 172
+            },
+            {
+              "name": "all_metrics.append",
+              "line": 183
+            },
+            {
+              "name": "self._log_batch_metrics",
+              "line": 184
+            },
+            {
+              "name": "self.logger.info",
+              "line": 168
+            },
+            {
+              "name": "self._calculate_theoretical_max_efficiency",
+              "line": 180
+            }
+          ],
+          "docstring": "Enhanced batch size optimization with detailed logging",
+          "code_snippet": "        return (input_memory + model_memory + activations_memory) / (1024 * 1024)  # Convert to MB\n    \n    def optimize_batch_size(self) -> Dict[str, Any]:\n        \"\"\"Enhanced batch size optimization with detailed logging\"\"\"\n        self.logger.info(\"\\nOptimizing batch size using enhanced K(t) framework...\")\n        self.logger.info(\"GPU Specs:\")\n        self.logger.info(f\"Memory: {self.gpu_specs.total_memory}MB\")\n        self.logger.info(f\"Clock Speed: {self.gpu_specs.clock_speed}MHz\")\n        self.logger.info(f\"Memory Clock: {self.gpu_specs.memory_clock}MHz\\n\")\n        \n        best_efficiency = 0\n        optimal_batch = 1\n        optimal_metrics = None\n        \n        # Calculate max batch size based on memory limits\n        max_theoretical_batch = min(\n            256,  # Safety limit\n            int(self.gpu_specs.total_memory * 0.9 / \n                (3 * 640 * 640 * 4 / (1024 * 1024)))  # 90% of GPU memory\n        )\n        \n        # Store metrics for each batch size\n        all_metrics = []\n        \n        for batch_size in range(1, max_theoretical_batch + 1):\n            estimated_memory = self._estimate_memory_requirement(batch_size)\n            \n            if estimated_memory > self.gpu_specs.total_memory * 0.95:  # 95% safety limit\n                self.logger.info(f\"\\nReached memory limit at batch size {batch_size}\")\n                break\n            \n            cognitive_load = self._calculate_cognitive_load(batch_size)\n            efficiency = self._calculate_efficiency(estimated_memory, cognitive_load)\n            \n            metrics = {\n                \"batch_size\": batch_size,\n                \"efficiency\": efficiency,\n                \"cognitive_load\": cognitive_load,\n                \"estimated_memory\": estimated_memory,\n                \"memory_utilization\": estimated_memory / self.gpu_specs.total_memory,\n                \"max_theoretical_efficiency\": self._calculate_theoretical_max_efficiency(batch_size)\n            }\n            \n            all_metrics.append(metrics)\n            self._log_batch_metrics(batch_size, metrics)\n            \n            # Update optimal if better\n            if efficiency > best_efficiency:\n                best_efficiency = efficiency\n                optimal_batch = batch_size\n                optimal_metrics = metrics\n        \n        # Generate results\n        results = {\n            \"optimal_batch_size\": optimal_batch,\n            \"peak_efficiency\": best_efficiency,\n            \"metrics\": {\n                \"efficiency_curve\": [m[\"efficiency\"] for m in all_metrics],\n                \"cognitive_load_curve\": [m[\"cognitive_load\"] for m in all_metrics],\n                \"memory_curve\": [m[\"estimated_memory\"] for m in all_metrics]\n            },\n            \"optimal_metrics\": optimal_metrics,\n            \"parameters\": {\n                \"Lc\": self.kt_params.Lc,\n                \"gamma\": self.kt_params.efficiency_coefficient,\n                \"beta\": self.kt_params.sync_cost\n            }\n        }\n        \n        # Log final results\n        self._log_final_results(results)\n        \n        # Save to JSON\n        self._save_results(results)\n        \n        return results\n    \n    def run_kt_benchmark(self, iterations: int = 100) -> Dict[str, Any]:\n        \"\"\"Run comprehensive K(t) framework benchmark\"\"\"\n        self.logger.info(\"\\nRunning K(t) Framework Benchmark...\")"
+        },
+        "run_kt_benchmark": {
+          "start_line": 217,
+          "end_line": 264,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "iterations",
+              "type": "int"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.logger.info",
+              "line": 219
+            },
+            {
+              "name": "np.argmax",
+              "line": 252
+            },
+            {
+              "name": "range",
+              "line": 225
+            },
+            {
+              "name": "self._estimate_memory_requirement",
+              "line": 230
+            },
+            {
+              "name": "self._calculate_cognitive_load",
+              "line": 231
+            },
+            {
+              "name": "self._calculate_efficiency",
+              "line": 232
+            },
+            {
+              "name": "....append",
+              "line": 235
+            },
+            {
+              "name": "....append",
+              "line": 236
+            },
+            {
+              "name": "....append",
+              "line": 237
+            },
+            {
+              "name": "self.logger.info",
+              "line": 241
+            },
+            {
+              "name": "self.logger.info",
+              "line": 242
+            },
+            {
+              "name": "self.logger.info",
+              "line": 243
+            },
+            {
+              "name": "self.logger.info",
+              "line": 244
+            },
+            {
+              "name": "self.logger.info",
+              "line": 248
+            }
+          ],
+          "docstring": "Run comprehensive K(t) framework benchmark",
+          "code_snippet": "        return results\n    \n    def run_kt_benchmark(self, iterations: int = 100) -> Dict[str, Any]:\n        \"\"\"Run comprehensive K(t) framework benchmark\"\"\"\n        self.logger.info(\"\\nRunning K(t) Framework Benchmark...\")\n        \n        benchmark_results = {\n            \"memory_curve\": [],\n            \"efficiency_curve\": [],\n            \"cognitive_load_curve\": [],\n            \"batch_sizes\": range(1, iterations + 1)\n        }\n        \n        for batch_size in benchmark_results[\"batch_sizes\"]:\n            # Calculate core metrics\n            estimated_memory = self._estimate_memory_requirement(batch_size)\n            cognitive_load = self._calculate_cognitive_load(batch_size)\n            efficiency = self._calculate_efficiency(estimated_memory, cognitive_load)\n            \n            # Store results\n            benchmark_results[\"memory_curve\"].append(estimated_memory)\n            benchmark_results[\"efficiency_curve\"].append(efficiency)\n            benchmark_results[\"cognitive_load_curve\"].append(cognitive_load)\n            \n            # Log key points\n            if batch_size == 1 or batch_size % 25 == 0 or efficiency > 0.99:\n                self.logger.info(f\"\\nBatch Size: {batch_size}\")\n                self.logger.info(f\"Memory Usage: {estimated_memory:.1f}MB\")\n                self.logger.info(f\"Cognitive Load: {cognitive_load:.3f}\")\n                self.logger.info(f\"Efficiency: {efficiency:.3f}\")\n                \n            # Early stop if we hit memory limits\n            if estimated_memory > self.gpu_specs.total_memory * 0.95:\n                self.logger.info(f\"\\nReached memory limit at batch size {batch_size}\")\n                break\n        \n        # Calculate optimal points\n        max_efficiency_idx = np.argmax(benchmark_results[\"efficiency_curve\"])\n        benchmark_results[\"optimal_points\"] = {\n            \"max_efficiency\": {\n                \"batch_size\": benchmark_results[\"batch_sizes\"][max_efficiency_idx],\n                \"efficiency\": benchmark_results[\"efficiency_curve\"][max_efficiency_idx],\n                \"memory\": benchmark_results[\"memory_curve\"][max_efficiency_idx],\n                \"cognitive_load\": benchmark_results[\"cognitive_load_curve\"][max_efficiency_idx]\n            }\n        }\n        \n        return benchmark_results\n    \n    def _log_final_results(self, results: Dict[str, Any]) -> None:\n        \"\"\"Log final optimization results\"\"\"\n        self.logger.info(\"\\nOptimization Results:\")"
+        },
+        "_log_final_results": {
+          "start_line": 264,
+          "end_line": 294,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "results"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.logger.info",
+              "line": 266
+            },
+            {
+              "name": "self.logger.info",
+              "line": 270
+            },
+            {
+              "name": "self.logger.info",
+              "line": 271
+            },
+            {
+              "name": "self.logger.info",
+              "line": 273
+            },
+            {
+              "name": "self.logger.info",
+              "line": 274
+            },
+            {
+              "name": "self.logger.info",
+              "line": 275
+            },
+            {
+              "name": "self.logger.info",
+              "line": 276
+            },
+            {
+              "name": "self.logger.info",
+              "line": 277
+            },
+            {
+              "name": "self.logger.info",
+              "line": 279
+            },
+            {
+              "name": "self.logger.info",
+              "line": 280
+            },
+            {
+              "name": "self.logger.info",
+              "line": 281
+            },
+            {
+              "name": "self.logger.info",
+              "line": 282
+            },
+            {
+              "name": "self.logger.info",
+              "line": 286
+            },
+            {
+              "name": "self.logger.info",
+              "line": 288
+            },
+            {
+              "name": "self.logger.info",
+              "line": 289
+            },
+            {
+              "name": "self.logger.info",
+              "line": 290
+            },
+            {
+              "name": "self.logger.info",
+              "line": 291
+            },
+            {
+              "name": "self.logger.info",
+              "line": 292
+            }
+          ],
+          "docstring": "Log final optimization results",
+          "code_snippet": "        return benchmark_results\n    \n    def _log_final_results(self, results: Dict[str, Any]) -> None:\n        \"\"\"Log final optimization results\"\"\"\n        self.logger.info(\"\\nOptimization Results:\")\n        \n        # Handle standard optimization results\n        if \"optimal_batch_size\" in results:\n            self.logger.info(f\"Optimal Batch Size: {results['optimal_batch_size']}\")\n            self.logger.info(f\"Peak Efficiency: {results['peak_efficiency']:.3f}\")\n            \n            self.logger.info(\"\\nOptimal Configuration Metrics:\")\n            self.logger.info(f\"Cognitive Load: {results['optimal_metrics']['cognitive_load']:.3f}\")\n            self.logger.info(f\"Estimated Memory Usage: {results['optimal_metrics']['estimated_memory']:.1f}MB\")\n            self.logger.info(f\"Memory Utilization: {results['optimal_metrics']['memory_utilization']:.1%}\")\n            self.logger.info(f\"Efficiency: {results['optimal_metrics']['efficiency']:.3f}\")\n            \n            self.logger.info(\"\\nTheoretical Validation:\")\n            self.logger.info(f\"Critical threshold (Lc): {results['parameters']['Lc']}\")\n            self.logger.info(f\"Efficiency coefficient (\u03b3): {results['parameters']['gamma']}\")\n            self.logger.info(f\"Sync cost (\u03b2): {results['parameters']['beta']}\")\n        \n        # Handle benchmark results if present\n        if \"benchmark\" in results:\n            self.logger.info(\"\\nBenchmark Results:\")\n            opt_points = results[\"benchmark\"][\"optimal_points\"][\"max_efficiency\"]\n            self.logger.info(f\"Maximum Efficiency Point:\")\n            self.logger.info(f\"  Batch Size: {opt_points['batch_size']}\")\n            self.logger.info(f\"  Efficiency: {opt_points['efficiency']:.3f}\")\n            self.logger.info(f\"  Memory Usage: {opt_points['memory']:.1f}MB\")\n            self.logger.info(f\"  Cognitive Load: {opt_points['cognitive_load']:.3f}\")\n\ndef test_kt_optimizer():\n    \"\"\"Test the enhanced K(t) framework batch optimizer with benchmarking\"\"\"\n    optimizer = KTBatchOptimizer(log_dir=\"logs\")"
+        }
+      },
+      "class_variables": [],
+      "bases": []
+    }
+  },
+  "functions": {
+    "test_kt_optimizer": {
+      "start_line": 294,
+      "end_line": 337,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "KTBatchOptimizer",
+          "line": 296
+        },
+        {
+          "name": "ResourceManager",
+          "line": 297
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 300
+        },
+        {
+          "name": "optimizer.optimize_batch_size",
+          "line": 301
+        },
+        {
+          "name": "resource_manager.get_memory_usage",
+          "line": 304
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 305
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 306
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 307
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 308
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 309
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 312
+        },
+        {
+          "name": "optimizer.run_kt_benchmark",
+          "line": 313
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 316
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 317
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 318
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 319
+        },
+        {
+          "name": "optimizer.logger.info",
+          "line": 320
+        },
+        {
+          "name": "optimizer._save_results",
+          "line": 334
+        },
+        {
+          "name": "....isoformat",
+          "line": 327
+        },
+        {
+          "name": "len",
+          "line": 328
+        },
+        {
+          "name": "max",
+          "line": 329
+        },
+        {
+          "name": "float",
+          "line": 330
+        },
+        {
+          "name": "len",
+          "line": 317
+        },
+        {
+          "name": "max",
+          "line": 318
+        },
+        {
+          "name": "max",
+          "line": 319
+        },
+        {
+          "name": "np.mean",
+          "line": 320
+        },
+        {
+          "name": "np.mean",
+          "line": 330
+        },
+        {
+          "name": "datetime.now",
+          "line": 327
+        }
+      ],
+      "docstring": "Test the enhanced K(t) framework batch optimizer with benchmarking",
+      "code_snippet": "            self.logger.info(f\"  Cognitive Load: {opt_points['cognitive_load']:.3f}\")\n\ndef test_kt_optimizer():\n    \"\"\"Test the enhanced K(t) framework batch optimizer with benchmarking\"\"\"\n    optimizer = KTBatchOptimizer(log_dir=\"logs\")\n    resource_manager = ResourceManager()\n    \n    # Run standard optimization\n    optimizer.logger.info(\"\\n=== Starting Standard Optimization ===\")\n    optimization_results = optimizer.optimize_batch_size()\n    \n    # Log memory stats\n    memory_stats = resource_manager.get_memory_usage()\n    optimizer.logger.info(\"\\n=== Memory Statistics ===\")\n    optimizer.logger.info(f\"Allocated Memory: {memory_stats['allocated_mb']:.1f}MB\")\n    optimizer.logger.info(f\"Reserved Memory: {memory_stats['reserved_mb']:.1f}MB\")\n    optimizer.logger.info(f\"Peak Memory Usage: {memory_stats['max_allocated_mb']:.1f}MB\")\n    optimizer.logger.info(f\"Memory Utilization: {memory_stats['utilization']:.1%}\")\n    \n    # Run benchmark\n    optimizer.logger.info(\"\\n=== Starting K(t) Framework Benchmark ===\")\n    benchmark_results = optimizer.run_kt_benchmark(iterations=100)\n    \n    # Log benchmark summary\n    optimizer.logger.info(\"\\n=== Benchmark Summary ===\")\n    optimizer.logger.info(f\"Total Iterations: {len(benchmark_results['efficiency_curve'])}\")\n    optimizer.logger.info(f\"Peak Memory Usage: {max(benchmark_results['memory_curve']):.1f}MB\")\n    optimizer.logger.info(f\"Peak Efficiency: {max(benchmark_results['efficiency_curve']):.3f}\")\n    optimizer.logger.info(f\"Average Cognitive Load: {np.mean(benchmark_results['cognitive_load_curve']):.3f}\")\n    \n    # Save combined results\n    combined_results = {\n        \"optimization\": optimization_results,\n        \"benchmark\": benchmark_results,\n        \"test_summary\": {\n            \"timestamp\": datetime.now().isoformat(),\n            \"total_patterns\": len(benchmark_results['batch_sizes']),\n            \"max_efficiency\": max(benchmark_results['efficiency_curve']),\n            \"avg_cognitive_load\": float(np.mean(benchmark_results['cognitive_load_curve']))\n        }\n    }\n    \n    optimizer._save_results(combined_results)\n    return combined_results\n\nif __name__ == \"__main__\":\n    test_kt_optimizer()"
+    }
+  },
+  "constants": {}
+}

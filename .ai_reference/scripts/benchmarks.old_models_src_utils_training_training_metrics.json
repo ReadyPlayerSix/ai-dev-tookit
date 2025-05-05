@@ -1,0 +1,411 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\training\\training_metrics.py",
+  "imports": [
+    {
+      "name": "dataclasses.dataclass",
+      "line": 1
+    },
+    {
+      "name": "typing.Dict",
+      "line": 2
+    },
+    {
+      "name": "typing.List",
+      "line": 2
+    },
+    {
+      "name": "typing.Optional",
+      "line": 2
+    },
+    {
+      "name": "typing.Any",
+      "line": 2
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 3
+    },
+    {
+      "name": "numpy",
+      "line": 4
+    },
+    {
+      "name": "torch",
+      "line": 5
+    },
+    {
+      "name": "logging",
+      "line": 6
+    },
+    {
+      "name": "json",
+      "line": 7
+    },
+    {
+      "name": "pathlib.Path",
+      "line": 8
+    }
+  ],
+  "classes": {
+    "TraditionalMetrics": {
+      "start_line": 11,
+      "end_line": 21,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Traditional ML training metrics"
+    },
+    "PatternMetrics": {
+      "start_line": 22,
+      "end_line": 30,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Our unique pattern-based metrics"
+    },
+    "TrainingMetricsTracker": {
+      "start_line": 30,
+      "end_line": 256,
+      "methods": {
+        "__init__": {
+          "start_line": 33,
+          "end_line": 69,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "experiment_name",
+              "type": "str"
+            },
+            {
+              "name": "log_dir",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "Path",
+              "line": 35
+            },
+            {
+              "name": "self.log_dir.mkdir",
+              "line": 36
+            },
+            {
+              "name": "logging.getLogger",
+              "line": 39
+            },
+            {
+              "name": "self.logger.setLevel",
+              "line": 40
+            },
+            {
+              "name": "logging.FileHandler",
+              "line": 41
+            },
+            {
+              "name": "fh.setFormatter",
+              "line": 42
+            },
+            {
+              "name": "self.logger.addHandler",
+              "line": 43
+            },
+            {
+              "name": "datetime.now",
+              "line": 56
+            },
+            {
+              "name": "self.logger.info",
+              "line": 67
+            },
+            {
+              "name": "logging.Formatter",
+              "line": 42
+            },
+            {
+              "name": "datetime.now",
+              "line": 41
+            }
+          ],
+          "code_snippet": "    \"\"\"Comprehensive training metrics tracking system\"\"\"\n    \n    def __init__(self, experiment_name: str, log_dir: str = \"logs/training_metrics\"):\n        self.experiment_name = experiment_name\n        self.log_dir = Path(log_dir)\n        self.log_dir.mkdir(parents=True, exist_ok=True)\n        \n        # Initialize logging\n        self.logger = logging.getLogger(f\"metrics_tracker_{experiment_name}\")\n        self.logger.setLevel(logging.INFO)\n        fh = logging.FileHandler(self.log_dir / f\"{experiment_name}_{datetime.now():%Y%m%d_%H%M%S}.log\")\n        fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))\n        self.logger.addHandler(fh)\n        \n        # Metrics storage\n        self.traditional_metrics: List[TraditionalMetrics] = []\n        self.pattern_metrics: List[PatternMetrics] = []\n        self.training_history: Dict[str, List[float]] = {\n            \"accuracy\": [],\n            \"pattern_translation\": [],\n            \"semantic_preservation\": [],\n            \"resource_efficiency\": []\n        }\n        \n        # Resource tracking\n        self.start_time = datetime.now()\n        self.total_gpu_memory = 0\n        self.total_processing_time = 0\n        \n        # Baseline comparisons\n        self.baselines = {\n            \"yolo\": {\"accuracy\": 0.89, \"training_time\": 24.0},  # hours\n            \"bert\": {\"accuracy\": 0.91, \"training_time\": 32.0},\n            \"roberta\": {\"accuracy\": 0.92, \"training_time\": 40.0}\n        }\n        \n        self.logger.info(f\"Initialized metrics tracking for experiment: {experiment_name}\")  \n\n    def update_traditional_metrics(self, \n                                 metrics: TraditionalMetrics,\n                                 epoch: int,"
+        },
+        "update_traditional_metrics": {
+          "start_line": 69,
+          "end_line": 109,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "metrics",
+              "type": "TraditionalMetrics"
+            },
+            {
+              "name": "epoch",
+              "type": "int"
+            },
+            {
+              "name": "domain",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.traditional_metrics.append",
+              "line": 74
+            },
+            {
+              "name": "....append",
+              "line": 75
+            },
+            {
+              "name": "self.baselines.items",
+              "line": 79
+            },
+            {
+              "name": "self.logger.info",
+              "line": 95
+            },
+            {
+              "name": "self.logger.info",
+              "line": 103
+            },
+            {
+              "name": "relative_performance.items",
+              "line": 104
+            },
+            {
+              "name": "self.get_training_hours",
+              "line": 82
+            },
+            {
+              "name": "self.logger.info",
+              "line": 105
+            }
+          ],
+          "docstring": "Update traditional ML metrics",
+          "code_snippet": "        self.logger.info(f\"Initialized metrics tracking for experiment: {experiment_name}\")  \n\n    def update_traditional_metrics(self, \n                                 metrics: TraditionalMetrics,\n                                 epoch: int,\n                                 domain: str):\n        \"\"\"Update traditional ML metrics\"\"\"\n        self.traditional_metrics.append(metrics)\n        self.training_history[\"accuracy\"].append(metrics.accuracy)\n        \n        # Calculate relative performance\n        relative_performance = {}\n        for model, baseline in self.baselines.items():\n            if metrics.accuracy >= baseline[\"accuracy\"]:\n                epsilon = 1e-9\n                training_hours = self.get_training_hours()\n                if training_hours > 0:\n                    time_ratio = training_hours / baseline[\"training_time\"]\n                    relative_performance[model] = {\n                        \"accuracy_ratio\": metrics.accuracy / baseline[\"accuracy\"],\n                        \"time_efficiency\": 1 / time_ratio  # >1 means faster\n                    }\n                else:\n                    relative_performance[model] = {\n                        \"accuracy_ratio\": metrics.accuracy / baseline[\"accuracy\"],\n                        \"time_efficiency\": 1.0  # Default when time is too short to measure\n                    }\n        \n        self.logger.info(\n            f\"Epoch {epoch} {domain} Metrics:\\n\"\n            f\"Accuracy: {metrics.accuracy:.4f}\\n\"\n            f\"Processing Time: {metrics.processing_time_ms:.2f}ms\\n\"\n            f\"GPU Memory: {metrics.gpu_memory_mb:.1f}MB\"\n        )\n        \n        if relative_performance:\n            self.logger.info(\"Relative Performance:\")\n            for model, perf in relative_performance.items():\n                self.logger.info(\n                    f\"{model}: {perf['accuracy_ratio']:.2f}x accuracy, \"\n                    f\"{perf['time_efficiency']:.2f}x faster\"\n                )\n    \n    def update_pattern_metrics(self,\n                            metrics: PatternMetrics,"
+        },
+        "update_pattern_metrics": {
+          "start_line": 110,
+          "end_line": 139,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "metrics",
+              "type": "PatternMetrics"
+            },
+            {
+              "name": "epoch",
+              "type": "int"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_metrics.append",
+              "line": 114
+            },
+            {
+              "name": "....append",
+              "line": 115
+            },
+            {
+              "name": "....append",
+              "line": 116
+            },
+            {
+              "name": "self.get_training_hours",
+              "line": 120
+            },
+            {
+              "name": "....append",
+              "line": 132
+            },
+            {
+              "name": "self.logger.info",
+              "line": 135
+            },
+            {
+              "name": "metrics.cross_domain_success.items",
+              "line": 136
+            },
+            {
+              "name": "self.logger.info",
+              "line": 137
+            }
+          ],
+          "docstring": "Update our unique pattern-based metrics",
+          "code_snippet": "                )\n    \n    def update_pattern_metrics(self,\n                            metrics: PatternMetrics,\n                            epoch: int):\n        \"\"\"Update our unique pattern-based metrics\"\"\"\n        self.pattern_metrics.append(metrics)\n        self.training_history[\"pattern_translation\"].append(metrics.pattern_translation_success)\n        self.training_history[\"semantic_preservation\"].append(metrics.semantic_preservation)\n        \n        # Calculate resource efficiency\n        gpu_memory_gb = self.total_gpu_memory / 1024  # Convert to GB\n        training_hours = self.get_training_hours()\n        \n        # Add safeguard for division\n        if gpu_memory_gb > 0 and training_hours > 0:\n            efficiency = (\n                (metrics.pattern_translation_success * \n                metrics.semantic_preservation) /\n                (gpu_memory_gb * training_hours)\n            )\n        else:\n            efficiency = metrics.pattern_translation_success * metrics.semantic_preservation\n            \n        self.training_history[\"resource_efficiency\"].append(efficiency)\n        \n        # Log cross-domain performance\n        self.logger.info(\"Cross-Domain Success Rates:\")\n        for source, success_rate in metrics.cross_domain_success.items():\n            self.logger.info(f\"{source}: {success_rate:.4f}\")\n    \n    def get_training_hours(self) -> float:\n        \"\"\"Calculate total training time in hours\"\"\"\n        return (datetime.now() - self.start_time).total_seconds() / 3600"
+        },
+        "get_training_hours": {
+          "start_line": 139,
+          "end_line": 143,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "....total_seconds",
+              "line": 141
+            },
+            {
+              "name": "datetime.now",
+              "line": 141
+            }
+          ],
+          "docstring": "Calculate total training time in hours",
+          "code_snippet": "            self.logger.info(f\"{source}: {success_rate:.4f}\")\n    \n    def get_training_hours(self) -> float:\n        \"\"\"Calculate total training time in hours\"\"\"\n        return (datetime.now() - self.start_time).total_seconds() / 3600\n    \n    def calculate_comparative_metrics(self) -> Dict[str, Any]:\n        \"\"\"Calculate metrics comparing our system to traditional approaches\"\"\"\n        if not self.traditional_metrics or not self.pattern_metrics:"
+        },
+        "calculate_comparative_metrics": {
+          "start_line": 143,
+          "end_line": 185,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.get_training_hours",
+              "line": 153
+            },
+            {
+              "name": "np.mean",
+              "line": 164
+            },
+            {
+              "name": "list",
+              "line": 164
+            },
+            {
+              "name": "np.mean",
+              "line": 176
+            },
+            {
+              "name": "self.get_training_hours",
+              "line": 180
+            },
+            {
+              "name": "latest_pattern.cross_domain_success.values",
+              "line": 164
+            },
+            {
+              "name": "list",
+              "line": 176
+            },
+            {
+              "name": "latest_pattern.cross_domain_success.values",
+              "line": 176
+            }
+          ],
+          "docstring": "Calculate metrics comparing our system to traditional approaches",
+          "code_snippet": "        return (datetime.now() - self.start_time).total_seconds() / 3600\n    \n    def calculate_comparative_metrics(self) -> Dict[str, Any]:\n        \"\"\"Calculate metrics comparing our system to traditional approaches\"\"\"\n        if not self.traditional_metrics or not self.pattern_metrics:\n            return {}\n            \n        # Get latest metrics\n        latest_traditional = self.traditional_metrics[-1]\n        latest_pattern = self.pattern_metrics[-1]\n        \n        # Calculate learning speed (samples per second)\n        training_time = self.get_training_hours() * 3600  # Convert to seconds\n        samples_per_second = latest_traditional.training_samples / training_time\n        \n        # Calculate memory efficiency (accuracy per GB)\n        memory_gb = self.total_gpu_memory / 1024\n        accuracy_per_gb = latest_traditional.accuracy / memory_gb\n        \n        # Calculate unique capabilities score\n        unique_score = (\n            latest_pattern.pattern_translation_success *\n            latest_pattern.semantic_preservation *\n            np.mean(list(latest_pattern.cross_domain_success.values()))\n        )\n        \n        return {\n            \"traditional_performance\": {\n                \"accuracy\": latest_traditional.accuracy,\n                \"samples_per_second\": samples_per_second,\n                \"accuracy_per_gb\": accuracy_per_gb\n            },\n            \"unique_capabilities\": {\n                \"pattern_translation\": latest_pattern.pattern_translation_success,\n                \"semantic_preservation\": latest_pattern.semantic_preservation,\n                \"cross_domain_average\": np.mean(list(latest_pattern.cross_domain_success.values())),\n                \"unique_score\": unique_score\n            },\n            \"efficiency_metrics\": {\n                \"training_hours\": self.get_training_hours(),\n                \"gpu_memory_gb\": memory_gb,\n                \"adaptation_speed\": latest_pattern.adaptation_speed,\n                \"learning_efficiency\": latest_pattern.learning_efficiency\n            }\n        }\n    \n    def save_metrics(self):"
+        },
+        "save_metrics": {
+          "start_line": 187,
+          "end_line": 205,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.logger.info",
+              "line": 203
+            },
+            {
+              "name": "self.get_training_hours",
+              "line": 193
+            },
+            {
+              "name": "self.calculate_comparative_metrics",
+              "line": 196
+            },
+            {
+              "name": "....isoformat",
+              "line": 197
+            },
+            {
+              "name": "open",
+              "line": 200
+            },
+            {
+              "name": "json.dump",
+              "line": 201
+            },
+            {
+              "name": "datetime.now",
+              "line": 197
+            }
+          ],
+          "docstring": "Save all metrics to file",
+          "code_snippet": "        }\n    \n    def save_metrics(self):\n        \"\"\"Save all metrics to file\"\"\"\n        save_path = self.log_dir / f\"{self.experiment_name}_metrics.json\"\n        \n        metrics_data = {\n            \"experiment_name\": self.experiment_name,\n            \"training_duration_hours\": self.get_training_hours(),\n            \"total_gpu_memory_gb\": self.total_gpu_memory / 1024,\n            \"training_history\": self.training_history,\n            \"comparative_metrics\": self.calculate_comparative_metrics(),\n            \"timestamp\": datetime.now().isoformat()\n        }\n        \n        with open(save_path, 'w') as f:\n            json.dump(metrics_data, f, indent=2)\n        \n        self.logger.info(f\"Saved metrics to: {save_path}\")\n        \n    def generate_comparison_report(self) -> str:\n        \"\"\"Generate a human-readable comparison report\"\"\"\n        comparative_metrics = self.calculate_comparative_metrics()"
+        },
+        "generate_comparison_report": {
+          "start_line": 205,
+          "end_line": 256,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "str",
+          "calls": [
+            {
+              "name": "self.calculate_comparative_metrics",
+              "line": 207
+            },
+            {
+              "name": "self.baselines.items",
+              "line": 239
+            },
+            {
+              "name": "....join",
+              "line": 254
+            },
+            {
+              "name": "print",
+              "line": 247
+            },
+            {
+              "name": "report.append",
+              "line": 248
+            },
+            {
+              "name": "datetime.now",
+              "line": 217
+            },
+            {
+              "name": "float",
+              "line": 242
+            },
+            {
+              "name": "model.upper",
+              "line": 249
+            }
+          ],
+          "docstring": "Generate a human-readable comparison report",
+          "code_snippet": "        self.logger.info(f\"Saved metrics to: {save_path}\")\n        \n    def generate_comparison_report(self) -> str:\n        \"\"\"Generate a human-readable comparison report\"\"\"\n        comparative_metrics = self.calculate_comparative_metrics()\n        if not comparative_metrics:\n            return \"No metrics available for comparison\"\n            \n        traditional = comparative_metrics[\"traditional_performance\"]\n        unique = comparative_metrics[\"unique_capabilities\"]\n        efficiency = comparative_metrics[\"efficiency_metrics\"]\n        \n        report = [\n            f\"Training Comparison Report for {self.experiment_name}\",\n            f\"Generated: {datetime.now():%Y-%m-%d %H:%M:%S}\",\n            \"\",\n            \"Traditional Metrics:\",\n            f\"- Accuracy: {traditional['accuracy']:.4f}\",\n            f\"- Processing Speed: {traditional['samples_per_second']:.2f} samples/second\",\n            f\"- Memory Efficiency: {traditional['accuracy_per_gb']:.4f} accuracy/GB\",\n            \"\",\n            \"Unique Capabilities:\",\n            f\"- Pattern Translation: {unique['pattern_translation']:.4f}\",\n            f\"- Semantic Preservation: {unique['semantic_preservation']:.4f}\",\n            f\"- Cross-Domain Success: {unique['cross_domain_average']:.4f}\",\n            \"\",\n            \"Efficiency Metrics:\",\n            f\"- Training Time: {efficiency['training_hours']:.2f} hours\",\n            f\"- GPU Memory: {efficiency['gpu_memory_gb']:.2f} GB\",\n            f\"- Adaptation Speed: {efficiency['adaptation_speed']:.4f}\",\n            f\"- Learning Efficiency: {efficiency['learning_efficiency']:.4f}\",\n            \"\",\n            \"Comparative Analysis:\",\n        ]\n        \n        # Add baseline comparisons\n        for model, baseline in self.baselines.items():\n            if traditional['accuracy'] >= baseline['accuracy']:\n                if efficiency['training_hours'] == 0:\n                    time_efficiency = float('inf')  # Infinity, indicating maximum efficiency\n                    time_ratio = 0 #Added this to prevent another ZeroDivisionError\n                else:\n                    time_ratio = efficiency['training_hours'] / baseline['training_time']\n                    time_efficiency = 1 / time_ratio\n                print(f\"DEBUG: time_ratio = {time_ratio}\")\n                report.append(\n                    f\"Compared to {model.upper()}:\"\n                    f\" {traditional['accuracy']/baseline['accuracy']:.2f}x accuracy,\"\n                    f\" {time_efficiency:.2f}x faster\"  # Use time_efficiency here\n                )\n        \n        return \"\\n\".join(report)\n\n# Example usage:\nif __name__ == \"__main__\":\n    # Initialize tracker"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Comprehensive training metrics tracking system"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

@@ -1,0 +1,351 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\models\\architectures\\model_creation.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 11
+    },
+    {
+      "name": "torch",
+      "line": 12
+    },
+    {
+      "name": "torch.nn",
+      "line": 13
+    },
+    {
+      "name": "torchvision.models",
+      "line": 14
+    },
+    {
+      "name": "types",
+      "line": 15
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "create_model": {
+      "start_line": 20,
+      "end_line": 238,
+      "parameters": [
+        {
+          "name": "model_type"
+        },
+        {
+          "name": "use_pretrained"
+        },
+        {
+          "name": "num_classes"
+        },
+        {
+          "name": "input_channels"
+        },
+        {
+          "name": "input_size"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 41
+        },
+        {
+          "name": "model_type.startswith",
+          "line": 44
+        },
+        {
+          "name": "nn.Linear",
+          "line": 89
+        },
+        {
+          "name": "model_type.startswith",
+          "line": 91
+        },
+        {
+          "name": "models.resnet18",
+          "line": 47
+        },
+        {
+          "name": "model.conv1.weight.clone",
+          "line": 61
+        },
+        {
+          "name": "logger.info",
+          "line": 62
+        },
+        {
+          "name": "model_type.startswith",
+          "line": 160
+        },
+        {
+          "name": "models.resnet34",
+          "line": 49
+        },
+        {
+          "name": "logger.info",
+          "line": 68
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 69
+        },
+        {
+          "name": "nn.Identity",
+          "line": 71
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 74
+        },
+        {
+          "name": "logger.info",
+          "line": 86
+        },
+        {
+          "name": "models.vgg11",
+          "line": 94
+        },
+        {
+          "name": "setattr",
+          "line": 110
+        },
+        {
+          "name": "types.MethodType",
+          "line": 123
+        },
+        {
+          "name": "logger.info",
+          "line": 127
+        },
+        {
+          "name": "nn.Sequential",
+          "line": 129
+        },
+        {
+          "name": "nn.Linear",
+          "line": 141
+        },
+        {
+          "name": "logger.warning",
+          "line": 145
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 148
+        },
+        {
+          "name": "hasattr",
+          "line": 172
+        },
+        {
+          "name": "model_type.startswith",
+          "line": 213
+        },
+        {
+          "name": "models.resnet50",
+          "line": 51
+        },
+        {
+          "name": "torch.no_grad",
+          "line": 78
+        },
+        {
+          "name": "models.vgg13",
+          "line": 96
+        },
+        {
+          "name": "nn.Sequential",
+          "line": 110
+        },
+        {
+          "name": "self.features_output",
+          "line": 117
+        },
+        {
+          "name": "torch.flatten",
+          "line": 118
+        },
+        {
+          "name": "self.classifier",
+          "line": 119
+        },
+        {
+          "name": "nn.Linear",
+          "line": 130
+        },
+        {
+          "name": "nn.ReLU",
+          "line": 131
+        },
+        {
+          "name": "nn.Dropout",
+          "line": 132
+        },
+        {
+          "name": "nn.Linear",
+          "line": 133
+        },
+        {
+          "name": "nn.ReLU",
+          "line": 134
+        },
+        {
+          "name": "nn.Dropout",
+          "line": 135
+        },
+        {
+          "name": "nn.Linear",
+          "line": 136
+        },
+        {
+          "name": "models.mobilenet_v2",
+          "line": 163
+        },
+        {
+          "name": "nn.Linear",
+          "line": 174
+        },
+        {
+          "name": "nn.Linear",
+          "line": 178
+        },
+        {
+          "name": "nn.Linear",
+          "line": 228
+        },
+        {
+          "name": "ValueError",
+          "line": 234
+        },
+        {
+          "name": "models.resnet101",
+          "line": 53
+        },
+        {
+          "name": "model.conv1.weight.copy_",
+          "line": 81
+        },
+        {
+          "name": "model.conv1.weight.copy_",
+          "line": 84
+        },
+        {
+          "name": "models.vgg16",
+          "line": 98
+        },
+        {
+          "name": "nn.AdaptiveAvgPool2d",
+          "line": 112
+        },
+        {
+          "name": "torch.no_grad",
+          "line": 155
+        },
+        {
+          "name": "models.mobilenet_v3_small",
+          "line": 165
+        },
+        {
+          "name": "hasattr",
+          "line": 182
+        },
+        {
+          "name": "hasattr",
+          "line": 182
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 185
+        },
+        {
+          "name": "nn.Conv2d",
+          "line": 200
+        },
+        {
+          "name": "models.efficientnet_b0",
+          "line": 216
+        },
+        {
+          "name": "logger.info",
+          "line": 232
+        },
+        {
+          "name": "models.resnet152",
+          "line": 55
+        },
+        {
+          "name": "ValueError",
+          "line": 57
+        },
+        {
+          "name": "models.vgg19",
+          "line": 100
+        },
+        {
+          "name": "ValueError",
+          "line": 102
+        },
+        {
+          "name": "models.mobilenet_v3_large",
+          "line": 167
+        },
+        {
+          "name": "ValueError",
+          "line": 169
+        },
+        {
+          "name": "models.efficientnet_b1",
+          "line": 218
+        },
+        {
+          "name": "torch.no_grad",
+          "line": 193
+        },
+        {
+          "name": "torch.no_grad",
+          "line": 208
+        },
+        {
+          "name": "models.efficientnet_b2",
+          "line": 220
+        },
+        {
+          "name": "min",
+          "line": 156
+        },
+        {
+          "name": "min",
+          "line": 156
+        },
+        {
+          "name": "models.efficientnet_b3",
+          "line": 222
+        },
+        {
+          "name": "ValueError",
+          "line": 224
+        },
+        {
+          "name": "min",
+          "line": 194
+        },
+        {
+          "name": "min",
+          "line": 194
+        },
+        {
+          "name": "min",
+          "line": 209
+        },
+        {
+          "name": "min",
+          "line": 209
+        }
+      ],
+      "docstring": "\n    Create a model for the specified architecture, optionally with pre-trained weights.\n    \n    This function creates a neural network model of the specified architecture type,\n    adapting it for the given input size, number of channels, and number of classes.\n    It also handles transferring pre-trained weights when applicable.\n    \n    Args:\n        model_type (str): Type of model to create (resnet18, resnet34, vgg16, etc.)\n        use_pretrained (bool): Whether to use pre-trained weights from ImageNet\n        num_classes (int): Number of output classes\n        input_channels (int): Number of input channels\n        input_size (int): Input image size\n        \n    Returns:\n        torch.nn.Module: The created model instance\n        \n    Raises:\n        ValueError: If the specified model_type is unsupported\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef create_model(model_type=\"resnet18\", use_pretrained=False, num_classes=10, input_channels=3, input_size=32):\n    \"\"\"\n    Create a model for the specified architecture, optionally with pre-trained weights.\n    \n    This function creates a neural network model of the specified architecture type,\n    adapting it for the given input size, number of channels, and number of classes.\n    It also handles transferring pre-trained weights when applicable.\n    \n    Args:\n        model_type (str): Type of model to create (resnet18, resnet34, vgg16, etc.)\n        use_pretrained (bool): Whether to use pre-trained weights from ImageNet\n        num_classes (int): Number of output classes\n        input_channels (int): Number of input channels\n        input_size (int): Input image size\n        \n    Returns:\n        torch.nn.Module: The created model instance\n        \n    Raises:\n        ValueError: If the specified model_type is unsupported\n    \"\"\"\n    logger.info(f\"Creating {model_type} model for {num_classes} classes with input size {input_size}x{input_size}\")\n    \n    # Handle different model architectures\n    if model_type.startswith(\"resnet\"):\n        # Choose the appropriate ResNet model\n        if model_type == \"resnet18\":\n            model = models.resnet18(pretrained=use_pretrained)\n        elif model_type == \"resnet34\":\n            model = models.resnet34(pretrained=use_pretrained)\n        elif model_type == \"resnet50\":\n            model = models.resnet50(pretrained=use_pretrained)\n        elif model_type == \"resnet101\":\n            model = models.resnet101(pretrained=use_pretrained)\n        elif model_type == \"resnet152\":\n            model = models.resnet152(pretrained=use_pretrained)\n        else:\n            raise ValueError(f\"Unsupported ResNet model: {model_type}\")\n        \n        # Save the pre-trained conv1 weights if using pre-trained model\n        if use_pretrained:\n            pretrained_conv1_weight = model.conv1.weight.clone()\n            logger.info(f\"Using pre-trained {model_type} with weights from ImageNet\")\n        \n        # Check if we need to adapt the first conv layer\n        if input_size < 64 or input_channels != 3:\n            # For small image sizes like CIFAR-10 (32x32), we need to adapt the first conv layer\n            if input_size < 64:\n                logger.info(f\"Adapting first conv layer for small input size: {input_size}x{input_size}\")\n                model.conv1 = nn.Conv2d(input_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)\n                # Remove aggressive pooling for small images\n                model.maxpool = nn.Identity()\n            else:\n                # Just adapt channels if input size is large enough\n                model.conv1 = nn.Conv2d(input_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)\n            \n            # Adapt the pre-trained weights to the new conv layer if possible\n            if use_pretrained and input_channels == 3:\n                with torch.no_grad():\n                    if input_size < 64:\n                        # Take the center 3x3 section of the 7x7 kernels for small images\n                        model.conv1.weight.copy_(pretrained_conv1_weight[:, :, 2:5, 2:5])\n                    else:\n                        # For different number of channels but same kernel size\n                        model.conv1.weight.copy_(pretrained_conv1_weight)\n                        \n                logger.info(\"Adapted pre-trained conv1 weights for the new input size\")\n        \n        # Adapt the final fc layer for the specified number of classes\n        model.fc = nn.Linear(model.fc.in_features, num_classes)\n        \n    elif model_type.startswith(\"vgg\"):\n        # Choose the appropriate VGG model\n        if model_type == \"vgg11\":\n            model = models.vgg11(pretrained=use_pretrained)\n        elif model_type == \"vgg13\":\n            model = models.vgg13(pretrained=use_pretrained)\n        elif model_type == \"vgg16\":\n            model = models.vgg16(pretrained=use_pretrained)\n        elif model_type == \"vgg19\":\n            model = models.vgg19(pretrained=use_pretrained)\n        else:\n            raise ValueError(f\"Unsupported VGG model: {model_type}\")\n        \n        # Adapt the classifier for different input sizes and number of classes\n        if input_size != 224:\n            # For CIFAR-10's 32x32 input, we need to modify the model architecture\n            # VGG doesn't have an adaptive pooling layer by default\n            \n            # Add adaptive pooling after the features\n            setattr(model, 'features_output', nn.Sequential(\n                model.features,\n                nn.AdaptiveAvgPool2d((1, 1))\n            ))\n            \n            # Override the forward method to use our adaptive pooling\n            def forward(self, x):\n                x = self.features_output(x)\n                x = torch.flatten(x, 1)\n                x = self.classifier(x)\n                return x\n            \n            # Bind the new forward method\n            model.forward = types.MethodType(forward, model)\n            \n            # Now create classifier with correct input size\n            in_features = 512  # For VGG16, after AdaptiveAvgPool2d(1,1)\n            logger.info(f\"Adapting VGG classifier for input size {input_size}x{input_size}, features: {in_features}\")\n            \n            model.classifier = nn.Sequential(\n                nn.Linear(in_features, 4096),\n                nn.ReLU(True),\n                nn.Dropout(),\n                nn.Linear(4096, 4096),\n                nn.ReLU(True),\n                nn.Dropout(),\n                nn.Linear(4096, num_classes),\n            )\n        else:\n            # Just adapt the final layer for the number of classes\n            num_features = model.classifier[6].in_features\n            model.classifier[6] = nn.Linear(num_features, num_classes)\n        \n        # Handle different input channels if needed\n        if input_channels != 3 and use_pretrained:\n            logger.warning(f\"Pre-trained VGG models expect 3 input channels, but {input_channels} were specified.\")\n            # Adapt the first conv layer for different number of channels\n            first_conv = model.features[0]\n            new_conv = nn.Conv2d(input_channels, first_conv.out_channels, \n                               kernel_size=first_conv.kernel_size, \n                               stride=first_conv.stride,\n                               padding=first_conv.padding)\n            \n            # Copy weights for shared channels if possible\n            if input_channels > 0:\n                with torch.no_grad():\n                    new_conv.weight[:, :min(3, input_channels)] = first_conv.weight[:, :min(3, input_channels)]\n            \n            model.features[0] = new_conv\n    \n    elif model_type.startswith(\"mobilenet\"):\n        # MobileNet models\n        if model_type == \"mobilenet_v2\":\n            model = models.mobilenet_v2(pretrained=use_pretrained)\n        elif model_type == \"mobilenet_v3_small\":\n            model = models.mobilenet_v3_small(pretrained=use_pretrained)\n        elif model_type == \"mobilenet_v3_large\":\n            model = models.mobilenet_v3_large(pretrained=use_pretrained)\n        else:\n            raise ValueError(f\"Unsupported MobileNet model: {model_type}\")\n        \n        # Adapt the classifier for the number of classes\n        if hasattr(model, 'classifier'):\n            in_features = model.classifier[-1].in_features\n            model.classifier[-1] = nn.Linear(in_features, num_classes)\n        else:\n            # For older versions of torchvision\n            in_features = model.last_channel\n            model.classifier = nn.Linear(in_features, num_classes)\n        \n        # Adapt the first conv layer for different input channels if needed\n        if input_channels != 3:\n            if hasattr(model, 'features') and hasattr(model.features[0], 'conv'):\n                # MobileNetV3\n                first_conv = model.features[0].conv\n                new_conv = nn.Conv2d(input_channels, first_conv.out_channels,\n                                   kernel_size=first_conv.kernel_size,\n                                   stride=first_conv.stride,\n                                   padding=first_conv.padding,\n                                   bias=False if first_conv.bias is None else True)\n                \n                # Copy weights for shared channels if possible and using pre-trained\n                if use_pretrained and input_channels > 0:\n                    with torch.no_grad():\n                        new_conv.weight[:, :min(3, input_channels)] = first_conv.weight[:, :min(3, input_channels)]\n                \n                model.features[0].conv = new_conv\n            else:\n                # MobileNetV2\n                first_conv = model.features[0][0]\n                new_conv = nn.Conv2d(input_channels, first_conv.out_channels,\n                                  kernel_size=first_conv.kernel_size,\n                                  stride=first_conv.stride,\n                                  padding=first_conv.padding,\n                                  bias=False if first_conv.bias is None else True)\n                \n                # Copy weights for shared channels if possible and using pre-trained\n                if use_pretrained and input_channels > 0:\n                    with torch.no_grad():\n                        new_conv.weight[:, :min(3, input_channels)] = first_conv.weight[:, :min(3, input_channels)]\n                \n                model.features[0][0] = new_conv\n    \n    elif model_type.startswith(\"efficientnet\"):\n        # EfficientNet models\n        if model_type == \"efficientnet_b0\":\n            model = models.efficientnet_b0(pretrained=use_pretrained)\n        elif model_type == \"efficientnet_b1\":\n            model = models.efficientnet_b1(pretrained=use_pretrained)\n        elif model_type == \"efficientnet_b2\":\n            model = models.efficientnet_b2(pretrained=use_pretrained)\n        elif model_type == \"efficientnet_b3\":\n            model = models.efficientnet_b3(pretrained=use_pretrained)\n        else:\n            raise ValueError(f\"Unsupported EfficientNet model: {model_type}\")\n        \n        # Modify the classifier for the target number of classes\n        in_features = model.classifier[1].in_features\n        model.classifier[1] = nn.Linear(in_features, num_classes)\n        \n        # Adapt for smaller input sizes if needed\n        if input_size < 224:\n            logger.info(f\"Adapting EfficientNet for smaller input size: {input_size}x{input_size}\")\n    else:\n        raise ValueError(f\"Unsupported model type: {model_type}\")\n    \n    return model"
+    }
+  },
+  "constants": {}
+}

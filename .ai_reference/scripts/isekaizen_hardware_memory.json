@@ -1,0 +1,403 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\hardware\\memory.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 5
+    },
+    {
+      "name": "logging",
+      "line": 6
+    },
+    {
+      "name": "numpy",
+      "line": 7
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 8
+    },
+    {
+      "name": "typing.Dict",
+      "line": 8
+    },
+    {
+      "name": "typing.Union",
+      "line": 8
+    },
+    {
+      "name": "typing.List",
+      "line": 8
+    },
+    {
+      "name": "typing.Optional",
+      "line": 8
+    }
+  ],
+  "classes": {
+    "ModelMemoryAnalyzer": {
+      "start_line": 12,
+      "end_line": 268,
+      "methods": {
+        "__init__": {
+          "start_line": 20,
+          "end_line": 46,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._calculate_parameter_memory",
+              "line": 41
+            },
+            {
+              "name": "logger.info",
+              "line": 43
+            },
+            {
+              "name": "logger.info",
+              "line": 44
+            },
+            {
+              "name": "next",
+              "line": 33
+            },
+            {
+              "name": "torch.device",
+              "line": 36
+            },
+            {
+              "name": "model.parameters",
+              "line": 33
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 36
+            }
+          ],
+          "docstring": "\n        Initialize with model and device.\n        \n        Args:\n            model: PyTorch model to analyze\n            device: Device on which the model is or will be run (default: infer from model)\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, model: torch.nn.Module, device: Optional[torch.device] = None):\n        \"\"\"\n        Initialize with model and device.\n        \n        Args:\n            model: PyTorch model to analyze\n            device: Device on which the model is or will be run (default: infer from model)\n        \"\"\"\n        self.model = model\n        \n        # Infer device from model if not specified\n        if device is None:\n            try:\n                self.device = next(model.parameters()).device\n            except StopIteration:\n                # Model has no parameters, default to cuda if available\n                self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        else:\n            self.device = device\n            \n        self.is_gpu = self.device.type == 'cuda'\n        self.param_memory = self._calculate_parameter_memory()\n        \n        logger.info(f\"Model memory analyzer initialized: {model.__class__.__name__} on {self.device}\")\n        logger.info(f\"Model parameters memory: {self.param_memory / (1024**2):.2f} MB\")\n        \n    def _calculate_parameter_memory(self) -> int:\n        \"\"\"\n        Calculate memory used by model parameters."
+        },
+        "_calculate_parameter_memory": {
+          "start_line": 46,
+          "end_line": 56,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "sum",
+              "line": 53
+            },
+            {
+              "name": "p.numel",
+              "line": 53
+            },
+            {
+              "name": "p.element_size",
+              "line": 53
+            },
+            {
+              "name": "self.model.parameters",
+              "line": 53
+            }
+          ],
+          "docstring": "\n        Calculate memory used by model parameters.\n        \n        Returns:\n            Memory usage in bytes\n        ",
+          "code_snippet": "        logger.info(f\"Model parameters memory: {self.param_memory / (1024**2):.2f} MB\")\n        \n    def _calculate_parameter_memory(self) -> int:\n        \"\"\"\n        Calculate memory used by model parameters.\n        \n        Returns:\n            Memory usage in bytes\n        \"\"\"\n        param_memory = sum(p.numel() * p.element_size() for p in self.model.parameters())\n        return param_memory\n    \n    def estimate_single_sample_memory(self, input_shape: Tuple) -> int:\n        \"\"\"\n        Estimate memory required for a single sample."
+        },
+        "estimate_single_sample_memory": {
+          "start_line": 56,
+          "end_line": 91,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "input_shape",
+              "type": "Tuple"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "....to",
+              "line": 67
+            },
+            {
+              "name": "self.model.eval",
+              "line": 76
+            },
+            {
+              "name": "logger.debug",
+              "line": 88
+            },
+            {
+              "name": "torch.cuda.reset_peak_memory_stats",
+              "line": 71
+            },
+            {
+              "name": "torch.cuda.empty_cache",
+              "line": 72
+            },
+            {
+              "name": "torch.cuda.memory_allocated",
+              "line": 73
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 77
+            },
+            {
+              "name": "self.model",
+              "line": 78
+            },
+            {
+              "name": "torch.cuda.max_memory_allocated",
+              "line": 82
+            },
+            {
+              "name": "self._estimate_cpu_memory",
+              "line": 86
+            },
+            {
+              "name": "torch.zeros",
+              "line": 67
+            }
+          ],
+          "docstring": "\n        Estimate memory required for a single sample.\n        \n        Args:\n            input_shape: Input shape for a single sample (batch dimension should be 1)\n            \n        Returns:\n            Estimated memory in bytes for a single sample forward pass\n        ",
+          "code_snippet": "        return param_memory\n    \n    def estimate_single_sample_memory(self, input_shape: Tuple) -> int:\n        \"\"\"\n        Estimate memory required for a single sample.\n        \n        Args:\n            input_shape: Input shape for a single sample (batch dimension should be 1)\n            \n        Returns:\n            Estimated memory in bytes for a single sample forward pass\n        \"\"\"\n        # Create a sample input\n        sample_input = torch.zeros(input_shape).to(self.device)\n        \n        # Track memory before forward pass\n        if self.is_gpu:\n            torch.cuda.reset_peak_memory_stats(self.device)\n            torch.cuda.empty_cache()\n            start_memory = torch.cuda.memory_allocated(self.device)\n        \n        # Run forward pass\n        self.model.eval()  # Set to evaluation mode\n        with torch.no_grad():\n            _ = self.model(sample_input)\n            \n        # Calculate memory used\n        if self.is_gpu:\n            end_memory = torch.cuda.max_memory_allocated(self.device)\n            memory_per_sample = end_memory - start_memory\n        else:\n            # For CPU, estimate based on model size and input shape\n            memory_per_sample = self._estimate_cpu_memory(input_shape)\n            \n        logger.debug(f\"Estimated single sample memory: {memory_per_sample / (1024**2):.2f} MB for {input_shape}\")\n        return memory_per_sample\n    \n    def _estimate_cpu_memory(self, input_shape: Tuple) -> int:\n        \"\"\"\n        Estimate memory for CPU based on model parameters and input size."
+        },
+        "_estimate_cpu_memory": {
+          "start_line": 91,
+          "end_line": 114,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "input_shape",
+              "type": "Tuple"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "int",
+              "line": 105
+            },
+            {
+              "name": "np.prod",
+              "line": 105
+            }
+          ],
+          "docstring": "\n        Estimate memory for CPU based on model parameters and input size.\n        \n        Args:\n            input_shape: Input shape for a single sample\n            \n        Returns:\n            Estimated memory in bytes\n        ",
+          "code_snippet": "        return memory_per_sample\n    \n    def _estimate_cpu_memory(self, input_shape: Tuple) -> int:\n        \"\"\"\n        Estimate memory for CPU based on model parameters and input size.\n        \n        Args:\n            input_shape: Input shape for a single sample\n            \n        Returns:\n            Estimated memory in bytes\n        \"\"\"\n        # Calculate model parameter memory\n        param_memory = self.param_memory\n        \n        # Estimate activation memory (rough approximation)\n        input_size = int(np.prod(input_shape)) * 4  # Assume float32 (4 bytes)\n        \n        # Heuristic: activations can take ~3x the input size in memory for typical models\n        # This varies greatly by model architecture and should be calibrated\n        activation_memory = input_size * 3\n        \n        # Add buffer for intermediate computations\n        return param_memory + activation_memory\n    \n    def calculate_max_batch_size(self, input_shape: Tuple[int, ...], available_memory: int) -> int:\n        \"\"\"\n        Calculate maximum batch size given available memory, using a realistic memory scaling model."
+        },
+        "calculate_max_batch_size": {
+          "start_line": 114,
+          "end_line": 214,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "input_shape"
+            },
+            {
+              "name": "available_memory",
+              "type": "int"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "sum",
+              "line": 194
+            },
+            {
+              "name": "int",
+              "line": 206
+            },
+            {
+              "name": "max",
+              "line": 209
+            },
+            {
+              "name": "logger.info",
+              "line": 211
+            },
+            {
+              "name": "self.estimate_single_sample_memory",
+              "line": 131
+            },
+            {
+              "name": "min",
+              "line": 209
+            },
+            {
+              "name": "....to",
+              "line": 139
+            },
+            {
+              "name": "self._calculate_parameter_memory",
+              "line": 167
+            },
+            {
+              "name": "max",
+              "line": 183
+            },
+            {
+              "name": "logger.info",
+              "line": 185
+            },
+            {
+              "name": "logger.info",
+              "line": 186
+            },
+            {
+              "name": "logger.warning",
+              "line": 190
+            },
+            {
+              "name": "p.numel",
+              "line": 194
+            },
+            {
+              "name": "isinstance",
+              "line": 126
+            },
+            {
+              "name": "len",
+              "line": 134
+            },
+            {
+              "name": "torch.cuda.reset_peak_memory_stats",
+              "line": 143
+            },
+            {
+              "name": "torch.cuda.empty_cache",
+              "line": 144
+            },
+            {
+              "name": "torch.cuda.memory_allocated",
+              "line": 145
+            },
+            {
+              "name": "torch.cuda.max_memory_allocated",
+              "line": 151
+            },
+            {
+              "name": "logger.warning",
+              "line": 155
+            },
+            {
+              "name": "int",
+              "line": 177
+            },
+            {
+              "name": "min",
+              "line": 183
+            },
+            {
+              "name": "self.model.parameters",
+              "line": 194
+            },
+            {
+              "name": "torch.zeros",
+              "line": 139
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 148
+            },
+            {
+              "name": "self.model",
+              "line": 149
+            }
+          ],
+          "docstring": "\n        Calculate maximum batch size given available memory, using a realistic memory scaling model.\n        \n        Args:\n            input_shape: Input shape for a single sample (excluding batch dimension)\n            available_memory: Available memory in bytes\n            \n        Returns:\n            Maximum batch size that should fit in memory\n        ",
+          "code_snippet": "        return param_memory + activation_memory\n    \n    def calculate_max_batch_size(self, input_shape: Tuple[int, ...], available_memory: int) -> int:\n        \"\"\"\n        Calculate maximum batch size given available memory, using a realistic memory scaling model.\n        \n        Args:\n            input_shape: Input shape for a single sample (excluding batch dimension)\n            available_memory: Available memory in bytes\n            \n        Returns:\n            Maximum batch size that should fit in memory\n        \"\"\"\n        # Adjust input shape to have batch dimension of 1\n        sample_shape = (1,) + input_shape if not isinstance(input_shape[0], int) or input_shape[0] != 1 else input_shape\n        \n        # First, try to estimate with single_sample_memory\n        try:\n            # Get memory for batch size 1\n            single_sample_memory = self.estimate_single_sample_memory(sample_shape)\n            \n            # Get memory for batch size 8 (to observe scaling behavior)\n            batch_8_shape = (8,) + input_shape[1:] if len(input_shape) > 1 else (8, input_shape[0])\n            batch_8_memory = 0\n            \n            try:\n                # Create a sample input and measure actual memory\n                sample_batch = torch.zeros(batch_8_shape).to(self.device)\n                \n                # Track memory\n                if self.device.type == 'cuda':\n                    torch.cuda.reset_peak_memory_stats(self.device)\n                    torch.cuda.empty_cache()\n                    start_memory = torch.cuda.memory_allocated(self.device)\n                \n                    # Forward pass\n                    with torch.no_grad():\n                        _ = self.model(sample_batch)\n                    \n                    end_memory = torch.cuda.max_memory_allocated(self.device)\n                    batch_8_memory = end_memory - start_memory\n            except Exception as e:\n                # If batch size 8 fails, use conservative estimate\n                logger.warning(f\"Failed to estimate memory for batch size 8: {e}\")\n                batch_8_memory = single_sample_memory * 8  # Assume linear scaling\n            \n            # Calculate memory scaling factor based on observed behavior\n            if batch_8_memory > 0:\n                # Memory per sample in batch of 8\n                memory_per_sample_in_batch = batch_8_memory / 8\n                \n                # Memory scaling factor (how much memory per sample decreases in larger batches)\n                scaling_factor = memory_per_sample_in_batch / (single_sample_memory or 1)  # Avoid division by zero\n                \n                # Apply a more realistic memory model based on observed scaling\n                param_memory = self._calculate_parameter_memory()  # Fixed cost\n                activation_per_sample_efficient = memory_per_sample_in_batch\n                \n                # Estimate max batch conservatively based on effective memory per sample\n                safety_margin = 0.8  # 80% of available memory\n                usable_memory = available_memory * safety_margin\n                \n                # Max batch with more realistic memory model\n                # Model: param_memory + (activation_per_sample_efficient * batch_size)\n                if activation_per_sample_efficient > 0:\n                    max_batch = int((usable_memory - param_memory) / activation_per_sample_efficient)\n                else:\n                    # Fallback if calculation fails\n                    max_batch = 64\n\n                # Ensure max batch is reasonable\n                max_batch = max(4, min(max_batch, 2048))  # Upper limit of 2048\n                \n                logger.info(f\"Memory model: Using scaling factor {scaling_factor:.3f}, observed memory per sample: {memory_per_sample_in_batch/(1024**2):.2f} MB\")\n                logger.info(f\"Calculated max batch size: {max_batch}\")\n                return max_batch\n            \n        except Exception as e:\n            logger.warning(f\"Memory estimation error: {e}. Using fallback calculation.\")\n            \n        # Fallback calculation if detailed estimation fails\n        # Use a conservative estimate based on model size and available memory\n        param_count = sum(p.numel() for p in self.model.parameters())\n        param_memory = param_count * 4  # Assuming float32 (4 bytes per parameter)\n        \n        # Very simple model: assume ~10MB per sample plus parameters\n        estimated_per_sample = 10 * (1024**2)  # 10MB per sample\n        \n        # For very large models, be more conservative\n        if param_count > 5e7:  # > 50M parameters\n            estimated_per_sample = 20 * (1024**2)  # 20MB per sample\n        \n        # Calculate max batch with safety factor\n        safety_factor = 0.75  # Use 75% of available memory\n        max_batch = int((available_memory * safety_factor - param_memory) / estimated_per_sample)\n        \n        # Ensure reasonable bounds\n        max_batch = max(4, min(max_batch, 256))\n        \n        logger.info(f\"Fallback calculation: max_batch={max_batch} (param count: {param_count/1e6:.2f}M)\")\n        return max_batch\n    \n    def estimate_batch_memory(self, batch_size: int, input_shape: Tuple) -> Dict[str, int]:\n        \"\"\"\n        Estimate memory usage for a specific batch size."
+        },
+        "estimate_batch_memory": {
+          "start_line": 214,
+          "end_line": 268,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            },
+            {
+              "name": "input_shape",
+              "type": "Tuple"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "....to",
+              "line": 232
+            },
+            {
+              "name": "torch.cuda.reset_peak_memory_stats",
+              "line": 236
+            },
+            {
+              "name": "torch.cuda.empty_cache",
+              "line": 237
+            },
+            {
+              "name": "torch.cuda.memory_allocated",
+              "line": 238
+            },
+            {
+              "name": "self.model.eval",
+              "line": 241
+            },
+            {
+              "name": "self._estimate_cpu_memory",
+              "line": 258
+            },
+            {
+              "name": "torch.zeros",
+              "line": 232
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 242
+            },
+            {
+              "name": "self.model",
+              "line": 243
+            },
+            {
+              "name": "torch.cuda.max_memory_allocated",
+              "line": 245
+            }
+          ],
+          "docstring": "\n        Estimate memory usage for a specific batch size.\n        \n        Args:\n            batch_size: Batch size to estimate for\n            input_shape: Input shape for a single sample (excluding batch dimension)\n            \n        Returns:\n            Dictionary with memory estimates in bytes:\n            - forward_memory: Memory used during forward pass\n            - backward_memory: Estimated memory for backward pass\n            - total_memory: Total estimated memory usage\n        ",
+          "code_snippet": "        return max_batch\n    \n    def estimate_batch_memory(self, batch_size: int, input_shape: Tuple) -> Dict[str, int]:\n        \"\"\"\n        Estimate memory usage for a specific batch size.\n        \n        Args:\n            batch_size: Batch size to estimate for\n            input_shape: Input shape for a single sample (excluding batch dimension)\n            \n        Returns:\n            Dictionary with memory estimates in bytes:\n            - forward_memory: Memory used during forward pass\n            - backward_memory: Estimated memory for backward pass\n            - total_memory: Total estimated memory usage\n        \"\"\"\n        # Create input shape with the specified batch size\n        batch_input_shape = (batch_size,) + input_shape[1:] if input_shape[0] == 1 else (batch_size,) + input_shape\n        \n        # Create a sample batch\n        sample_batch = torch.zeros(batch_input_shape).to(self.device)\n        \n        # Memory tracking\n        if self.is_gpu:\n            torch.cuda.reset_peak_memory_stats(self.device)\n            torch.cuda.empty_cache()\n            start_memory = torch.cuda.memory_allocated(self.device)\n            \n            # Forward pass\n            self.model.eval()\n            with torch.no_grad():\n                _ = self.model(sample_batch)\n                \n            forward_memory = torch.cuda.max_memory_allocated(self.device) - start_memory\n            \n            # Estimate backward memory (typically ~2x forward memory for gradients and optimizer states)\n            backward_memory = forward_memory * 2\n            total_memory = forward_memory + backward_memory\n            \n            return {\n                'forward_memory': forward_memory,\n                'backward_memory': backward_memory,\n                'total_memory': total_memory\n            }\n        else:\n            # For CPU, provide a rough estimate\n            single_sample = self._estimate_cpu_memory((1,) + input_shape[1:] if input_shape[0] != 1 else input_shape)\n            forward_memory = single_sample * batch_size\n            backward_memory = forward_memory * 2\n            total_memory = forward_memory + backward_memory\n            \n            return {\n                'forward_memory': forward_memory,\n                'backward_memory': backward_memory,\n                'total_memory': total_memory\n            }"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Analyzes model memory requirements for different batch sizes.\n    \n    This class helps determine the maximum batch size that can fit in memory and\n    provides estimates of memory usage for different batch sizes.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

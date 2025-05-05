@@ -1,0 +1,426 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\optimizer\\pattern_responsive_optimizer.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "time",
+      "line": 10
+    },
+    {
+      "name": "random",
+      "line": 11
+    },
+    {
+      "name": "math",
+      "line": 12
+    },
+    {
+      "name": "numpy",
+      "line": 13
+    },
+    {
+      "name": "typing.Dict",
+      "line": 14
+    },
+    {
+      "name": "typing.List",
+      "line": 14
+    },
+    {
+      "name": "typing.Any",
+      "line": 14
+    },
+    {
+      "name": "typing.Optional",
+      "line": 14
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 14
+    },
+    {
+      "name": "typing.Set",
+      "line": 14
+    },
+    {
+      "name": "isekaizen.core.optimizer.risk_aware_optimizer.RiskAwarePatternIsekaiZen",
+      "line": 16
+    },
+    {
+      "name": "isekaizen.core.optimizer.risk_aware_optimizer.RiskLevel",
+      "line": 16
+    },
+    {
+      "name": "isekaizen.pattern.augmentation.PatternResponsiveAugmenter",
+      "line": 17
+    },
+    {
+      "name": "torch.utils.data.ConcatDataset",
+      "line": 186
+    },
+    {
+      "name": "torch.utils.data.TensorDataset",
+      "line": 191
+    },
+    {
+      "name": "torch.utils.data.TensorDataset",
+      "line": 200
+    }
+  ],
+  "classes": {
+    "PatternResponsiveOptimizer": {
+      "start_line": 21,
+      "end_line": 269,
+      "methods": {
+        "__init__": {
+          "start_line": 30,
+          "end_line": 87,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "total_epochs"
+            },
+            {
+              "name": "max_epoch_time"
+            },
+            {
+              "name": "run_diagnostics"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "exploration_rate"
+            },
+            {
+              "name": "risk_aversion"
+            },
+            {
+              "name": "augmentation_strength"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 61
+            },
+            {
+              "name": "min",
+              "line": 74
+            },
+            {
+              "name": "PatternResponsiveAugmenter",
+              "line": 75
+            },
+            {
+              "name": "logger.info",
+              "line": 84
+            },
+            {
+              "name": "logger.info",
+              "line": 85
+            },
+            {
+              "name": "max",
+              "line": 74
+            },
+            {
+              "name": "super",
+              "line": 61
+            }
+          ],
+          "docstring": "\n        Initialize the pattern-responsive optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            exploration_rate: Rate of random exploration\n            risk_aversion: Factor determining how cautious the optimizer is (0.0-1.0)\n            pattern_adaptation_start: Epoch to start pattern adaptation\n            pattern_adaptation_frequency: How often to adapt patterns\n            augmentation_strength: Strength of augmentation (0.0-1.0)\n            **kwargs: Additional parameters\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self, \n        model,\n        device=None,\n        total_epochs=50,\n        max_epoch_time=None,\n        run_diagnostics=True,\n        pattern_map=None,\n        exploration_rate=0.1,\n        risk_aversion=0.5,\n        augmentation_strength=0.5,  # 0.0-1.0 strength of augmentation\n        **kwargs\n    ):\n        \"\"\"\n        Initialize the pattern-responsive optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            exploration_rate: Rate of random exploration\n            risk_aversion: Factor determining how cautious the optimizer is (0.0-1.0)\n            pattern_adaptation_start: Epoch to start pattern adaptation\n            pattern_adaptation_frequency: How often to adapt patterns\n            augmentation_strength: Strength of augmentation (0.0-1.0)\n            **kwargs: Additional parameters\n        \"\"\"\n        # Initialize base optimizer\n        super().__init__(\n            model=model,\n            device=device,\n            total_epochs=total_epochs,\n            max_epoch_time=max_epoch_time,\n            run_diagnostics=run_diagnostics,\n            pattern_map=pattern_map,\n            exploration_rate=exploration_rate,\n            risk_aversion=risk_aversion,\n            **kwargs\n        )\n        \n        # Initialize augmenter and parameters\n        self.augmentation_strength = min(1.0, max(0.0, augmentation_strength))\n        self.augmenter = PatternResponsiveAugmenter(pattern_map, device)\n        \n        # Keep track of augmentations\n        self.augmentation_history = []\n        self.augmented_dataset = None\n        \n        # Track pattern responsiveness\n        self.pattern_responsiveness = {}\n        \n        logger.info(\"Pattern-responsive optimizer initialized\")\n        logger.info(f\"Augmentation strength: {self.augmentation_strength}\")\n    \n    def should_adapt_patterns(self) -> bool:\n        \"\"\"\n        Determine if patterns should be adapted based on risk assessment."
+        },
+        "should_adapt_patterns": {
+          "start_line": 87,
+          "end_line": 122,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [
+            {
+              "name": "self.risk_assessment_tracker.get_current_risk_metrics",
+              "line": 98
+            },
+            {
+              "name": "self.pattern_recognition_tracker.get_current_recognition_rates",
+              "line": 101
+            },
+            {
+              "name": "pattern_risks.get",
+              "line": 105
+            },
+            {
+              "name": "any",
+              "line": 114
+            },
+            {
+              "name": "recognition_rates.items",
+              "line": 102
+            },
+            {
+              "name": "len",
+              "line": 113
+            },
+            {
+              "name": "recognition_rates.keys",
+              "line": 117
+            },
+            {
+              "name": "len",
+              "line": 114
+            }
+          ],
+          "docstring": "\n        Determine if patterns should be adapted based on risk assessment.\n        \n        Returns:\n            True if patterns should be adapted, False otherwise\n        ",
+          "code_snippet": "        logger.info(f\"Augmentation strength: {self.augmentation_strength}\")\n    \n    def should_adapt_patterns(self) -> bool:\n        \"\"\"\n        Determine if patterns should be adapted based on risk assessment.\n        \n        Returns:\n            True if patterns should be adapted, False otherwise\n        \"\"\"\n        if self.epoch < 3:  # Give some time for initial learning\n            return False\n            \n        # Get current risk assessment\n        pattern_risks = self.risk_assessment_tracker.get_current_risk_metrics()\n        \n        # Get accuracy rates\n        recognition_rates = self.pattern_recognition_tracker.get_current_recognition_rates()\n        accuracy_issues = [p for p, rate in recognition_rates.items() if rate < 0.6]\n        \n        # Calculate overall risk\n        overall_risk = pattern_risks.get('average_risk_factor', 0.5)\n        \n        # Adapt if:\n        # 1. High overall risk\n        # 2. Multiple accuracy issues\n        # 3. Significant accuracy drop in any pattern\n        should_adapt = (\n            overall_risk > 0.6 or\n            len(accuracy_issues) >= 2 or\n            any(len(self.pattern_recognition_tracker.pattern_stats[p]['accuracy_history']) > 1 and\n                self.pattern_recognition_tracker.pattern_stats[p]['accuracy_history'][-1] <\n                self.pattern_recognition_tracker.pattern_stats[p]['accuracy_history'][-2] * 0.8\n                for p in recognition_rates.keys())\n        )\n        \n        return should_adapt\n    \n    def get_responsive_patterns(self) -> Set[str]:\n        \"\"\"\n        Get the set of patterns the model is responding well to."
+        },
+        "get_responsive_patterns": {
+          "start_line": 122,
+          "end_line": 146,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "set",
+              "line": 129
+            },
+            {
+              "name": "self.pattern_recognition_tracker.get_current_recognition_rates",
+              "line": 132
+            },
+            {
+              "name": "recognition_rates.items",
+              "line": 135
+            },
+            {
+              "name": "responsive_patterns.add",
+              "line": 137
+            },
+            {
+              "name": "....append",
+              "line": 142
+            }
+          ],
+          "docstring": "\n        Get the set of patterns the model is responding well to.\n        \n        Returns:\n            Set of pattern types the model is responding well to\n        ",
+          "code_snippet": "        return should_adapt\n    \n    def get_responsive_patterns(self) -> Set[str]:\n        \"\"\"\n        Get the set of patterns the model is responding well to.\n        \n        Returns:\n            Set of pattern types the model is responding well to\n        \"\"\"\n        responsive_patterns = set()\n        \n        # Get pattern recognition rates\n        recognition_rates = self.pattern_recognition_tracker.get_current_recognition_rates()\n        \n        # Find patterns with good recognition rates\n        for pattern_type, rate in recognition_rates.items():\n            if rate >= 0.7:  # Threshold for \"responding well\"\n                responsive_patterns.add(pattern_type)\n                \n                # Update pattern responsiveness tracking\n                if pattern_type not in self.pattern_responsiveness:\n                    self.pattern_responsiveness[pattern_type] = []\n                self.pattern_responsiveness[pattern_type].append(rate)\n        \n        return responsive_patterns\n    \n    def adapt_dataset(self, dataset) -> Tuple[Any, Dict[str, Any]]:\n        \"\"\"\n        Adapt the dataset based on pattern responsiveness."
+        },
+        "adapt_dataset": {
+          "start_line": 146,
+          "end_line": 225,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.get_responsive_patterns",
+              "line": 157
+            },
+            {
+              "name": "logger.info",
+              "line": 163
+            },
+            {
+              "name": "int",
+              "line": 167
+            },
+            {
+              "name": "int",
+              "line": 168
+            },
+            {
+              "name": "self.augmenter.augment_dataset",
+              "line": 171
+            },
+            {
+              "name": "self.augmentation_history.append",
+              "line": 209
+            },
+            {
+              "name": "logger.info",
+              "line": 216
+            },
+            {
+              "name": "logger.info",
+              "line": 217
+            },
+            {
+              "name": "logger.info",
+              "line": 160
+            },
+            {
+              "name": "logger.info",
+              "line": 180
+            },
+            {
+              "name": "torch.stack",
+              "line": 192
+            },
+            {
+              "name": "torch.tensor",
+              "line": 193
+            },
+            {
+              "name": "TensorDataset",
+              "line": 194
+            },
+            {
+              "name": "ConcatDataset",
+              "line": 197
+            },
+            {
+              "name": "torch.stack",
+              "line": 201
+            },
+            {
+              "name": "torch.tensor",
+              "line": 202
+            },
+            {
+              "name": "TensorDataset",
+              "line": 203
+            },
+            {
+              "name": "ConcatDataset",
+              "line": 206
+            },
+            {
+              "name": "list",
+              "line": 211
+            },
+            {
+              "name": "len",
+              "line": 212
+            },
+            {
+              "name": "self.augmenter.metrics.copy",
+              "line": 213
+            },
+            {
+              "name": "list",
+              "line": 221
+            },
+            {
+              "name": "len",
+              "line": 222
+            },
+            {
+              "name": "len",
+              "line": 223
+            },
+            {
+              "name": "len",
+              "line": 216
+            },
+            {
+              "name": "len",
+              "line": 217
+            }
+          ],
+          "docstring": "\n        Adapt the dataset based on pattern responsiveness.\n        \n        Args:\n            dataset: Dataset to adapt\n            \n        Returns:\n            Tuple of (adapted dataset, adaptation metrics)\n        ",
+          "code_snippet": "        return responsive_patterns\n    \n    def adapt_dataset(self, dataset) -> Tuple[Any, Dict[str, Any]]:\n        \"\"\"\n        Adapt the dataset based on pattern responsiveness.\n        \n        Args:\n            dataset: Dataset to adapt\n            \n        Returns:\n            Tuple of (adapted dataset, adaptation metrics)\n        \"\"\"\n        # Get responsive patterns\n        responsive_patterns = self.get_responsive_patterns()\n        \n        if not responsive_patterns:\n            logger.info(\"No responsive patterns found for adaptation\")\n            return dataset, {\"adapted\": False, \"reason\": \"no_responsive_patterns\"}\n        \n        logger.info(f\"Adapting dataset for responsive patterns: {responsive_patterns}\")\n        \n        # Calculate number of augmentations based on strength\n        # 0.0 strength = 0 augmentations, 1.0 strength = 100 per pattern\n        count_per_pattern = int(100 * self.augmentation_strength)\n        max_total = int(200 * self.augmentation_strength)\n        \n        # Augment the dataset\n        augmented_examples = self.augmenter.augment_dataset(\n            dataset,\n            responsive_patterns,\n            count_per_pattern=count_per_pattern,\n            max_total=max_total\n        )\n        \n        # Return if no augmentations were created\n        if not augmented_examples:\n            logger.info(\"No augmentations were created\")\n            return dataset, {\"adapted\": False, \"reason\": \"no_augmentations_created\"}\n        \n        # Create a combined dataset\n        # This assumes dataset is a torch.utils.data.Dataset with similar structure\n        # Adapt this section based on the specific dataset type\n        from torch.utils.data import ConcatDataset\n        \n        # If we already have an augmented dataset, update it\n        if self.augmented_dataset is None:\n            # Create a dataset from the augmented examples\n            from torch.utils.data import TensorDataset\n            features = torch.stack([item[0] for item in augmented_examples])\n            labels = torch.tensor([item[1] for item in augmented_examples])\n            augmented_dataset = TensorDataset(features, labels)\n            \n            # Combine with original dataset\n            self.augmented_dataset = ConcatDataset([dataset, augmented_dataset])\n        else:\n            # Add new examples to existing augmented dataset\n            from torch.utils.data import TensorDataset\n            features = torch.stack([item[0] for item in augmented_examples])\n            labels = torch.tensor([item[1] for item in augmented_examples])\n            new_augmented_dataset = TensorDataset(features, labels)\n            \n            # Create a new combined dataset\n            self.augmented_dataset = ConcatDataset([dataset, new_augmented_dataset])\n        \n        # Record augmentation history\n        self.augmentation_history.append({\n            \"epoch\": self.epoch,\n            \"responsive_patterns\": list(responsive_patterns),\n            \"examples_added\": len(augmented_examples),\n            \"augmentation_metrics\": self.augmenter.metrics.copy()\n        })\n        \n        logger.info(f\"Dataset adapted. Added {len(augmented_examples)} examples.\")\n        logger.info(f\"New dataset size: {len(self.augmented_dataset)}\")\n        \n        return self.augmented_dataset, {\n            \"adapted\": True,\n            \"responsive_patterns\": list(responsive_patterns),\n            \"examples_added\": len(augmented_examples),\n            \"total_size\": len(self.augmented_dataset)\n        }\n    \n    def get_optimal_batch_size(self):\n        \"\"\""
+        },
+        "get_optimal_batch_size": {
+          "start_line": 226,
+          "end_line": 245,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....get_optimal_batch_size",
+              "line": 236
+            },
+            {
+              "name": "len",
+              "line": 239
+            },
+            {
+              "name": "logger.debug",
+              "line": 241
+            },
+            {
+              "name": "super",
+              "line": 236
+            }
+          ],
+          "docstring": "\n        Get the optimal batch size for the current training state.\n        \n        Also manages pattern adaptation if needed.\n        \n        Returns:\n            Optimal batch size\n        ",
+          "code_snippet": "        }\n    \n    def get_optimal_batch_size(self):\n        \"\"\"\n        Get the optimal batch size for the current training state.\n        \n        Also manages pattern adaptation if needed.\n        \n        Returns:\n            Optimal batch size\n        \"\"\"\n        # Get batch size from base implementation\n        batch_size = super().get_optimal_batch_size()\n        \n        # Log current pattern responsiveness\n        if len(self.pattern_recognition_tracker.recognition_history) > 0:\n            latest = self.pattern_recognition_tracker.recognition_history[-1]\n            logger.debug(f\"Pattern recognition stats: {latest['pattern_stats']}\")\n        \n        return batch_size\n    \n    def get_status(self):\n        \"\"\"\n        Get comprehensive status of the optimizer."
+        },
+        "get_status": {
+          "start_line": 245,
+          "end_line": 269,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....get_status",
+              "line": 253
+            },
+            {
+              "name": "state.update",
+              "line": 256
+            },
+            {
+              "name": "super",
+              "line": 253
+            },
+            {
+              "name": "self.should_adapt_patterns",
+              "line": 260
+            },
+            {
+              "name": "hasattr",
+              "line": 259
+            }
+          ],
+          "docstring": "\n        Get comprehensive status of the optimizer.\n        \n        Returns:\n            Dictionary with status information\n        ",
+          "code_snippet": "        return batch_size\n    \n    def get_status(self):\n        \"\"\"\n        Get comprehensive status of the optimizer.\n        \n        Returns:\n            Dictionary with status information\n        \"\"\"\n        # Get base state\n        state = super().get_status()\n        \n        # Add pattern responsiveness information\n        state.update({\n            \"pattern_responsiveness\": self.pattern_responsiveness,\n            \"augmentation_history\": self.augmentation_history,\n            \"augmentation_metrics\": self.augmenter.metrics if hasattr(self, 'augmenter') else {},\n            \"is_adaptation_active\": self.should_adapt_patterns(),\n            \"next_adaptation_epoch\": (\n                self.pattern_adaptation_start if self.epoch < self.pattern_adaptation_start\n                else self.epoch + (self.pattern_adaptation_frequency - ((self.epoch - self.pattern_adaptation_start) % self.pattern_adaptation_frequency))\n            )\n        })\n        \n        return state"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "RiskAwarePatternIsekaiZen"
+      ],
+      "docstring": "\n    Pattern-responsive risk-aware optimizer.\n    \n    This optimizer extends the risk-aware optimizer with pattern responsiveness\n    tracking and dataset augmentation capabilities, creating a positive feedback\n    loop that reinforces successful learning pathways.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

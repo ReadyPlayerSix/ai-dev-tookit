@@ -1,0 +1,495 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\scil\\memory_pool.py",
+  "imports": [
+    {
+      "name": "__future__.annotations",
+      "line": 23
+    },
+    {
+      "name": "typing.Dict",
+      "line": 24
+    },
+    {
+      "name": "typing.List",
+      "line": 24
+    },
+    {
+      "name": "typing.Optional",
+      "line": 24
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 25
+    },
+    {
+      "name": "enum.Enum",
+      "line": 26
+    },
+    {
+      "name": "logging",
+      "line": 27
+    },
+    {
+      "name": "numpy",
+      "line": 28
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 29
+    },
+    {
+      "name": "kt_batch_optimizer_v3.KTBatchOptimizer",
+      "line": 31
+    }
+  ],
+  "classes": {
+    "ChunkSize": {
+      "start_line": 33,
+      "end_line": 40,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "QUICK",
+          "line": 35
+        },
+        {
+          "name": "STANDARD",
+          "line": 36
+        },
+        {
+          "name": "BULK",
+          "line": 37
+        },
+        {
+          "name": "ARCHIVE",
+          "line": 38
+        }
+      ],
+      "bases": [
+        "Enum"
+      ],
+      "docstring": "Memory chunk size classifications"
+    },
+    "MemoryChunk": {
+      "start_line": 41,
+      "end_line": 51,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Represents a single memory chunk in the SCIL system"
+    },
+    "MemoryPoolManager": {
+      "start_line": 51,
+      "end_line": 340,
+      "methods": {
+        "__init__": {
+          "start_line": 54,
+          "end_line": 75,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "logger"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "KTBatchOptimizer",
+              "line": 56
+            },
+            {
+              "name": "self._initialize_pools",
+              "line": 73
+            },
+            {
+              "name": "logging.getLogger",
+              "line": 55
+            }
+          ],
+          "code_snippet": "    \"\"\"Manages memory pools for SCIL with K(t) framework optimization\"\"\"\n    \n    def __init__(self, logger: Optional[logging.Logger] = None):\n        self.logger = logger or logging.getLogger(__name__)\n        self.kt_optimizer = KTBatchOptimizer()\n        \n        # Initialize memory pools for each chunk size\n        self.memory_pools: Dict[ChunkSize, List[MemoryChunk]] = {\n            size: [] for size in ChunkSize\n        }\n        \n        # Initialize monitoring stats\n        self.stats = {\n            \"allocations\": 0,\n            \"deallocations\": 0,\n            \"fragments\": 0,\n            \"recycled\": 0,\n            \"peak_memory_usage\": 0.0,\n            \"current_memory_usage\": 0.0\n        }\n        \n        self._initialize_pools()\n        \n    def _calculate_pool_sizes(self) -> Dict[ChunkSize, int]:\n        \"\"\"Calculate optimal number of chunks for each pool using K(t) framework\"\"\"\n        # Get K(t) optimization results"
+        },
+        "_calculate_pool_sizes": {
+          "start_line": 75,
+          "end_line": 152,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.kt_optimizer.optimize_batch_size",
+              "line": 78
+            },
+            {
+              "name": "min",
+              "line": 87
+            },
+            {
+              "name": "self.logger.info",
+              "line": 92
+            },
+            {
+              "name": "self.logger.info",
+              "line": 93
+            },
+            {
+              "name": "self.logger.info",
+              "line": 94
+            },
+            {
+              "name": "max",
+              "line": 84
+            },
+            {
+              "name": "max",
+              "line": 98
+            },
+            {
+              "name": "max",
+              "line": 99
+            },
+            {
+              "name": "max",
+              "line": 100
+            },
+            {
+              "name": "max",
+              "line": 101
+            },
+            {
+              "name": "np.array",
+              "line": 105
+            },
+            {
+              "name": "np.percentile",
+              "line": 108
+            },
+            {
+              "name": "max",
+              "line": 129
+            },
+            {
+              "name": "self.logger.debug",
+              "line": 145
+            },
+            {
+              "name": "len",
+              "line": 106
+            },
+            {
+              "name": "min",
+              "line": 131
+            },
+            {
+              "name": "int",
+              "line": 134
+            }
+          ],
+          "docstring": "Calculate optimal number of chunks for each pool using K(t) framework",
+          "code_snippet": "        self._initialize_pools()\n        \n    def _calculate_pool_sizes(self) -> Dict[ChunkSize, int]:\n        \"\"\"Calculate optimal number of chunks for each pool using K(t) framework\"\"\"\n        # Get K(t) optimization results\n        kt_results = self.kt_optimizer.optimize_batch_size()\n        optimal_batch = kt_results[\"optimal_batch_size\"]\n        memory_curve = kt_results[\"metrics\"][\"memory_curve\"]\n        \n        # Get optimal memory distribution from K(t)\n        optimal_memory = kt_results[\"optimal_metrics\"][\"estimated_memory\"]\n        max_memory = max(memory_curve) if memory_curve else optimal_memory * 1.5\n        \n        # Use K(t) efficiency curve to determine safe memory limits\n        target_memory = min(\n            max_memory,\n            self.kt_optimizer.gpu_specs.total_memory * 0.8  # 90% safety margin\n        )\n        \n        self.logger.info(f\"K(t) Optimization Results:\")\n        self.logger.info(f\"  Optimal Batch Size: {optimal_batch}\")\n        self.logger.info(f\"  Target Memory: {target_memory:.0f}MB\")\n        \n        # Base minimum chunks (derived from K(t) optimal batch size)\n        base_chunks = {\n            ChunkSize.QUICK: max(5, optimal_batch // 32),    # Quick access needs more chunks\n            ChunkSize.STANDARD: max(3, optimal_batch // 64),\n            ChunkSize.BULK: max(2, optimal_batch // 128),\n            ChunkSize.ARCHIVE: max(1, optimal_batch // 256)\n        }\n        \n        # Calculate proportions based on K(t) memory curve distribution\n        memory_distribution = np.array(memory_curve) if memory_curve else None\n        if memory_distribution is not None and len(memory_distribution) > 0:\n            # Use memory curve to determine natural breakpoints\n            percentiles = np.percentile(memory_distribution, [40, 70, 90])\n            proportions = {\n                ChunkSize.QUICK: 0.4,     # Handle most common cases (up to 40th percentile)\n                ChunkSize.STANDARD: 0.3,   # Handle medium cases (40th-70th percentile)\n                ChunkSize.BULK: 0.2,       # Handle larger cases (70th-90th percentile)\n                ChunkSize.ARCHIVE: 0.1     # Handle extreme cases (90th+ percentile)\n            }\n        else:\n            # Fallback proportions if memory curve isn't available\n            proportions = {\n                ChunkSize.QUICK: 0.4,\n                ChunkSize.STANDARD: 0.3,\n                ChunkSize.BULK: 0.2,\n                ChunkSize.ARCHIVE: 0.1\n            }\n        \n        pool_sizes = {}\n        remaining_memory = target_memory\n        \n        for size in ChunkSize:\n            memory_for_pool = target_memory * proportions[size]\n            calculated_chunks = max(\n                base_chunks[size],\n                min(\n                    # Use K(t) optimal batch size to cap maximum chunks\n                    optimal_batch,\n                    int(memory_for_pool / size.value)\n                )\n            )\n            \n            # Ensure we don't exceed remaining memory\n            while calculated_chunks * size.value > remaining_memory and calculated_chunks > base_chunks[size]:\n                calculated_chunks -= 1\n            \n            pool_sizes[size] = calculated_chunks\n            remaining_memory -= calculated_chunks * size.value\n            \n            self.logger.debug(\n                f\"{size.name} Pool: {calculated_chunks} chunks \"\n                f\"({calculated_chunks * size.value}MB)\"\n            )\n        \n        return pool_sizes\n        \n    def _initialize_pools(self):\n        \"\"\"Initialize memory pools with adaptive sizing\"\"\"\n        try:"
+        },
+        "_initialize_pools": {
+          "start_line": 152,
+          "end_line": 198,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._calculate_pool_sizes",
+              "line": 156
+            },
+            {
+              "name": "pool_sizes.items",
+              "line": 158
+            },
+            {
+              "name": "self._update_memory_usage",
+              "line": 173
+            },
+            {
+              "name": "range",
+              "line": 160
+            },
+            {
+              "name": "self.logger.debug",
+              "line": 168
+            },
+            {
+              "name": "self.logger.error",
+              "line": 176
+            },
+            {
+              "name": "self.logger.warning",
+              "line": 185
+            },
+            {
+              "name": "fallback_sizes.items",
+              "line": 187
+            },
+            {
+              "name": "self._update_memory_usage",
+              "line": 196
+            },
+            {
+              "name": "MemoryChunk",
+              "line": 161
+            },
+            {
+              "name": "current_pool.append",
+              "line": 165
+            },
+            {
+              "name": "MemoryChunk",
+              "line": 189
+            },
+            {
+              "name": "len",
+              "line": 169
+            },
+            {
+              "name": "str",
+              "line": 176
+            },
+            {
+              "name": "range",
+              "line": 193
+            },
+            {
+              "name": "len",
+              "line": 170
+            },
+            {
+              "name": "size.name.lower",
+              "line": 162
+            },
+            {
+              "name": "size.name.lower",
+              "line": 190
+            }
+          ],
+          "docstring": "Initialize memory pools with adaptive sizing",
+          "code_snippet": "        return pool_sizes\n        \n    def _initialize_pools(self):\n        \"\"\"Initialize memory pools with adaptive sizing\"\"\"\n        try:\n            # Get optimal pool sizes\n            pool_sizes = self._calculate_pool_sizes()\n            \n            for size, count in pool_sizes.items():\n                current_pool = []\n                for i in range(count):\n                    chunk = MemoryChunk(\n                        id=f\"{size.name.lower()}_{i}\",\n                        size=size\n                    )\n                    current_pool.append(chunk)\n                    \n                self.memory_pools[size] = current_pool\n                self.logger.debug(\n                    f\"Initialized {len(current_pool)} chunks for {size.name} \"\n                    f\"({len(current_pool) * size.value}MB)\"\n                )\n            \n            self._update_memory_usage()\n            \n        except Exception as e:\n            self.logger.error(f\"Error during pool initialization: {str(e)}\")\n            # Fallback to minimal pools\n            fallback_sizes = {\n                ChunkSize.QUICK: 4,      # 128MB\n                ChunkSize.STANDARD: 2,    # 128MB\n                ChunkSize.BULK: 1,        # 128MB\n                ChunkSize.ARCHIVE: 1      # 256MB\n            }\n            \n            self.logger.warning(\"Falling back to minimal pool initialization\")\n            \n            for size, count in fallback_sizes.items():\n                self.memory_pools[size] = [\n                    MemoryChunk(\n                        id=f\"{size.name.lower()}_{i}\",\n                        size=size\n                    )\n                    for i in range(count)\n                ]\n            \n            self._update_memory_usage()\n    \n    def allocate_chunk(self, size: ChunkSize, owner: str) -> Optional[MemoryChunk]:\n        \"\"\"\n        Attempt to allocate a memory chunk of specified size"
+        },
+        "allocate_chunk": {
+          "start_line": 198,
+          "end_line": 232,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "size",
+              "type": "ChunkSize"
+            },
+            {
+              "name": "owner",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self._recycle_chunks",
+              "line": 224
+            },
+            {
+              "name": "self.logger.warning",
+              "line": 229
+            },
+            {
+              "name": "self.allocate_chunk",
+              "line": 227
+            },
+            {
+              "name": "....timestamp",
+              "line": 217
+            },
+            {
+              "name": "self._update_memory_usage",
+              "line": 219
+            },
+            {
+              "name": "self.logger.debug",
+              "line": 220
+            },
+            {
+              "name": "datetime.now",
+              "line": 217
+            }
+          ],
+          "docstring": "\n        Attempt to allocate a memory chunk of specified size\n        \n        Args:\n            size: The size category of chunk to allocate\n            owner: Identifier of the component requesting the chunk\n            \n        Returns:\n            MemoryChunk if allocation successful, None otherwise\n        ",
+          "code_snippet": "            self._update_memory_usage()\n    \n    def allocate_chunk(self, size: ChunkSize, owner: str) -> Optional[MemoryChunk]:\n        \"\"\"\n        Attempt to allocate a memory chunk of specified size\n        \n        Args:\n            size: The size category of chunk to allocate\n            owner: Identifier of the component requesting the chunk\n            \n        Returns:\n            MemoryChunk if allocation successful, None otherwise\n        \"\"\"\n        pool = self.memory_pools[size]\n        \n        # First try to find an available chunk\n        for chunk in pool:\n            if not chunk.in_use and not chunk.fragmented:\n                chunk.in_use = True\n                chunk.owner = owner\n                chunk.access_count += 1\n                chunk.last_accessed = datetime.now().timestamp()\n                self.stats[\"allocations\"] += 1\n                self._update_memory_usage()\n                self.logger.debug(f\"Allocated chunk {chunk.id} to {owner}\")\n                return chunk\n                \n        # If no chunks available, try recycling\n        recycled = self._recycle_chunks(size)\n        if recycled:\n            self.stats[\"recycled\"] += 1\n            return self.allocate_chunk(size, owner)\n            \n        self.logger.warning(f\"No available chunks of size {size}\")\n        return None\n        \n    def deallocate_chunk(self, chunk: MemoryChunk) -> bool:\n        \"\"\"\n        Deallocate a memory chunk"
+        },
+        "deallocate_chunk": {
+          "start_line": 232,
+          "end_line": 253,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "chunk",
+              "type": "MemoryChunk"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [
+            {
+              "name": "self._update_memory_usage",
+              "line": 249
+            },
+            {
+              "name": "self.logger.debug",
+              "line": 250
+            },
+            {
+              "name": "self.logger.warning",
+              "line": 243
+            }
+          ],
+          "docstring": "\n        Deallocate a memory chunk\n        \n        Args:\n            chunk: The MemoryChunk to deallocate\n            \n        Returns:\n            bool: True if deallocation successful, False otherwise\n        ",
+          "code_snippet": "        return None\n        \n    def deallocate_chunk(self, chunk: MemoryChunk) -> bool:\n        \"\"\"\n        Deallocate a memory chunk\n        \n        Args:\n            chunk: The MemoryChunk to deallocate\n            \n        Returns:\n            bool: True if deallocation successful, False otherwise\n        \"\"\"\n        if not chunk.in_use:\n            self.logger.warning(f\"Attempt to deallocate inactive chunk {chunk.id}\")\n            return False\n            \n        chunk.in_use = False\n        chunk.owner = None\n        self.stats[\"deallocations\"] += 1\n        self._update_memory_usage()\n        self.logger.debug(f\"Deallocated chunk {chunk.id}\")\n        return True\n        \n    def _recycle_chunks(self, size: ChunkSize) -> bool:\n        \"\"\"\n        Attempt to recycle chunks by cleaning up fragmented ones"
+        },
+        "_recycle_chunks": {
+          "start_line": 253,
+          "end_line": 274,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "size",
+              "type": "ChunkSize"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [
+            {
+              "name": "self.logger.debug",
+              "line": 270
+            }
+          ],
+          "docstring": "\n        Attempt to recycle chunks by cleaning up fragmented ones\n        \n        Args:\n            size: The size category of chunks to recycle\n            \n        Returns:\n            bool: True if any chunks were recycled\n        ",
+          "code_snippet": "        return True\n        \n    def _recycle_chunks(self, size: ChunkSize) -> bool:\n        \"\"\"\n        Attempt to recycle chunks by cleaning up fragmented ones\n        \n        Args:\n            size: The size category of chunks to recycle\n            \n        Returns:\n            bool: True if any chunks were recycled\n        \"\"\"\n        pool = self.memory_pools[size]\n        recycled = False\n        \n        for chunk in pool:\n            if chunk.fragmented and not chunk.in_use:\n                chunk.fragmented = False\n                recycled = True\n                self.logger.debug(f\"Recycled chunk {chunk.id}\")\n                \n        return recycled\n        \n    def _update_memory_usage(self):\n        \"\"\"Update memory usage statistics\"\"\"\n        current_usage = sum("
+        },
+        "_update_memory_usage": {
+          "start_line": 274,
+          "end_line": 286,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "sum",
+              "line": 276
+            },
+            {
+              "name": "max",
+              "line": 282
+            },
+            {
+              "name": "self.memory_pools.values",
+              "line": 277
+            }
+          ],
+          "docstring": "Update memory usage statistics",
+          "code_snippet": "        return recycled\n        \n    def _update_memory_usage(self):\n        \"\"\"Update memory usage statistics\"\"\"\n        current_usage = sum(\n            chunk.size.value for pool in self.memory_pools.values()\n            for chunk in pool if chunk.in_use\n        )\n        \n        self.stats[\"current_memory_usage\"] = current_usage\n        self.stats[\"peak_memory_usage\"] = max(\n            self.stats[\"peak_memory_usage\"],\n            current_usage\n        )\n        \n    def get_pool_stats(self) -> Dict[str, Dict[str, int]]:\n        \"\"\""
+        },
+        "get_pool_stats": {
+          "start_line": 287,
+          "end_line": 306,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "len",
+              "line": 299
+            },
+            {
+              "name": "sum",
+              "line": 300
+            },
+            {
+              "name": "sum",
+              "line": 301
+            },
+            {
+              "name": "sum",
+              "line": 302
+            }
+          ],
+          "docstring": "\n        Get current statistics for all memory pools\n        \n        Returns:\n            Dict containing stats for each pool including total, in_use,\n            fragmented, and available chunks\n        ",
+          "code_snippet": "        )\n        \n    def get_pool_stats(self) -> Dict[str, Dict[str, int]]:\n        \"\"\"\n        Get current statistics for all memory pools\n        \n        Returns:\n            Dict containing stats for each pool including total, in_use,\n            fragmented, and available chunks\n        \"\"\"\n        stats = {}\n        for size in ChunkSize:\n            pool = self.memory_pools[size]\n            stats[size.name] = {\n                \"total\": len(pool),\n                \"in_use\": sum(1 for c in pool if c.in_use),\n                \"fragmented\": sum(1 for c in pool if c.fragmented),\n                \"available\": sum(1 for c in pool if not c.in_use and not c.fragmented)\n            }\n        return stats\n        \n    def get_memory_usage(self) -> Dict[str, float]:\n        \"\"\"\n        Get current memory usage statistics"
+        },
+        "get_memory_usage": {
+          "start_line": 306,
+          "end_line": 320,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "sum",
+              "line": 317
+            },
+            {
+              "name": "self.memory_pools.values",
+              "line": 317
+            }
+          ],
+          "docstring": "\n        Get current memory usage statistics\n        \n        Returns:\n            Dict containing current usage, peak usage, and utilization percentage\n        ",
+          "code_snippet": "        return stats\n        \n    def get_memory_usage(self) -> Dict[str, float]:\n        \"\"\"\n        Get current memory usage statistics\n        \n        Returns:\n            Dict containing current usage, peak usage, and utilization percentage\n        \"\"\"\n        return {\n            \"current_usage_mb\": self.stats[\"current_memory_usage\"],\n            \"peak_usage_mb\": self.stats[\"peak_memory_usage\"],\n            \"utilization_percent\": (self.stats[\"current_memory_usage\"] / \n                                  sum(chunk.size.value for pool in self.memory_pools.values()\n                                      for chunk in pool) * 100)\n        }\n        \n    def mark_chunk_fragmented(self, chunk: MemoryChunk) -> bool:\n        \"\"\""
+        },
+        "mark_chunk_fragmented": {
+          "start_line": 321,
+          "end_line": 340,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "chunk",
+              "type": "MemoryChunk"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [
+            {
+              "name": "self.logger.debug",
+              "line": 337
+            },
+            {
+              "name": "self.logger.warning",
+              "line": 332
+            }
+          ],
+          "docstring": "\n        Mark a chunk as fragmented (for testing and monitoring)\n        \n        Args:\n            chunk: The MemoryChunk to mark as fragmented\n            \n        Returns:\n            bool: True if chunk was marked as fragmented\n        ",
+          "code_snippet": "        }\n        \n    def mark_chunk_fragmented(self, chunk: MemoryChunk) -> bool:\n        \"\"\"\n        Mark a chunk as fragmented (for testing and monitoring)\n        \n        Args:\n            chunk: The MemoryChunk to mark as fragmented\n            \n        Returns:\n            bool: True if chunk was marked as fragmented\n        \"\"\"\n        if chunk.in_use:\n            self.logger.warning(f\"Cannot mark in-use chunk {chunk.id} as fragmented\")\n            return False\n            \n        chunk.fragmented = True\n        self.stats[\"fragments\"] += 1\n        self.logger.debug(f\"Marked chunk {chunk.id} as fragmented\")\n        return True"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Manages memory pools for SCIL with K(t) framework optimization"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

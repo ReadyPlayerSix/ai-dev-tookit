@@ -1,0 +1,269 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\integration_test.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 1
+    },
+    {
+      "name": "numpy",
+      "line": 2
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 3
+    },
+    {
+      "name": "typing.Dict",
+      "line": 4
+    },
+    {
+      "name": "typing.List",
+      "line": 4
+    },
+    {
+      "name": "typing.Optional",
+      "line": 4
+    },
+    {
+      "name": "typing.Union",
+      "line": 4
+    },
+    {
+      "name": "typing.Any",
+      "line": 4
+    },
+    {
+      "name": "enum.Enum",
+      "line": 5
+    }
+  ],
+  "classes": {
+    "SpecialistType": {
+      "start_line": 7,
+      "end_line": 12,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "VISION",
+          "line": 8
+        },
+        {
+          "name": "TEXT",
+          "line": 9
+        },
+        {
+          "name": "SENTIMENT",
+          "line": 10
+        }
+      ],
+      "bases": [
+        "Enum"
+      ]
+    },
+    "SpecialistOutput": {
+      "start_line": 13,
+      "end_line": 19,
+      "methods": {},
+      "class_variables": [],
+      "bases": []
+    },
+    "IntegrationTestHarness": {
+      "start_line": 19,
+      "end_line": 117,
+      "methods": {
+        "__init__": {
+          "start_line": 20,
+          "end_line": 38,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.device",
+              "line": 21
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 21
+            }
+          ],
+          "code_snippet": "\nclass IntegrationTestHarness:\n    def __init__(self):\n        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        self.gpu_memory_limit = 4089  # MB for RTX 4070 SUPER\n        \n        # Track specialist resource usage\n        self.resource_allocation = {\n            SpecialistType.VISION: {\"memory\": 0, \"active\": False},\n            SpecialistType.TEXT: {\"memory\": 0, \"active\": False},\n            SpecialistType.SENTIMENT: {\"memory\": 0, \"active\": False}\n        }\n        \n        # Performance tracking\n        self.integration_metrics = {\n            \"patterns_processed\": 0,\n            \"successful_integrations\": 0,\n            \"resource_efficiency\": 0.0,\n            \"average_confidence\": 0.0\n        }\n    \n    def allocate_specialist_resources(self, \n                                    specialist_type: SpecialistType, "
+        },
+        "allocate_specialist_resources": {
+          "start_line": 39,
+          "end_line": 51,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "specialist_type",
+              "type": "SpecialistType"
+            },
+            {
+              "name": "required_memory",
+              "type": "int"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [
+            {
+              "name": "sum",
+              "line": 43
+            },
+            {
+              "name": "self.resource_allocation.values",
+              "line": 43
+            }
+          ],
+          "docstring": "Attempt to allocate GPU memory for a specialist",
+          "code_snippet": "        }\n    \n    def allocate_specialist_resources(self, \n                                    specialist_type: SpecialistType, \n                                    required_memory: int) -> bool:\n        \"\"\"Attempt to allocate GPU memory for a specialist\"\"\"\n        current_usage = sum(s[\"memory\"] for s in self.resource_allocation.values())\n        \n        if current_usage + required_memory <= self.gpu_memory_limit:\n            self.resource_allocation[specialist_type][\"memory\"] = required_memory\n            self.resource_allocation[specialist_type][\"active\"] = True\n            return True\n        return False\n    \n    def test_specialist_integration(self, \n                                  specialist_type: SpecialistType,\n                                  test_pattern: np.ndarray,"
+        },
+        "test_specialist_integration": {
+          "start_line": 51,
+          "end_line": 117,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "specialist_type",
+              "type": "SpecialistType"
+            },
+            {
+              "name": "test_pattern"
+            },
+            {
+              "name": "expected_confidence",
+              "type": "float"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.allocate_specialist_resources",
+              "line": 64
+            },
+            {
+              "name": "float",
+              "line": 76
+            },
+            {
+              "name": "sum",
+              "line": 87
+            },
+            {
+              "name": "sum",
+              "line": 71
+            },
+            {
+              "name": "np.clip",
+              "line": 76
+            },
+            {
+              "name": "abs",
+              "line": 83
+            },
+            {
+              "name": "SpecialistOutput",
+              "line": 100
+            },
+            {
+              "name": "np.random.normal",
+              "line": 77
+            },
+            {
+              "name": "self.resource_allocation.values",
+              "line": 87
+            },
+            {
+              "name": "self.resource_allocation.values",
+              "line": 71
+            }
+          ],
+          "docstring": "Test integration of a specific specialist",
+          "code_snippet": "        return False\n    \n    def test_specialist_integration(self, \n                                  specialist_type: SpecialistType,\n                                  test_pattern: np.ndarray,\n                                  expected_confidence: float) -> Dict[str, Any]:\n        \"\"\"Test integration of a specific specialist\"\"\"\n        # Memory requirements (estimated from documentation)\n        memory_requirements = {\n            SpecialistType.VISION: 1500,    # YOLO base memory\n            SpecialistType.TEXT: 800,       # DistilBERT memory\n            SpecialistType.SENTIMENT: 1200  # RoBERTa memory\n        }\n        \n        # Try to allocate resources\n        if not self.allocate_specialist_resources(\n            specialist_type, \n            memory_requirements[specialist_type]\n        ):\n            return {\n                \"success\": False,\n                \"error\": \"Insufficient GPU memory\",\n                \"current_usage\": sum(s[\"memory\"] for s in self.resource_allocation.values())\n            }\n        \n        try:\n            # Simulate specialist processing\n            processed_confidence = float(np.clip(\n                np.random.normal(expected_confidence, 0.1),\n                0, 1\n            ))\n            \n            # Update metrics\n            self.integration_metrics[\"patterns_processed\"] += 1\n            if abs(processed_confidence - expected_confidence) < 0.2:\n                self.integration_metrics[\"successful_integrations\"] += 1\n            \n            # Calculate resource efficiency\n            current_usage = sum(s[\"memory\"] for s in self.resource_allocation.values())\n            self.integration_metrics[\"resource_efficiency\"] = 1 - (current_usage / self.gpu_memory_limit)\n            \n            # Update average confidence\n            self.integration_metrics[\"average_confidence\"] = (\n                (self.integration_metrics[\"average_confidence\"] * \n                 (self.integration_metrics[\"patterns_processed\"] - 1) +\n                 processed_confidence) / \n                self.integration_metrics[\"patterns_processed\"]\n            )\n            \n            return {\n                \"success\": True,\n                \"specialist_output\": SpecialistOutput(\n                    specialist_type=specialist_type,\n                    confidence=processed_confidence,\n                    pattern_signature=test_pattern,\n                    domain_metrics={\n                        \"memory_usage\": memory_requirements[specialist_type],\n                        \"resource_efficiency\": self.integration_metrics[\"resource_efficiency\"]\n                    }\n                ),\n                \"metrics\": self.integration_metrics\n            }\n            \n        finally:\n            # Release resources\n            self.resource_allocation[specialist_type][\"memory\"] = 0\n            self.resource_allocation[specialist_type][\"active\"] = False\n\ndef test_harness():\n    \"\"\"Run integration tests for specialists\"\"\"\n    harness = IntegrationTestHarness()"
+        }
+      },
+      "class_variables": [],
+      "bases": []
+    }
+  },
+  "functions": {
+    "test_harness": {
+      "start_line": 117,
+      "end_line": 158,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "IntegrationTestHarness",
+          "line": 119
+        },
+        {
+          "name": "print",
+          "line": 128
+        },
+        {
+          "name": "print",
+          "line": 152
+        },
+        {
+          "name": "print",
+          "line": 153
+        },
+        {
+          "name": "print",
+          "line": 154
+        },
+        {
+          "name": "print",
+          "line": 155
+        },
+        {
+          "name": "print",
+          "line": 156
+        },
+        {
+          "name": "print",
+          "line": 131
+        },
+        {
+          "name": "np.random.rand",
+          "line": 134
+        },
+        {
+          "name": "harness.test_specialist_integration",
+          "line": 137
+        },
+        {
+          "name": "print",
+          "line": 145
+        },
+        {
+          "name": "print",
+          "line": 146
+        },
+        {
+          "name": "print",
+          "line": 147
+        },
+        {
+          "name": "print",
+          "line": 149
+        },
+        {
+          "name": "print",
+          "line": 150
+        }
+      ],
+      "docstring": "Run integration tests for specialists",
+      "code_snippet": "            self.resource_allocation[specialist_type][\"active\"] = False\n\ndef test_harness():\n    \"\"\"Run integration tests for specialists\"\"\"\n    harness = IntegrationTestHarness()\n    \n    # Test patterns based on documented success rates\n    test_cases = [\n        (SpecialistType.VISION, 0.82),    # FFT \u2192 Matrix success rate\n        (SpecialistType.TEXT, 0.76),      # Graph \u2192 Image success rate\n        (SpecialistType.SENTIMENT, 0.74)   # Parallel Sort \u2192 Query success rate\n    ]\n    \n    print(\"\\nRunning Specialist Integration Tests...\")\n    \n    for specialist_type, expected_confidence in test_cases:\n        print(f\"\\nTesting {specialist_type.value} specialist:\")\n        \n        # Generate test pattern\n        test_pattern = np.random.rand(10)  # 10-dimensional feature vector\n        \n        # Run integration test\n        result = harness.test_specialist_integration(\n            specialist_type,\n            test_pattern,\n            expected_confidence\n        )\n        \n        if result[\"success\"]:\n            output = result[\"specialist_output\"]\n            print(f\"Integration successful:\")\n            print(f\"- Confidence: {output.confidence:.3f}\")\n            print(f\"- Resource efficiency: {output.domain_metrics['resource_efficiency']:.3f}\")\n        else:\n            print(f\"Integration failed: {result['error']}\")\n            print(f\"Current GPU usage: {result['current_usage']}MB\")\n    \n    print(\"\\nFinal Integration Metrics:\")\n    print(f\"Patterns Processed: {harness.integration_metrics['patterns_processed']}\")\n    print(f\"Successful Integrations: {harness.integration_metrics['successful_integrations']}\")\n    print(f\"Average Confidence: {harness.integration_metrics['average_confidence']:.3f}\")\n    print(f\"Resource Efficiency: {harness.integration_metrics['resource_efficiency']:.3f}\")\n\nif __name__ == \"__main__\":\n    test_harness()"
+    }
+  },
+  "constants": {}
+}

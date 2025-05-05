@@ -1,0 +1,79 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\training\\risk_accuracy_tracker.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 11
+    },
+    {
+      "name": "isekaizen.core.optimizer.pattern_risk_accuracy_tracker.PatternRiskAccuracyTracker",
+      "line": 21
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "modify_pattern_risk_accuracy_tracker": {
+      "start_line": 15,
+      "end_line": 76,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 70
+        },
+        {
+          "name": "original_init",
+          "line": 29
+        },
+        {
+          "name": "logger.info",
+          "line": 42
+        },
+        {
+          "name": "complexities.items",
+          "line": 45
+        },
+        {
+          "name": "logger.error",
+          "line": 73
+        },
+        {
+          "name": "self._initialize_risks_from_complexities",
+          "line": 33
+        },
+        {
+          "name": "logger.warning",
+          "line": 39
+        },
+        {
+          "name": "min",
+          "line": 60
+        },
+        {
+          "name": "logger.info",
+          "line": 62
+        },
+        {
+          "name": "isinstance",
+          "line": 48
+        },
+        {
+          "name": "max",
+          "line": 60
+        },
+        {
+          "name": "str",
+          "line": 73
+        },
+        {
+          "name": "isinstance",
+          "line": 51
+        }
+      ],
+      "docstring": "\n    Modify the PatternRiskAccuracyTracker to initialize risk from complexity.\n    This ensures compatibility with the streamlined pattern map format.\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef modify_pattern_risk_accuracy_tracker():\n    \"\"\"\n    Modify the PatternRiskAccuracyTracker to initialize risk from complexity.\n    This ensures compatibility with the streamlined pattern map format.\n    \"\"\"\n    try:\n        from isekaizen.core.optimizer.pattern_risk_accuracy_tracker import PatternRiskAccuracyTracker\n        \n        # Store the original __init__ method\n        original_init = PatternRiskAccuracyTracker.__init__\n        \n        # Define a new initialization method that handles complexity information\n        def new_init(self, pattern_map=None):\n            # Call the original initialization\n            original_init(self, pattern_map)\n            \n            # Initialize risks from complexity if available\n            if pattern_map and 'pattern_complexities' in pattern_map:\n                self._initialize_risks_from_complexities()\n        \n        # Define the new method to initialize risks from complexities\n        def initialize_risks_from_complexities(self):\n            \"\"\"Initialize risks from complexity scores if available.\"\"\"\n            if not self.pattern_map or 'pattern_complexities' not in self.pattern_map:\n                logger.warning(\"No pattern complexities found for risk initialization\")\n                return\n                \n            logger.info(\"Initializing pattern risks from complexity scores\")\n            complexities = self.pattern_map['pattern_complexities']\n            \n            for pattern_type, complexity_info in complexities.items():\n                if pattern_type in self.pattern_stats:\n                    # Use complexity score to initialize risk\n                    if isinstance(complexity_info, dict) and 'avg_complexity' in complexity_info:\n                        avg_complexity = complexity_info['avg_complexity']\n                    else:\n                        avg_complexity = complexity_info if isinstance(complexity_info, (int, float)) else 2.5\n                        \n                    # Since the complexity in the pattern map is very low (~0.1), scale it up\n                    if avg_complexity < 0.2:\n                        # Scale up low complexities to get meaningful risk values\n                        scaled_complexity = avg_complexity * 2.5\n                    else:\n                        scaled_complexity = avg_complexity / 5.0  # Keep original scale for higher values\n                        \n                    initial_risk = min(1.0, max(0.1, scaled_complexity))  # Minimum risk of 0.1\n                    self.pattern_stats[pattern_type]['risk'] = initial_risk\n                    logger.info(f\"Initialized {pattern_type} risk to {initial_risk:.2f} based on complexity {avg_complexity}\")\n        \n        # Add the new method to the class\n        PatternRiskAccuracyTracker._initialize_risks_from_complexities = initialize_risks_from_complexities\n        \n        # Replace the __init__ method\n        PatternRiskAccuracyTracker.__init__ = new_init\n        \n        logger.info(\"Enhanced PatternRiskAccuracyTracker to initialize risk from complexity scores\")\n        return True\n    except (ImportError, AttributeError) as e:\n        logger.error(f\"Failed to modify PatternRiskAccuracyTracker: {str(e)}\")\n        return False"
+    }
+  },
+  "constants": {}
+}

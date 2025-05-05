@@ -1,0 +1,360 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\mediators\\ratio\\ratio_tracker.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 7
+    },
+    {
+      "name": "time",
+      "line": 8
+    },
+    {
+      "name": "typing.Dict",
+      "line": 9
+    },
+    {
+      "name": "typing.List",
+      "line": 9
+    },
+    {
+      "name": "typing.Any",
+      "line": 9
+    },
+    {
+      "name": "typing.Optional",
+      "line": 9
+    },
+    {
+      "name": "isekaizen.mediators.base.Mediator",
+      "line": 11
+    }
+  ],
+  "classes": {
+    "UnifiedRatioTracker": {
+      "start_line": 15,
+      "end_line": 227,
+      "methods": {
+        "__init__": {
+          "start_line": 21,
+          "end_line": 51,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 28
+            },
+            {
+              "name": "super",
+              "line": 28
+            }
+          ],
+          "docstring": "\n        Initialize the unified ratio tracker.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, pattern_map=None):\n        \"\"\"\n        Initialize the unified ratio tracker.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n        \"\"\"\n        super().__init__()\n        \n        # Store pattern map reference\n        self.pattern_map = pattern_map\n        \n        # Ratio tracking - by epoch and pattern type\n        # {epoch: {pattern_type: ratio}}\n        self.ratios_by_epoch = {}\n        \n        # Accuracy tracking\n        # {epoch: {'train': train_acc, 'test': test_acc}}\n        self.accuracy_by_epoch = {}\n        \n        # Current state\n        self.current_epoch = 0\n        \n        # Metrics tracking\n        self.metrics = {\n            \"tracked_epochs\": 0,\n            \"pattern_counts\": {},\n            \"average_ratios\": {},\n            \"memory_usage\": 0\n        }\n    \n    def initialize(self):\n        \"\"\"Initialize the ratio tracker.\"\"\""
+        },
+        "initialize": {
+          "start_line": 52,
+          "end_line": 62,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._extract_pattern_types",
+              "line": 56
+            },
+            {
+              "name": "logger.info",
+              "line": 57
+            },
+            {
+              "name": "logger.info",
+              "line": 60
+            },
+            {
+              "name": "len",
+              "line": 57
+            }
+          ],
+          "docstring": "Initialize the ratio tracker.",
+          "code_snippet": "        }\n    \n    def initialize(self):\n        \"\"\"Initialize the ratio tracker.\"\"\"\n        # Extract pattern types from pattern map if available\n        if self.pattern_map:\n            self.pattern_types = self._extract_pattern_types()\n            logger.info(f\"Initialized UnifiedRatioTracker with {len(self.pattern_types)} pattern types\")\n        else:\n            self.pattern_types = []\n            logger.info(\"Initialized UnifiedRatioTracker without pattern map\")\n    \n    def _extract_pattern_types(self) -> List[str]:\n        \"\"\"Extract pattern types from pattern map.\"\"\"\n        if not self.pattern_map:"
+        },
+        "_extract_pattern_types": {
+          "start_line": 62,
+          "end_line": 77,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "list",
+              "line": 69
+            },
+            {
+              "name": "....keys",
+              "line": 69
+            }
+          ],
+          "docstring": "Extract pattern types from pattern map.",
+          "code_snippet": "            logger.info(\"Initialized UnifiedRatioTracker without pattern map\")\n    \n    def _extract_pattern_types(self) -> List[str]:\n        \"\"\"Extract pattern types from pattern map.\"\"\"\n        if not self.pattern_map:\n            return []\n            \n        # First check standardized format\n        if 'pattern_distribution' in self.pattern_map:\n            return list(self.pattern_map['pattern_distribution'].keys())\n        \n        # Try alternative formats\n        if 'pattern_types' in self.pattern_map:\n            return self.pattern_map['pattern_types']\n        \n        return []\n    \n    def update_ratios(self, pattern_ratios: Dict[str, float], epoch: Optional[int] = None):\n        \"\"\"\n        Update the ratio values for a specific epoch."
+        },
+        "update_ratios": {
+          "start_line": 77,
+          "end_line": 112,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_ratios"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 92
+            },
+            {
+              "name": "pattern_ratios.keys",
+              "line": 95
+            },
+            {
+              "name": "pattern_ratios.items",
+              "line": 101
+            },
+            {
+              "name": "logger.debug",
+              "line": 110
+            },
+            {
+              "name": "len",
+              "line": 110
+            }
+          ],
+          "docstring": "\n        Update the ratio values for a specific epoch.\n        \n        Args:\n            pattern_ratios: Dictionary mapping pattern types to ratio values\n            epoch: Epoch number (defaults to current epoch)\n        ",
+          "code_snippet": "        return []\n    \n    def update_ratios(self, pattern_ratios: Dict[str, float], epoch: Optional[int] = None):\n        \"\"\"\n        Update the ratio values for a specific epoch.\n        \n        Args:\n            pattern_ratios: Dictionary mapping pattern types to ratio values\n            epoch: Epoch number (defaults to current epoch)\n        \"\"\"\n        if epoch is None:\n            epoch = self.current_epoch\n        \n        # Store the ratios\n        self.ratios_by_epoch[epoch] = pattern_ratios\n        \n        # Update metrics\n        self.metrics[\"tracked_epochs\"] = len(self.ratios_by_epoch)\n        \n        # Update pattern counts\n        for pattern_type in pattern_ratios.keys():\n            if pattern_type not in self.metrics[\"pattern_counts\"]:\n                self.metrics[\"pattern_counts\"][pattern_type] = 0\n            self.metrics[\"pattern_counts\"][pattern_type] += 1\n        \n        # Update average ratios\n        for pattern_type, ratio in pattern_ratios.items():\n            if pattern_type not in self.metrics[\"average_ratios\"]:\n                self.metrics[\"average_ratios\"][pattern_type] = ratio\n            else:\n                current_avg = self.metrics[\"average_ratios\"][pattern_type]\n                count = self.metrics[\"pattern_counts\"][pattern_type]\n                # Running average calculation\n                self.metrics[\"average_ratios\"][pattern_type] = current_avg + (ratio - current_avg) / count\n        \n        logger.debug(f\"UnifiedRatioTracker: Updated ratios for epoch {epoch} with {len(pattern_ratios)} patterns\")\n    \n    def update_accuracy(self, train_accuracy: float, test_accuracy: float, epoch: Optional[int] = None):\n        \"\"\"\n        Update the accuracy values for a specific epoch."
+        },
+        "update_accuracy": {
+          "start_line": 112,
+          "end_line": 132,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_accuracy",
+              "type": "float"
+            },
+            {
+              "name": "test_accuracy",
+              "type": "float"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.debug",
+              "line": 130
+            }
+          ],
+          "docstring": "\n        Update the accuracy values for a specific epoch.\n        \n        Args:\n            train_accuracy: Training accuracy value\n            test_accuracy: Testing/validation accuracy value\n            epoch: Epoch number (defaults to current epoch)\n        ",
+          "code_snippet": "        logger.debug(f\"UnifiedRatioTracker: Updated ratios for epoch {epoch} with {len(pattern_ratios)} patterns\")\n    \n    def update_accuracy(self, train_accuracy: float, test_accuracy: float, epoch: Optional[int] = None):\n        \"\"\"\n        Update the accuracy values for a specific epoch.\n        \n        Args:\n            train_accuracy: Training accuracy value\n            test_accuracy: Testing/validation accuracy value\n            epoch: Epoch number (defaults to current epoch)\n        \"\"\"\n        if epoch is None:\n            epoch = self.current_epoch\n        \n        # Store the accuracies\n        self.accuracy_by_epoch[epoch] = {\n            'train': train_accuracy,\n            'test': test_accuracy\n        }\n        \n        logger.debug(f\"UnifiedRatioTracker: Updated accuracy for epoch {epoch} - train: {train_accuracy:.2f}%, test: {test_accuracy:.2f}%\")\n    \n    def get_ratios(self, epoch: Optional[int] = None) -> Dict[str, float]:\n        \"\"\"\n        Get the ratio values for a specific epoch."
+        },
+        "get_ratios": {
+          "start_line": 132,
+          "end_line": 147,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.ratios_by_epoch.get",
+              "line": 145
+            }
+          ],
+          "docstring": "\n        Get the ratio values for a specific epoch.\n        \n        Args:\n            epoch: Epoch number (defaults to current epoch)\n            \n        Returns:\n            Dictionary mapping pattern types to ratio values\n        ",
+          "code_snippet": "        logger.debug(f\"UnifiedRatioTracker: Updated accuracy for epoch {epoch} - train: {train_accuracy:.2f}%, test: {test_accuracy:.2f}%\")\n    \n    def get_ratios(self, epoch: Optional[int] = None) -> Dict[str, float]:\n        \"\"\"\n        Get the ratio values for a specific epoch.\n        \n        Args:\n            epoch: Epoch number (defaults to current epoch)\n            \n        Returns:\n            Dictionary mapping pattern types to ratio values\n        \"\"\"\n        if epoch is None:\n            epoch = self.current_epoch\n        \n        return self.ratios_by_epoch.get(epoch, {})\n    \n    def get_accuracy(self, epoch: Optional[int] = None) -> Dict[str, float]:\n        \"\"\"\n        Get the accuracy values for a specific epoch."
+        },
+        "get_accuracy": {
+          "start_line": 147,
+          "end_line": 162,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.accuracy_by_epoch.get",
+              "line": 160
+            }
+          ],
+          "docstring": "\n        Get the accuracy values for a specific epoch.\n        \n        Args:\n            epoch: Epoch number (defaults to current epoch)\n            \n        Returns:\n            Dictionary with 'train' and 'test' accuracy values\n        ",
+          "code_snippet": "        return self.ratios_by_epoch.get(epoch, {})\n    \n    def get_accuracy(self, epoch: Optional[int] = None) -> Dict[str, float]:\n        \"\"\"\n        Get the accuracy values for a specific epoch.\n        \n        Args:\n            epoch: Epoch number (defaults to current epoch)\n            \n        Returns:\n            Dictionary with 'train' and 'test' accuracy values\n        \"\"\"\n        if epoch is None:\n            epoch = self.current_epoch\n        \n        return self.accuracy_by_epoch.get(epoch, {'train': 0.0, 'test': 0.0})\n    \n    def end_epoch(self, epoch: int):\n        \"\"\"\n        Signal the end of an epoch."
+        },
+        "end_epoch": {
+          "start_line": 162,
+          "end_line": 177,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch",
+              "type": "int"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._cleanup_old_epochs",
+              "line": 173
+            },
+            {
+              "name": "logger.debug",
+              "line": 175
+            }
+          ],
+          "docstring": "\n        Signal the end of an epoch.\n        \n        Args:\n            epoch: The epoch that has ended\n        ",
+          "code_snippet": "        return self.accuracy_by_epoch.get(epoch, {'train': 0.0, 'test': 0.0})\n    \n    def end_epoch(self, epoch: int):\n        \"\"\"\n        Signal the end of an epoch.\n        \n        Args:\n            epoch: The epoch that has ended\n        \"\"\"\n        # Update current epoch\n        self.current_epoch = epoch + 1\n        \n        # Cleanup old epochs if needed\n        self._cleanup_old_epochs()\n        \n        logger.debug(f\"UnifiedRatioTracker: End of epoch {epoch}, moving to epoch {self.current_epoch}\")\n    \n    def _cleanup_old_epochs(self):\n        \"\"\"Clean up data from old epochs to save memory.\"\"\"\n        # Keep only the last N epochs"
+        },
+        "_cleanup_old_epochs": {
+          "start_line": 177,
+          "end_line": 200,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.ratios_by_epoch.keys",
+              "line": 184
+            },
+            {
+              "name": "self.accuracy_by_epoch.keys",
+              "line": 193
+            },
+            {
+              "name": "epochs_to_remove.append",
+              "line": 186
+            },
+            {
+              "name": "epochs_to_remove.append",
+              "line": 195
+            }
+          ],
+          "docstring": "Clean up data from old epochs to save memory.",
+          "code_snippet": "        logger.debug(f\"UnifiedRatioTracker: End of epoch {epoch}, moving to epoch {self.current_epoch}\")\n    \n    def _cleanup_old_epochs(self):\n        \"\"\"Clean up data from old epochs to save memory.\"\"\"\n        # Keep only the last N epochs\n        max_epochs_to_keep = 10\n        \n        # Remove old ratio data\n        epochs_to_remove = []\n        for epoch in self.ratios_by_epoch.keys():\n            if epoch < self.current_epoch - max_epochs_to_keep:\n                epochs_to_remove.append(epoch)\n        \n        for epoch in epochs_to_remove:\n            del self.ratios_by_epoch[epoch]\n        \n        # Remove old accuracy data\n        epochs_to_remove = []\n        for epoch in self.accuracy_by_epoch.keys():\n            if epoch < self.current_epoch - max_epochs_to_keep:\n                epochs_to_remove.append(epoch)\n        \n        for epoch in epochs_to_remove:\n            del self.accuracy_by_epoch[epoch]\n    \n    def clear_cache(self):\n        \"\"\"Clear cached data to free memory.\"\"\"\n        # Keep only the current epoch data"
+        },
+        "clear_cache": {
+          "start_line": 200,
+          "end_line": 213,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "list",
+              "line": 203
+            },
+            {
+              "name": "list",
+              "line": 207
+            },
+            {
+              "name": "logger.info",
+              "line": 211
+            },
+            {
+              "name": "self.ratios_by_epoch.keys",
+              "line": 203
+            },
+            {
+              "name": "self.accuracy_by_epoch.keys",
+              "line": 207
+            }
+          ],
+          "docstring": "Clear cached data to free memory.",
+          "code_snippet": "            del self.accuracy_by_epoch[epoch]\n    \n    def clear_cache(self):\n        \"\"\"Clear cached data to free memory.\"\"\"\n        # Keep only the current epoch data\n        for epoch in list(self.ratios_by_epoch.keys()):\n            if epoch != self.current_epoch:\n                del self.ratios_by_epoch[epoch]\n        \n        for epoch in list(self.accuracy_by_epoch.keys()):\n            if epoch != self.current_epoch:\n                del self.accuracy_by_epoch[epoch]\n        \n        logger.info(\"UnifiedRatioTracker: Cache cleared\")\n    \n    def get_metrics(self) -> Dict[str, Any]:\n        \"\"\"Get current metrics from the mediator.\"\"\"\n        # Update metrics"
+        },
+        "get_metrics": {
+          "start_line": 213,
+          "end_line": 227,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "len",
+              "line": 216
+            },
+            {
+              "name": "dict",
+              "line": 219
+            },
+            {
+              "name": "sum",
+              "line": 223
+            },
+            {
+              "name": "len",
+              "line": 223
+            },
+            {
+              "name": "....values",
+              "line": 223
+            }
+          ],
+          "docstring": "Get current metrics from the mediator.",
+          "code_snippet": "        logger.info(\"UnifiedRatioTracker: Cache cleared\")\n    \n    def get_metrics(self) -> Dict[str, Any]:\n        \"\"\"Get current metrics from the mediator.\"\"\"\n        # Update metrics\n        self.metrics[\"tracked_epochs\"] = len(self.ratios_by_epoch)\n        \n        # Add derived metrics\n        metrics = dict(self.metrics)\n        \n        # Calculate average ratio across all patterns\n        if self.metrics[\"average_ratios\"]:\n            metrics[\"overall_average_ratio\"] = sum(self.metrics[\"average_ratios\"].values()) / len(self.metrics[\"average_ratios\"])\n        \n        return metrics"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Mediator"
+      ],
+      "docstring": "\n    Mediator component that tracks the unified risk/accuracy ratios\n    for different pattern types over time.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

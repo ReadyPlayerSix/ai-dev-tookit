@@ -1,0 +1,162 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\semantic\\mapper.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 5
+    },
+    {
+      "name": "json",
+      "line": 6
+    },
+    {
+      "name": "logging",
+      "line": 7
+    }
+  ],
+  "classes": {
+    "SemanticTopographicalMapper": {
+      "start_line": 11,
+      "end_line": 79,
+      "methods": {
+        "__init__": {
+          "start_line": 17,
+          "end_line": 21,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "Initialize the mapper.",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self):\n        \"\"\"Initialize the mapper.\"\"\"\n        pass\n        \n    def load_map(self, map_path):\n        \"\"\"\n        Load a semantic map from file."
+        },
+        "load_map": {
+          "start_line": 21,
+          "end_line": 44,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "map_path"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "os.path.exists",
+              "line": 31
+            },
+            {
+              "name": "logger.error",
+              "line": 32
+            },
+            {
+              "name": "logger.info",
+              "line": 38
+            },
+            {
+              "name": "open",
+              "line": 36
+            },
+            {
+              "name": "json.load",
+              "line": 37
+            },
+            {
+              "name": "logger.error",
+              "line": 41
+            },
+            {
+              "name": "str",
+              "line": 41
+            }
+          ],
+          "docstring": "\n        Load a semantic map from file.\n        \n        Args:\n            map_path: Path to the semantic map file\n            \n        Returns:\n            The loaded semantic map dictionary\n        ",
+          "code_snippet": "        pass\n        \n    def load_map(self, map_path):\n        \"\"\"\n        Load a semantic map from file.\n        \n        Args:\n            map_path: Path to the semantic map file\n            \n        Returns:\n            The loaded semantic map dictionary\n        \"\"\"\n        if not os.path.exists(map_path):\n            logger.error(f\"Map file not found: {map_path}\")\n            return {}\n            \n        try:\n            with open(map_path, 'r') as f:\n                semantic_map = json.load(f)\n            logger.info(f\"Loaded semantic map from {map_path}\")\n            return semantic_map\n        except Exception as e:\n            logger.error(f\"Failed to load semantic map: {str(e)}\")\n            return {}\n    \n    def save_map(self, semantic_map, output_path, update_latest=True, maps_dir=\"benchmarks/semantic_maps\"):\n        \"\"\"\n        Save a semantic map to file."
+        },
+        "save_map": {
+          "start_line": 44,
+          "end_line": 79,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "semantic_map"
+            },
+            {
+              "name": "output_path"
+            },
+            {
+              "name": "update_latest"
+            },
+            {
+              "name": "maps_dir"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "os.makedirs",
+              "line": 58
+            },
+            {
+              "name": "os.path.dirname",
+              "line": 58
+            },
+            {
+              "name": "logger.info",
+              "line": 64
+            },
+            {
+              "name": "open",
+              "line": 62
+            },
+            {
+              "name": "json.dump",
+              "line": 63
+            },
+            {
+              "name": "os.path.join",
+              "line": 68
+            },
+            {
+              "name": "os.makedirs",
+              "line": 69
+            },
+            {
+              "name": "logger.info",
+              "line": 72
+            },
+            {
+              "name": "logger.error",
+              "line": 76
+            },
+            {
+              "name": "open",
+              "line": 70
+            },
+            {
+              "name": "f.write",
+              "line": 71
+            },
+            {
+              "name": "str",
+              "line": 76
+            }
+          ],
+          "docstring": "\n        Save a semantic map to file.\n        \n        Args:\n            semantic_map: The semantic map to save\n            output_path: Path where to save the map\n            update_latest: Whether to update the latest map reference\n            maps_dir: Directory where maps are stored\n            \n        Returns:\n            Path to the saved map\n        ",
+          "code_snippet": "            return {}\n    \n    def save_map(self, semantic_map, output_path, update_latest=True, maps_dir=\"benchmarks/semantic_maps\"):\n        \"\"\"\n        Save a semantic map to file.\n        \n        Args:\n            semantic_map: The semantic map to save\n            output_path: Path where to save the map\n            update_latest: Whether to update the latest map reference\n            maps_dir: Directory where maps are stored\n            \n        Returns:\n            Path to the saved map\n        \"\"\"\n        # Create output directory if it doesn't exist\n        os.makedirs(os.path.dirname(output_path), exist_ok=True)\n        \n        # Save the map\n        try:\n            with open(output_path, 'w') as f:\n                json.dump(semantic_map, f, indent=2)\n            logger.info(f\"Saved semantic map to {output_path}\")\n            \n            # Update latest map reference if requested\n            if update_latest:\n                latest_path_file = os.path.join(maps_dir, \"latest_map_path.txt\")\n                os.makedirs(maps_dir, exist_ok=True)\n                with open(latest_path_file, 'w') as f:\n                    f.write(output_path)\n                logger.info(f\"Updated latest map reference: {latest_path_file}\")\n                \n            return output_path\n        except Exception as e:\n            logger.error(f\"Failed to save semantic map: {str(e)}\")\n            return None"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Class for creating and managing semantic topographical maps of datasets.\n    These maps identify difficult regions in the training data.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

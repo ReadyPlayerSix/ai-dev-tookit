@@ -1,0 +1,12 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\semantic\\__init__.py",
+  "imports": [
+    {
+      "name": "mapper_math.SemanticTopographicalMapper",
+      "line": 1
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

@@ -1,0 +1,522 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\trainer\\model_trainer.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 7
+    },
+    {
+      "name": "torch.nn",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "time",
+      "line": 10
+    },
+    {
+      "name": "typing.Dict",
+      "line": 11
+    },
+    {
+      "name": "typing.List",
+      "line": 11
+    },
+    {
+      "name": "typing.Any",
+      "line": 11
+    },
+    {
+      "name": "typing.Optional",
+      "line": 11
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 11
+    },
+    {
+      "name": "isekaizen.core.optimizer.IsekaiZenOptimizer",
+      "line": 13
+    },
+    {
+      "name": "isekaizen.core.optimizer.RiskAwarePatternIsekaiZen",
+      "line": 13
+    },
+    {
+      "name": "os",
+      "line": 293
+    }
+  ],
+  "classes": {
+    "ModelTrainer": {
+      "start_line": 17,
+      "end_line": 310,
+      "methods": {
+        "__init__": {
+          "start_line": 22,
+          "end_line": 84,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "criterion"
+            },
+            {
+              "name": "optimizer_class"
+            },
+            {
+              "name": "optimizer_kwargs"
+            },
+            {
+              "name": "scheduler_class"
+            },
+            {
+              "name": "scheduler_kwargs"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "use_risk_aware"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.to",
+              "line": 55
+            },
+            {
+              "name": "optimizer_class",
+              "line": 59
+            },
+            {
+              "name": "logger.info",
+              "line": 82
+            },
+            {
+              "name": "torch.device",
+              "line": 52
+            },
+            {
+              "name": "self.model.parameters",
+              "line": 59
+            },
+            {
+              "name": "scheduler_class",
+              "line": 65
+            },
+            {
+              "name": "RiskAwarePatternIsekaiZen",
+              "line": 69
+            },
+            {
+              "name": "IsekaiZenOptimizer",
+              "line": 76
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 52
+            }
+          ],
+          "docstring": "\n        Initialize the model trainer.\n        \n        Args:\n            model: PyTorch model to train\n            criterion: Loss function\n            optimizer_class: PyTorch optimizer class\n            optimizer_kwargs: Optimizer parameters\n            scheduler_class: Learning rate scheduler class\n            scheduler_kwargs: Scheduler parameters\n            device: Computation device\n            use_risk_aware: Whether to use risk-aware batch optimization\n            pattern_map: Pattern map for risk-aware optimization\n            **kwargs: Additional parameters for batch optimizer\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self,\n        model,\n        criterion,\n        optimizer_class,\n        optimizer_kwargs=None,\n        scheduler_class=None,\n        scheduler_kwargs=None,\n        device=None,\n        use_risk_aware=False,\n        pattern_map=None,\n        **kwargs\n    ):\n        \"\"\"\n        Initialize the model trainer.\n        \n        Args:\n            model: PyTorch model to train\n            criterion: Loss function\n            optimizer_class: PyTorch optimizer class\n            optimizer_kwargs: Optimizer parameters\n            scheduler_class: Learning rate scheduler class\n            scheduler_kwargs: Scheduler parameters\n            device: Computation device\n            use_risk_aware: Whether to use risk-aware batch optimization\n            pattern_map: Pattern map for risk-aware optimization\n            **kwargs: Additional parameters for batch optimizer\n        \"\"\"\n        self.model = model\n        self.criterion = criterion\n        self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Move model to device\n        self.model = self.model.to(self.device)\n        \n        # Create optimizer\n        optimizer_kwargs = optimizer_kwargs or {}\n        self.optimizer = optimizer_class(self.model.parameters(), **optimizer_kwargs)\n        \n        # Create scheduler if provided\n        self.scheduler = None\n        if scheduler_class:\n            scheduler_kwargs = scheduler_kwargs or {}\n            self.scheduler = scheduler_class(self.optimizer, **scheduler_kwargs)\n        \n        # Create batch optimizer\n        if use_risk_aware:\n            self.batch_optimizer = RiskAwarePatternIsekaiZen(\n                model=model,\n                device=self.device,\n                pattern_map=pattern_map,\n                **kwargs\n            )\n        else:\n            self.batch_optimizer = IsekaiZenOptimizer(\n                model=model,\n                device=self.device,\n                **kwargs\n            )\n            \n        logger.info(f\"Model trainer initialized with {'risk-aware' if use_risk_aware else 'standard'} batch optimization\")\n    \n    def train(\n        self,\n        train_dataset,"
+        },
+        "train": {
+          "start_line": 84,
+          "end_line": 180,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_dataset"
+            },
+            {
+              "name": "val_dataset"
+            },
+            {
+              "name": "epochs"
+            },
+            {
+              "name": "early_stopping"
+            },
+            {
+              "name": "patience"
+            },
+            {
+              "name": "test_interval"
+            },
+            {
+              "name": "checkpoint_interval"
+            },
+            {
+              "name": "checkpoint_path"
+            },
+            {
+              "name": "callbacks"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "float",
+              "line": 120
+            },
+            {
+              "name": "range",
+              "line": 123
+            },
+            {
+              "name": "logger.info",
+              "line": 177
+            },
+            {
+              "name": "logger.info",
+              "line": 124
+            },
+            {
+              "name": "self.batch_optimizer.get_optimal_batch_size",
+              "line": 127
+            },
+            {
+              "name": "....append",
+              "line": 128
+            },
+            {
+              "name": "time.time",
+              "line": 131
+            },
+            {
+              "name": "self._train_epoch",
+              "line": 132
+            },
+            {
+              "name": "....append",
+              "line": 135
+            },
+            {
+              "name": "....append",
+              "line": 136
+            },
+            {
+              "name": "....append",
+              "line": 137
+            },
+            {
+              "name": "logger.info",
+              "line": 139
+            },
+            {
+              "name": "time.time",
+              "line": 133
+            },
+            {
+              "name": "self._validate",
+              "line": 143
+            },
+            {
+              "name": "....append",
+              "line": 144
+            },
+            {
+              "name": "....append",
+              "line": 145
+            },
+            {
+              "name": "logger.info",
+              "line": 147
+            },
+            {
+              "name": "self.save_model",
+              "line": 166
+            },
+            {
+              "name": "self.scheduler.step",
+              "line": 170
+            },
+            {
+              "name": "callback",
+              "line": 175
+            },
+            {
+              "name": "logger.info",
+              "line": 161
+            },
+            {
+              "name": "self.save_model",
+              "line": 156
+            }
+          ],
+          "docstring": "\n        Train the model with batch optimization.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Validation dataset\n            epochs: Number of epochs\n            early_stopping: Whether to use early stopping\n            patience: Early stopping patience\n            test_interval: Interval for validation\n            checkpoint_interval: Interval for saving checkpoints\n            checkpoint_path: Path to save checkpoints\n            callbacks: List of callback functions\n            \n        Returns:\n            Training history\n        ",
+          "code_snippet": "        logger.info(f\"Model trainer initialized with {'risk-aware' if use_risk_aware else 'standard'} batch optimization\")\n    \n    def train(\n        self,\n        train_dataset,\n        val_dataset=None,\n        epochs=10,\n        early_stopping=False,\n        patience=3,\n        test_interval=1,\n        checkpoint_interval=None,\n        checkpoint_path=None,\n        callbacks=None\n    ):\n        \"\"\"\n        Train the model with batch optimization.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Validation dataset\n            epochs: Number of epochs\n            early_stopping: Whether to use early stopping\n            patience: Early stopping patience\n            test_interval: Interval for validation\n            checkpoint_interval: Interval for saving checkpoints\n            checkpoint_path: Path to save checkpoints\n            callbacks: List of callback functions\n            \n        Returns:\n            Training history\n        \"\"\"\n        # Initialize variables\n        history = {\n            'train_loss': [], 'train_acc': [],\n            'val_loss': [], 'val_acc': [],\n            'batch_sizes': [], 'epoch_times': []\n        }\n        \n        best_val_loss = float('inf')\n        no_improve_count = 0\n        \n        for epoch in range(epochs):\n            logger.info(f\"Epoch {epoch+1}/{epochs}\")\n            \n            # Get optimal batch size\n            batch_size = self.batch_optimizer.get_optimal_batch_size()\n            history['batch_sizes'].append(batch_size)\n            \n            # Train for one epoch\n            start_time = time.time()\n            train_loss, train_acc = self._train_epoch(train_dataset, batch_size)\n            epoch_time = time.time() - start_time\n            \n            history['train_loss'].append(train_loss)\n            history['train_acc'].append(train_acc)\n            history['epoch_times'].append(epoch_time)\n            \n            logger.info(f\"Training - Loss: {train_loss:.4f}, Acc: {train_acc:.2f}%\")\n            \n            # Validate if a validation set is provided\n            if val_dataset is not None and (epoch + 1) % test_interval == 0:\n                val_loss, val_acc = self._validate(val_dataset)\n                history['val_loss'].append(val_loss)\n                history['val_acc'].append(val_acc)\n                \n                logger.info(f\"Validation - Loss: {val_loss:.4f}, Acc: {val_acc:.2f}%\")\n                \n                # Check for early stopping\n                if early_stopping:\n                    if val_loss < best_val_loss:\n                        best_val_loss = val_loss\n                        no_improve_count = 0\n                        # Save best model\n                        if checkpoint_path:\n                            self.save_model(f\"{checkpoint_path}_best.pth\")\n                    else:\n                        no_improve_count += 1\n                        \n                    if no_improve_count >= patience:\n                        logger.info(f\"Early stopping triggered after {epoch+1} epochs\")\n                        break\n            \n            # Save checkpoint if interval is specified\n            if checkpoint_interval and (epoch + 1) % checkpoint_interval == 0 and checkpoint_path:\n                self.save_model(f\"{checkpoint_path}_epoch{epoch+1}.pth\")\n            \n            # Step the scheduler if it exists\n            if self.scheduler:\n                self.scheduler.step()\n            \n            # Execute callbacks if provided\n            if callbacks:\n                for callback in callbacks:\n                    callback(epoch, history, self.model, self.optimizer)\n        \n        logger.info(\"Training complete\")\n        return history\n    \n    def _train_epoch(self, dataset, batch_size):\n        \"\"\"\n        Train for one epoch."
+        },
+        "_train_epoch": {
+          "start_line": 180,
+          "end_line": 226,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.train",
+              "line": 191
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 197
+            },
+            {
+              "name": "self.optimizer.zero_grad",
+              "line": 204
+            },
+            {
+              "name": "self.model",
+              "line": 207
+            },
+            {
+              "name": "self.criterion",
+              "line": 208
+            },
+            {
+              "name": "loss.backward",
+              "line": 211
+            },
+            {
+              "name": "self.optimizer.step",
+              "line": 212
+            },
+            {
+              "name": "loss.item",
+              "line": 215
+            },
+            {
+              "name": "outputs.max",
+              "line": 216
+            },
+            {
+              "name": "targets.size",
+              "line": 217
+            },
+            {
+              "name": "....item",
+              "line": 218
+            },
+            {
+              "name": "len",
+              "line": 221
+            },
+            {
+              "name": "inputs.to",
+              "line": 201
+            },
+            {
+              "name": "targets.to",
+              "line": 201
+            },
+            {
+              "name": "....sum",
+              "line": 218
+            },
+            {
+              "name": "predicted.eq",
+              "line": 218
+            }
+          ],
+          "docstring": "\n        Train for one epoch.\n        \n        Args:\n            dataset: Dataset to train on\n            batch_size: Batch size\n            \n        Returns:\n            Tuple of (loss, accuracy)\n        ",
+          "code_snippet": "        return history\n    \n    def _train_epoch(self, dataset, batch_size):\n        \"\"\"\n        Train for one epoch.\n        \n        Args:\n            dataset: Dataset to train on\n            batch_size: Batch size\n            \n        Returns:\n            Tuple of (loss, accuracy)\n        \"\"\"\n        self.model.train()\n        running_loss = 0.0\n        correct = 0\n        total = 0\n        \n        # Create data loader\n        dataloader = torch.utils.data.DataLoader(\n            dataset, batch_size=batch_size, shuffle=True, num_workers=2)\n        \n        for inputs, targets in dataloader:\n            inputs, targets = inputs.to(self.device), targets.to(self.device)\n            \n            # Zero the parameter gradients\n            self.optimizer.zero_grad()\n            \n            # Forward pass\n            outputs = self.model(inputs)\n            loss = self.criterion(outputs, targets)\n            \n            # Backward pass and optimize\n            loss.backward()\n            self.optimizer.step()\n            \n            # Update metrics\n            running_loss += loss.item()\n            _, predicted = outputs.max(1)\n            total += targets.size(0)\n            correct += predicted.eq(targets).sum().item()\n        \n        # Calculate epoch metrics\n        epoch_loss = running_loss / len(dataloader)\n        epoch_acc = 100. * correct / total\n        \n        return epoch_loss, epoch_acc\n    \n    def _validate(self, dataset, batch_size=128):\n        \"\"\"\n        Validate the model."
+        },
+        "_validate": {
+          "start_line": 226,
+          "end_line": 267,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.eval",
+              "line": 237
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 243
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 247
+            },
+            {
+              "name": "len",
+              "line": 262
+            },
+            {
+              "name": "self.model",
+              "line": 252
+            },
+            {
+              "name": "self.criterion",
+              "line": 253
+            },
+            {
+              "name": "loss.item",
+              "line": 256
+            },
+            {
+              "name": "outputs.max",
+              "line": 257
+            },
+            {
+              "name": "targets.size",
+              "line": 258
+            },
+            {
+              "name": "....item",
+              "line": 259
+            },
+            {
+              "name": "inputs.to",
+              "line": 249
+            },
+            {
+              "name": "targets.to",
+              "line": 249
+            },
+            {
+              "name": "....sum",
+              "line": 259
+            },
+            {
+              "name": "predicted.eq",
+              "line": 259
+            }
+          ],
+          "docstring": "\n        Validate the model.\n        \n        Args:\n            dataset: Validation dataset\n            batch_size: Batch size\n            \n        Returns:\n            Tuple of (loss, accuracy)\n        ",
+          "code_snippet": "        return epoch_loss, epoch_acc\n    \n    def _validate(self, dataset, batch_size=128):\n        \"\"\"\n        Validate the model.\n        \n        Args:\n            dataset: Validation dataset\n            batch_size: Batch size\n            \n        Returns:\n            Tuple of (loss, accuracy)\n        \"\"\"\n        self.model.eval()\n        running_loss = 0.0\n        correct = 0\n        total = 0\n        \n        # Create data loader\n        dataloader = torch.utils.data.DataLoader(\n            dataset, batch_size=batch_size, shuffle=False, num_workers=2)\n        \n        # Disable gradient calculation\n        with torch.no_grad():\n            for inputs, targets in dataloader:\n                inputs, targets = inputs.to(self.device), targets.to(self.device)\n                \n                # Forward pass\n                outputs = self.model(inputs)\n                loss = self.criterion(outputs, targets)\n                \n                # Update metrics\n                running_loss += loss.item()\n                _, predicted = outputs.max(1)\n                total += targets.size(0)\n                correct += predicted.eq(targets).sum().item()\n        \n        # Calculate metrics\n        val_loss = running_loss / len(dataloader)\n        val_acc = 100. * correct / total\n        \n        return val_loss, val_acc\n    \n    def evaluate(self, dataset, batch_size=128):\n        \"\"\"\n        Evaluate the model."
+        },
+        "evaluate": {
+          "start_line": 267,
+          "end_line": 284,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._validate",
+              "line": 278
+            }
+          ],
+          "docstring": "\n        Evaluate the model.\n        \n        Args:\n            dataset: Dataset to evaluate\n            batch_size: Batch size\n            \n        Returns:\n            Dictionary with evaluation metrics\n        ",
+          "code_snippet": "        return val_loss, val_acc\n    \n    def evaluate(self, dataset, batch_size=128):\n        \"\"\"\n        Evaluate the model.\n        \n        Args:\n            dataset: Dataset to evaluate\n            batch_size: Batch size\n            \n        Returns:\n            Dictionary with evaluation metrics\n        \"\"\"\n        val_loss, val_acc = self._validate(dataset, batch_size)\n        \n        return {\n            'loss': val_loss,\n            'accuracy': val_acc\n        }\n    \n    def save_model(self, path):\n        \"\"\""
+        },
+        "save_model": {
+          "start_line": 285,
+          "end_line": 300,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "path"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "os.makedirs",
+              "line": 294
+            },
+            {
+              "name": "torch.save",
+              "line": 297
+            },
+            {
+              "name": "logger.info",
+              "line": 298
+            },
+            {
+              "name": "os.path.dirname",
+              "line": 294
+            },
+            {
+              "name": "self.model.state_dict",
+              "line": 297
+            }
+          ],
+          "docstring": "\n        Save the model to a file.\n        \n        Args:\n            path: Path to save the model\n        ",
+          "code_snippet": "        }\n    \n    def save_model(self, path):\n        \"\"\"\n        Save the model to a file.\n        \n        Args:\n            path: Path to save the model\n        \"\"\"\n        # Create directory if it doesn't exist\n        import os\n        os.makedirs(os.path.dirname(path), exist_ok=True)\n        \n        # Save model\n        torch.save(self.model.state_dict(), path)\n        logger.info(f\"Model saved to {path}\")\n    \n    def load_model(self, path):\n        \"\"\"\n        Load the model from a file."
+        },
+        "load_model": {
+          "start_line": 300,
+          "end_line": 310,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "path"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.load_state_dict",
+              "line": 307
+            },
+            {
+              "name": "logger.info",
+              "line": 308
+            },
+            {
+              "name": "torch.load",
+              "line": 307
+            }
+          ],
+          "docstring": "\n        Load the model from a file.\n        \n        Args:\n            path: Path to load the model from\n        ",
+          "code_snippet": "        logger.info(f\"Model saved to {path}\")\n    \n    def load_model(self, path):\n        \"\"\"\n        Load the model from a file.\n        \n        Args:\n            path: Path to load the model from\n        \"\"\"\n        self.model.load_state_dict(torch.load(path, map_location=self.device))\n        logger.info(f\"Model loaded from {path}\")"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Base model trainer with batch optimization support.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

@@ -1,0 +1,130 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\config.py",
+  "imports": [
+    {
+      "name": "dataclasses.dataclass",
+      "line": 6
+    },
+    {
+      "name": "typing.Dict",
+      "line": 7
+    },
+    {
+      "name": "typing.Any",
+      "line": 7
+    }
+  ],
+  "classes": {
+    "GPUConfig": {
+      "start_line": 10,
+      "end_line": 18,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "RTX 4070 SUPER specifications"
+    },
+    "MemoryPoolConfig": {
+      "start_line": 19,
+      "end_line": 26,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Memory pool configuration"
+    },
+    "ProcessingConfig": {
+      "start_line": 27,
+      "end_line": 35,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Processing parameters"
+    },
+    "KTParameters": {
+      "start_line": 36,
+      "end_line": 42,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Validated K(t) framework parameters"
+    },
+    "SystemConfiguration": {
+      "start_line": 42,
+      "end_line": 89,
+      "methods": {
+        "__init__": {
+          "start_line": 44,
+          "end_line": 64,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "GPUConfig",
+              "line": 45
+            },
+            {
+              "name": "MemoryPoolConfig",
+              "line": 46
+            },
+            {
+              "name": "ProcessingConfig",
+              "line": 47
+            },
+            {
+              "name": "KTParameters",
+              "line": 48
+            }
+          ],
+          "code_snippet": "class SystemConfiguration:\n    \"\"\"Central configuration management\"\"\"\n    def __init__(self):\n        self.gpu = GPUConfig()\n        self.memory = MemoryPoolConfig()\n        self.processing = ProcessingConfig()\n        self.kt_params = KTParameters()\n        \n        # Current performance metrics\n        self.current_metrics = {\n            \"average_processing_time\": 6.35,\n            \"memory_utilization\": 0.9479,\n            \"cognitive_load\": 4.73,\n            \"pattern_preservation\": 0.85\n        }\n        \n        # Success rates by domain\n        self.success_rates = {\n            \"vision_to_text\": 0.7427,\n            \"text_to_sentiment\": 0.7729,\n            \"vision_to_sentiment\": 0.6612\n        }\n\n    def get_resource_limits(self) -> Dict[str, Any]:\n        \"\"\"Get resource limits for managers\"\"\""
+        },
+        "get_resource_limits": {
+          "start_line": 65,
+          "end_line": 72,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "Get resource limits for managers",
+          "code_snippet": "        }\n\n    def get_resource_limits(self) -> Dict[str, Any]:\n        \"\"\"Get resource limits for managers\"\"\"\n        return {\n            \"gpu_memory\": self.gpu.total_memory_mb,\n            \"target_inference\": self.processing.target_inference_ms,\n            \"max_batch_size\": self.processing.optimal_batch_size\n        }\n\n    def get_memory_pool_config(self) -> Dict[str, Any]:\n        \"\"\"Get memory pool configuration\"\"\""
+        },
+        "get_memory_pool_config": {
+          "start_line": 73,
+          "end_line": 81,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "Get memory pool configuration",
+          "code_snippet": "        }\n\n    def get_memory_pool_config(self) -> Dict[str, Any]:\n        \"\"\"Get memory pool configuration\"\"\"\n        return {\n            \"chunk_sizes\": self.memory.chunk_sizes_mb,\n            \"max_pools\": self.memory.max_pools,\n            \"recycling_threshold\": self.memory.recycling_threshold,\n            \"fragment_threshold\": self.memory.fragment_threshold\n        }\n\n    def get_kt_parameters(self) -> Dict[str, float]:\n        \"\"\"Get K(t) framework parameters\"\"\""
+        },
+        "get_kt_parameters": {
+          "start_line": 82,
+          "end_line": 89,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "Get K(t) framework parameters",
+          "code_snippet": "        }\n\n    def get_kt_parameters(self) -> Dict[str, float]:\n        \"\"\"Get K(t) framework parameters\"\"\"\n        return {\n            \"Lc\": self.kt_params.Lc,\n            \"efficiency_coefficient\": self.kt_params.efficiency_coefficient,\n            \"sync_cost\": self.kt_params.sync_cost\n        }"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Central configuration management"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

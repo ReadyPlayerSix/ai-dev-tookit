@@ -1,0 +1,112 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\training\\unified_ratio_trainer\\callbacks.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 10
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "track_unified_ratio_callback": {
+      "start_line": 14,
+      "end_line": 83,
+      "parameters": [
+        {
+          "name": "epoch"
+        },
+        {
+          "name": "history"
+        },
+        {
+          "name": "model"
+        },
+        {
+          "name": "optimizer"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "hasattr",
+          "line": 34
+        },
+        {
+          "name": "hasattr",
+          "line": 52
+        },
+        {
+          "name": "....append",
+          "line": 79
+        },
+        {
+          "name": "hasattr",
+          "line": 28
+        },
+        {
+          "name": "optimizer.calculate_risk_accuracy_ratios",
+          "line": 35
+        },
+        {
+          "name": "optimizer.get_bound_status_history",
+          "line": 53
+        },
+        {
+          "name": "hasattr",
+          "line": 63
+        },
+        {
+          "name": "len",
+          "line": 29
+        },
+        {
+          "name": "logger.debug",
+          "line": 31
+        },
+        {
+          "name": "logger.info",
+          "line": 45
+        },
+        {
+          "name": "....join",
+          "line": 48
+        },
+        {
+          "name": "logger.info",
+          "line": 49
+        },
+        {
+          "name": "bound_history.items",
+          "line": 59
+        },
+        {
+          "name": "optimizer.get_bound_adjustment_history",
+          "line": 64
+        },
+        {
+          "name": "sum",
+          "line": 44
+        },
+        {
+          "name": "len",
+          "line": 44
+        },
+        {
+          "name": "adjustment_history.items",
+          "line": 70
+        },
+        {
+          "name": "ratios.values",
+          "line": 44
+        },
+        {
+          "name": "ratios.items",
+          "line": 48
+        }
+      ],
+      "docstring": "\n    Callback function to track unified ratio metrics and bounds status.\n    \n    Args:\n        epoch: Current epoch number\n        history: Training history dictionary\n        model: The model being trained\n        optimizer: The optimizer being used\n        \n    Returns:\n        bool: Whether to stop training (True) or continue (False)\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef track_unified_ratio_callback(epoch, history, model, optimizer):\n    \"\"\"\n    Callback function to track unified ratio metrics and bounds status.\n    \n    Args:\n        epoch: Current epoch number\n        history: Training history dictionary\n        model: The model being trained\n        optimizer: The optimizer being used\n        \n    Returns:\n        bool: Whether to stop training (True) or continue (False)\n    \"\"\"\n    # Update Fibonacci interval if using Fibonacci sensitivity\n    if hasattr(optimizer, 'fibonacci_intervals') and optimizer.fibonacci_intervals:\n        if epoch < len(optimizer.fibonacci_intervals):\n            optimizer.lr_check_interval = optimizer.fibonacci_intervals[epoch]\n            logger.debug(f\"Updated LR check interval to {optimizer.lr_check_interval} for epoch {epoch}\")\n    \n    # Track risk/accuracy ratios if available\n    if hasattr(optimizer, 'calculate_risk_accuracy_ratios'):\n        ratios = optimizer.calculate_risk_accuracy_ratios()\n        \n        if ratios:\n            if 'risk_accuracy_ratios' not in history:\n                history['risk_accuracy_ratios'] = {}\n            \n            history['risk_accuracy_ratios'][epoch] = ratios\n            \n            # Calculate and log average ratio\n            avg_ratio = sum(ratios.values()) / len(ratios)\n            logger.info(f\"Epoch {epoch} - Average Risk/Accuracy ratio: {avg_ratio:.3f}\")\n            \n            # Store the detailed ratio information\n            ratio_str = \", \".join([f\"{k}: {v:.2f}\" for k, v in ratios.items()])\n            logger.info(f\"Risk/Accuracy ratios: {ratio_str}\")\n    \n    # Track equilibrium bounds status if available\n    if hasattr(optimizer, 'get_bound_status_history'):\n        bound_history = optimizer.get_bound_status_history()\n        \n        if bound_history:\n            if 'equilibrium_bounds_history' not in history:\n                history['equilibrium_bounds_history'] = {}\n            \n            for e, statuses in bound_history.items():\n                history['equilibrium_bounds_history'][e] = statuses\n                \n        # Track bound adjustments if available\n        if hasattr(optimizer, 'get_bound_adjustment_history'):\n            adjustment_history = optimizer.get_bound_adjustment_history()\n            \n            if adjustment_history:\n                if 'bound_adjustments' not in history:\n                    history['bound_adjustments'] = {}\n                \n                for e, ratio in adjustment_history.items():\n                    history['bound_adjustments'][e] = ratio\n    \n    # Track learning rate\n    if 'learning_rates' not in history:\n        history['learning_rates'] = []\n    \n    # Get current learning rate\n    current_lr = optimizer.param_groups[0]['lr']\n    history['learning_rates'].append(current_lr)\n    \n    return False  # Continue training"
+    }
+  },
+  "constants": {}
+}

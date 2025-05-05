@@ -1,0 +1,1408 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\modified\\lazy_augmentation.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "time",
+      "line": 10
+    },
+    {
+      "name": "random",
+      "line": 11
+    },
+    {
+      "name": "typing.Dict",
+      "line": 12
+    },
+    {
+      "name": "typing.List",
+      "line": 12
+    },
+    {
+      "name": "typing.Any",
+      "line": 12
+    },
+    {
+      "name": "typing.Optional",
+      "line": 12
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 12
+    },
+    {
+      "name": "typing.Union",
+      "line": 12
+    },
+    {
+      "name": "torch.utils.data.Dataset",
+      "line": 13
+    },
+    {
+      "name": "torch.utils.data.DataLoader",
+      "line": 13
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 284
+    },
+    {
+      "name": "PIL.Image",
+      "line": 285
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 348
+    },
+    {
+      "name": "PIL.Image",
+      "line": 349
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 397
+    },
+    {
+      "name": "PIL.Image",
+      "line": 398
+    },
+    {
+      "name": "PIL.ImageFilter",
+      "line": 398
+    },
+    {
+      "name": "multiprocessing",
+      "line": 729
+    },
+    {
+      "name": "psutil",
+      "line": 730
+    }
+  ],
+  "classes": {
+    "LazyPatternAugmentedDataset": {
+      "start_line": 17,
+      "end_line": 677,
+      "methods": {
+        "__init__": {
+          "start_line": 23,
+          "end_line": 85,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "base_dataset",
+              "type": "Dataset"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "augmentation_percentages"
+            },
+            {
+              "name": "device"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._extract_pattern_types",
+              "line": 59
+            },
+            {
+              "name": "list",
+              "line": 71
+            },
+            {
+              "name": "self._initialize_templates",
+              "line": 76
+            },
+            {
+              "name": "self._calculate_virtual_size",
+              "line": 79
+            },
+            {
+              "name": "logger.info",
+              "line": 81
+            },
+            {
+              "name": "logger.info",
+              "line": 82
+            },
+            {
+              "name": "logger.info",
+              "line": 83
+            },
+            {
+              "name": "torch.device",
+              "line": 39
+            },
+            {
+              "name": "isinstance",
+              "line": 49
+            },
+            {
+              "name": "range",
+              "line": 71
+            },
+            {
+              "name": "logger.info",
+              "line": 51
+            },
+            {
+              "name": "len",
+              "line": 71
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 39
+            },
+            {
+              "name": "len",
+              "line": 81
+            },
+            {
+              "name": "len",
+              "line": 82
+            },
+            {
+              "name": "len",
+              "line": 83
+            }
+          ],
+          "docstring": "\n        Initialize the lazy augmented dataset.\n        \n        Args:\n            base_dataset: Original dataset to augment\n            pattern_map: Pattern map containing pattern information\n            augmentation_percentages: Dict mapping pattern types to augmentation percentages\n            device: Computation device (CPU/GPU)\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, \n                 base_dataset: Dataset, \n                 pattern_map=None,\n                 augmentation_percentages=None,\n                 device=None):\n        \"\"\"\n        Initialize the lazy augmented dataset.\n        \n        Args:\n            base_dataset: Original dataset to augment\n            pattern_map: Pattern map containing pattern information\n            augmentation_percentages: Dict mapping pattern types to augmentation percentages\n            device: Computation device (CPU/GPU)\n        \"\"\"\n        self.base_dataset = base_dataset\n        self.pattern_map = pattern_map\n        self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Flag to track if data is already on the target device\n        self.data_on_device = False\n        \n        # Check if base dataset already returns data on the device\n        # This is critical for avoiding pinning issues\n        try:\n            # Sample the first item to check where data is located\n            sample_data, _ = self.base_dataset[0]\n            if isinstance(sample_data, torch.Tensor):\n                self.data_on_device = sample_data.device.type == self.device.type\n                logger.info(f\"Base dataset uses tensors on device: {sample_data.device}, target device: {self.device}\")\n        except:\n            pass\n        \n        # Default percentages if not provided\n        self.augmentation_percentages = augmentation_percentages or {}\n        \n        # Extract pattern types from map\n        self.pattern_types = self._extract_pattern_types()\n        \n        # Template storage - secure and internal to the instance\n        self.pattern_templates = {}  # {pattern_type: [templates]}\n        \n        # Cache for generated augmentations (LRU style)\n        self.augmentation_cache = {}\n        self.cache_access_count = {}\n        self.access_counter = 0\n        self.cache_size = 1000  # Maximum cache size\n        \n        # Define virtual dataset structure\n        self.original_indices = list(range(len(base_dataset)))\n        self.augmented_indices = []  # Virtual indices beyond original\n        self.augmentation_mapping = {}  # Maps virtual index to (pattern_type, template_idx)\n        \n        # Initialize pattern templates\n        self._initialize_templates()\n        \n        # Calculate virtual size based on percentages\n        self._calculate_virtual_size()\n        \n        logger.info(f\"LazyPatternAugmentedDataset initialized with {len(self)} total examples\")\n        logger.info(f\"  {len(self.original_indices)} original examples\")\n        logger.info(f\"  {len(self.augmented_indices)} virtual augmented examples (generated on-demand)\")\n    \n    def _extract_pattern_types(self) -> List[str]:\n        \"\"\"Extract pattern types from pattern map.\"\"\"\n        if not self.pattern_map:"
+        },
+        "_extract_pattern_types": {
+          "start_line": 85,
+          "end_line": 101,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "list",
+              "line": 92
+            },
+            {
+              "name": "....keys",
+              "line": 92
+            }
+          ],
+          "docstring": "Extract pattern types from pattern map.",
+          "code_snippet": "        logger.info(f\"  {len(self.augmented_indices)} virtual augmented examples (generated on-demand)\")\n    \n    def _extract_pattern_types(self) -> List[str]:\n        \"\"\"Extract pattern types from pattern map.\"\"\"\n        if not self.pattern_map:\n            return [\"structural\", \"statistical\", \"temporal\"]\n            \n        # First check standardized format\n        if 'pattern_distribution' in self.pattern_map:\n            return list(self.pattern_map['pattern_distribution'].keys())\n        \n        # Try alternative formats\n        if 'pattern_types' in self.pattern_map:\n            return self.pattern_map['pattern_types']\n        \n        # Default pattern types\n        return [\"structural\", \"statistical\", \"temporal\"]\n    \n    def _initialize_templates(self):\n        \"\"\"Initialize templates for all pattern types.\"\"\"\n        start_time = time.time()"
+        },
+        "_initialize_templates": {
+          "start_line": 101,
+          "end_line": 140,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 103
+            },
+            {
+              "name": "logger.info",
+              "line": 138
+            },
+            {
+              "name": "self._find_examples_for_pattern",
+              "line": 111
+            },
+            {
+              "name": "logger.info",
+              "line": 136
+            },
+            {
+              "name": "logger.warning",
+              "line": 114
+            },
+            {
+              "name": "self._create_template",
+              "line": 125
+            },
+            {
+              "name": "templates.append",
+              "line": 127
+            },
+            {
+              "name": "len",
+              "line": 130
+            },
+            {
+              "name": "len",
+              "line": 136
+            },
+            {
+              "name": "time.time",
+              "line": 138
+            }
+          ],
+          "docstring": "Initialize templates for all pattern types.",
+          "code_snippet": "        return [\"structural\", \"statistical\", \"temporal\"]\n    \n    def _initialize_templates(self):\n        \"\"\"Initialize templates for all pattern types.\"\"\"\n        start_time = time.time()\n        \n        for pattern_type in self.pattern_types:\n            # Skip if percentage is 0\n            if pattern_type not in self.augmentation_percentages or self.augmentation_percentages[pattern_type] <= 0:\n                continue\n                \n            # Find examples for this pattern type\n            pattern_examples = self._find_examples_for_pattern(pattern_type, count=100)\n            \n            if not pattern_examples:\n                logger.warning(f\"No examples found for pattern {pattern_type}, skipping template generation\")\n                continue\n                \n            # Initialize template storage\n            if pattern_type not in self.pattern_templates:\n                self.pattern_templates[pattern_type] = []\n            \n            # Generate templates\n            templates = []\n            for example_idx in pattern_examples:\n                # Create template for this example\n                template = self._create_template(pattern_type, example_idx)\n                if template:\n                    templates.append(template)\n                    \n                # Limit number of templates per pattern\n                if len(templates) >= 50:  # Reasonable limit for memory\n                    break\n            \n            # Store templates\n            self.pattern_templates[pattern_type] = templates\n            \n            logger.info(f\"Generated {len(templates)} templates for {pattern_type}\")\n        \n        logger.info(f\"Template initialization completed in {time.time() - start_time:.2f}s\")\n    \n    def _find_examples_for_pattern(self, pattern_type: str, count: int = 100) -> List[int]:\n        \"\"\"\n        Find examples for a specific pattern type."
+        },
+        "_find_examples_for_pattern": {
+          "start_line": 140,
+          "end_line": 183,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            },
+            {
+              "name": "count",
+              "type": "int"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "random.sample",
+              "line": 181
+            },
+            {
+              "name": "random.sample",
+              "line": 153
+            },
+            {
+              "name": "assignments.items",
+              "line": 160
+            },
+            {
+              "name": "range",
+              "line": 181
+            },
+            {
+              "name": "min",
+              "line": 181
+            },
+            {
+              "name": "range",
+              "line": 153
+            },
+            {
+              "name": "min",
+              "line": 153
+            },
+            {
+              "name": "random.sample",
+              "line": 178
+            },
+            {
+              "name": "len",
+              "line": 181
+            },
+            {
+              "name": "len",
+              "line": 181
+            },
+            {
+              "name": "len",
+              "line": 153
+            },
+            {
+              "name": "len",
+              "line": 153
+            },
+            {
+              "name": "assignment.get",
+              "line": 161
+            },
+            {
+              "name": "range",
+              "line": 178
+            },
+            {
+              "name": "min",
+              "line": 178
+            },
+            {
+              "name": "int",
+              "line": 163
+            },
+            {
+              "name": "examples.append",
+              "line": 164
+            },
+            {
+              "name": "len",
+              "line": 178
+            },
+            {
+              "name": "len",
+              "line": 178
+            },
+            {
+              "name": "len",
+              "line": 165
+            }
+          ],
+          "docstring": "\n        Find examples for a specific pattern type.\n        \n        Args:\n            pattern_type: Pattern type to find examples for\n            count: Maximum number of examples to find\n            \n        Returns:\n            List of example indices\n        ",
+          "code_snippet": "        logger.info(f\"Template initialization completed in {time.time() - start_time:.2f}s\")\n    \n    def _find_examples_for_pattern(self, pattern_type: str, count: int = 100) -> List[int]:\n        \"\"\"\n        Find examples for a specific pattern type.\n        \n        Args:\n            pattern_type: Pattern type to find examples for\n            count: Maximum number of examples to find\n            \n        Returns:\n            List of example indices\n        \"\"\"\n        if not self.pattern_map:\n            # Without pattern map, just return random indices\n            return random.sample(range(len(self.base_dataset)), min(count, len(self.base_dataset)))\n        \n        # Try to find examples from pattern assignments\n        if 'pattern_assignments' in self.pattern_map:\n            assignments = self.pattern_map['pattern_assignments']\n            examples = []\n            \n            for idx_str, assignment in assignments.items():\n                if assignment.get('pattern_type') == pattern_type:\n                    try:\n                        idx = int(idx_str)\n                        examples.append(idx)\n                        if len(examples) >= count:\n                            break\n                    except ValueError:\n                        continue\n            \n            if examples:\n                return examples\n        \n        # If no examples found or no assignments, use distribution to estimate\n        if 'pattern_distribution' in self.pattern_map:\n            distribution = self.pattern_map['pattern_distribution']\n            if pattern_type in distribution:\n                # Generate synthetic indices\n                return random.sample(range(len(self.base_dataset)), min(count, len(self.base_dataset)))\n        \n        # Fallback to random selection\n        return random.sample(range(len(self.base_dataset)), min(count, len(self.base_dataset)))\n    \n    def _create_template(self, pattern_type: str, example_idx: int) -> Optional[Dict]:\n        \"\"\"\n        Create an augmentation template for a specific example."
+        },
+        "_create_template": {
+          "start_line": 183,
+          "end_line": 233,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            },
+            {
+              "name": "example_idx",
+              "type": "int"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "logger.error",
+              "line": 230
+            },
+            {
+              "name": "isinstance",
+              "line": 201
+            },
+            {
+              "name": "label.item",
+              "line": 201
+            },
+            {
+              "name": "round",
+              "line": 209
+            },
+            {
+              "name": "bool",
+              "line": 210
+            },
+            {
+              "name": "round",
+              "line": 211
+            },
+            {
+              "name": "round",
+              "line": 212
+            },
+            {
+              "name": "float",
+              "line": 209
+            },
+            {
+              "name": "float",
+              "line": 211
+            },
+            {
+              "name": "float",
+              "line": 212
+            },
+            {
+              "name": "round",
+              "line": 216
+            },
+            {
+              "name": "round",
+              "line": 217
+            },
+            {
+              "name": "round",
+              "line": 218
+            },
+            {
+              "name": "round",
+              "line": 219
+            },
+            {
+              "name": "torch.rand",
+              "line": 210
+            },
+            {
+              "name": "float",
+              "line": 216
+            },
+            {
+              "name": "float",
+              "line": 217
+            },
+            {
+              "name": "float",
+              "line": 218
+            },
+            {
+              "name": "float",
+              "line": 219
+            },
+            {
+              "name": "round",
+              "line": 223
+            },
+            {
+              "name": "round",
+              "line": 224
+            },
+            {
+              "name": "round",
+              "line": 225
+            },
+            {
+              "name": "str",
+              "line": 230
+            },
+            {
+              "name": "torch.rand",
+              "line": 211
+            },
+            {
+              "name": "float",
+              "line": 223
+            },
+            {
+              "name": "float",
+              "line": 224
+            },
+            {
+              "name": "float",
+              "line": 225
+            },
+            {
+              "name": "torch.rand",
+              "line": 209
+            },
+            {
+              "name": "torch.rand",
+              "line": 212
+            },
+            {
+              "name": "torch.rand",
+              "line": 216
+            },
+            {
+              "name": "torch.rand",
+              "line": 217
+            },
+            {
+              "name": "torch.rand",
+              "line": 218
+            },
+            {
+              "name": "torch.rand",
+              "line": 219
+            },
+            {
+              "name": "torch.rand",
+              "line": 224
+            },
+            {
+              "name": "torch.rand",
+              "line": 225
+            },
+            {
+              "name": "torch.rand",
+              "line": 223
+            }
+          ],
+          "docstring": "\n        Create an augmentation template for a specific example.\n        \n        Args:\n            pattern_type: Type of pattern\n            example_idx: Index of the example\n            \n        Returns:\n            Template dictionary or None if creation failed\n        ",
+          "code_snippet": "        return random.sample(range(len(self.base_dataset)), min(count, len(self.base_dataset)))\n    \n    def _create_template(self, pattern_type: str, example_idx: int) -> Optional[Dict]:\n        \"\"\"\n        Create an augmentation template for a specific example.\n        \n        Args:\n            pattern_type: Type of pattern\n            example_idx: Index of the example\n            \n        Returns:\n            Template dictionary or None if creation failed\n        \"\"\"\n        try:\n            # Get the example\n            example, label = self.base_dataset[example_idx]\n            \n            # Base template\n            template = {\n                \"example_idx\": example_idx,\n                \"label\": label.item() if isinstance(label, torch.Tensor) else label,\n                \"transforms\": {},\n                \"pattern_type\": pattern_type\n            }\n            \n            # Add transforms based on pattern type\n            if pattern_type == \"structural\":\n                template[\"transforms\"] = {\n                    \"rotation\": round(float(torch.rand(1) * 30 - 15), 1),  # -15 to 15 degrees\n                    \"flip\": bool(torch.rand(1) > 0.5),\n                    \"perspective\": round(float(torch.rand(1) * 0.3), 2),  # 0 to 0.3\n                    \"scale\": round(float(0.9 + torch.rand(1) * 0.2), 2)  # 0.9 to 1.1\n                }\n            elif pattern_type == \"statistical\":\n                template[\"transforms\"] = {\n                    \"brightness\": round(float(0.8 + torch.rand(1) * 0.4), 2),  # 0.8 to 1.2\n                    \"contrast\": round(float(0.8 + torch.rand(1) * 0.4), 2),  # 0.8 to 1.2\n                    \"saturation\": round(float(0.8 + torch.rand(1) * 0.4), 2),  # 0.8 to 1.2\n                    \"hue\": round(float(torch.rand(1) * 0.2 - 0.1), 2)  # -0.1 to 0.1\n                }\n            elif pattern_type == \"temporal\":\n                template[\"transforms\"] = {\n                    \"blur\": round(float(0.5 + torch.rand(1) * 1.5), 2),  # 0.5 to 2.0\n                    \"translate_x\": round(float(torch.rand(1) * 0.1), 2),  # 0 to 0.1\n                    \"translate_y\": round(float(torch.rand(1) * 0.1), 2),  # 0 to 0.1\n                }\n            \n            return template\n        except Exception as e:\n            logger.error(f\"Error creating template for example {example_idx}: {str(e)}\")\n            return None\n    \n    def _apply_template(self, template: Dict) -> Optional[Tuple[torch.Tensor, int]]:\n        \"\"\"\n        Apply a template to generate an augmented example."
+        },
+        "_apply_template": {
+          "start_line": 233,
+          "end_line": 281,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "template",
+              "type": "Dict"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 265
+            },
+            {
+              "name": "self._apply_structural_transforms",
+              "line": 255
+            },
+            {
+              "name": "torch.tensor",
+              "line": 266
+            },
+            {
+              "name": "isinstance",
+              "line": 267
+            },
+            {
+              "name": "isinstance",
+              "line": 273
+            },
+            {
+              "name": "augmented.to",
+              "line": 274
+            },
+            {
+              "name": "logger.error",
+              "line": 278
+            },
+            {
+              "name": "self._apply_statistical_transforms",
+              "line": 257
+            },
+            {
+              "name": "label.to",
+              "line": 268
+            },
+            {
+              "name": "self._apply_temporal_transforms",
+              "line": 259
+            },
+            {
+              "name": "str",
+              "line": 278
+            }
+          ],
+          "docstring": "\n        Apply a template to generate an augmented example.\n        \n        Args:\n            template: Template dictionary\n            \n        Returns:\n            Tuple of (tensor, label) or None if application failed\n        ",
+          "code_snippet": "            return None\n    \n    def _apply_template(self, template: Dict) -> Optional[Tuple[torch.Tensor, int]]:\n        \"\"\"\n        Apply a template to generate an augmented example.\n        \n        Args:\n            template: Template dictionary\n            \n        Returns:\n            Tuple of (tensor, label) or None if application failed\n        \"\"\"\n        try:\n            # Extract information from template\n            example_idx = template[\"example_idx\"]\n            label = template[\"label\"]\n            transforms_dict = template[\"transforms\"]\n            pattern_type = template[\"pattern_type\"]\n            \n            # Get the base example\n            example, _ = self.base_dataset[example_idx]\n            \n            # Apply augmentation based on pattern type\n            if pattern_type == \"structural\":\n                augmented = self._apply_structural_transforms(example, transforms_dict)\n            elif pattern_type == \"statistical\":\n                augmented = self._apply_statistical_transforms(example, transforms_dict)\n            elif pattern_type == \"temporal\":\n                augmented = self._apply_temporal_transforms(example, transforms_dict)\n            else:\n                # Unknown pattern type\n                return None\n            \n            # Ensure label is a tensor on the right device if needed\n            if isinstance(label, (int, float)):\n                label_tensor = torch.tensor(label, device=self.device)\n            elif isinstance(label, torch.Tensor):\n                label_tensor = label.to(self.device)\n            else:\n                label_tensor = label\n                \n            # Double check that augmented is on the right device\n            if isinstance(augmented, torch.Tensor) and augmented.device != self.device:\n                augmented = augmented.to(self.device)\n            \n            return augmented, label_tensor\n        except Exception as e:\n            logger.error(f\"Error applying template: {str(e)}\")\n            return None\n    \n    def _apply_structural_transforms(self, example, transforms_dict):\n        \"\"\"Apply structural transforms to an example.\"\"\"\n        # Import required modules inside function to ensure they're only loaded when needed"
+        },
+        "_apply_structural_transforms": {
+          "start_line": 281,
+          "end_line": 345,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example"
+            },
+            {
+              "name": "transforms_dict"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 288
+            },
+            {
+              "name": "isinstance",
+              "line": 328
+            },
+            {
+              "name": "example.cpu",
+              "line": 290
+            },
+            {
+              "name": "transform_list.append",
+              "line": 303
+            },
+            {
+              "name": "transform_list.append",
+              "line": 308
+            },
+            {
+              "name": "transform_list.append",
+              "line": 312
+            },
+            {
+              "name": "transform_list.append",
+              "line": 318
+            },
+            {
+              "name": "transforms.Compose",
+              "line": 324
+            },
+            {
+              "name": "composed",
+              "line": 325
+            },
+            {
+              "name": "tensor.to",
+              "line": 341
+            },
+            {
+              "name": "transforms.ToPILImage",
+              "line": 293
+            },
+            {
+              "name": "transforms.RandomRotation",
+              "line": 304
+            },
+            {
+              "name": "transforms.RandomHorizontalFlip",
+              "line": 308
+            },
+            {
+              "name": "transforms.RandomPerspective",
+              "line": 313
+            },
+            {
+              "name": "transforms.RandomAffine",
+              "line": 319
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 330
+            },
+            {
+              "name": "example.min",
+              "line": 333
+            },
+            {
+              "name": "transforms.Normalize",
+              "line": 335
+            }
+          ],
+          "docstring": "Apply structural transforms to an example.",
+          "code_snippet": "            return None\n    \n    def _apply_structural_transforms(self, example, transforms_dict):\n        \"\"\"Apply structural transforms to an example.\"\"\"\n        # Import required modules inside function to ensure they're only loaded when needed\n        import torchvision.transforms as transforms\n        from PIL import Image\n        \n        # First, ensure example is on CPU for PIL processing\n        if isinstance(example, torch.Tensor):\n            # Move to CPU for PIL conversion\n            example_cpu = example.cpu()\n            # Save original shape for later\n            orig_shape = example.shape\n            img = transforms.ToPILImage()(example_cpu)\n        else:\n            img = example\n            orig_shape = None\n        \n        # Build transform compose list\n        transform_list = []\n        \n        if 'rotation' in transforms_dict:\n            rotation = transforms_dict['rotation']\n            transform_list.append(\n                transforms.RandomRotation([rotation, rotation])\n            )\n        \n        if 'flip' in transforms_dict and transforms_dict['flip']:\n            transform_list.append(transforms.RandomHorizontalFlip(p=1.0))\n        \n        if 'perspective' in transforms_dict:\n            perspective = transforms_dict['perspective']\n            transform_list.append(\n                transforms.RandomPerspective(distortion_scale=perspective, p=1.0)\n            )\n        \n        if 'scale' in transforms_dict:\n            scale = transforms_dict['scale']\n            transform_list.append(\n                transforms.RandomAffine(degrees=0, scale=(scale, scale))\n            )\n        \n        # Apply transforms\n        if transform_list:\n            composed = transforms.Compose(transform_list)\n            img = composed(img)\n        \n        # Convert back to tensor if input was tensor\n        if isinstance(example, torch.Tensor):\n            # Convert back to tensor on CPU first\n            tensor = transforms.ToTensor()(img)\n            \n            # Apply normalization if original had it\n            if orig_shape[0] == 3 and example.min() < 0:\n                # Standard normalization for CIFAR/ImageNet\n                tensor = transforms.Normalize(\n                    (0.4914, 0.4822, 0.4465), \n                    (0.2023, 0.1994, 0.2010)\n                )(tensor)\n            \n            # Explicitly move to target device\n            return tensor.to(self.device)\n        else:\n            return img\n    \n    def _apply_statistical_transforms(self, example, transforms_dict):\n        \"\"\"Apply statistical transforms to an example.\"\"\"\n        # Import required modules inside function to ensure they're only loaded when needed"
+        },
+        "_apply_statistical_transforms": {
+          "start_line": 345,
+          "end_line": 394,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example"
+            },
+            {
+              "name": "transforms_dict"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 352
+            },
+            {
+              "name": "transforms_dict.get",
+              "line": 361
+            },
+            {
+              "name": "transforms_dict.get",
+              "line": 362
+            },
+            {
+              "name": "transforms_dict.get",
+              "line": 363
+            },
+            {
+              "name": "transforms_dict.get",
+              "line": 364
+            },
+            {
+              "name": "transforms.ColorJitter",
+              "line": 367
+            },
+            {
+              "name": "color_jitter",
+              "line": 375
+            },
+            {
+              "name": "isinstance",
+              "line": 378
+            },
+            {
+              "name": "tensor.to",
+              "line": 390
+            },
+            {
+              "name": "transforms.ToPILImage",
+              "line": 355
+            },
+            {
+              "name": "example.cpu",
+              "line": 355
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 380
+            },
+            {
+              "name": "example.min",
+              "line": 383
+            },
+            {
+              "name": "transforms.Normalize",
+              "line": 385
+            }
+          ],
+          "docstring": "Apply statistical transforms to an example.",
+          "code_snippet": "            return img\n    \n    def _apply_statistical_transforms(self, example, transforms_dict):\n        \"\"\"Apply statistical transforms to an example.\"\"\"\n        # Import required modules inside function to ensure they're only loaded when needed\n        import torchvision.transforms as transforms\n        from PIL import Image\n        \n        # Convert tensor to PIL for transforms if needed\n        if isinstance(example, torch.Tensor):\n            # Save original shape for later\n            orig_shape = example.shape\n            img = transforms.ToPILImage()(example.cpu())\n        else:\n            img = example\n            orig_shape = None\n        \n        # Extract transform parameters\n        brightness = transforms_dict.get('brightness', 1.0)\n        contrast = transforms_dict.get('contrast', 1.0)\n        saturation = transforms_dict.get('saturation', 1.0)\n        hue = transforms_dict.get('hue', 0.0)\n        \n        # Create transform\n        color_jitter = transforms.ColorJitter(\n            brightness=(brightness, brightness),\n            contrast=(contrast, contrast),\n            saturation=(saturation, saturation),\n            hue=(hue, hue)\n        )\n        \n        # Apply transform\n        img = color_jitter(img)\n        \n        # Convert back to tensor if input was tensor\n        if isinstance(example, torch.Tensor):\n            # Convert back to tensor\n            tensor = transforms.ToTensor()(img)\n            \n            # Apply normalization if original had it\n            if orig_shape[0] == 3 and example.min() < 0:\n                # Standard normalization for CIFAR/ImageNet\n                tensor = transforms.Normalize(\n                    (0.4914, 0.4822, 0.4465), \n                    (0.2023, 0.1994, 0.2010)\n                )(tensor)\n            \n            return tensor.to(self.device)\n        else:\n            return img\n    \n    def _apply_temporal_transforms(self, example, transforms_dict):\n        \"\"\"Apply temporal transforms to an example.\"\"\"\n        # Import required modules inside function to ensure they're only loaded when needed"
+        },
+        "_apply_temporal_transforms": {
+          "start_line": 394,
+          "end_line": 442,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example"
+            },
+            {
+              "name": "transforms_dict"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 401
+            },
+            {
+              "name": "transforms_dict.get",
+              "line": 415
+            },
+            {
+              "name": "transforms_dict.get",
+              "line": 416
+            },
+            {
+              "name": "isinstance",
+              "line": 426
+            },
+            {
+              "name": "img.filter",
+              "line": 412
+            },
+            {
+              "name": "transforms.RandomAffine",
+              "line": 419
+            },
+            {
+              "name": "translate_transform",
+              "line": 423
+            },
+            {
+              "name": "tensor.to",
+              "line": 438
+            },
+            {
+              "name": "transforms.ToPILImage",
+              "line": 404
+            },
+            {
+              "name": "example.cpu",
+              "line": 404
+            },
+            {
+              "name": "ImageFilter.GaussianBlur",
+              "line": 412
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 428
+            },
+            {
+              "name": "example.min",
+              "line": 431
+            },
+            {
+              "name": "transforms.Normalize",
+              "line": 433
+            }
+          ],
+          "docstring": "Apply temporal transforms to an example.",
+          "code_snippet": "            return img\n    \n    def _apply_temporal_transforms(self, example, transforms_dict):\n        \"\"\"Apply temporal transforms to an example.\"\"\"\n        # Import required modules inside function to ensure they're only loaded when needed\n        import torchvision.transforms as transforms\n        from PIL import Image, ImageFilter\n        \n        # Convert tensor to PIL for transforms if needed\n        if isinstance(example, torch.Tensor):\n            # Save original shape for later\n            orig_shape = example.shape\n            img = transforms.ToPILImage()(example.cpu())\n        else:\n            img = example\n            orig_shape = None\n        \n        # Apply blur if specified\n        if 'blur' in transforms_dict:\n            blur_radius = transforms_dict['blur']\n            img = img.filter(ImageFilter.GaussianBlur(radius=blur_radius))\n        \n        # Apply translation if specified\n        translate_x = transforms_dict.get('translate_x', 0.0)\n        translate_y = transforms_dict.get('translate_y', 0.0)\n        \n        if translate_x > 0 or translate_y > 0:\n            translate_transform = transforms.RandomAffine(\n                degrees=0,\n                translate=(translate_x, translate_y)\n            )\n            img = translate_transform(img)\n        \n        # Convert back to tensor if input was tensor\n        if isinstance(example, torch.Tensor):\n            # Convert back to tensor\n            tensor = transforms.ToTensor()(img)\n            \n            # Apply normalization if original had it\n            if orig_shape[0] == 3 and example.min() < 0:\n                # Standard normalization for CIFAR/ImageNet\n                tensor = transforms.Normalize(\n                    (0.4914, 0.4822, 0.4465), \n                    (0.2023, 0.1994, 0.2010)\n                )(tensor)\n            \n            return tensor.to(self.device)\n        else:\n            return img\n    \n    def _calculate_virtual_size(self):\n        \"\"\"Calculate the virtual dataset size based on augmentation percentages.\"\"\"\n        self.augmented_indices = []"
+        },
+        "_calculate_virtual_size": {
+          "start_line": 442,
+          "end_line": 476,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 447
+            },
+            {
+              "name": "self.augmentation_percentages.items",
+              "line": 449
+            },
+            {
+              "name": "logger.info",
+              "line": 470
+            },
+            {
+              "name": "int",
+              "line": 458
+            },
+            {
+              "name": "range",
+              "line": 461
+            },
+            {
+              "name": "sum",
+              "line": 472
+            },
+            {
+              "name": "self.pattern_templates.get",
+              "line": 454
+            },
+            {
+              "name": "self.augmented_indices.append",
+              "line": 467
+            },
+            {
+              "name": "logger.info",
+              "line": 474
+            },
+            {
+              "name": "len",
+              "line": 458
+            },
+            {
+              "name": "len",
+              "line": 463
+            },
+            {
+              "name": "len",
+              "line": 470
+            },
+            {
+              "name": "self.augmentation_mapping.items",
+              "line": 472
+            }
+          ],
+          "docstring": "Calculate the virtual dataset size based on augmentation percentages.",
+          "code_snippet": "            return img\n    \n    def _calculate_virtual_size(self):\n        \"\"\"Calculate the virtual dataset size based on augmentation percentages.\"\"\"\n        self.augmented_indices = []\n        self.augmentation_mapping = {}\n        \n        current_idx = len(self.original_indices)\n        \n        for pattern_type, percentage in self.augmentation_percentages.items():\n            if percentage <= 0 or pattern_type not in self.pattern_templates:\n                continue\n                \n            # Skip if no templates available\n            if not self.pattern_templates.get(pattern_type):\n                continue\n                \n            # Calculate how many augmented examples to create\n            count = int(len(self.original_indices) * percentage)\n            \n            # Create virtual indices for augmented examples\n            for i in range(count):\n                # Map to a template\n                template_idx = i % len(self.pattern_templates[pattern_type])\n                \n                # Store the mapping\n                self.augmentation_mapping[current_idx] = (pattern_type, template_idx)\n                self.augmented_indices.append(current_idx)\n                current_idx += 1\n        \n        logger.info(f\"Virtual dataset size: {len(self)}\")\n        for pattern_type in self.augmentation_percentages:\n            pattern_count = sum(1 for _, (pt, _) in self.augmentation_mapping.items() if pt == pattern_type)\n            if pattern_count > 0:\n                logger.info(f\"  {pattern_type}: {pattern_count} virtual augmented examples\")\n    \n    def add_augmentations(self, pattern_type: str, percentage: float) -> int:\n        \"\"\"\n        Add more augmentations for a specific pattern type."
+        },
+        "add_augmentations": {
+          "start_line": 476,
+          "end_line": 555,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            },
+            {
+              "name": "percentage",
+              "type": "float"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "self.augmentation_percentages.get",
+              "line": 493
+            },
+            {
+              "name": "int",
+              "line": 525
+            },
+            {
+              "name": "len",
+              "line": 530
+            },
+            {
+              "name": "range",
+              "line": 536
+            },
+            {
+              "name": "logger.info",
+              "line": 547
+            },
+            {
+              "name": "self.augmentation_cache.clear",
+              "line": 550
+            },
+            {
+              "name": "self.cache_access_count.clear",
+              "line": 551
+            },
+            {
+              "name": "logger.warning",
+              "line": 489
+            },
+            {
+              "name": "self._find_examples_for_pattern",
+              "line": 499
+            },
+            {
+              "name": "len",
+              "line": 533
+            },
+            {
+              "name": "len",
+              "line": 533
+            },
+            {
+              "name": "self.augmented_indices.append",
+              "line": 542
+            },
+            {
+              "name": "len",
+              "line": 546
+            },
+            {
+              "name": "logger.warning",
+              "line": 502
+            },
+            {
+              "name": "self._create_template",
+              "line": 509
+            },
+            {
+              "name": "logger.warning",
+              "line": 521
+            },
+            {
+              "name": "len",
+              "line": 525
+            },
+            {
+              "name": "len",
+              "line": 538
+            },
+            {
+              "name": "templates.append",
+              "line": 511
+            },
+            {
+              "name": "len",
+              "line": 514
+            }
+          ],
+          "docstring": "\n        Add more augmentations for a specific pattern type.\n        \n        Args:\n            pattern_type: Type of pattern to augment\n            percentage: Percentage to augment\n            \n        Returns:\n            Number of augmentations added\n        ",
+          "code_snippet": "                logger.info(f\"  {pattern_type}: {pattern_count} virtual augmented examples\")\n    \n    def add_augmentations(self, pattern_type: str, percentage: float) -> int:\n        \"\"\"\n        Add more augmentations for a specific pattern type.\n        \n        Args:\n            pattern_type: Type of pattern to augment\n            percentage: Percentage to augment\n            \n        Returns:\n            Number of augmentations added\n        \"\"\"\n        # Skip if pattern type not supported\n        if pattern_type not in self.pattern_types:\n            logger.warning(f\"Pattern type {pattern_type} not supported\")\n            return 0\n        \n        # Update percentages dictionary\n        current_percentage = self.augmentation_percentages.get(pattern_type, 0)\n        self.augmentation_percentages[pattern_type] = current_percentage + percentage\n        \n        # Generate templates if needed\n        if pattern_type not in self.pattern_templates or not self.pattern_templates[pattern_type]:\n            # Find examples for this pattern type\n            pattern_examples = self._find_examples_for_pattern(pattern_type, count=100)\n            \n            if not pattern_examples:\n                logger.warning(f\"No examples found for pattern {pattern_type}, skipping augmentation\")\n                return 0\n                \n            # Generate templates\n            templates = []\n            for example_idx in pattern_examples:\n                # Create template for this example\n                template = self._create_template(pattern_type, example_idx)\n                if template:\n                    templates.append(template)\n                    \n                # Limit number of templates\n                if len(templates) >= 50:\n                    break\n            \n            # Store templates\n            self.pattern_templates[pattern_type] = templates\n            \n            if not templates:\n                logger.warning(f\"No templates generated for pattern {pattern_type}\")\n                return 0\n        \n        # Calculate how many new examples to add\n        count = int(len(self.original_indices) * percentage)\n        if count <= 0:\n            return 0\n        \n        # Store the original augmented size\n        original_augmented_size = len(self.augmented_indices)\n        \n        # Update virtual dataset structure\n        current_idx = len(self.original_indices) + len(self.augmented_indices)\n        \n        # Create virtual indices for new augmented examples\n        for i in range(count):\n            # Map to a template (round-robin through available templates)\n            template_idx = i % len(self.pattern_templates[pattern_type])\n            \n            # Store the mapping\n            self.augmentation_mapping[current_idx] = (pattern_type, template_idx)\n            self.augmented_indices.append(current_idx)\n            current_idx += 1\n        \n        # Calculate how many were actually added\n        added_count = len(self.augmented_indices) - original_augmented_size\n        logger.info(f\"Added {added_count} virtual augmentations for pattern type '{pattern_type}'\")\n        \n        # Clear cache after adding new augmentations\n        self.augmentation_cache.clear()\n        self.cache_access_count.clear()\n        \n        return added_count\n    \n    def __len__(self):\n        \"\"\"Get the total number of examples (original + augmented).\"\"\"\n        return len(self.original_indices) + len(self.augmented_indices)"
+        },
+        "__len__": {
+          "start_line": 555,
+          "end_line": 559,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 557
+            },
+            {
+              "name": "len",
+              "line": 557
+            }
+          ],
+          "docstring": "Get the total number of examples (original + augmented).",
+          "code_snippet": "        return added_count\n    \n    def __len__(self):\n        \"\"\"Get the total number of examples (original + augmented).\"\"\"\n        return len(self.original_indices) + len(self.augmented_indices)\n    \n    def __getitem__(self, idx):\n        \"\"\"\n        Get an example by index, generating augmentations on-demand."
+        },
+        "__getitem__": {
+          "start_line": 559,
+          "end_line": 636,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "idx"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 570
+            },
+            {
+              "name": "isinstance",
+              "line": 575
+            },
+            {
+              "name": "isinstance",
+              "line": 579
+            },
+            {
+              "name": "isinstance",
+              "line": 625
+            },
+            {
+              "name": "isinstance",
+              "line": 629
+            },
+            {
+              "name": "data.to",
+              "line": 576
+            },
+            {
+              "name": "torch.tensor",
+              "line": 580
+            },
+            {
+              "name": "isinstance",
+              "line": 581
+            },
+            {
+              "name": "len",
+              "line": 621
+            },
+            {
+              "name": "data.to",
+              "line": 626
+            },
+            {
+              "name": "torch.tensor",
+              "line": 630
+            },
+            {
+              "name": "isinstance",
+              "line": 631
+            },
+            {
+              "name": "label.to",
+              "line": 582
+            },
+            {
+              "name": "self._apply_template",
+              "line": 602
+            },
+            {
+              "name": "label.to",
+              "line": 632
+            },
+            {
+              "name": "len",
+              "line": 598
+            },
+            {
+              "name": "len",
+              "line": 606
+            },
+            {
+              "name": "min",
+              "line": 608
+            },
+            {
+              "name": "self.cache_access_count.keys",
+              "line": 608
+            }
+          ],
+          "docstring": "\n        Get an example by index, generating augmentations on-demand.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Tuple of (data, label)\n        ",
+          "code_snippet": "        return len(self.original_indices) + len(self.augmented_indices)\n    \n    def __getitem__(self, idx):\n        \"\"\"\n        Get an example by index, generating augmentations on-demand.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Tuple of (data, label)\n        \"\"\"\n        # Check if this is an original or augmented example\n        if idx < len(self.original_indices):\n            # Original example - use the base dataset but ensure it's on the right device\n            data, label = self.base_dataset[idx]\n            \n            # Convert tensor to device if it's a tensor\n            if isinstance(data, torch.Tensor):\n                data = data.to(self.device)\n            \n            # Convert label to tensor if it's an int or float\n            if isinstance(label, (int, float)):\n                label = torch.tensor(label, device=self.device)\n            elif isinstance(label, torch.Tensor):\n                label = label.to(self.device)\n                \n            return data, label\n        else:\n            # Check cache first\n            if idx in self.augmentation_cache:\n                # Update cache access statistics\n                self.access_counter += 1\n                self.cache_access_count[idx] = self.access_counter\n                return self.augmentation_cache[idx]\n            \n            # Augmented example - generate on-demand\n            if idx in self.augmentation_mapping:\n                pattern_type, template_idx = self.augmentation_mapping[idx]\n                \n                # Get the template\n                if pattern_type in self.pattern_templates and template_idx < len(self.pattern_templates[pattern_type]):\n                    template = self.pattern_templates[pattern_type][template_idx]\n                    \n                    # Apply the template\n                    augmented = self._apply_template(template)\n                    \n                    if augmented:\n                        # Cache the result if cache not full\n                        if len(self.augmentation_cache) >= self.cache_size:\n                            # Remove least recently used item\n                            lru_idx = min(self.cache_access_count.keys(), \n                                         key=lambda k: self.cache_access_count[k])\n                            del self.augmentation_cache[lru_idx]\n                            del self.cache_access_count[lru_idx]\n                        \n                        # Add to cache and update access count\n                        self.augmentation_cache[idx] = augmented\n                        self.access_counter += 1\n                        self.cache_access_count[idx] = self.access_counter\n                        \n                        return augmented\n            \n            # Fallback to random original example if something fails\n            fallback_idx = idx % len(self.original_indices)\n            data, label = self.base_dataset[fallback_idx]\n            \n            # Ensure data is on the right device\n            if isinstance(data, torch.Tensor):\n                data = data.to(self.device)\n                \n            # Ensure label is a tensor\n            if isinstance(label, (int, float)):\n                label = torch.tensor(label, device=self.device)\n            elif isinstance(label, torch.Tensor):\n                label = label.to(self.device)\n                \n            return data, label\n    \n    def get_augmentation_info(self, idx):\n        \"\"\"\n        Get information about an augmentation."
+        },
+        "get_augmentation_info": {
+          "start_line": 636,
+          "end_line": 662,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "idx"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 646
+            },
+            {
+              "name": "len",
+              "line": 657
+            }
+          ],
+          "docstring": "\n        Get information about an augmentation.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Dictionary with augmentation information or None if original example\n        ",
+          "code_snippet": "            return data, label\n    \n    def get_augmentation_info(self, idx):\n        \"\"\"\n        Get information about an augmentation.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Dictionary with augmentation information or None if original example\n        \"\"\"\n        if idx < len(self.original_indices):\n            # Original example\n            return None\n        else:\n            # Augmented example\n            if idx in self.augmentation_mapping:\n                pattern_type, template_idx = self.augmentation_mapping[idx]\n                return {\n                    \"pattern_type\": pattern_type,\n                    \"augmented\": True,\n                    \"template_idx\": template_idx,\n                    \"original_dataset_size\": len(self.original_indices)\n                }\n            else:\n                return None\n    \n    def get_augmentation_counts(self):\n        \"\"\"\n        Get counts of augmentations by pattern type."
+        },
+        "get_augmentation_counts": {
+          "start_line": 662,
+          "end_line": 677,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.augmentation_mapping.items",
+              "line": 670
+            }
+          ],
+          "docstring": "\n        Get counts of augmentations by pattern type.\n        \n        Returns:\n            Dictionary mapping pattern types to counts\n        ",
+          "code_snippet": "                return None\n    \n    def get_augmentation_counts(self):\n        \"\"\"\n        Get counts of augmentations by pattern type.\n        \n        Returns:\n            Dictionary mapping pattern types to counts\n        \"\"\"\n        counts = {}\n        for _, (pattern_type, _) in self.augmentation_mapping.items():\n            if pattern_type not in counts:\n                counts[pattern_type] = 0\n            counts[pattern_type] += 1\n            \n        return counts\n\n# Worker initialization function for DataLoader\ndef lazy_augmentation_worker_init_fn(worker_id):\n    \"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Dataset"
+      ],
+      "docstring": "\n    Dataset wrapper that generates pattern augmentations on-demand.\n    Securely stores templates within the isekaizen framework.\n    "
+    }
+  },
+  "functions": {
+    "lazy_augmentation_worker_init_fn": {
+      "start_line": 678,
+      "end_line": 712,
+      "parameters": [
+        {
+          "name": "worker_id"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "torch.utils.data.get_worker_info",
+          "line": 685
+        },
+        {
+          "name": "isinstance",
+          "line": 693
+        },
+        {
+          "name": "logger.debug",
+          "line": 696
+        },
+        {
+          "name": "torch.cuda.set_device",
+          "line": 702
+        },
+        {
+          "name": "logger.debug",
+          "line": 703
+        },
+        {
+          "name": "torch.cuda.current_stream",
+          "line": 707
+        },
+        {
+          "name": "logger.debug",
+          "line": 708
+        },
+        {
+          "name": "hasattr",
+          "line": 701
+        },
+        {
+          "name": "logger.debug",
+          "line": 710
+        },
+        {
+          "name": "str",
+          "line": 710
+        }
+      ],
+      "docstring": "\n    Initialize worker process for DataLoader.\n    \n    Args:\n        worker_id: ID of the worker process\n    ",
+      "code_snippet": "\n# Worker initialization function for DataLoader\ndef lazy_augmentation_worker_init_fn(worker_id):\n    \"\"\"\n    Initialize worker process for DataLoader.\n    \n    Args:\n        worker_id: ID of the worker process\n    \"\"\"\n    worker_info = torch.utils.data.get_worker_info()\n    if worker_info is None:\n        # Not in a worker process\n        return\n        \n    dataset = worker_info.dataset\n    \n    # Set worker ID if dataset is a LazyPatternAugmentedDataset\n    if isinstance(dataset, LazyPatternAugmentedDataset):\n        # Ensure all workers use the same device as the dataset\n        device = dataset.device\n        logger.debug(f\"Initialized worker {worker_id} with device {device}\")\n        \n        # Pin memory for faster data transfer if using CUDA\n        if device.type == 'cuda':\n            # Get the device index or default to 0 if not specified\n            device_idx = device.index if hasattr(device, 'index') and device.index is not None else 0\n            torch.cuda.set_device(device_idx)\n            logger.debug(f\"Set CUDA device for worker {worker_id} to index {device_idx}\")\n            # Create CUDA stream with appropriate priority if supported\n            try:\n                # Use default stream instead of setting priority\n                torch.cuda.current_stream()\n                logger.debug(f\"Using default CUDA stream for worker {worker_id}\")\n            except Exception as e:\n                logger.debug(f\"Could not set CUDA stream: {str(e)}\")\n\n# Function to create an optimized DataLoader for LazyPatternAugmentedDataset\ndef create_optimized_dataloader(dataset, batch_size, shuffle=True, num_workers=None):\n    \"\"\""
+    },
+    "create_optimized_dataloader": {
+      "start_line": 713,
+      "end_line": 834,
+      "parameters": [
+        {
+          "name": "dataset"
+        },
+        {
+          "name": "batch_size"
+        },
+        {
+          "name": "shuffle"
+        },
+        {
+          "name": "num_workers"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "isinstance",
+          "line": 759
+        },
+        {
+          "name": "isinstance",
+          "line": 771
+        },
+        {
+          "name": "logger.info",
+          "line": 784
+        },
+        {
+          "name": "DataLoader",
+          "line": 832
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 761
+        },
+        {
+          "name": "logger.info",
+          "line": 766
+        },
+        {
+          "name": "isinstance",
+          "line": 777
+        },
+        {
+          "name": "hasattr",
+          "line": 777
+        },
+        {
+          "name": "multiprocessing.cpu_count",
+          "line": 733
+        },
+        {
+          "name": "max",
+          "line": 742
+        },
+        {
+          "name": "max",
+          "line": 743
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 746
+        },
+        {
+          "name": "logger.info",
+          "line": 749
+        },
+        {
+          "name": "torch.utils.data.default_collate",
+          "line": 805
+        },
+        {
+          "name": "min",
+          "line": 743
+        },
+        {
+          "name": "min",
+          "line": 747
+        },
+        {
+          "name": "logger.info",
+          "line": 754
+        },
+        {
+          "name": "psutil.cpu_percent",
+          "line": 737
+        },
+        {
+          "name": "int",
+          "line": 743
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 753
+        },
+        {
+          "name": "data.append",
+          "line": 812
+        },
+        {
+          "name": "isinstance",
+          "line": 815
+        },
+        {
+          "name": "targets.append",
+          "line": 816
+        },
+        {
+          "name": "targets.append",
+          "line": 818
+        },
+        {
+          "name": "torch.stack",
+          "line": 822
+        },
+        {
+          "name": "torch.stack",
+          "line": 822
+        },
+        {
+          "name": "logger.warning",
+          "line": 825
+        },
+        {
+          "name": "torch.tensor",
+          "line": 816
+        },
+        {
+          "name": "....unsqueeze",
+          "line": 826
+        },
+        {
+          "name": "....unsqueeze",
+          "line": 826
+        }
+      ],
+      "docstring": "\n    Create an optimized DataLoader for a dataset.\n    \n    Args:\n        dataset: Dataset to load (LazyPatternAugmentedDataset or regular dataset)\n        batch_size: Batch size\n        shuffle: Whether to shuffle the data\n        num_workers: Number of worker processes (None = auto-calculate)\n        \n    Returns:\n        Optimized DataLoader\n    ",
+      "code_snippet": "\n# Function to create an optimized DataLoader for LazyPatternAugmentedDataset\ndef create_optimized_dataloader(dataset, batch_size, shuffle=True, num_workers=None):\n    \"\"\"\n    Create an optimized DataLoader for a dataset.\n    \n    Args:\n        dataset: Dataset to load (LazyPatternAugmentedDataset or regular dataset)\n        batch_size: Batch size\n        shuffle: Whether to shuffle the data\n        num_workers: Number of worker processes (None = auto-calculate)\n        \n    Returns:\n        Optimized DataLoader\n    \"\"\"\n    # Auto-calculate workers if not specified\n    if num_workers is None:\n        try:\n            import multiprocessing\n            import psutil\n            \n            # Get system information\n            cpu_count = multiprocessing.cpu_count()\n            \n            # Get system load (0.0-1.0)\n            try:\n                system_load = psutil.cpu_percent(interval=0.1) / 100.0\n            except:\n                system_load = 0.5  # Default if we can't measure\n            \n            # Calculate optimal workers based on CPU count and system load\n            load_factor = max(0.3, 1.0 - system_load)  # Higher system load = fewer workers\n            optimal_workers = max(1, min(4, int(cpu_count * load_factor)))\n            \n            # Reduce workers when using GPU to avoid IO bottlenecks\n            if torch.cuda.is_available():\n                optimal_workers = min(optimal_workers, 2)\n                \n            logger.info(f\"Using {optimal_workers} DataLoader workers (auto-calculated)\")\n            num_workers = optimal_workers\n        except:\n            # Conservative fallback\n            num_workers = 2 if torch.cuda.is_available() else 4\n            logger.info(f\"Using {num_workers} DataLoader workers (fallback)\")\n    \n    # For safer device handling, reduce or eliminate workers when using CUDA\n    # This prevents device mismatch issues with multi-process data loading\n    is_cuda = False\n    if isinstance(dataset, LazyPatternAugmentedDataset):\n        is_cuda = dataset.device.type == 'cuda'\n    elif torch.cuda.is_available():\n        is_cuda = True\n    \n    if is_cuda:\n        # For CUDA, use 0 workers to avoid pinning issues\n        logger.info(f\"CUDA device detected, setting workers to 0 for maximum stability\")\n        num_workers = 0  # Use no workers with CUDA to avoid pinning and serialization issues\n    \n    # Set worker_init_fn if using LazyPatternAugmentedDataset\n    worker_init_fn = None\n    if isinstance(dataset, LazyPatternAugmentedDataset):\n        worker_init_fn = lazy_augmentation_worker_init_fn\n    \n    # Create optimized DataLoader with device-aware options\n    # Check if data is already on the device to avoid pinning CUDA tensors\n    data_on_device = False\n    if isinstance(dataset, LazyPatternAugmentedDataset) and hasattr(dataset, 'data_on_device'):\n        data_on_device = dataset.data_on_device\n    \n    # ALWAYS disable pin_memory to avoid the \"cannot pin 'torch.cuda.FloatTensor'\" error\n    # This is safer as we're not fully certain when data might already be on the device\n    use_pin_memory = False\n    \n    logger.info(f\"Creating DataLoader with pin_memory=False (disabled for stability), num_workers={num_workers}\")\n    \n    # For CUDA with workers=0, disable prefetch_factor and persistent_workers\n    dataloader_kwargs = {\n        'batch_size': batch_size,\n        'shuffle': shuffle,\n        'num_workers': num_workers,\n        'pin_memory': False,  # Always disable for stability\n        'worker_init_fn': worker_init_fn,\n    }\n    \n    # Only add these parameters if workers > 0\n    if num_workers > 0:\n        dataloader_kwargs['persistent_workers'] = True\n        dataloader_kwargs['prefetch_factor'] = 2\n    \n    # Define custom collate function to handle tensor type inconsistencies\n    def custom_collate_fn(batch):\n        \"\"\"Custom collate function to ensure consistent tensor types\"\"\"\n        try:\n            # Default collation if everything is already properly formatted\n            return torch.utils.data.default_collate(batch)\n        except (TypeError, RuntimeError) as e:\n            # If default collation fails, handle it manually\n            data = []\n            targets = []\n            for item in batch:\n                # Handle data\n                data.append(item[0])\n                \n                # Handle target - ensure it's a tensor\n                if isinstance(item[1], (int, float)):\n                    targets.append(torch.tensor(item[1]))\n                else:\n                    targets.append(item[1])\n            \n            # Stack the data and targets\n            try:\n                return torch.stack(data), torch.stack(targets)\n            except:\n                # Even more fallback - return first working item\n                logger.warning(\"Custom collation failed, returning limited batch\")\n                return data[0].unsqueeze(0), targets[0].unsqueeze(0)\n    \n    # Add the custom collate function\n    dataloader_kwargs['collate_fn'] = custom_collate_fn\n    \n    # Create and return the DataLoader\n    return DataLoader(dataset, **dataloader_kwargs)\n\n# Integration function to create a lazy augmented dataset\ndef create_lazy_augmented_dataset(base_dataset, pattern_map=None, augmentation_percentages=None, device=None):\n    \"\"\""
+    },
+    "create_lazy_augmented_dataset": {
+      "start_line": 835,
+      "end_line": 874,
+      "parameters": [
+        {
+          "name": "base_dataset"
+        },
+        {
+          "name": "pattern_map"
+        },
+        {
+          "name": "augmentation_percentages"
+        },
+        {
+          "name": "device"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "LazyPatternAugmentedDataset",
+          "line": 868
+        },
+        {
+          "name": "torch.device",
+          "line": 850
+        },
+        {
+          "name": "....keys",
+          "line": 857
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 850
+        }
+      ],
+      "docstring": "\n    Create a lazy augmented dataset with on-demand pattern augmentation.\n    \n    Args:\n        base_dataset: Original dataset\n        pattern_map: Pattern map containing pattern information\n        augmentation_percentages: Dict mapping pattern types to percentages\n        device: Computation device\n        \n    Returns:\n        LazyPatternAugmentedDataset instance\n    ",
+      "code_snippet": "\n# Integration function to create a lazy augmented dataset\ndef create_lazy_augmented_dataset(base_dataset, pattern_map=None, augmentation_percentages=None, device=None):\n    \"\"\"\n    Create a lazy augmented dataset with on-demand pattern augmentation.\n    \n    Args:\n        base_dataset: Original dataset\n        pattern_map: Pattern map containing pattern information\n        augmentation_percentages: Dict mapping pattern types to percentages\n        device: Computation device\n        \n    Returns:\n        LazyPatternAugmentedDataset instance\n    \"\"\"\n    # Set default device\n    if device is None:\n        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n    \n    # Set default percentages if not provided\n    if augmentation_percentages is None:\n        augmentation_percentages = {}\n        if pattern_map and 'pattern_distribution' in pattern_map:\n            # Default to 5% augmentation for each pattern type\n            for pattern_type in pattern_map['pattern_distribution'].keys():\n                augmentation_percentages[pattern_type] = 0.05\n        else:\n            # Default types if no pattern map\n            augmentation_percentages = {\n                'structural': 0.05,\n                'statistical': 0.05,\n                'temporal': 0.05\n            }\n    \n    # Create and return dataset\n    return LazyPatternAugmentedDataset(\n        base_dataset=base_dataset,\n        pattern_map=pattern_map,\n        augmentation_percentages=augmentation_percentages,\n        device=device\n    )"
+    }
+  },
+  "constants": {}
+}

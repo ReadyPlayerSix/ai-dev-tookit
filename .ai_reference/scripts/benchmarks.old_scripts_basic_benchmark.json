@@ -1,0 +1,16 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\scripts\\basic_benchmark.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 3
+    },
+    {
+      "name": "time",
+      "line": 4
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

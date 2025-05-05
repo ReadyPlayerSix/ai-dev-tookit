@@ -1,0 +1,1015 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\optimizer\\base_optimizer.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "time",
+      "line": 10
+    },
+    {
+      "name": "math",
+      "line": 11
+    },
+    {
+      "name": "numpy",
+      "line": 12
+    },
+    {
+      "name": "typing.Union",
+      "line": 13
+    },
+    {
+      "name": "typing.Optional",
+      "line": 13
+    },
+    {
+      "name": "typing.Dict",
+      "line": 13
+    },
+    {
+      "name": "typing.List",
+      "line": 13
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 13
+    },
+    {
+      "name": "typing.Any",
+      "line": 13
+    },
+    {
+      "name": "enum.Enum",
+      "line": 14
+    },
+    {
+      "name": "isekaizen.cognitive.efficiency.CognitiveEfficiencyCalculator",
+      "line": 17
+    },
+    {
+      "name": "isekaizen.hardware.analyzer.HardwareAnalyzer",
+      "line": 18
+    },
+    {
+      "name": "isekaizen.hardware.memory.ModelMemoryAnalyzer",
+      "line": 19
+    },
+    {
+      "name": "isekaizen.utils.input_shapes.infer_input_shape",
+      "line": 20
+    },
+    {
+      "name": "isekaizen.cortex.rpg_manager.RPGCortexManager",
+      "line": 24
+    },
+    {
+      "name": "isekaizen.cortex.rpg_manager.PatternType",
+      "line": 24
+    },
+    {
+      "name": "isekaizen.cortex.rpg_manager.SkillTree",
+      "line": 24
+    },
+    {
+      "name": "isekaizen.cortex.rpg_manager.Pattern",
+      "line": 24
+    },
+    {
+      "name": "isekaizen.cortex.pattern_orchestrator.PatternOrchestrator",
+      "line": 25
+    },
+    {
+      "name": "isekaizen.cortex.pattern_orchestrator.OrchestrationMode",
+      "line": 25
+    },
+    {
+      "name": "isekaizen.cortex.resource_manager.ResourceManager",
+      "line": 26
+    }
+  ],
+  "classes": {
+    "IsekaiZenOptimizer": {
+      "start_line": 88,
+      "end_line": 589,
+      "methods": {
+        "__init__": {
+          "start_line": 100,
+          "end_line": 199,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "total_epochs",
+              "type": "int"
+            },
+            {
+              "name": "max_epoch_time"
+            },
+            {
+              "name": "min_batch"
+            },
+            {
+              "name": "max_batch"
+            },
+            {
+              "name": "run_diagnostics",
+              "type": "bool"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "sum",
+              "line": 135
+            },
+            {
+              "name": "logger.info",
+              "line": 137
+            },
+            {
+              "name": "HardwareAnalyzer",
+              "line": 149
+            },
+            {
+              "name": "ModelMemoryAnalyzer",
+              "line": 150
+            },
+            {
+              "name": "CognitiveEfficiencyCalculator",
+              "line": 151
+            },
+            {
+              "name": "RPGCortexManager",
+              "line": 154
+            },
+            {
+              "name": "torch.device",
+              "line": 126
+            },
+            {
+              "name": "self.model.to",
+              "line": 132
+            },
+            {
+              "name": "PatternOrchestrator",
+              "line": 158
+            },
+            {
+              "name": "ResourceManager",
+              "line": 159
+            },
+            {
+              "name": "logger.info",
+              "line": 160
+            },
+            {
+              "name": "logger.warning",
+              "line": 164
+            },
+            {
+              "name": "logger.info",
+              "line": 176
+            },
+            {
+              "name": "self._run_diagnostics",
+              "line": 177
+            },
+            {
+              "name": "next",
+              "line": 131
+            },
+            {
+              "name": "p.numel",
+              "line": 135
+            },
+            {
+              "name": "logger.info",
+              "line": 180
+            },
+            {
+              "name": "max",
+              "line": 188
+            },
+            {
+              "name": "logger.info",
+              "line": 189
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 126
+            },
+            {
+              "name": "model.parameters",
+              "line": 131
+            },
+            {
+              "name": "model.parameters",
+              "line": 135
+            }
+          ],
+          "docstring": "\n        Initialize the IsekaiZen optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Target device (auto-detected if None)\n            total_epochs: Total expected number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (if None, no time constraint)\n            min_batch: Minimum batch size (auto-detected if None)\n            max_batch: Maximum batch size (auto-detected if None)\n            run_diagnostics: Whether to run initial diagnostics\n            **kwargs: Additional parameters\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self, \n        model: torch.nn.Module, \n        device: Optional[torch.device] = None,\n        total_epochs: int = 50,\n        max_epoch_time: Optional[float] = None,\n        min_batch: Optional[int] = None,\n        max_batch: Optional[int] = None,\n        run_diagnostics: bool = True,\n        **kwargs\n    ):\n        \"\"\"\n        Initialize the IsekaiZen optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Target device (auto-detected if None)\n            total_epochs: Total expected number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (if None, no time constraint)\n            min_batch: Minimum batch size (auto-detected if None)\n            max_batch: Maximum batch size (auto-detected if None)\n            run_diagnostics: Whether to run initial diagnostics\n            **kwargs: Additional parameters\n        \"\"\"\n        # Basic setup\n        self.model = model\n        self.device = device if device is not None else torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\n        self.total_epochs = total_epochs\n        self.max_epoch_time = max_epoch_time\n        \n        # Move model to device if needed\n        if next(model.parameters()).device != self.device:\n            self.model.to(self.device)\n        \n        # Calculate model complexity (parameter count in millions)\n        self.param_count = sum(p.numel() for p in model.parameters())\n        self.model_complexity = self.param_count / 1_000_000\n        logger.info(f\"Model has {self.param_count:,} parameters ({self.model_complexity:.2f}M)\")\n        \n        # Training state tracking\n        self.epoch = 0\n        self.iteration = 0\n        self.batch_history = []\n        self.accuracy_history = []\n        self.loss_history = []\n        self.gradient_history = []\n        self.train_test_gap = 0.0  # For tracking train/val accuracy gap\n        \n        # Initialize analyzers and calculators\n        self.hardware_analyzer = HardwareAnalyzer(self.device)\n        self.memory_analyzer = ModelMemoryAnalyzer(model, self.device)\n        self.efficiency_calculator = CognitiveEfficiencyCalculator()\n        \n        # Initialize RPG manager and Cortex Flow components\n        self.rpg_manager = RPGCortexManager()\n        \n        # Only initialize Cortex Flow components if they're available\n        if cortex_components_available:\n            self.pattern_orchestrator = PatternOrchestrator()\n            self.resource_manager = ResourceManager()\n            logger.info(\"Cortex Flow components initialized\")\n        else:\n            self.pattern_orchestrator = None\n            self.resource_manager = None\n            logger.warning(\"Cortex Flow components not available\")\n        \n        # Initialize time management\n        self.epoch_start_time = 0\n        self.epoch_timings = []\n        \n        # Placeholder values until diagnostics\n        self.min_batch = min_batch if min_batch is not None else 4\n        self.max_batch = max_batch if max_batch is not None else 256\n        \n        # Run diagnostics if requested\n        if run_diagnostics:\n            logger.info(\"Running framework diagnostics...\")\n            self._run_diagnostics()\n        elif min_batch is not None and max_batch is not None:\n            # Skip diagnostics but use provided values\n            logger.info(f\"Diagnostics skipped. Using boundaries: [{self.min_batch}, {self.max_batch}]\")\n        else:\n            # Conservative defaults with safety factor\n            if self.device.type == \"cuda\":\n                self.max_batch = 128\n            else:\n                self.max_batch = 64\n            \n            self.min_batch = max(1, self.max_batch // 16)\n            logger.info(f\"Using conservative batch boundaries: [{self.min_batch}, {self.max_batch}]\")\n        \n        # Stability monitoring\n        self.stability_metrics = {\n            \"loss_variance\": 0.0,\n            \"accuracy_variance\": 0.0,\n            \"gradient_norm_history\": [],\n            \"stability_score\": 1.0,  # 0.0 (unstable) to 1.0 (stable)\n            \"unstable_epochs\": 0\n        }\n    \n    def _run_diagnostics(self):\n        \"\"\""
+        },
+        "_run_diagnostics": {
+          "start_line": 200,
+          "end_line": 261,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.hardware_analyzer.analyze_memory",
+              "line": 209
+            },
+            {
+              "name": "self.hardware_analyzer.get_memory_safety_factor",
+              "line": 210
+            },
+            {
+              "name": "logger.info",
+              "line": 212
+            },
+            {
+              "name": "infer_input_shape",
+              "line": 234
+            },
+            {
+              "name": "logger.info",
+              "line": 235
+            },
+            {
+              "name": "self.memory_analyzer.calculate_max_batch_size",
+              "line": 238
+            },
+            {
+              "name": "logger.info",
+              "line": 239
+            },
+            {
+              "name": "self.efficiency_calculator.calculate_optimal_batch_boundaries",
+              "line": 242
+            },
+            {
+              "name": "logger.info",
+              "line": 245
+            },
+            {
+              "name": "self._analyze_device_capabilities",
+              "line": 248
+            },
+            {
+              "name": "logger.warning",
+              "line": 216
+            },
+            {
+              "name": "logger.warning",
+              "line": 217
+            },
+            {
+              "name": "logger.warning",
+              "line": 218
+            },
+            {
+              "name": "logger.info",
+              "line": 230
+            },
+            {
+              "name": "torch.cuda.empty_cache",
+              "line": 252
+            },
+            {
+              "name": "logger.error",
+              "line": 255
+            },
+            {
+              "name": "logger.warning",
+              "line": 259
+            },
+            {
+              "name": "str",
+              "line": 255
+            }
+          ],
+          "docstring": "\n        Run initial diagnostics to determine optimal batch size boundaries.\n        \n        This analyzes hardware capabilities, memory constraints, and calculates\n        the optimal batch size range.\n        ",
+          "code_snippet": "        }\n    \n    def _run_diagnostics(self):\n        \"\"\"\n        Run initial diagnostics to determine optimal batch size boundaries.\n        \n        This analyzes hardware capabilities, memory constraints, and calculates\n        the optimal batch size range.\n        \"\"\"\n        try:\n            # Analyze hardware memory\n            memory_info = self.hardware_analyzer.analyze_memory()\n            memory_safety_factor = self.hardware_analyzer.get_memory_safety_factor()\n            available_memory = memory_info['free_memory'] * memory_safety_factor\n            logger.info(f\"Available memory for training: {available_memory / (1024**3):.2f} GB\")\n            \n            # Handle extremely low memory situations with better error message\n            if available_memory < 100 * 1024**2:  # Less than 100 MB\n                logger.warning(f\"Very low available memory detected: {available_memory / (1024**3):.2f} GB\")\n                logger.warning(\"This could be due to PyTorch memory reporting issues or actual memory constraints\")\n                logger.warning(\"Setting conservative batch size boundaries and continuing\")\n                \n                # Get a reasonable minimum batch size\n                if self.device.type == \"cuda\":\n                    # For GPU, we can usually manage at least 16 batches\n                    self.min_batch = 4\n                    self.max_batch = 32\n                else:\n                    # For CPU, use even smaller batches\n                    self.min_batch = 2\n                    self.max_batch = 16\n                    \n                logger.info(f\"Using batch size range: [{self.min_batch}, {self.max_batch}]\")\n                return\n                \n            # Determine input shape\n            input_shape = infer_input_shape(self.model)\n            logger.info(f\"Inferred input shape: {input_shape}\")\n            \n            # Calculate maximum batch size based on hardware constraints\n            max_hardware_batch = self.memory_analyzer.calculate_max_batch_size(input_shape, available_memory)\n            logger.info(f\"Maximum hardware batch size: {max_hardware_batch}\")\n            \n            # Calculate batch boundaries based on hardware and model complexity\n            self.min_batch, self.max_batch = self.efficiency_calculator.calculate_optimal_batch_boundaries(\n                max_hardware_batch, self.model_complexity)\n            \n            logger.info(f\"Calculated batch boundaries: [{self.min_batch}, {self.max_batch}]\")\n            \n            # Test device capabilities\n            self._analyze_device_capabilities()\n            \n            # Force cleanup to ensure memory is available for training\n            if self.device.type == \"cuda\":\n                torch.cuda.empty_cache()\n            \n        except Exception as e:\n            logger.error(f\"Error during diagnostics: {str(e)}\")\n            # Set conservative defaults\n            self.min_batch = 4 if self.min_batch is None else self.min_batch\n            self.max_batch = 128 if self.max_batch is None else self.max_batch\n            logger.warning(f\"Using fallback batch boundaries due to error: [{self.min_batch}, {self.max_batch}]\")\n    \n    def _analyze_device_capabilities(self):\n        \"\"\"Analyze device-specific capabilities for optimizations\"\"\"\n        if self.device.type == \"cuda\":"
+        },
+        "_analyze_device_capabilities": {
+          "start_line": 261,
+          "end_line": 280,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.cuda.get_device_capability",
+              "line": 265
+            },
+            {
+              "name": "logger.info",
+              "line": 269
+            },
+            {
+              "name": "logger.info",
+              "line": 270
+            },
+            {
+              "name": "logger.info",
+              "line": 271
+            },
+            {
+              "name": "logger.info",
+              "line": 272
+            },
+            {
+              "name": "max",
+              "line": 277
+            },
+            {
+              "name": "logger.info",
+              "line": 278
+            },
+            {
+              "name": "torch.cuda.get_device_properties",
+              "line": 267
+            },
+            {
+              "name": "torch.cuda.get_device_properties",
+              "line": 266
+            },
+            {
+              "name": "hasattr",
+              "line": 277
+            },
+            {
+              "name": "torch.get_num_threads",
+              "line": 277
+            },
+            {
+              "name": "torch.cuda.get_device_name",
+              "line": 269
+            }
+          ],
+          "docstring": "Analyze device-specific capabilities for optimizations",
+          "code_snippet": "            logger.warning(f\"Using fallback batch boundaries due to error: [{self.min_batch}, {self.max_batch}]\")\n    \n    def _analyze_device_capabilities(self):\n        \"\"\"Analyze device-specific capabilities for optimizations\"\"\"\n        if self.device.type == \"cuda\":\n            # GPU specific capabilities\n            self.gpu_compute_capability = torch.cuda.get_device_capability(self.device)\n            self.gpu_memory = torch.cuda.get_device_properties(self.device).total_memory / (1024**3)  # GB\n            self.parallel_processors = torch.cuda.get_device_properties(self.device).multi_processor_count\n            \n            logger.info(f\"GPU: {torch.cuda.get_device_name(self.device)}\")\n            logger.info(f\"Compute capability: {self.gpu_compute_capability}\")\n            logger.info(f\"Available memory: {self.gpu_memory:.2f} GB\")\n            logger.info(f\"Streaming multiprocessors: {self.parallel_processors}\")\n        else:\n            # CPU specific capabilities\n            self.gpu_compute_capability = (0, 0)\n            self.gpu_memory = 0\n            self.parallel_processors = max(1, (torch.get_num_threads() if hasattr(torch, 'get_num_threads') else 1))\n            logger.info(f\"CPU with {self.parallel_processors} logical processors\")\n    \n    def update_training_state(self, loss: float, gradient_norm: float, accuracy: Optional[float] = None):\n        \"\"\"\n        Update internal state based on current training metrics."
+        },
+        "update_training_state": {
+          "start_line": 280,
+          "end_line": 311,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "loss",
+              "type": "float"
+            },
+            {
+              "name": "gradient_norm",
+              "type": "float"
+            },
+            {
+              "name": "accuracy"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.loss_history.append",
+              "line": 290
+            },
+            {
+              "name": "self.gradient_history.append",
+              "line": 293
+            },
+            {
+              "name": "self._update_stability_metrics",
+              "line": 309
+            },
+            {
+              "name": "len",
+              "line": 294
+            },
+            {
+              "name": "self.gradient_history.pop",
+              "line": 295
+            },
+            {
+              "name": "self.accuracy_history.append",
+              "line": 301
+            },
+            {
+              "name": "len",
+              "line": 305
+            }
+          ],
+          "docstring": "\n        Update internal state based on current training metrics.\n        \n        Args:\n            loss: Current loss value\n            gradient_norm: Norm of current gradients\n            accuracy: Current accuracy (optional)\n        ",
+          "code_snippet": "            logger.info(f\"CPU with {self.parallel_processors} logical processors\")\n    \n    def update_training_state(self, loss: float, gradient_norm: float, accuracy: Optional[float] = None):\n        \"\"\"\n        Update internal state based on current training metrics.\n        \n        Args:\n            loss: Current loss value\n            gradient_norm: Norm of current gradients\n            accuracy: Current accuracy (optional)\n        \"\"\"\n        # Track loss history\n        self.loss_history.append(loss)\n        \n        # Track gradient history\n        self.gradient_history.append(gradient_norm)\n        if len(self.gradient_history) > 20:\n            self.gradient_history.pop(0)\n        \n        self.iteration += 1\n        \n        # Track accuracy if provided\n        if accuracy is not None:\n            self.accuracy_history.append(accuracy)\n            \n            # Keep only recent history for analysis\n            max_history = 20  # Keep at most 20 epochs of history\n            if len(self.accuracy_history) > max_history:\n                self.accuracy_history = self.accuracy_history[-max_history:]\n        \n        # Update stability metrics\n        self._update_stability_metrics(loss, accuracy, gradient_norm)\n    \n    def _update_stability_metrics(self, loss: float, accuracy: Optional[float], gradient_norm: float):\n        \"\"\"\n        Update stability metrics based on recent training results."
+        },
+        "_update_stability_metrics": {
+          "start_line": 311,
+          "end_line": 381,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "loss",
+              "type": "float"
+            },
+            {
+              "name": "accuracy"
+            },
+            {
+              "name": "gradient_norm",
+              "type": "float"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "min",
+              "line": 321
+            },
+            {
+              "name": "....append",
+              "line": 356
+            },
+            {
+              "name": "len",
+              "line": 321
+            },
+            {
+              "name": "max",
+              "line": 352
+            },
+            {
+              "name": "len",
+              "line": 360
+            },
+            {
+              "name": "len",
+              "line": 364
+            },
+            {
+              "name": "max",
+              "line": 376
+            },
+            {
+              "name": "np.var",
+              "line": 326
+            },
+            {
+              "name": "max",
+              "line": 337
+            },
+            {
+              "name": "np.var",
+              "line": 367
+            },
+            {
+              "name": "len",
+              "line": 340
+            },
+            {
+              "name": "np.var",
+              "line": 343
+            },
+            {
+              "name": "sum",
+              "line": 329
+            },
+            {
+              "name": "len",
+              "line": 329
+            },
+            {
+              "name": "sum",
+              "line": 330
+            },
+            {
+              "name": "len",
+              "line": 330
+            },
+            {
+              "name": "sum",
+              "line": 370
+            },
+            {
+              "name": "len",
+              "line": 370
+            },
+            {
+              "name": "sum",
+              "line": 371
+            },
+            {
+              "name": "len",
+              "line": 371
+            },
+            {
+              "name": "sum",
+              "line": 346
+            },
+            {
+              "name": "len",
+              "line": 346
+            },
+            {
+              "name": "sum",
+              "line": 347
+            },
+            {
+              "name": "len",
+              "line": 347
+            }
+          ],
+          "docstring": "\n        Update stability metrics based on recent training results.\n        \n        Args:\n            loss: Current loss value\n            accuracy: Current accuracy value\n            gradient_norm: Norm of gradients\n        ",
+          "code_snippet": "        self._update_stability_metrics(loss, accuracy, gradient_norm)\n    \n    def _update_stability_metrics(self, loss: float, accuracy: Optional[float], gradient_norm: float):\n        \"\"\"\n        Update stability metrics based on recent training results.\n        \n        Args:\n            loss: Current loss value\n            accuracy: Current accuracy value\n            gradient_norm: Norm of gradients\n        \"\"\"\n        # Calculate variance for last few iterations\n        window_size = min(5, len(self.loss_history))\n        if window_size >= 3:\n            recent_losses = self.loss_history[-window_size:]\n            \n            try:\n                self.stability_metrics[\"loss_variance\"] = np.var(recent_losses)\n            except Exception:\n                # Fallback if numpy isn't available or there's another issue\n                mean_loss = sum(recent_losses) / len(recent_losses)\n                loss_var = sum((l - mean_loss) ** 2 for l in recent_losses) / len(recent_losses)\n                self.stability_metrics[\"loss_variance\"] = loss_var\n            \n            # Check for high loss variance (instability)\n            if self.stability_metrics[\"loss_variance\"] > 0.1:\n                self.stability_metrics[\"unstable_epochs\"] += 1\n            else:\n                self.stability_metrics[\"unstable_epochs\"] = max(0, self.stability_metrics[\"unstable_epochs\"] - 1)\n            \n            # Update accuracy variance if available\n            if accuracy is not None and len(self.accuracy_history) >= 3:\n                recent_accuracies = self.accuracy_history[-window_size:]\n                try:\n                    self.stability_metrics[\"accuracy_variance\"] = np.var(recent_accuracies)\n                except Exception:\n                    # Fallback calculation\n                    mean_acc = sum(recent_accuracies) / len(recent_accuracies)\n                    acc_var = sum((a - mean_acc) ** 2 for a in recent_accuracies) / len(recent_accuracies)\n                    self.stability_metrics[\"accuracy_variance\"] = acc_var\n            \n            # Update stability score\n            max_variance = 0.5  # Maximum expected loss variance\n            loss_stability = max(0, 1.0 - (self.stability_metrics[\"loss_variance\"] / max_variance))\n            self.stability_metrics[\"stability_score\"] = loss_stability\n        \n        # Track gradient norm\n        self.stability_metrics[\"gradient_norm_history\"].append(gradient_norm)\n        \n        # Keep limited history\n        max_grad_history = 20\n        if len(self.stability_metrics[\"gradient_norm_history\"]) > max_grad_history:\n            self.stability_metrics[\"gradient_norm_history\"] = self.stability_metrics[\"gradient_norm_history\"][-max_grad_history:]\n        \n        # Calculate variance in gradient norms\n        if len(self.stability_metrics[\"gradient_norm_history\"]) > 3:\n            grad_window = self.stability_metrics[\"gradient_norm_history\"][-5:]\n            try:\n                grad_variance = np.var(grad_window)\n            except Exception:\n                # Fallback calculation\n                mean_grad = sum(grad_window) / len(grad_window)\n                grad_var = sum((g - mean_grad) ** 2 for g in grad_window) / len(grad_window)\n                grad_variance = grad_var\n            \n            # Update stability score considering gradient variance\n            max_grad_variance = 10.0  # Maximum expected gradient variance\n            grad_stability = max(0, 1.0 - (grad_variance / max_grad_variance))\n            \n            # Blend with loss-based stability\n            self.stability_metrics[\"stability_score\"] = 0.7 * self.stability_metrics[\"stability_score\"] + 0.3 * grad_stability\n    \n    def get_stability_score(self) -> float:\n        \"\"\"\n        Get the current training stability score."
+        },
+        "get_stability_score": {
+          "start_line": 381,
+          "end_line": 390,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "float",
+          "calls": [],
+          "docstring": "\n        Get the current training stability score.\n        \n        Returns:\n            Stability score from 0.0 (unstable) to 1.0 (stable)\n        ",
+          "code_snippet": "            self.stability_metrics[\"stability_score\"] = 0.7 * self.stability_metrics[\"stability_score\"] + 0.3 * grad_stability\n    \n    def get_stability_score(self) -> float:\n        \"\"\"\n        Get the current training stability score.\n        \n        Returns:\n            Stability score from 0.0 (unstable) to 1.0 (stable)\n        \"\"\"\n        return self.stability_metrics[\"stability_score\"]\n    \n    def is_training_stable(self) -> bool:\n        \"\"\"\n        Check if the training is currently stable."
+        },
+        "is_training_stable": {
+          "start_line": 390,
+          "end_line": 399,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [],
+          "docstring": "\n        Check if the training is currently stable.\n        \n        Returns:\n            True if training is stable, False otherwise\n        ",
+          "code_snippet": "        return self.stability_metrics[\"stability_score\"]\n    \n    def is_training_stable(self) -> bool:\n        \"\"\"\n        Check if the training is currently stable.\n        \n        Returns:\n            True if training is stable, False otherwise\n        \"\"\"\n        return self.stability_metrics[\"stability_score\"] >= 0.7 and self.stability_metrics[\"unstable_epochs\"] < 2\n    \n    def start_epoch_timer(self):\n        \"\"\"Start timing the current epoch\"\"\"\n        self.epoch_start_time = time.time()"
+        },
+        "start_epoch_timer": {
+          "start_line": 399,
+          "end_line": 403,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 401
+            }
+          ],
+          "docstring": "Start timing the current epoch",
+          "code_snippet": "        return self.stability_metrics[\"stability_score\"] >= 0.7 and self.stability_metrics[\"unstable_epochs\"] < 2\n    \n    def start_epoch_timer(self):\n        \"\"\"Start timing the current epoch\"\"\"\n        self.epoch_start_time = time.time()\n    \n    def end_epoch_timer(self) -> float:\n        \"\"\"\n        End timing the current epoch and return the elapsed time."
+        },
+        "end_epoch_timer": {
+          "start_line": 403,
+          "end_line": 418,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "self.epoch_timings.append",
+              "line": 414
+            },
+            {
+              "name": "time.time",
+              "line": 413
+            }
+          ],
+          "docstring": "\n        End timing the current epoch and return the elapsed time.\n        \n        Returns:\n            Elapsed time in seconds\n        ",
+          "code_snippet": "        self.epoch_start_time = time.time()\n    \n    def end_epoch_timer(self) -> float:\n        \"\"\"\n        End timing the current epoch and return the elapsed time.\n        \n        Returns:\n            Elapsed time in seconds\n        \"\"\"\n        if self.epoch_start_time == 0:\n            return 0.0\n            \n        elapsed = time.time() - self.epoch_start_time\n        self.epoch_timings.append(elapsed)\n        self.epoch_start_time = 0\n        return elapsed\n    \n    def estimate_remaining_time(self) -> Tuple[float, float]:\n        \"\"\"\n        Estimate remaining training time based on current epoch timings."
+        },
+        "estimate_remaining_time": {
+          "start_line": 418,
+          "end_line": 434,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "sum",
+              "line": 428
+            },
+            {
+              "name": "len",
+              "line": 428
+            }
+          ],
+          "docstring": "\n        Estimate remaining training time based on current epoch timings.\n        \n        Returns:\n            Tuple of (remaining_seconds, total_seconds)\n        ",
+          "code_snippet": "        return elapsed\n    \n    def estimate_remaining_time(self) -> Tuple[float, float]:\n        \"\"\"\n        Estimate remaining training time based on current epoch timings.\n        \n        Returns:\n            Tuple of (remaining_seconds, total_seconds)\n        \"\"\"\n        if not self.epoch_timings:\n            return 0.0, 0.0\n            \n        avg_epoch_time = sum(self.epoch_timings) / len(self.epoch_timings)\n        remaining_epochs = self.total_epochs - self.epoch\n        remaining_seconds = avg_epoch_time * remaining_epochs\n        total_seconds = avg_epoch_time * self.total_epochs\n        return remaining_seconds, total_seconds\n    \n    def format_time_estimate(self, seconds: float) -> str:\n        \"\"\"\n        Format time estimate in human-readable format."
+        },
+        "format_time_estimate": {
+          "start_line": 434,
+          "end_line": 454,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "seconds",
+              "type": "float"
+            }
+          ],
+          "return_type": "str",
+          "calls": [
+            {
+              "name": "divmod",
+              "line": 444
+            },
+            {
+              "name": "divmod",
+              "line": 445
+            },
+            {
+              "name": "int",
+              "line": 448
+            },
+            {
+              "name": "int",
+              "line": 448
+            },
+            {
+              "name": "int",
+              "line": 450
+            },
+            {
+              "name": "int",
+              "line": 450
+            },
+            {
+              "name": "int",
+              "line": 452
+            }
+          ],
+          "docstring": "\n        Format time estimate in human-readable format.\n        \n        Args:\n            seconds: Time in seconds\n            \n        Returns:\n            Formatted time string\n        ",
+          "code_snippet": "        return remaining_seconds, total_seconds\n    \n    def format_time_estimate(self, seconds: float) -> str:\n        \"\"\"\n        Format time estimate in human-readable format.\n        \n        Args:\n            seconds: Time in seconds\n            \n        Returns:\n            Formatted time string\n        \"\"\"\n        hours, remainder = divmod(seconds, 3600)\n        minutes, seconds = divmod(remainder, 60)\n        \n        if hours > 0:\n            return f\"{int(hours)}h {int(minutes)}m\"\n        elif minutes > 0:\n            return f\"{int(minutes)}m {int(seconds)}s\"\n        else:\n            return f\"{int(seconds)}s\"\n    \n    def is_time_constrained(self) -> bool:\n        \"\"\"\n        Check if the epoch should adhere to time constraints."
+        },
+        "is_time_constrained": {
+          "start_line": 454,
+          "end_line": 463,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [],
+          "docstring": "\n        Check if the epoch should adhere to time constraints.\n        \n        Returns:\n            True if time constraints are active, False otherwise\n        ",
+          "code_snippet": "            return f\"{int(seconds)}s\"\n    \n    def is_time_constrained(self) -> bool:\n        \"\"\"\n        Check if the epoch should adhere to time constraints.\n        \n        Returns:\n            True if time constraints are active, False otherwise\n        \"\"\"\n        return self.max_epoch_time is not None and self.max_epoch_time > 0\n    \n    def should_continue_epoch(self) -> Tuple[bool, float]:\n        \"\"\"\n        Check if the epoch should continue based on time constraints."
+        },
+        "should_continue_epoch": {
+          "start_line": 463,
+          "end_line": 476,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 473
+            },
+            {
+              "name": "self.is_time_constrained",
+              "line": 470
+            }
+          ],
+          "docstring": "\n        Check if the epoch should continue based on time constraints.\n        \n        Returns:\n            Tuple of (should_continue, elapsed_time)\n        ",
+          "code_snippet": "        return self.max_epoch_time is not None and self.max_epoch_time > 0\n    \n    def should_continue_epoch(self) -> Tuple[bool, float]:\n        \"\"\"\n        Check if the epoch should continue based on time constraints.\n        \n        Returns:\n            Tuple of (should_continue, elapsed_time)\n        \"\"\"\n        if not self.is_time_constrained() or self.epoch_start_time == 0:\n            return True, 0.0\n            \n        elapsed = time.time() - self.epoch_start_time\n        return elapsed < self.max_epoch_time, elapsed\n    \n    def process_pattern(self, pattern_data: Dict[str, Any], pattern_type: PatternType = PatternType.RISK) -> Dict[str, Any]:\n        \"\"\"\n        Process a pattern using the RPG system."
+        },
+        "process_pattern": {
+          "start_line": 476,
+          "end_line": 504,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_data"
+            },
+            {
+              "name": "pattern_type",
+              "type": "PatternType"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "Pattern",
+              "line": 492
+            },
+            {
+              "name": "self.rpg_manager.process_pattern",
+              "line": 502
+            },
+            {
+              "name": "np.array",
+              "line": 490
+            },
+            {
+              "name": "pattern_data.get",
+              "line": 493
+            },
+            {
+              "name": "pattern_data.get",
+              "line": 494
+            },
+            {
+              "name": "pattern_data.get",
+              "line": 496
+            },
+            {
+              "name": "pattern_data.get",
+              "line": 497
+            },
+            {
+              "name": "pattern_data.get",
+              "line": 498
+            },
+            {
+              "name": "np.array",
+              "line": 493
+            }
+          ],
+          "docstring": "\n        Process a pattern using the RPG system.\n        \n        Args:\n            pattern_data: Pattern data to process\n            pattern_type: Type of pattern (risk or opportunity)\n            \n        Returns:\n            Processing result\n        ",
+          "code_snippet": "        return elapsed < self.max_epoch_time, elapsed\n    \n    def process_pattern(self, pattern_data: Dict[str, Any], pattern_type: PatternType = PatternType.RISK) -> Dict[str, Any]:\n        \"\"\"\n        Process a pattern using the RPG system.\n        \n        Args:\n            pattern_data: Pattern data to process\n            pattern_type: Type of pattern (risk or opportunity)\n            \n        Returns:\n            Processing result\n        \"\"\"\n        # Create RPG pattern\n        if 'signature' not in pattern_data:\n            # Create a default signature if none provided\n            pattern_data['signature'] = np.array([0.5])\n        \n        pattern = Pattern(\n            signature=pattern_data.get('signature', np.array([0.5])),\n            weight=pattern_data.get('weight', 1.0),\n            pattern_type=pattern_type,\n            complexity=pattern_data.get('complexity', 1.0),\n            xp_value=pattern_data.get('xp_value', 10.0),\n            power_level=pattern_data.get('power_level', 1)\n        )\n        \n        # Process with RPG manager\n        return self.rpg_manager.process_pattern(pattern)\n    \n    async def process_batch_with_cortex(self, batch_data: List[Dict[str, Any]], domain: str = \"visual\") -> Dict[str, Any]:\n        \"\"\"\n        Process a batch of data using the Cortex Flow system."
+        },
+        "get_optimal_batch_size": {
+          "start_line": 538,
+          "end_line": 549,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "NotImplementedError",
+              "line": 547
+            }
+          ],
+          "docstring": "\n        Calculate and return the optimal batch size.\n        \n        This method must be implemented by subclasses.\n        \n        Returns:\n            Optimal batch size for the current state\n        ",
+          "code_snippet": "            return {\"success\": False, \"error\": str(e)}\n    \n    def get_optimal_batch_size(self) -> int:\n        \"\"\"\n        Calculate and return the optimal batch size.\n        \n        This method must be implemented by subclasses.\n        \n        Returns:\n            Optimal batch size for the current state\n        \"\"\"\n        raise NotImplementedError(\"Subclasses must implement get_optimal_batch_size()\")\n    \n    def increment_epoch(self):\n        \"\"\"Increment epoch counter\"\"\"\n        self.epoch += 1"
+        },
+        "increment_epoch": {
+          "start_line": 549,
+          "end_line": 553,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "Increment epoch counter",
+          "code_snippet": "        raise NotImplementedError(\"Subclasses must implement get_optimal_batch_size()\")\n    \n    def increment_epoch(self):\n        \"\"\"Increment epoch counter\"\"\"\n        self.epoch += 1\n    \n    def get_current_state(self) -> Dict[str, Any]:\n        \"\"\"\n        Get the current optimizer state."
+        },
+        "get_current_state": {
+          "start_line": 553,
+          "end_line": 589,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.estimate_remaining_time",
+              "line": 581
+            },
+            {
+              "name": "self.format_time_estimate",
+              "line": 583
+            },
+            {
+              "name": "self.format_time_estimate",
+              "line": 585
+            },
+            {
+              "name": "self.rpg_manager.skills.items",
+              "line": 572
+            },
+            {
+              "name": "sum",
+              "line": 574
+            },
+            {
+              "name": "len",
+              "line": 574
+            }
+          ],
+          "docstring": "\n        Get the current optimizer state.\n        \n        Returns:\n            Dictionary containing the current optimizer state\n        ",
+          "code_snippet": "        self.epoch += 1\n    \n    def get_current_state(self) -> Dict[str, Any]:\n        \"\"\"\n        Get the current optimizer state.\n        \n        Returns:\n            Dictionary containing the current optimizer state\n        \"\"\"\n        state = {\n            \"epoch\": self.epoch,\n            \"iteration\": self.iteration,\n            \"batch_history\": self.batch_history[-5:] if self.batch_history else [],\n            \"min_batch\": self.min_batch,\n            \"max_batch\": self.max_batch,\n            \"stability\": {\n                \"score\": self.stability_metrics[\"stability_score\"],\n                \"unstable_epochs\": self.stability_metrics[\"unstable_epochs\"],\n                \"loss_variance\": self.stability_metrics[\"loss_variance\"]\n            },\n            \"rpg_level\": self.rpg_manager.level,\n            \"rpg_skills\": {skill.value: level for skill, level in self.rpg_manager.skills.items()},\n            \"timing\": {\n                \"avg_epoch_time\": sum(self.epoch_timings) / len(self.epoch_timings) if self.epoch_timings else 0,\n                \"total_epochs\": self.total_epochs,\n                \"remaining_epochs\": self.total_epochs - self.epoch\n            }\n        }\n        \n        # Add time estimates\n        remaining_time, total_time = self.estimate_remaining_time()\n        state[\"timing\"][\"remaining_time\"] = remaining_time\n        state[\"timing\"][\"remaining_time_formatted\"] = self.format_time_estimate(remaining_time)\n        state[\"timing\"][\"total_time\"] = total_time\n        state[\"timing\"][\"total_time_formatted\"] = self.format_time_estimate(total_time)\n        \n        return state"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Base class for IsekaiZen framework optimizers with integrated RPG and Cortex Flow.\n    \n    This class provides the core functionality for all IsekaiZen optimizers, including:\n    - Hardware diagnostics and batch boundary detection\n    - Cognitive efficiency calculations\n    - RPG-style risk assessment and pattern recognition\n    - Cortex Flow integration for advanced pattern processing\n    - Self-adaptive time management\n    "
+    },
+    "PatternType": {
+      "start_line": 31,
+      "end_line": 36,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "OPPORTUNITY",
+          "line": 33
+        },
+        {
+          "name": "RISK",
+          "line": 34
+        }
+      ],
+      "bases": [
+        "Enum"
+      ],
+      "docstring": "Pattern types for risk assessment"
+    },
+    "SkillTree": {
+      "start_line": 36,
+      "end_line": 43,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "PATTERN_RECOGNITION",
+          "line": 38
+        },
+        {
+          "name": "RISK_ASSESSMENT",
+          "line": 39
+        },
+        {
+          "name": "INTUITION",
+          "line": 40
+        },
+        {
+          "name": "PATTERN_MEMORY",
+          "line": 41
+        }
+      ],
+      "bases": [
+        "Enum"
+      ],
+      "docstring": "Skill trees for risk assessment"
+    },
+    "Pattern": {
+      "start_line": 43,
+      "end_line": 53,
+      "methods": {
+        "__init__": {
+          "start_line": 45,
+          "end_line": 53,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "signature"
+            },
+            {
+              "name": "weight"
+            },
+            {
+              "name": "pattern_type"
+            },
+            {
+              "name": "complexity"
+            },
+            {
+              "name": "xp_value"
+            },
+            {
+              "name": "power_level"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "    class Pattern:\n        \"\"\"Fallback Pattern class\"\"\"\n        def __init__(self, signature, weight, pattern_type, complexity, xp_value, power_level):\n            self.signature = signature\n            self.weight = weight\n            self.pattern_type = pattern_type\n            self.complexity = complexity\n            self.xp_value = xp_value\n            self.power_level = power_level\n    \n    class RPGCortexManager:\n        \"\"\"Fallback RPG manager\"\"\"\n        def __init__(self):"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Fallback Pattern class"
+    },
+    "RPGCortexManager": {
+      "start_line": 53,
+      "end_line": 67,
+      "methods": {
+        "__init__": {
+          "start_line": 55,
+          "end_line": 63,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "    class RPGCortexManager:\n        \"\"\"Fallback RPG manager\"\"\"\n        def __init__(self):\n            self.level = 1\n            self.skills = {\n                SkillTree.PATTERN_RECOGNITION: 1,\n                SkillTree.RISK_ASSESSMENT: 1,\n                SkillTree.INTUITION: 1,\n                SkillTree.PATTERN_MEMORY: 1\n            }\n        \n        def process_pattern(self, pattern):\n            return {\"success\": False, \"reason\": \"Cortex components not available\"}"
+        },
+        "process_pattern": {
+          "start_line": 64,
+          "end_line": 67,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "            }\n        \n        def process_pattern(self, pattern):\n            return {\"success\": False, \"reason\": \"Cortex components not available\"}\n    \n    class PatternOrchestrator:\n        \"\"\"Fallback Pattern Orchestrator\"\"\"\n        def __init__(self):"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Fallback RPG manager"
+    },
+    "PatternOrchestrator": {
+      "start_line": 67,
+      "end_line": 75,
+      "methods": {
+        "__init__": {
+          "start_line": 69,
+          "end_line": 72,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "    class PatternOrchestrator:\n        \"\"\"Fallback Pattern Orchestrator\"\"\"\n        def __init__(self):\n            pass\n        \n        async def process_pattern_batch(self, domain, patterns):\n            return {\"success\": False, \"reason\": \"Cortex components not available\"}\n    "
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Fallback Pattern Orchestrator"
+    },
+    "ResourceManager": {
+      "start_line": 75,
+      "end_line": 86,
+      "methods": {
+        "__init__": {
+          "start_line": 77,
+          "end_line": 80,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "    class ResourceManager:\n        \"\"\"Fallback Resource Manager\"\"\"\n        def __init__(self):\n            pass\n        \n        async def register_batch(self, batch_id, flow_ids, status):\n            pass\n        "
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Fallback Resource Manager"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

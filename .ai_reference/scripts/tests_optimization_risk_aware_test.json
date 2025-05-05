@@ -1,0 +1,455 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\tests\\optimization\\risk_aware_test.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 11
+    },
+    {
+      "name": "torch.nn",
+      "line": 12
+    },
+    {
+      "name": "torch.optim",
+      "line": 13
+    },
+    {
+      "name": "numpy",
+      "line": 14
+    },
+    {
+      "name": "matplotlib.pyplot",
+      "line": 15
+    },
+    {
+      "name": "logging",
+      "line": 16
+    },
+    {
+      "name": "sys",
+      "line": 17
+    },
+    {
+      "name": "os",
+      "line": 18
+    },
+    {
+      "name": "isekaizen.optimizers.RiskAwareEVEOptimizer",
+      "line": 33
+    },
+    {
+      "name": "isekaizen.utils.training_utils.get_fibonacci_check_intervals",
+      "line": 34
+    }
+  ],
+  "classes": {
+    "SimpleModel": {
+      "start_line": 40,
+      "end_line": 52,
+      "methods": {
+        "__init__": {
+          "start_line": 41,
+          "end_line": 47,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 42
+            },
+            {
+              "name": "nn.Linear",
+              "line": 43
+            },
+            {
+              "name": "nn.Linear",
+              "line": 44
+            },
+            {
+              "name": "nn.Linear",
+              "line": 45
+            },
+            {
+              "name": "super",
+              "line": 42
+            }
+          ],
+          "code_snippet": "    # Create a simple model for testing\n    class SimpleModel(nn.Module):\n        def __init__(self):\n            super(SimpleModel, self).__init__()\n            self.fc1 = nn.Linear(10, 20)\n            self.fc2 = nn.Linear(20, 10)\n            self.fc3 = nn.Linear(10, 5)\n        \n        def forward(self, x):\n            x = torch.relu(self.fc1(x))\n            x = torch.relu(self.fc2(x))"
+        },
+        "forward": {
+          "start_line": 47,
+          "end_line": 52,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "x"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.relu",
+              "line": 48
+            },
+            {
+              "name": "torch.relu",
+              "line": 49
+            },
+            {
+              "name": "self.fc3",
+              "line": 50
+            },
+            {
+              "name": "self.fc1",
+              "line": 48
+            },
+            {
+              "name": "self.fc2",
+              "line": 49
+            }
+          ],
+          "code_snippet": "            self.fc3 = nn.Linear(10, 5)\n        \n        def forward(self, x):\n            x = torch.relu(self.fc1(x))\n            x = torch.relu(self.fc2(x))\n            return self.fc3(x)\n    \n    # Create model\n    model = SimpleModel()\n    "
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "..."
+      ]
+    },
+    "MockEquilibriumTracker": {
+      "start_line": 105,
+      "end_line": 119,
+      "methods": {
+        "get_current_bounds": {
+          "start_line": 106,
+          "end_line": 112,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "    # Create mock equilibrium tracker\n    class MockEquilibriumTracker:\n        def get_current_bounds(self):\n            return {\n                'structural': {'min': 0.3, 'max': 0.9},\n                'statistical': {'min': 0.3, 'max': 0.8},\n                'temporal': {'min': 0.2, 'max': 0.7}\n            }\n        \n        def get_patterns_below_min(self):\n            return []"
+        },
+        "get_patterns_below_min": {
+          "start_line": 113,
+          "end_line": 116,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "            }\n        \n        def get_patterns_below_min(self):\n            return []\n            \n        def get_patterns_above_max(self):\n            return []\n    "
+        },
+        "get_patterns_above_max": {
+          "start_line": 116,
+          "end_line": 119,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "            return []\n            \n        def get_patterns_above_max(self):\n            return []\n    \n    optimizer.equilibrium_tracker = MockEquilibriumTracker()\n    optimizer.use_equilibrium_bounds = True\n    "
+        }
+      },
+      "class_variables": [],
+      "bases": []
+    }
+  },
+  "functions": {
+    "test_risk_aware_optimizer": {
+      "start_line": 36,
+      "end_line": 235,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "SimpleModel",
+          "line": 53
+        },
+        {
+          "name": "get_fibonacci_check_intervals",
+          "line": 71
+        },
+        {
+          "name": "RiskAwareEVEOptimizer",
+          "line": 74
+        },
+        {
+          "name": "MockEquilibriumTracker",
+          "line": 119
+        },
+        {
+          "name": "logger.info",
+          "line": 123
+        },
+        {
+          "name": "nn.MSELoss",
+          "line": 134
+        },
+        {
+          "name": "torch.randn",
+          "line": 135
+        },
+        {
+          "name": "torch.randn",
+          "line": 136
+        },
+        {
+          "name": "range",
+          "line": 139
+        },
+        {
+          "name": "os.makedirs",
+          "line": 197
+        },
+        {
+          "name": "range",
+          "line": 200
+        },
+        {
+          "name": "plt.figure",
+          "line": 202
+        },
+        {
+          "name": "plt.subplot",
+          "line": 205
+        },
+        {
+          "name": "plt.plot",
+          "line": 206
+        },
+        {
+          "name": "plt.title",
+          "line": 207
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 208
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 209
+        },
+        {
+          "name": "plt.legend",
+          "line": 210
+        },
+        {
+          "name": "plt.grid",
+          "line": 211
+        },
+        {
+          "name": "plt.subplot",
+          "line": 214
+        },
+        {
+          "name": "pattern_multipliers_history.items",
+          "line": 215
+        },
+        {
+          "name": "plt.title",
+          "line": 217
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 218
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 219
+        },
+        {
+          "name": "plt.legend",
+          "line": 220
+        },
+        {
+          "name": "plt.grid",
+          "line": 221
+        },
+        {
+          "name": "plt.tight_layout",
+          "line": 223
+        },
+        {
+          "name": "plt.savefig",
+          "line": 224
+        },
+        {
+          "name": "logger.info",
+          "line": 227
+        },
+        {
+          "name": "logger.info",
+          "line": 228
+        },
+        {
+          "name": "logger.info",
+          "line": 229
+        },
+        {
+          "name": "logger.info",
+          "line": 230
+        },
+        {
+          "name": "logger.info",
+          "line": 231
+        },
+        {
+          "name": "optimizer.pattern_lr_multipliers.items",
+          "line": 232
+        },
+        {
+          "name": "model.parameters",
+          "line": 75
+        },
+        {
+          "name": "model",
+          "line": 141
+        },
+        {
+          "name": "criterion",
+          "line": 142
+        },
+        {
+          "name": "optimizer.zero_grad",
+          "line": 145
+        },
+        {
+          "name": "loss.backward",
+          "line": 146
+        },
+        {
+          "name": "optimizer.step",
+          "line": 149
+        },
+        {
+          "name": "optimizer.update_accuracy_metrics_with_epoch",
+          "line": 153
+        },
+        {
+          "name": "min",
+          "line": 161
+        },
+        {
+          "name": "min",
+          "line": 162
+        },
+        {
+          "name": "min",
+          "line": 163
+        },
+        {
+          "name": "lr_history.append",
+          "line": 186
+        },
+        {
+          "name": "logger.info",
+          "line": 194
+        },
+        {
+          "name": "plt.plot",
+          "line": 216
+        },
+        {
+          "name": "logger.info",
+          "line": 233
+        },
+        {
+          "name": "....__init__",
+          "line": 42
+        },
+        {
+          "name": "nn.Linear",
+          "line": 43
+        },
+        {
+          "name": "nn.Linear",
+          "line": 44
+        },
+        {
+          "name": "nn.Linear",
+          "line": 45
+        },
+        {
+          "name": "torch.relu",
+          "line": 48
+        },
+        {
+          "name": "torch.relu",
+          "line": 49
+        },
+        {
+          "name": "self.fc3",
+          "line": 50
+        },
+        {
+          "name": "max",
+          "line": 180
+        },
+        {
+          "name": "max",
+          "line": 181
+        },
+        {
+          "name": "max",
+          "line": 182
+        },
+        {
+          "name": "optimizer.pattern_lr_multipliers.get",
+          "line": 190
+        },
+        {
+          "name": "....append",
+          "line": 191
+        },
+        {
+          "name": "self.fc1",
+          "line": 48
+        },
+        {
+          "name": "self.fc2",
+          "line": 49
+        },
+        {
+          "name": "min",
+          "line": 154
+        },
+        {
+          "name": "min",
+          "line": 155
+        },
+        {
+          "name": "super",
+          "line": 42
+        },
+        {
+          "name": "range",
+          "line": 230
+        },
+        {
+          "name": "optimizer._is_fibonacci_check_point",
+          "line": 230
+        },
+        {
+          "name": "len",
+          "line": 230
+        }
+      ],
+      "docstring": "Test the RiskAwareEVEOptimizer with simulated training data.",
+      "code_snippet": "from isekaizen.utils.training_utils import get_fibonacci_check_intervals\n\ndef test_risk_aware_optimizer():\n    \"\"\"Test the RiskAwareEVEOptimizer with simulated training data.\"\"\"\n    \n    # Create a simple model for testing\n    class SimpleModel(nn.Module):\n        def __init__(self):\n            super(SimpleModel, self).__init__()\n            self.fc1 = nn.Linear(10, 20)\n            self.fc2 = nn.Linear(20, 10)\n            self.fc3 = nn.Linear(10, 5)\n        \n        def forward(self, x):\n            x = torch.relu(self.fc1(x))\n            x = torch.relu(self.fc2(x))\n            return self.fc3(x)\n    \n    # Create model\n    model = SimpleModel()\n    \n    # Create sample pattern map\n    pattern_map = {\n        'pattern_types': ['structural', 'statistical', 'temporal'],\n        'pattern_complexities': {\n            'structural': 0.4,\n            'statistical': 0.6,\n            'temporal': 0.8\n        },\n        'pattern_distribution': {\n            'structural': 0.3,\n            'statistical': 0.5,\n            'temporal': 0.2\n        }\n    }\n    \n    # Generate Fibonacci intervals for 20 epochs\n    fibonacci_intervals = get_fibonacci_check_intervals(20)\n    \n    # Create optimizer - note: no custom sensitivity parameter (follows isekaiZen philosophy)\n    optimizer = RiskAwareEVEOptimizer(\n        model.parameters(),\n        lr=0.01,\n        pattern_map=pattern_map,\n        fibonacci_intervals=fibonacci_intervals,\n        weight_adjustment_range=\"default\",  # Will affect LR adjustment range\n        weight_range_iris=True,             # Will use more sensitive LR adjustments\n        warmup_epochs=1\n    )\n    \n    # Initialize ratio tracker with simulated data\n    optimizer.ratio_tracker.pattern_accuracies = {\n        'structural': 0.8,    # Well-learned pattern\n        'statistical': 0.5,   # Moderately learned pattern\n        'temporal': 0.3       # Poorly learned pattern\n    }\n    \n    optimizer.ratio_tracker.pattern_risks = {\n        'structural': 0.2,    # Low risk (well-learned)\n        'statistical': 0.5,   # Moderate risk\n        'temporal': 0.9       # High risk (struggling)\n    }\n    \n    # Initialize pattern tracker with simulated data\n    optimizer.pattern_tracker.pattern_accuracies = {\n        'structural': 0.8,\n        'statistical': 0.5,\n        'temporal': 0.3\n    }\n    \n    # Create mock equilibrium tracker\n    class MockEquilibriumTracker:\n        def get_current_bounds(self):\n            return {\n                'structural': {'min': 0.3, 'max': 0.9},\n                'statistical': {'min': 0.3, 'max': 0.8},\n                'temporal': {'min': 0.2, 'max': 0.7}\n            }\n        \n        def get_patterns_below_min(self):\n            return []\n            \n        def get_patterns_above_max(self):\n            return []\n    \n    optimizer.equilibrium_tracker = MockEquilibriumTracker()\n    optimizer.use_equilibrium_bounds = True\n    \n    # Simulate training\n    logger.info(\"Simulating training run with RiskAwareEVEOptimizer\")\n    \n    # Track learning rates\n    lr_history = []\n    pattern_multipliers_history = {\n        'structural': [],\n        'statistical': [],\n        'temporal': []\n    }\n    \n    # Create dummy loss function and input\n    criterion = nn.MSELoss()\n    dummy_input = torch.randn(32, 10)\n    dummy_target = torch.randn(32, 5)\n    \n    # Run for 20 epochs\n    for epoch in range(20):\n        # Forward pass\n        output = model(dummy_input)\n        loss = criterion(output, dummy_target)\n        \n        # Backward pass\n        optimizer.zero_grad()\n        loss.backward()\n        \n        # Step optimizer\n        optimizer.step()\n        \n        # Update metrics for next epoch\n        # Simulate improving accuracy over time with different rates\n        optimizer.update_accuracy_metrics_with_epoch(\n            train_acc=min(90, 60 + epoch * 1.5),  # Training accuracy increasing\n            test_acc=min(85, 50 + epoch * 1.75),  # Testing accuracy increasing faster (underfitting scenario)\n            epoch=epoch,\n            total_epochs=20\n        )\n        \n        # Update risk/accuracy metrics to simulate training progress\n        structural_acc = min(0.9, 0.8 + epoch * 0.005)  # Slow improvement (already good)\n        statistical_acc = min(0.8, 0.5 + epoch * 0.015)  # Moderate improvement\n        temporal_acc = min(0.7, 0.3 + epoch * 0.02)      # Faster improvement (starting lower)\n        \n        # Update pattern accuracies\n        optimizer.pattern_tracker.pattern_accuracies = {\n            'structural': structural_acc,\n            'statistical': statistical_acc,\n            'temporal': temporal_acc\n        }\n        \n        optimizer.ratio_tracker.pattern_accuracies = {\n            'structural': structural_acc,\n            'statistical': statistical_acc,\n            'temporal': temporal_acc\n        }\n        \n        # Update pattern risks (inversely related to accuracy)\n        optimizer.ratio_tracker.pattern_risks = {\n            'structural': max(0.1, 0.2 - epoch * 0.005),  # Decreasing risk for well-learned pattern\n            'statistical': max(0.2, 0.5 - epoch * 0.015), # Moderate decrease\n            'temporal': max(0.3, 0.9 - epoch * 0.03)      # Faster decrease for improving pattern\n        }\n        \n        # Store learning rate\n        lr_history.append(optimizer.param_groups[0]['lr'])\n        \n        # Store pattern multipliers\n        for pattern in pattern_multipliers_history:\n            multiplier = optimizer.pattern_lr_multipliers.get(pattern, 1.0)\n            pattern_multipliers_history[pattern].append(multiplier)\n        \n        # Log current state\n        logger.info(f\"Epoch {epoch}: LR = {lr_history[-1]:.6f}\")\n    \n    # Create output directory if needed\n    os.makedirs('outputs', exist_ok=True)\n    \n    # Plot results\n    epochs = range(20)\n    \n    plt.figure(figsize=(15, 10))\n    \n    # Plot learning rate history\n    plt.subplot(2, 1, 1)\n    plt.plot(epochs, lr_history, 'b-', label='Learning Rate')\n    plt.title('Learning Rate History')\n    plt.xlabel('Epoch')\n    plt.ylabel('Learning Rate')\n    plt.legend()\n    plt.grid(True)\n    \n    # Plot pattern multipliers\n    plt.subplot(2, 1, 2)\n    for pattern, multipliers in pattern_multipliers_history.items():\n        plt.plot(epochs, multipliers, label=f'{pattern} multiplier')\n    plt.title('Pattern-Specific Learning Rate Multipliers')\n    plt.xlabel('Epoch')\n    plt.ylabel('Multiplier')\n    plt.legend()\n    plt.grid(True)\n    \n    plt.tight_layout()\n    plt.savefig('outputs/risk_aware_optimizer_test.png')\n    \n    # Print summary\n    logger.info(\"\\nTest Results Summary:\")\n    logger.info(f\"Starting LR: {lr_history[0]:.6f}\")\n    logger.info(f\"Final LR: {lr_history[-1]:.6f}\")\n    logger.info(f\"Fibonacci check points: {[i for i in range(len(fibonacci_intervals)) if optimizer._is_fibonacci_check_point(i)]}\")\n    logger.info(\"Final pattern multipliers:\")\n    for pattern, value in optimizer.pattern_lr_multipliers.items():\n        logger.info(f\"  {pattern}: {value:.4f}\")\n\nif __name__ == \"__main__\":\n    test_risk_aware_optimizer()"
+    }
+  },
+  "constants": {}
+}

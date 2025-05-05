@@ -1,0 +1,306 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\optimizers\\eve\\base.py",
+  "imports": [
+    {
+      "name": "math",
+      "line": 10
+    },
+    {
+      "name": "torch",
+      "line": 11
+    },
+    {
+      "name": "torch.optim.Optimizer",
+      "line": 12
+    },
+    {
+      "name": "typing.List",
+      "line": 13
+    },
+    {
+      "name": "typing.Dict",
+      "line": 13
+    },
+    {
+      "name": "typing.Any",
+      "line": 13
+    },
+    {
+      "name": "typing.Optional",
+      "line": 13
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 13
+    },
+    {
+      "name": "typing.Callable",
+      "line": 13
+    },
+    {
+      "name": "typing.Union",
+      "line": 13
+    },
+    {
+      "name": "logging",
+      "line": 15
+    }
+  ],
+  "classes": {
+    "EVENaturalWeights": {
+      "start_line": 18,
+      "end_line": 201,
+      "methods": {
+        "__init__": {
+          "start_line": 34,
+          "end_line": 79,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "params"
+            },
+            {
+              "name": "lr"
+            },
+            {
+              "name": "betas"
+            },
+            {
+              "name": "eps"
+            },
+            {
+              "name": "weight_decay"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "dict",
+              "line": 60
+            },
+            {
+              "name": "....__init__",
+              "line": 61
+            },
+            {
+              "name": "logger.info",
+              "line": 76
+            },
+            {
+              "name": "ValueError",
+              "line": 48
+            },
+            {
+              "name": "ValueError",
+              "line": 50
+            },
+            {
+              "name": "ValueError",
+              "line": 52
+            },
+            {
+              "name": "ValueError",
+              "line": 54
+            },
+            {
+              "name": "ValueError",
+              "line": 56
+            },
+            {
+              "name": "super",
+              "line": 61
+            }
+          ],
+          "docstring": "\n        Initialize the EVE optimizer.\n        \n        Args:\n            params: Iterable of parameters to optimize\n            lr: Learning rate\n            betas: Coefficients for computing running averages of gradient and its square\n            eps: Term added to the denominator to improve numerical stability\n            weight_decay: Weight decay (L2 penalty)\n            **kwargs: Additional arguments\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, \n                weight_decay=0, **kwargs):\n        \"\"\"\n        Initialize the EVE optimizer.\n        \n        Args:\n            params: Iterable of parameters to optimize\n            lr: Learning rate\n            betas: Coefficients for computing running averages of gradient and its square\n            eps: Term added to the denominator to improve numerical stability\n            weight_decay: Weight decay (L2 penalty)\n            **kwargs: Additional arguments\n        \"\"\"\n        if not 0.0 <= lr:\n            raise ValueError(f\"Invalid learning rate: {lr}\")\n        if not 0.0 <= eps:\n            raise ValueError(f\"Invalid epsilon value: {eps}\")\n        if not 0.0 <= betas[0] < 1.0:\n            raise ValueError(f\"Invalid beta parameter at index 0: {betas[0]}\")\n        if not 0.0 <= betas[1] < 1.0:\n            raise ValueError(f\"Invalid beta parameter at index 1: {betas[1]}\")\n        if not 0.0 <= weight_decay:\n            raise ValueError(f\"Invalid weight_decay value: {weight_decay}\")\n            \n        # Store base learning rate for restoration\n        self.base_lr = lr\n        defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay)\n        super().__init__(params, defaults)\n        \n        # Extract parameters for easy access\n        self.beta1, self.beta2 = betas\n        self.eps = eps\n        self.weight_decay = weight_decay\n        \n        # Store accuracy metrics\n        self.train_acc = 0.0\n        self.test_acc = 0.0\n        \n        # Store history for metrics\n        self._state_history = []\n        self._lr_history = [lr]\n        \n        logger.info(f\"EVENaturalWeights initialized with lr={lr}, betas={betas}, \"\n                  f\"eps={eps}, weight_decay={weight_decay}\")\n    \n    def step(self, closure=None, pattern_states=None):\n        \"\"\"\n        Perform a single optimization step."
+        },
+        "step": {
+          "start_line": 79,
+          "end_line": 154,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "closure"
+            },
+            {
+              "name": "pattern_states"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.enable_grad",
+              "line": 92
+            },
+            {
+              "name": "closure",
+              "line": 93
+            },
+            {
+              "name": "....add_",
+              "line": 130
+            },
+            {
+              "name": "....addcmul_",
+              "line": 132
+            },
+            {
+              "name": "....add_",
+              "line": 143
+            },
+            {
+              "name": "update.clone",
+              "line": 147
+            },
+            {
+              "name": "p.data.add_",
+              "line": 150
+            },
+            {
+              "name": "RuntimeError",
+              "line": 104
+            },
+            {
+              "name": "len",
+              "line": 110
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 113
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 115
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 117
+            },
+            {
+              "name": "grad.add",
+              "line": 127
+            },
+            {
+              "name": "....mul_",
+              "line": 130
+            },
+            {
+              "name": "....mul_",
+              "line": 132
+            },
+            {
+              "name": "exp_avg_sq.sqrt",
+              "line": 143
+            }
+          ],
+          "docstring": "\n        Perform a single optimization step.\n        \n        Args:\n            closure: A closure that reevaluates the model and returns the loss\n            pattern_states: Optional pattern states for pattern-aware optimization\n            \n        Returns:\n            loss: Loss value\n        ",
+          "code_snippet": "                  f\"eps={eps}, weight_decay={weight_decay}\")\n    \n    def step(self, closure=None, pattern_states=None):\n        \"\"\"\n        Perform a single optimization step.\n        \n        Args:\n            closure: A closure that reevaluates the model and returns the loss\n            pattern_states: Optional pattern states for pattern-aware optimization\n            \n        Returns:\n            loss: Loss value\n        \"\"\"\n        loss = None\n        if closure is not None:\n            with torch.enable_grad():\n                loss = closure()\n        \n        # Update parameters\n        for group in self.param_groups:\n            for p in group['params']:\n                if p.grad is None:\n                    continue\n                \n                # Get gradient\n                grad = p.grad.data\n                if grad.is_sparse:\n                    raise RuntimeError('EVE does not support sparse gradients')\n                \n                # Get parameter state\n                state = self.state[p]\n                \n                # Initialize state if needed\n                if len(state) == 0:\n                    state['step'] = 0\n                    # Exponential moving average of gradient values\n                    state['exp_avg'] = torch.zeros_like(p.data)\n                    # Exponential moving average of squared gradient values\n                    state['exp_avg_sq'] = torch.zeros_like(p.data)\n                    # Previous update direction\n                    state['prev_update'] = torch.zeros_like(p.data)\n                \n                # Update step count\n                state['step'] += 1\n                \n                # Extract optimizer parameters\n                beta1, beta2 = group['betas']\n                \n                # Apply weight decay\n                if group['weight_decay'] != 0:\n                    grad = grad.add(p.data, alpha=group['weight_decay'])\n                \n                # Update biased first moment estimate\n                state['exp_avg'].mul_(beta1).add_(grad, alpha=1 - beta1)\n                # Update biased second raw moment estimate\n                state['exp_avg_sq'].mul_(beta2).addcmul_(grad, grad, value=1 - beta2)\n                \n                # Bias correction\n                bias_correction1 = 1 - beta1 ** state['step']\n                bias_correction2 = 1 - beta2 ** state['step']\n                \n                # Compute bias-corrected estimates\n                exp_avg = state['exp_avg'] / bias_correction1\n                exp_avg_sq = state['exp_avg_sq'] / bias_correction2\n                \n                # Calculate update\n                denom = exp_avg_sq.sqrt().add_(group['eps'])\n                update = exp_avg / denom\n                \n                # Store previous update\n                state['prev_update'] = update.clone()\n                \n                # Apply update\n                p.data.add_(update, alpha=-group['lr'])\n        \n        return loss\n    \n    def update_accuracy_metrics(self, train_acc, test_acc):\n        \"\"\"\n        Update accuracy metrics for potential learning rate adjustment."
+        },
+        "update_accuracy_metrics": {
+          "start_line": 154,
+          "end_line": 165,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_acc"
+            },
+            {
+              "name": "test_acc"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Update accuracy metrics for potential learning rate adjustment.\n        \n        Args:\n            train_acc: Training accuracy (0-100 scale)\n            test_acc: Test/validation accuracy (0-100 scale)\n        ",
+          "code_snippet": "        return loss\n    \n    def update_accuracy_metrics(self, train_acc, test_acc):\n        \"\"\"\n        Update accuracy metrics for potential learning rate adjustment.\n        \n        Args:\n            train_acc: Training accuracy (0-100 scale)\n            test_acc: Test/validation accuracy (0-100 scale)\n        \"\"\"\n        self.train_acc = train_acc\n        self.test_acc = test_acc\n    \n    def get_learning_rate_history(self):\n        \"\"\"\n        Get history of learning rate changes."
+        },
+        "get_learning_rate_history": {
+          "start_line": 165,
+          "end_line": 174,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Get history of learning rate changes.\n        \n        Returns:\n            List of learning rates used during training\n        ",
+          "code_snippet": "        self.test_acc = test_acc\n    \n    def get_learning_rate_history(self):\n        \"\"\"\n        Get history of learning rate changes.\n        \n        Returns:\n            List of learning rates used during training\n        \"\"\"\n        return self._lr_history\n    \n    def get_state_history(self):\n        \"\"\"\n        Get history of optimizer states."
+        },
+        "get_state_history": {
+          "start_line": 174,
+          "end_line": 183,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Get history of optimizer states.\n        \n        Returns:\n            List of dictionaries with optimizer state snapshots\n        ",
+          "code_snippet": "        return self._lr_history\n    \n    def get_state_history(self):\n        \"\"\"\n        Get history of optimizer states.\n        \n        Returns:\n            List of dictionaries with optimizer state snapshots\n        \"\"\"\n        return self._state_history\n    \n    def store_state_snapshot(self):\n        \"\"\"Store a snapshot of the current optimizer state.\"\"\"\n        # Create a copy of the current state"
+        },
+        "store_state_snapshot": {
+          "start_line": 183,
+          "end_line": 195,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._state_history.append",
+              "line": 192
+            },
+            {
+              "name": "self._lr_history.append",
+              "line": 193
+            },
+            {
+              "name": "next",
+              "line": 187
+            },
+            {
+              "name": "iter",
+              "line": 187
+            }
+          ],
+          "docstring": "Store a snapshot of the current optimizer state.",
+          "code_snippet": "        return self._state_history\n    \n    def store_state_snapshot(self):\n        \"\"\"Store a snapshot of the current optimizer state.\"\"\"\n        # Create a copy of the current state\n        snapshot = {\n            'step': self.state[next(iter(self.state))]['step'] if self.state else 0,\n            'lr': self.param_groups[0]['lr'],\n            'train_acc': self.train_acc,\n            'test_acc': self.test_acc\n        }\n        self._state_history.append(snapshot)\n        self._lr_history.append(self.param_groups[0]['lr'])\n    \n    def restore_base_learning_rate(self):\n        \"\"\"Restore the initial learning rate.\"\"\"\n        for group in self.param_groups:"
+        },
+        "restore_base_learning_rate": {
+          "start_line": 195,
+          "end_line": 201,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 199
+            }
+          ],
+          "docstring": "Restore the initial learning rate.",
+          "code_snippet": "        self._lr_history.append(self.param_groups[0]['lr'])\n    \n    def restore_base_learning_rate(self):\n        \"\"\"Restore the initial learning rate.\"\"\"\n        for group in self.param_groups:\n            group['lr'] = self.base_lr\n        logger.info(f\"Restored base learning rate: {self.base_lr}\")"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Optimizer"
+      ],
+      "docstring": "\n    EVE optimizer variant with natural weights adaptation.\n    \n    This implementation serves as the base class for the unified ratio version.\n    It includes core EVE functionality without pattern-specific optimizations.\n    \n    Attributes:\n        defaults: Default optimizer parameters\n        base_lr: Base learning rate\n        beta1: Exponential decay rate for first moment estimate\n        beta2: Exponential decay rate for second moment estimate\n        eps: Small constant for numerical stability\n        weight_decay: Weight decay factor\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

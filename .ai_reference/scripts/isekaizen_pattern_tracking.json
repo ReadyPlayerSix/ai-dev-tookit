@@ -1,0 +1,537 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\pattern\\tracking.py",
+  "imports": [
+    {
+      "name": "numpy",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "typing.Dict",
+      "line": 10
+    },
+    {
+      "name": "typing.List",
+      "line": 10
+    },
+    {
+      "name": "typing.Optional",
+      "line": 10
+    },
+    {
+      "name": "typing.Union",
+      "line": 10
+    },
+    {
+      "name": "typing.Any",
+      "line": 10
+    }
+  ],
+  "classes": {
+    "PatternRecognitionTracker": {
+      "start_line": 14,
+      "end_line": 297,
+      "methods": {
+        "__init__": {
+          "start_line": 17,
+          "end_line": 21,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "    \"\"\"Track and assess pattern recognition and associated risks.\"\"\"\n    \n    def __init__(self):\n        self.pattern_stats = {}\n        self.recognition_history = []\n        \n    def initialize_from_pattern_map(self, pattern_map):\n        \"\"\"Initialize pattern tracker with data from a pattern map.\n        "
+        },
+        "initialize_from_pattern_map": {
+          "start_line": 21,
+          "end_line": 73,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "pattern_map.get",
+              "line": 36
+            },
+            {
+              "name": "pattern_map.get",
+              "line": 42
+            },
+            {
+              "name": "pattern_distribution.items",
+              "line": 45
+            },
+            {
+              "name": "self.recognition_history.append",
+              "line": 61
+            },
+            {
+              "name": "self.initialize_from_standardized_map",
+              "line": 33
+            },
+            {
+              "name": "logger.warning",
+              "line": 38
+            },
+            {
+              "name": "logger.error",
+              "line": 70
+            },
+            {
+              "name": "complexity_data.get",
+              "line": 56
+            },
+            {
+              "name": "complexity_data.get",
+              "line": 57
+            },
+            {
+              "name": "complexity_data.get",
+              "line": 58
+            },
+            {
+              "name": "sum",
+              "line": 64
+            },
+            {
+              "name": "pattern_distribution.values",
+              "line": 64
+            },
+            {
+              "name": "str",
+              "line": 70
+            }
+          ],
+          "docstring": "Initialize pattern tracker with data from a pattern map.\n        \n        This method is critical for proper EVE optimizer operation in the first epoch.\n        \n        Args:\n            pattern_map: Dictionary containing pattern map data\n                        (must have 'pattern_distribution' and 'pattern_complexities')\n        ",
+          "code_snippet": "        self.recognition_history = []\n        \n    def initialize_from_pattern_map(self, pattern_map):\n        \"\"\"Initialize pattern tracker with data from a pattern map.\n        \n        This method is critical for proper EVE optimizer operation in the first epoch.\n        \n        Args:\n            pattern_map: Dictionary containing pattern map data\n                        (must have 'pattern_distribution' and 'pattern_complexities')\n        \"\"\"\n        try:\n            # Check if this is a standardized pattern map\n            if 'format_version' in pattern_map:\n                return self.initialize_from_standardized_map(pattern_map)\n                \n            # Get pattern distribution (required)\n            pattern_distribution = pattern_map.get('pattern_distribution', {})\n            if not pattern_distribution:\n                logger.warning(\"No pattern distribution found in pattern map\")\n                return False\n                \n            # Get pattern complexities (optional)\n            pattern_complexities = pattern_map.get('pattern_complexities', {})\n            \n            # Initialize pattern stats\n            for pattern_type, count in pattern_distribution.items():\n                if pattern_type not in self.pattern_stats:\n                    self.pattern_stats[pattern_type] = {\n                        'accuracy_history': [0.5],  # Start with neutral accuracy\n                        'complexity_score': 0.5,    # Default complexity\n                        'count': count              # Number of examples with this pattern\n                    }\n                \n                # Add complexity data if available\n                if pattern_type in pattern_complexities:\n                    complexity_data = pattern_complexities[pattern_type]\n                    self.pattern_stats[pattern_type]['complexity_score'] = complexity_data.get('avg_complexity', 0.5)\n                    self.pattern_stats[pattern_type]['min_complexity'] = complexity_data.get('min_complexity', 0.1)\n                    self.pattern_stats[pattern_type]['max_complexity'] = complexity_data.get('max_complexity', 4.9)\n            \n            # Add an initialization record to history\n            self.recognition_history.append({\n                'event': 'initialization',\n                'source': 'pattern_map',\n                'pattern_count': sum(pattern_distribution.values())\n            })\n            \n            return True\n            \n        except Exception as e:\n            logger.error(f\"Error initializing pattern tracker: {str(e)}\")\n            return False\n            \n    def initialize_from_standardized_map(self, standardized_map):\n        \"\"\"Initialize pattern tracker with data from a standardized pattern map.\n        "
+        },
+        "initialize_from_standardized_map": {
+          "start_line": 73,
+          "end_line": 138,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "standardized_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 85
+            },
+            {
+              "name": "standardized_map.get",
+              "line": 88
+            },
+            {
+              "name": "standardized_map.get",
+              "line": 94
+            },
+            {
+              "name": "standardized_map.get",
+              "line": 97
+            },
+            {
+              "name": "pattern_distribution.items",
+              "line": 100
+            },
+            {
+              "name": "self.recognition_history.append",
+              "line": 124
+            },
+            {
+              "name": "logger.info",
+              "line": 131
+            },
+            {
+              "name": "logger.warning",
+              "line": 90
+            },
+            {
+              "name": "logger.error",
+              "line": 135
+            },
+            {
+              "name": "sum",
+              "line": 127
+            },
+            {
+              "name": "standardized_map.get",
+              "line": 128
+            },
+            {
+              "name": "isinstance",
+              "line": 111
+            },
+            {
+              "name": "complexity_data.get",
+              "line": 113
+            },
+            {
+              "name": "complexity_data.get",
+              "line": 114
+            },
+            {
+              "name": "float",
+              "line": 117
+            },
+            {
+              "name": "pattern_distribution.values",
+              "line": 127
+            },
+            {
+              "name": "len",
+              "line": 131
+            },
+            {
+              "name": "str",
+              "line": 135
+            }
+          ],
+          "docstring": "Initialize pattern tracker with data from a standardized pattern map.\n        \n        This method processes the standardized pattern map format created by the translation layer.\n        \n        Args:\n            standardized_map: Dictionary containing standardized pattern map data\n            \n        Returns:\n            True if initialization was successful, False otherwise\n        ",
+          "code_snippet": "            return False\n            \n    def initialize_from_standardized_map(self, standardized_map):\n        \"\"\"Initialize pattern tracker with data from a standardized pattern map.\n        \n        This method processes the standardized pattern map format created by the translation layer.\n        \n        Args:\n            standardized_map: Dictionary containing standardized pattern map data\n            \n        Returns:\n            True if initialization was successful, False otherwise\n        \"\"\"\n        try:\n            logger.info(\"Initializing pattern tracker from standardized map\")\n            \n            # Extract pattern distribution\n            pattern_distribution = standardized_map.get('pattern_distribution', {})\n            if not pattern_distribution:\n                logger.warning(\"No pattern distribution found in standardized map\")\n                return False\n                \n            # Extract pattern complexities\n            pattern_complexities = standardized_map.get('pattern_complexities', {})\n            \n            # Extract pattern risks\n            pattern_risks = standardized_map.get('pattern_risks', {})\n            \n            # Initialize pattern stats\n            for pattern_type, count in pattern_distribution.items():\n                if pattern_type not in self.pattern_stats:\n                    self.pattern_stats[pattern_type] = {\n                        'accuracy_history': [0.5],  # Start with neutral accuracy\n                        'complexity_score': 0.5,    # Default complexity\n                        'count': count              # Number of examples with this pattern\n                    }\n                \n                # Add complexity data if available\n                if pattern_type in pattern_complexities:\n                    complexity_data = pattern_complexities[pattern_type]\n                    if isinstance(complexity_data, dict) and 'avg_complexity' in complexity_data:\n                        self.pattern_stats[pattern_type]['complexity_score'] = complexity_data['avg_complexity']\n                        self.pattern_stats[pattern_type]['min_complexity'] = complexity_data.get('min_complexity', 0.1)\n                        self.pattern_stats[pattern_type]['max_complexity'] = complexity_data.get('max_complexity', 0.9)\n                    else:\n                        # Simple float value\n                        self.pattern_stats[pattern_type]['complexity_score'] = float(complexity_data)\n                \n                # Add risk data if available\n                if pattern_type in pattern_risks:\n                    self.pattern_stats[pattern_type]['risk'] = pattern_risks[pattern_type]\n            \n            # Add an initialization record to history\n            self.recognition_history.append({\n                'event': 'initialization',\n                'source': 'standardized_pattern_map',\n                'pattern_count': sum(pattern_distribution.values()),\n                'format_version': standardized_map.get('format_version', '1.0')\n            })\n            \n            logger.info(f\"Successfully initialized pattern tracker with {len(pattern_distribution)} pattern types\")\n            return True\n            \n        except Exception as e:\n            logger.error(f\"Error initializing pattern tracker from standardized map: {str(e)}\")\n            return False\n    \n    def update_epoch_performance(self, epoch, accuracy):\n        \"\"\"Update all pattern types with epoch performance.\n        "
+        },
+        "update_epoch_performance": {
+          "start_line": 138,
+          "end_line": 150,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            },
+            {
+              "name": "accuracy"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.update_pattern_stats",
+              "line": 148
+            }
+          ],
+          "docstring": "Update all pattern types with epoch performance.\n        \n        This is a simplified update that applies the same accuracy to all patterns.\n        \n        Args:\n            epoch: Current epoch number\n            accuracy: Overall accuracy for this epoch\n        ",
+          "code_snippet": "            return False\n    \n    def update_epoch_performance(self, epoch, accuracy):\n        \"\"\"Update all pattern types with epoch performance.\n        \n        This is a simplified update that applies the same accuracy to all patterns.\n        \n        Args:\n            epoch: Current epoch number\n            accuracy: Overall accuracy for this epoch\n        \"\"\"\n        for pattern_type in self.pattern_stats:\n            self.update_pattern_stats(pattern_type, accuracy)\n        \n    def get_pattern_risks(self):\n        \"\"\"Calculate risk metrics for each pattern type.\"\"\"\n        pattern_risks = {}"
+        },
+        "get_pattern_risks": {
+          "start_line": 150,
+          "end_line": 193,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_stats.items",
+              "line": 154
+            },
+            {
+              "name": "stats.get",
+              "line": 156
+            },
+            {
+              "name": "self._calculate_trend_risk",
+              "line": 162
+            },
+            {
+              "name": "self._calculate_stability_risk",
+              "line": 165
+            },
+            {
+              "name": "stats.get",
+              "line": 168
+            },
+            {
+              "name": "max",
+              "line": 185
+            },
+            {
+              "name": "sum",
+              "line": 180
+            },
+            {
+              "name": "len",
+              "line": 181
+            },
+            {
+              "name": "pattern_risks.values",
+              "line": 185
+            },
+            {
+              "name": "pattern_risks.values",
+              "line": 180
+            }
+          ],
+          "docstring": "Calculate risk metrics for each pattern type.",
+          "code_snippet": "            self.update_pattern_stats(pattern_type, accuracy)\n        \n    def get_pattern_risks(self):\n        \"\"\"Calculate risk metrics for each pattern type.\"\"\"\n        pattern_risks = {}\n        \n        for pattern_type, stats in self.pattern_stats.items():\n            # Get historical accuracy rates\n            accuracy_history = stats.get('accuracy_history', [])\n            if not accuracy_history:\n                pattern_risks[pattern_type] = 0.5  # Default mid-level risk\n                continue\n                \n            # Calculate trend risk (declining performance)\n            trend_risk = self._calculate_trend_risk(accuracy_history)\n            \n            # Calculate stability risk (high variance)\n            stability_risk = self._calculate_stability_risk(accuracy_history)\n            \n            # Calculate complexity risk (from pattern complexity scores)\n            complexity_risk = stats.get('complexity_score', 0.5)\n            \n            # Calculate overall risk as weighted combination\n            pattern_risks[pattern_type] = (\n                0.4 * trend_risk +      # Trend is most important\n                0.3 * stability_risk +  # Stability is second\n                0.3 * complexity_risk   # Complexity is third\n            )\n            \n        # Add aggregate risk metrics\n        if pattern_risks:\n            pattern_risks['average_risk_factor'] = (\n                sum(risk for risk in pattern_risks.values()) / \n                len(pattern_risks)\n            )\n            \n            pattern_risks['max_risk_factor'] = (\n                max(risk for risk in pattern_risks.values())\n            )\n        else:\n            pattern_risks['average_risk_factor'] = 0.5\n            pattern_risks['max_risk_factor'] = 0.5\n        \n        return pattern_risks\n    \n    def _calculate_trend_risk(self, accuracy_history: List[float], window_size: int = 5) -> float:\n        \"\"\"Calculate risk based on accuracy trend.\"\"\"\n        if len(accuracy_history) < 2:"
+        },
+        "_calculate_trend_risk": {
+          "start_line": 193,
+          "end_line": 219,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "accuracy_history"
+            },
+            {
+              "name": "window_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "list",
+              "line": 202
+            },
+            {
+              "name": "len",
+              "line": 204
+            },
+            {
+              "name": "max",
+              "line": 217
+            },
+            {
+              "name": "len",
+              "line": 195
+            },
+            {
+              "name": "range",
+              "line": 202
+            },
+            {
+              "name": "min",
+              "line": 217
+            },
+            {
+              "name": "len",
+              "line": 202
+            },
+            {
+              "name": "sum",
+              "line": 210
+            },
+            {
+              "name": "sum",
+              "line": 210
+            },
+            {
+              "name": "sum",
+              "line": 210
+            },
+            {
+              "name": "sum",
+              "line": 211
+            },
+            {
+              "name": "sum",
+              "line": 211
+            },
+            {
+              "name": "sum",
+              "line": 211
+            },
+            {
+              "name": "range",
+              "line": 210
+            },
+            {
+              "name": "range",
+              "line": 211
+            }
+          ],
+          "docstring": "Calculate risk based on accuracy trend.",
+          "code_snippet": "        return pattern_risks\n    \n    def _calculate_trend_risk(self, accuracy_history: List[float], window_size: int = 5) -> float:\n        \"\"\"Calculate risk based on accuracy trend.\"\"\"\n        if len(accuracy_history) < 2:\n            return 0.5\n            \n        # Use recent window\n        recent = accuracy_history[-window_size:]\n        \n        # Calculate trend slope\n        x = list(range(len(recent)))\n        y = recent\n        n = len(recent)\n        \n        if n < 2:\n            return 0.5\n            \n        slope = (\n            (n * sum(x[i] * y[i] for i in range(n)) - sum(x) * sum(y)) /\n            (n * sum(x[i] * x[i] for i in range(n)) - sum(x) * sum(x))\n        )\n        \n        # Convert slope to risk (negative slope = higher risk)\n        # Normalize to 0-1 range where 0.5 is neutral\n        trend_risk = 0.5 - slope\n        return max(0.1, min(0.9, trend_risk))\n    \n    def _calculate_stability_risk(self, accuracy_history: List[float], window_size: int = 5) -> float:\n        \"\"\"Calculate risk based on accuracy stability.\"\"\"\n        if len(accuracy_history) < 2:"
+        },
+        "_calculate_stability_risk": {
+          "start_line": 219,
+          "end_line": 236,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "accuracy_history"
+            },
+            {
+              "name": "window_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "min",
+              "line": 233
+            },
+            {
+              "name": "len",
+              "line": 221
+            },
+            {
+              "name": "sum",
+              "line": 228
+            },
+            {
+              "name": "len",
+              "line": 228
+            },
+            {
+              "name": "sum",
+              "line": 229
+            },
+            {
+              "name": "len",
+              "line": 229
+            },
+            {
+              "name": "max",
+              "line": 233
+            }
+          ],
+          "docstring": "Calculate risk based on accuracy stability.",
+          "code_snippet": "        return max(0.1, min(0.9, trend_risk))\n    \n    def _calculate_stability_risk(self, accuracy_history: List[float], window_size: int = 5) -> float:\n        \"\"\"Calculate risk based on accuracy stability.\"\"\"\n        if len(accuracy_history) < 2:\n            return 0.5\n            \n        # Use recent window\n        recent = accuracy_history[-window_size:]\n        \n        # Calculate variance\n        mean = sum(recent) / len(recent)\n        variance = sum((x - mean) ** 2 for x in recent) / len(recent)\n        \n        # Convert variance to risk (higher variance = higher risk)\n        # Scale variance to 0-1 range\n        stability_risk = min(0.9, max(0.1, variance * 4))  # *4 to scale appropriately\n        return stability_risk\n    \n    def get_current_recognition_rates(self) -> Dict[str, float]:\n        \"\"\"Get current recognition rates for each pattern type.\"\"\"\n        recognition_rates = {}"
+        },
+        "get_current_recognition_rates": {
+          "start_line": 236,
+          "end_line": 249,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.pattern_stats.items",
+              "line": 240
+            },
+            {
+              "name": "stats.get",
+              "line": 241
+            }
+          ],
+          "docstring": "Get current recognition rates for each pattern type.",
+          "code_snippet": "        return stability_risk\n    \n    def get_current_recognition_rates(self) -> Dict[str, float]:\n        \"\"\"Get current recognition rates for each pattern type.\"\"\"\n        recognition_rates = {}\n        \n        for pattern_type, stats in self.pattern_stats.items():\n            accuracy_history = stats.get('accuracy_history', [])\n            if accuracy_history:\n                recognition_rates[pattern_type] = accuracy_history[-1]\n            else:\n                recognition_rates[pattern_type] = 0.0\n                \n        return recognition_rates\n    \n    def update_with_pattern_recognition(self, pattern_type: str, batch_indices: list, correct_mask: list):\n        \"\"\"Update pattern stats based on recognition results for a batch.\n        "
+        },
+        "update_with_pattern_recognition": {
+          "start_line": 249,
+          "end_line": 273,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            },
+            {
+              "name": "batch_indices",
+              "type": "list"
+            },
+            {
+              "name": "correct_mask",
+              "type": "list"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.update_pattern_stats",
+              "line": 271
+            },
+            {
+              "name": "len",
+              "line": 265
+            },
+            {
+              "name": "len",
+              "line": 261
+            },
+            {
+              "name": "sum",
+              "line": 266
+            },
+            {
+              "name": "len",
+              "line": 266
+            }
+          ],
+          "docstring": "Update pattern stats based on recognition results for a batch.\n        \n        Args:\n            pattern_type: Type of pattern being recognized\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask indicating which examples were correctly classified\n        ",
+          "code_snippet": "        return recognition_rates\n    \n    def update_with_pattern_recognition(self, pattern_type: str, batch_indices: list, correct_mask: list):\n        \"\"\"Update pattern stats based on recognition results for a batch.\n        \n        Args:\n            pattern_type: Type of pattern being recognized\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask indicating which examples were correctly classified\n        \"\"\"\n        if pattern_type not in self.pattern_stats:\n            self.pattern_stats[pattern_type] = {\n                'accuracy_history': [],\n                'complexity_score': 0.5,\n                'count': len(batch_indices)\n            }\n        \n        # Calculate accuracy for this batch\n        if len(correct_mask) > 0:\n            batch_accuracy = sum(correct_mask) / len(correct_mask)\n        else:\n            batch_accuracy = 0.5  # Default if empty batch\n        \n        # Update pattern stats\n        self.update_pattern_stats(pattern_type, batch_accuracy)\n    \n    def update_pattern_stats(self, pattern_type: str, accuracy: float, complexity_score: Optional[float] = None):\n        \"\"\"Update statistics for a pattern type.\"\"\"\n        if pattern_type not in self.pattern_stats:"
+        },
+        "update_pattern_stats": {
+          "start_line": 273,
+          "end_line": 297,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            },
+            {
+              "name": "accuracy",
+              "type": "float"
+            },
+            {
+              "name": "complexity_score"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....append",
+              "line": 282
+            },
+            {
+              "name": "self.recognition_history.append",
+              "line": 292
+            },
+            {
+              "name": "len",
+              "line": 288
+            },
+            {
+              "name": "v.copy",
+              "line": 295
+            },
+            {
+              "name": "self.pattern_stats.items",
+              "line": 295
+            }
+          ],
+          "docstring": "Update statistics for a pattern type.",
+          "code_snippet": "        self.update_pattern_stats(pattern_type, batch_accuracy)\n    \n    def update_pattern_stats(self, pattern_type: str, accuracy: float, complexity_score: Optional[float] = None):\n        \"\"\"Update statistics for a pattern type.\"\"\"\n        if pattern_type not in self.pattern_stats:\n            self.pattern_stats[pattern_type] = {\n                'accuracy_history': [],\n                'complexity_score': 0.5\n            }\n            \n        stats = self.pattern_stats[pattern_type]\n        stats['accuracy_history'].append(accuracy)\n        \n        if complexity_score is not None:\n            stats['complexity_score'] = complexity_score\n            \n        # Keep history bounded\n        if len(stats['accuracy_history']) > 100:\n            stats['accuracy_history'] = stats['accuracy_history'][-100:]\n            \n        # Record overall recognition state\n        self.recognition_history.append({\n            'pattern_type': pattern_type,\n            'accuracy': accuracy,\n            'pattern_stats': {k: v.copy() for k, v in self.pattern_stats.items()}\n        })"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Track and assess pattern recognition and associated risks."
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

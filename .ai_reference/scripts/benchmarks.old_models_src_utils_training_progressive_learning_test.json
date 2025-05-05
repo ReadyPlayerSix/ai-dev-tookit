@@ -1,0 +1,642 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\training\\progressive_learning_test.py",
+  "imports": [
+    {
+      "name": "typing.Dict",
+      "line": 1
+    },
+    {
+      "name": "typing.List",
+      "line": 1
+    },
+    {
+      "name": "typing.Optional",
+      "line": 1
+    },
+    {
+      "name": "typing.Any",
+      "line": 1
+    },
+    {
+      "name": "torch",
+      "line": 2
+    },
+    {
+      "name": "numpy",
+      "line": 3
+    },
+    {
+      "name": "logging",
+      "line": 4
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 5
+    },
+    {
+      "name": "pathlib.Path",
+      "line": 6
+    },
+    {
+      "name": "json",
+      "line": 7
+    },
+    {
+      "name": "cortex.pattern_orchestrator.PatternOrchestrator",
+      "line": 10
+    },
+    {
+      "name": "cortex.semantic_core.SemanticPatternRegistry",
+      "line": 11
+    },
+    {
+      "name": "kt_batch_optimizer_v3.KTBatchOptimizer",
+      "line": 12
+    }
+  ],
+  "classes": {
+    "ProgressiveLearningTest": {
+      "start_line": 14,
+      "end_line": 360,
+      "methods": {
+        "__init__": {
+          "start_line": 17,
+          "end_line": 72,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "test_name",
+              "type": "str"
+            },
+            {
+              "name": "log_dir",
+              "type": "str"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "Path",
+              "line": 22
+            },
+            {
+              "name": "self.log_dir.mkdir",
+              "line": 23
+            },
+            {
+              "name": "PatternOrchestrator",
+              "line": 27
+            },
+            {
+              "name": "SemanticPatternRegistry",
+              "line": 28
+            },
+            {
+              "name": "KTBatchOptimizer",
+              "line": 29
+            },
+            {
+              "name": "self._setup_logging",
+              "line": 37
+            },
+            {
+              "name": "self.logger.info",
+              "line": 68
+            },
+            {
+              "name": "self.logger.info",
+              "line": 69
+            },
+            {
+              "name": "self.logger.info",
+              "line": 70
+            }
+          ],
+          "code_snippet": "    \"\"\"Framework for testing progressive pattern learning and acceleration\"\"\"\n    \n    def __init__(self, \n                 test_name: str,\n                 log_dir: str = \"logs/learning_tests\",\n                 batch_size: int = 221):\n        self.test_name = test_name\n        self.log_dir = Path(log_dir)\n        self.log_dir.mkdir(parents=True, exist_ok=True)\n        self.batch_size = batch_size\n        \n        # Initialize core components with proper configuration\n        self.pattern_orchestrator = PatternOrchestrator()\n        self.semantic_registry = SemanticPatternRegistry()\n        self.batch_optimizer = KTBatchOptimizer()\n        \n        # Set up minimum thresholds for meaningful measurements\n        self.min_recognition_time = 0.1  # Minimum realistic recognition time in ms\n        self.min_pattern_complexity = 0.1  # Minimum pattern complexity\n        self.smoothing_window = 5  # Number of batches for moving average\n        \n        # Setup logging\n        self.logger = self._setup_logging()\n        \n        # Initialize metrics tracking\n        self.progression_metrics = {\n            \"pattern_recognition_times\": [],\n            \"translation_times\": [],\n            \"pattern_complexity\": [],\n            \"learning_rate\": [],\n            \"stage_transitions\": []\n        }\n        \n        # Initialize stage tracking\n        self.current_stage = \"initial\"\n        self.stage_metrics = {\n            \"initial\": {\n                \"avg_recognition_time\": 0,\n                \"pattern_success_rate\": 0,\n                \"translation_success_rate\": 0\n            },\n            \"acceleration\": {\n                \"detected\": False,\n                \"detection_time\": None,\n                \"acceleration_factor\": 0\n            },\n            \"stable\": {\n                \"reached\": False,\n                \"stabilization_time\": None,\n                \"final_metrics\": {}\n            }\n        }\n        \n        self.logger.info(f\"Initialized Progressive Learning Test: {test_name}\")\n        self.logger.info(f\"Using batch size: {batch_size}\")\n        self.logger.info(\"Core components initialized successfully\")\n\n    def _setup_logging(self) -> logging.Logger:\n        \"\"\"Set up logging configuration\"\"\"\n        logger = logging.getLogger(f\"learning_test_{self.test_name}\")"
+        },
+        "_setup_logging": {
+          "start_line": 72,
+          "end_line": 93,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logging.getLogger",
+              "line": 74
+            },
+            {
+              "name": "logger.setLevel",
+              "line": 75
+            },
+            {
+              "name": "logging.FileHandler",
+              "line": 82
+            },
+            {
+              "name": "fh.setFormatter",
+              "line": 83
+            },
+            {
+              "name": "logger.addHandler",
+              "line": 84
+            },
+            {
+              "name": "logging.StreamHandler",
+              "line": 87
+            },
+            {
+              "name": "ch.setFormatter",
+              "line": 88
+            },
+            {
+              "name": "logger.addHandler",
+              "line": 89
+            },
+            {
+              "name": "logger.removeHandler",
+              "line": 79
+            },
+            {
+              "name": "logging.Formatter",
+              "line": 83
+            },
+            {
+              "name": "logging.Formatter",
+              "line": 88
+            },
+            {
+              "name": "datetime.now",
+              "line": 82
+            }
+          ],
+          "docstring": "Set up logging configuration",
+          "code_snippet": "        self.logger.info(\"Core components initialized successfully\")\n\n    def _setup_logging(self) -> logging.Logger:\n        \"\"\"Set up logging configuration\"\"\"\n        logger = logging.getLogger(f\"learning_test_{self.test_name}\")\n        logger.setLevel(logging.INFO)\n        \n        # Remove existing handlers if any\n        for handler in logger.handlers[:]:\n            logger.removeHandler(handler)\n            \n        # Create file handler\n        fh = logging.FileHandler(self.log_dir / f\"{self.test_name}_{datetime.now():%Y%m%d_%H%M%S}.log\")\n        fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))\n        logger.addHandler(fh)\n        \n        # Create console handler\n        ch = logging.StreamHandler()\n        ch.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))\n        logger.addHandler(ch)\n        \n        return logger\n\n    def process_batch(self, \n                     batch_data: Dict[str, torch.Tensor],\n                     domain: str) -> Dict[str, Any]:"
+        },
+        "process_batch": {
+          "start_line": 93,
+          "end_line": 155,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_data"
+            },
+            {
+              "name": "domain",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.logger.debug",
+              "line": 97
+            },
+            {
+              "name": "datetime.now",
+              "line": 98
+            },
+            {
+              "name": "self.pattern_orchestrator.process_domain_data",
+              "line": 102
+            },
+            {
+              "name": "max",
+              "line": 108
+            },
+            {
+              "name": "....append",
+              "line": 136
+            },
+            {
+              "name": "....append",
+              "line": 137
+            },
+            {
+              "name": "self._update_learning_rate",
+              "line": 139
+            },
+            {
+              "name": "self._check_stage_transition",
+              "line": 140
+            },
+            {
+              "name": "self.logger.debug",
+              "line": 142
+            },
+            {
+              "name": "max",
+              "line": 115
+            },
+            {
+              "name": "np.mean",
+              "line": 118
+            },
+            {
+              "name": "max",
+              "line": 122
+            },
+            {
+              "name": "np.mean",
+              "line": 126
+            },
+            {
+              "name": "self.logger.error",
+              "line": 152
+            },
+            {
+              "name": "....total_seconds",
+              "line": 110
+            },
+            {
+              "name": "p.get",
+              "line": 115
+            },
+            {
+              "name": "str",
+              "line": 152
+            },
+            {
+              "name": "datetime.now",
+              "line": 110
+            }
+          ],
+          "docstring": "Process a batch of data and track progression metrics",
+          "code_snippet": "        return logger\n\n    def process_batch(self, \n                     batch_data: Dict[str, torch.Tensor],\n                     domain: str) -> Dict[str, Any]:\n        \"\"\"Process a batch of data and track progression metrics\"\"\"\n        self.logger.debug(f\"Processing batch for domain: {domain}\")\n        batch_start = datetime.now()\n        \n        try:\n            # Process patterns\n            pattern_results = self.pattern_orchestrator.process_domain_data(\n                batch_data,\n                domain\n            )\n            \n            # Calculate recognition time with minimum threshold\n            recognition_time = max(\n                self.min_recognition_time,\n                (datetime.now() - batch_start).total_seconds() * 1000\n            )\n            \n            # Calculate pattern complexity with minimum threshold\n            complexities = [\n                max(self.min_pattern_complexity, p.get(\"complexity\", self.min_pattern_complexity))\n                for p in pattern_results[\"results\"]\n            ]\n            avg_complexity = np.mean(complexities) if complexities else self.min_pattern_complexity\n            \n            # Calculate success rates with smoothing\n            pattern_success = pattern_results[\"metrics\"][\"semantic_patterns_recognized\"] / \\\n                            max(pattern_results[\"metrics\"][\"patterns_processed\"], 1)\n            \n            if self.progression_metrics[\"pattern_recognition_times\"]:\n                recent_successes = self.progression_metrics[\"pattern_recognition_times\"][-self.smoothing_window:]\n                pattern_success = np.mean([*recent_successes, pattern_success])\n            \n            current_metrics = {\n                \"recognition_time\": recognition_time,\n                \"pattern_success_rate\": pattern_success,\n                \"translation_success_rate\": pattern_results[\"metrics\"][\"batch_processing_efficiency\"],\n                \"pattern_complexity\": avg_complexity\n            }\n            \n            # Update progression tracking\n            self.progression_metrics[\"pattern_recognition_times\"].append(recognition_time)\n            self.progression_metrics[\"pattern_complexity\"].append(avg_complexity)\n            \n            self._update_learning_rate(current_metrics)\n            self._check_stage_transition(current_metrics)\n            \n            self.logger.debug(f\"Batch processing complete. Recognition time: {recognition_time:.2f}ms\")\n            \n            return {\n                \"current_metrics\": current_metrics,\n                \"stage\": self.current_stage,\n                \"learning_rate\": self.progression_metrics[\"learning_rate\"][-1] \n                    if self.progression_metrics[\"learning_rate\"] else 0\n            }\n            \n        except Exception as e:\n            self.logger.error(f\"Error processing batch: {str(e)}\")\n            raise\n\n    def calculate_learning_rate(self, \n                              current_metrics: Dict[str, float],\n                              previous_metrics: Dict[str, float]) -> float:"
+        },
+        "calculate_learning_rate": {
+          "start_line": 155,
+          "end_line": 181,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "current_metrics"
+            },
+            {
+              "name": "previous_metrics"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "np.mean",
+              "line": 174
+            },
+            {
+              "name": "np.mean",
+              "line": 177
+            },
+            {
+              "name": "max",
+              "line": 163
+            },
+            {
+              "name": "max",
+              "line": 164
+            },
+            {
+              "name": "improvements.append",
+              "line": 171
+            },
+            {
+              "name": "np.exp",
+              "line": 169
+            }
+          ],
+          "docstring": "Calculate learning rate with improved reliability",
+          "code_snippet": "            raise\n\n    def calculate_learning_rate(self, \n                              current_metrics: Dict[str, float],\n                              previous_metrics: Dict[str, float]) -> float:\n        \"\"\"Calculate learning rate with improved reliability\"\"\"\n        improvements = []\n        \n        for key in [\"pattern_success_rate\", \"translation_success_rate\"]:\n            if key in current_metrics and key in previous_metrics:\n                current_val = max(current_metrics[key], self.min_pattern_complexity)\n                prev_val = max(previous_metrics[key], self.min_pattern_complexity)\n                \n                # Calculate relative improvement with dampening\n                improvement = (current_val - prev_val) / prev_val\n                # Apply sigmoid to constrain learning rate\n                improvement = 2 / (1 + np.exp(-2 * improvement)) - 1\n                \n                improvements.append(improvement)\n        \n        # Apply smoothing over recent learning rates\n        learning_rate = np.mean(improvements) if improvements else 0.0\n        if self.progression_metrics[\"learning_rate\"]:\n            recent_rates = self.progression_metrics[\"learning_rate\"][-self.smoothing_window:]\n            learning_rate = np.mean([*recent_rates, learning_rate])\n            \n        return learning_rate\n\n    def _update_learning_rate(self, current_metrics: Dict[str, float]):\n        \"\"\"Update learning rate with improved calculation\"\"\"\n        if len(self.progression_metrics[\"pattern_recognition_times\"]) > 1:"
+        },
+        "_update_learning_rate": {
+          "start_line": 181,
+          "end_line": 192,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "current_metrics"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 183
+            },
+            {
+              "name": "self.calculate_learning_rate",
+              "line": 189
+            },
+            {
+              "name": "....append",
+              "line": 190
+            }
+          ],
+          "docstring": "Update learning rate with improved calculation",
+          "code_snippet": "        return learning_rate\n\n    def _update_learning_rate(self, current_metrics: Dict[str, float]):\n        \"\"\"Update learning rate with improved calculation\"\"\"\n        if len(self.progression_metrics[\"pattern_recognition_times\"]) > 1:\n            previous_metrics = {\n                \"pattern_success_rate\": self.progression_metrics[\"learning_rate\"][-1] \n                    if self.progression_metrics[\"learning_rate\"] else 0.0,\n                \"translation_success_rate\": current_metrics[\"translation_success_rate\"]\n            }\n            learning_rate = self.calculate_learning_rate(current_metrics, previous_metrics)\n            self.progression_metrics[\"learning_rate\"].append(learning_rate)\n\n    def detect_learning_stage(self, current_metrics: Dict[str, float]) -> str:\n        \"\"\"Detect current learning stage based on metrics\"\"\"\n        if not self.stage_metrics[\"acceleration\"][\"detected\"]:"
+        },
+        "detect_learning_stage": {
+          "start_line": 192,
+          "end_line": 222,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "current_metrics"
+            }
+          ],
+          "return_type": "str",
+          "calls": [
+            {
+              "name": "len",
+              "line": 197
+            },
+            {
+              "name": "np.mean",
+              "line": 198
+            },
+            {
+              "name": "np.mean",
+              "line": 199
+            },
+            {
+              "name": "datetime.now",
+              "line": 203
+            },
+            {
+              "name": "len",
+              "line": 210
+            },
+            {
+              "name": "np.var",
+              "line": 211
+            },
+            {
+              "name": "np.mean",
+              "line": 212
+            },
+            {
+              "name": "datetime.now",
+              "line": 217
+            },
+            {
+              "name": "abs",
+              "line": 215
+            }
+          ],
+          "docstring": "Detect current learning stage based on metrics",
+          "code_snippet": "            self.progression_metrics[\"learning_rate\"].append(learning_rate)\n\n    def detect_learning_stage(self, current_metrics: Dict[str, float]) -> str:\n        \"\"\"Detect current learning stage based on metrics\"\"\"\n        if not self.stage_metrics[\"acceleration\"][\"detected\"]:\n            # Check for acceleration phase\n            recent_times = self.progression_metrics[\"pattern_recognition_times\"][-10:]\n            if len(recent_times) >= 10:\n                avg_recent = np.mean(recent_times)\n                avg_initial = np.mean(self.progression_metrics[\"pattern_recognition_times\"][:10])\n                \n                if avg_recent < avg_initial * 0.7:  # 30% faster than initial\n                    self.stage_metrics[\"acceleration\"][\"detected\"] = True\n                    self.stage_metrics[\"acceleration\"][\"detection_time\"] = datetime.now()\n                    self.stage_metrics[\"acceleration\"][\"acceleration_factor\"] = avg_initial / avg_recent\n                    return \"acceleration\"\n        \n        elif not self.stage_metrics[\"stable\"][\"reached\"]:\n            # Check for stabilization\n            recent_rates = self.progression_metrics[\"learning_rate\"][-20:]\n            if len(recent_rates) >= 20:\n                rate_variance = np.var(recent_rates)\n                rate_mean = np.mean(recent_rates)\n                \n                # Require both low variance and reasonable mean\n                if rate_variance < 0.01 and abs(rate_mean) < 0.1:\n                    self.stage_metrics[\"stable\"][\"reached\"] = True\n                    self.stage_metrics[\"stable\"][\"stabilization_time\"] = datetime.now()\n                    return \"stable\"\n        \n        return self.current_stage\n\n    def _check_stage_transition(self, current_metrics: Dict[str, float]):\n        \"\"\"Check and handle stage transitions\"\"\"\n        new_stage = self.detect_learning_stage(current_metrics)"
+        },
+        "_check_stage_transition": {
+          "start_line": 222,
+          "end_line": 237,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "current_metrics"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.detect_learning_stage",
+              "line": 224
+            },
+            {
+              "name": "self._verify_stage_transition",
+              "line": 226
+            },
+            {
+              "name": "....append",
+              "line": 227
+            },
+            {
+              "name": "self.logger.info",
+              "line": 234
+            },
+            {
+              "name": "self.logger.info",
+              "line": 235
+            },
+            {
+              "name": "len",
+              "line": 230
+            }
+          ],
+          "docstring": "Check and handle stage transitions",
+          "code_snippet": "        return self.current_stage\n\n    def _check_stage_transition(self, current_metrics: Dict[str, float]):\n        \"\"\"Check and handle stage transitions\"\"\"\n        new_stage = self.detect_learning_stage(current_metrics)\n        if new_stage != self.current_stage:\n            if self._verify_stage_transition(new_stage, current_metrics):\n                self.progression_metrics[\"stage_transitions\"].append({\n                    \"from\": self.current_stage,\n                    \"to\": new_stage,\n                    \"batch_number\": len(self.progression_metrics[\"pattern_recognition_times\"]),\n                    \"metrics\": current_metrics\n                })\n                self.current_stage = new_stage\n                self.logger.info(f\"Learning stage transition detected: {new_stage}\")\n                self.logger.info(f\"Current metrics at transition: {current_metrics}\")\n\n    def _verify_stage_transition(self, \n                               new_stage: str, \n                               current_metrics: Dict[str, float]) -> bool:"
+        },
+        "_verify_stage_transition": {
+          "start_line": 237,
+          "end_line": 265,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "new_stage",
+              "type": "str"
+            },
+            {
+              "name": "current_metrics"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [
+            {
+              "name": "np.mean",
+              "line": 247
+            },
+            {
+              "name": "np.mean",
+              "line": 248
+            },
+            {
+              "name": "len",
+              "line": 246
+            },
+            {
+              "name": "len",
+              "line": 246
+            },
+            {
+              "name": "len",
+              "line": 256
+            },
+            {
+              "name": "np.var",
+              "line": 257
+            },
+            {
+              "name": "np.mean",
+              "line": 258
+            },
+            {
+              "name": "abs",
+              "line": 261
+            }
+          ],
+          "docstring": "Verify stage transition with confidence check",
+          "code_snippet": "                self.logger.info(f\"Current metrics at transition: {current_metrics}\")\n\n    def _verify_stage_transition(self, \n                               new_stage: str, \n                               current_metrics: Dict[str, float]) -> bool:\n        \"\"\"Verify stage transition with confidence check\"\"\"\n        if new_stage == \"acceleration\":\n            # Require sustained improvement over multiple batches\n            recent_times = self.progression_metrics[\"pattern_recognition_times\"][-self.smoothing_window:]\n            initial_times = self.progression_metrics[\"pattern_recognition_times\"][:self.smoothing_window]\n            \n            if len(recent_times) >= self.smoothing_window and len(initial_times) >= self.smoothing_window:\n                avg_recent = np.mean(recent_times)\n                avg_initial = np.mean(initial_times)\n                \n                # Require clear acceleration trend\n                return avg_recent < avg_initial * 0.7\n                \n        elif new_stage == \"stable\":\n            # Require sustained stability over more batches\n            recent_rates = self.progression_metrics[\"learning_rate\"][-20:]\n            if len(recent_rates) >= 20:\n                rate_variance = np.var(recent_rates)\n                rate_mean = np.mean(recent_rates)\n                \n                # Require both low variance and reasonable mean\n                return rate_variance < 0.01 and abs(rate_mean) < 0.1\n                \n        return False\n    \n    def save_results(self):\n        \"\"\"Save detailed results and progression metrics\"\"\"\n        # Convert datetime objects to ISO format strings for JSON serialization"
+        },
+        "save_results": {
+          "start_line": 265,
+          "end_line": 305,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.logger.info",
+              "line": 295
+            },
+            {
+              "name": "self.generate_progression_report",
+              "line": 298
+            },
+            {
+              "name": "self.logger.info",
+              "line": 303
+            },
+            {
+              "name": "....isoformat",
+              "line": 270
+            },
+            {
+              "name": "open",
+              "line": 292
+            },
+            {
+              "name": "json.dump",
+              "line": 293
+            },
+            {
+              "name": "open",
+              "line": 300
+            },
+            {
+              "name": "f.write",
+              "line": 301
+            },
+            {
+              "name": "datetime.now",
+              "line": 270
+            },
+            {
+              "name": "....isoformat",
+              "line": 276
+            },
+            {
+              "name": "....isoformat",
+              "line": 282
+            }
+          ],
+          "docstring": "Save detailed results and progression metrics",
+          "code_snippet": "        return False\n    \n    def save_results(self):\n        \"\"\"Save detailed results and progression metrics\"\"\"\n        # Convert datetime objects to ISO format strings for JSON serialization\n        results = {\n            \"test_name\": self.test_name,\n            \"timestamp\": datetime.now().isoformat(),\n            \"progression_metrics\": self.progression_metrics,\n            \"stage_metrics\": {\n                \"initial\": self.stage_metrics[\"initial\"],\n                \"acceleration\": {\n                    \"detected\": self.stage_metrics[\"acceleration\"][\"detected\"],\n                    \"detection_time\": self.stage_metrics[\"acceleration\"][\"detection_time\"].isoformat() \n                        if self.stage_metrics[\"acceleration\"][\"detection_time\"] else None,\n                    \"acceleration_factor\": self.stage_metrics[\"acceleration\"][\"acceleration_factor\"]\n                },\n                \"stable\": {\n                    \"reached\": self.stage_metrics[\"stable\"][\"reached\"],\n                    \"stabilization_time\": self.stage_metrics[\"stable\"][\"stabilization_time\"].isoformat() \n                        if self.stage_metrics[\"stable\"][\"stabilization_time\"] else None,\n                    \"final_metrics\": self.stage_metrics[\"stable\"][\"final_metrics\"]\n                }\n            },\n            \"final_stage\": self.current_stage\n        }\n        \n        # Save detailed results to JSON\n        results_path = self.log_dir / f\"{self.test_name}_results.json\"\n        with open(results_path, 'w') as f:\n            json.dump(results, f, indent=2)\n        \n        self.logger.info(f\"Saved detailed results to: {results_path}\")\n        \n        # Generate and save report\n        report = self.generate_progression_report()\n        report_path = self.log_dir / f\"{self.test_name}_report.txt\"\n        with open(report_path, 'w') as f:\n            f.write(report)\n        \n        self.logger.info(f\"Saved progression report to: {report_path}\")\n\n    def generate_progression_report(self) -> str:\n        \"\"\"Generate a detailed report of learning progression\"\"\"\n        report = ["
+        },
+        "generate_progression_report": {
+          "start_line": 305,
+          "end_line": 360,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "str",
+          "calls": [
+            {
+              "name": "report.extend",
+              "line": 329
+            },
+            {
+              "name": "report.extend",
+              "line": 350
+            },
+            {
+              "name": "....join",
+              "line": 358
+            },
+            {
+              "name": "report.extend",
+              "line": 316
+            },
+            {
+              "name": "report.extend",
+              "line": 322
+            },
+            {
+              "name": "report.extend",
+              "line": 339
+            },
+            {
+              "name": "report.append",
+              "line": 344
+            },
+            {
+              "name": "datetime.now",
+              "line": 309
+            },
+            {
+              "name": "len",
+              "line": 312
+            },
+            {
+              "name": "np.mean",
+              "line": 332
+            },
+            {
+              "name": "np.mean",
+              "line": 333
+            },
+            {
+              "name": "len",
+              "line": 353
+            },
+            {
+              "name": "np.mean",
+              "line": 354
+            },
+            {
+              "name": "np.mean",
+              "line": 355
+            },
+            {
+              "name": "np.mean",
+              "line": 325
+            },
+            {
+              "name": "np.mean",
+              "line": 326
+            }
+          ],
+          "docstring": "Generate a detailed report of learning progression",
+          "code_snippet": "        self.logger.info(f\"Saved progression report to: {report_path}\")\n\n    def generate_progression_report(self) -> str:\n        \"\"\"Generate a detailed report of learning progression\"\"\"\n        report = [\n            f\"Learning Progression Report for {self.test_name}\",\n            f\"Generated: {datetime.now():%Y-%m-%d %H:%M:%S}\",\n            \"\",\n            \"Learning Stages:\",\n            f\"Initial Phase Duration: {len(self.progression_metrics['pattern_recognition_times'])} batches\"\n        ]\n        \n        if self.stage_metrics[\"acceleration\"][\"detected\"]:\n            report.extend([\n                f\"Acceleration Detected at: {self.stage_metrics['acceleration']['detection_time']}\",\n                f\"Acceleration Factor: {self.stage_metrics['acceleration']['acceleration_factor']:.2f}x\"\n            ])\n        \n        if self.stage_metrics[\"stable\"][\"reached\"]:\n            report.extend([\n                f\"Stabilization Reached at: {self.stage_metrics['stable']['stabilization_time']}\",\n                \"Final Stable Metrics:\",\n                f\"- Pattern Recognition Time: {np.mean(self.progression_metrics['pattern_recognition_times'][-20:]):.2f}ms\",\n                f\"- Learning Rate: {np.mean(self.progression_metrics['learning_rate'][-20:]):.4f}\"\n            ])\n        \n        report.extend([\n            \"\",\n            \"Performance Summary:\",\n            f\"Initial Recognition Time: {np.mean(self.progression_metrics['pattern_recognition_times'][:10]):.2f}ms\",\n            f\"Final Recognition Time: {np.mean(self.progression_metrics['pattern_recognition_times'][-10:]):.2f}ms\",\n            f\"Pattern Complexity Growth: {(self.progression_metrics['pattern_complexity'][-1] / self.progression_metrics['pattern_complexity'][0]):.2f}x\"\n        ])\n        \n        # Add stage transitions\n        if self.progression_metrics[\"stage_transitions\"]:\n            report.extend([\n                \"\",\n                \"Stage Transitions:\"\n            ])\n            for transition in self.progression_metrics[\"stage_transitions\"]:\n                report.append(\n                    f\"Batch {transition['batch_number']}: \"\n                    f\"{transition['from']} \u2192 {transition['to']}\"\n                )\n        \n        # Add batch processing statistics\n        report.extend([\n            \"\",\n            \"Batch Processing Statistics:\",\n            f\"Total Batches Processed: {len(self.progression_metrics['pattern_recognition_times'])}\",\n            f\"Average Recognition Time: {np.mean(self.progression_metrics['pattern_recognition_times']):.2f}ms\",\n            f\"Average Pattern Complexity: {np.mean(self.progression_metrics['pattern_complexity']):.2f}\"\n        ])\n        \n        return \"\\n\".join(report)"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Framework for testing progressive pattern learning and acceleration"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

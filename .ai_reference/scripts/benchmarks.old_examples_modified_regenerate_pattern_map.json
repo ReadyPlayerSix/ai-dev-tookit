@@ -1,0 +1,187 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\modified\\regenerate_pattern_map.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 9
+    },
+    {
+      "name": "sys",
+      "line": 10
+    },
+    {
+      "name": "argparse",
+      "line": 11
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 12
+    },
+    {
+      "name": "examples.modified.simplified_pattern_mapping.SimplifiedPatternMapper",
+      "line": 17
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "main": {
+      "start_line": 19,
+      "end_line": 102,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "argparse.ArgumentParser",
+          "line": 22
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 23
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 26
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 28
+        },
+        {
+          "name": "parser.parse_args",
+          "line": 30
+        },
+        {
+          "name": "SimplifiedPatternMapper",
+          "line": 43
+        },
+        {
+          "name": "min",
+          "line": 48
+        },
+        {
+          "name": "print",
+          "line": 49
+        },
+        {
+          "name": "print",
+          "line": 86
+        },
+        {
+          "name": "mapper.run_mapping",
+          "line": 87
+        },
+        {
+          "name": "print",
+          "line": 98
+        },
+        {
+          "name": "print",
+          "line": 99
+        },
+        {
+          "name": "print",
+          "line": 100
+        },
+        {
+          "name": "mapper.run_mapping",
+          "line": 52
+        },
+        {
+          "name": "set",
+          "line": 63
+        },
+        {
+          "name": "set",
+          "line": 64
+        },
+        {
+          "name": "print",
+          "line": 69
+        },
+        {
+          "name": "print",
+          "line": 70
+        },
+        {
+          "name": "....items",
+          "line": 71
+        },
+        {
+          "name": "input",
+          "line": 75
+        },
+        {
+          "name": "print",
+          "line": 94
+        },
+        {
+          "name": "....items",
+          "line": 95
+        },
+        {
+          "name": "print",
+          "line": 59
+        },
+        {
+          "name": "sys.exit",
+          "line": 60
+        },
+        {
+          "name": "....keys",
+          "line": 64
+        },
+        {
+          "name": "expected_types.issubset",
+          "line": 65
+        },
+        {
+          "name": "print",
+          "line": 66
+        },
+        {
+          "name": "print",
+          "line": 72
+        },
+        {
+          "name": "response.lower",
+          "line": 76
+        },
+        {
+          "name": "print",
+          "line": 77
+        },
+        {
+          "name": "sys.exit",
+          "line": 78
+        },
+        {
+          "name": "print",
+          "line": 81
+        },
+        {
+          "name": "print",
+          "line": 82
+        },
+        {
+          "name": "sys.exit",
+          "line": 83
+        },
+        {
+          "name": "print",
+          "line": 96
+        },
+        {
+          "name": "len",
+          "line": 98
+        },
+        {
+          "name": "str",
+          "line": 81
+        }
+      ],
+      "docstring": "Run the simplified pattern mapping process.",
+      "code_snippet": "from examples.modified.simplified_pattern_mapping import SimplifiedPatternMapper\n\ndef main():\n    \"\"\"Run the simplified pattern mapping process.\"\"\"\n    # Parse command-line arguments\n    parser = argparse.ArgumentParser(description=\"Create simplified pattern map for dataset\")\n    parser.add_argument(\"--dataset\", type=str, default=\"cifar10\",\n                      choices=[\"cifar10\", \"cifar100\", \"mnist\"],\n                      help=\"Dataset to analyze (cifar10, cifar100, mnist)\")\n    parser.add_argument(\"--sample-limit\", type=int, default=None,\n                      help=\"Maximum number of samples to analyze (default: full dataset)\")\n    parser.add_argument(\"--output-dir\", type=str, default=\"benchmarks/semantic_maps\",\n                      help=\"Directory to save pattern map and visualizations\")\n    args = parser.parse_args()\n    \n    # If no sample limit is provided, use the full dataset\n    if args.sample_limit is None:\n        # For image datasets, these are reasonable full dataset sizes\n        if args.dataset == \"cifar10\":\n            args.sample_limit = 50000  # Full CIFAR-10 training set\n        elif args.dataset == \"cifar100\":\n            args.sample_limit = 50000  # Full CIFAR-100 training set\n        elif args.dataset == \"mnist\":\n            args.sample_limit = 60000  # Full MNIST training set\n    \n    # Create pattern mapper and force disable terminal UI\n    mapper = SimplifiedPatternMapper(output_dir=args.output_dir)\n    # Temporarily disable terminal UI\n    mapper.terminal_ui = None\n    \n    # First run a test on a small portion of the dataset\n    test_sample_size = min(100, args.sample_limit // 10)  # Use 100 samples or 10% of limit\n    print(f\"\\n=== Running validation test on {test_sample_size} samples ===\")\n    \n    try:\n        test_pattern_map = mapper.run_mapping(\n            dataset_name=args.dataset,\n            sample_limit=test_sample_size\n        )\n        \n        # Validate the test results\n        if 'pattern_distribution' not in test_pattern_map or not test_pattern_map['pattern_distribution']:\n            print(\"\\nERROR: Test mapping failed - no patterns detected\")\n            sys.exit(1)\n            \n        # Validate all pattern types are present\n        expected_types = set(['structural', 'statistical', 'temporal'])\n        detected_types = set(test_pattern_map['pattern_distribution'].keys())\n        if not expected_types.issubset(detected_types):\n            print(f\"\\nWARNING: Not all pattern types detected in test. Expected: {expected_types}, Got: {detected_types}\")\n        \n        # Show test results\n        print(\"\\nTest validation successful!\")\n        print(\"Test pattern distribution:\")\n        for pattern_type, count in test_pattern_map['pattern_distribution'].items():\n            print(f\"  {pattern_type}: {count}\")\n            \n        # Ask user to proceed\n        response = input(f\"\\nProceed with full dataset mapping ({args.sample_limit} samples)? [Y/n]: \")\n        if response.lower() == 'n':\n            print(\"\\nMapping cancelled by user.\")\n            sys.exit(0)\n    \n    except Exception as e:\n        print(f\"\\nERROR during test validation: {str(e)}\")\n        print(\"Please fix the issue before proceeding.\")\n        sys.exit(1)\n    \n    # Run the full mapping process\n    print(f\"\\n=== Running full pattern mapping on {args.sample_limit} samples ===\")\n    pattern_map = mapper.run_mapping(\n        dataset_name=args.dataset,\n        sample_limit=args.sample_limit\n    )\n    \n    # Print summary\n    if 'pattern_distribution' in pattern_map:\n        print(\"\\nPattern distribution summary:\")\n        for pattern_type, count in pattern_map['pattern_distribution'].items():\n            print(f\"  {pattern_type}: {count}\")\n\n    print(f\"\\nPattern map created with {len(pattern_map['pattern_map'])} examples\")\n    print(f\"Dataset: {args.dataset}\")\n    print(f\"Output directory: {args.output_dir}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+    }
+  },
+  "constants": {}
+}

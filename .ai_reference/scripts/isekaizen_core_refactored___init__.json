@@ -1,0 +1,32 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\refactored\\__init__.py",
+  "imports": [
+    {
+      "name": "base_optimizer.IsekaiZenOptimizer",
+      "line": 8
+    },
+    {
+      "name": "base_optimizer.cortex_components_available",
+      "line": 8
+    },
+    {
+      "name": "risk_aware_optimizer.RiskAwarePatternIsekaiZen",
+      "line": 9
+    },
+    {
+      "name": "risk_aware_optimizer.RiskLevel",
+      "line": 9
+    },
+    {
+      "name": "risk_aware_optimizer.PatternRecognitionTracker",
+      "line": 9
+    },
+    {
+      "name": "risk_aware_optimizer.RiskAssessmentTracker",
+      "line": 9
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

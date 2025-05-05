@@ -1,0 +1,510 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\testing\\integration\\test_mathematical_implementation.py",
+  "imports": [
+    {
+      "name": "unittest",
+      "line": 11
+    },
+    {
+      "name": "sys",
+      "line": 12
+    },
+    {
+      "name": "os",
+      "line": 13
+    },
+    {
+      "name": "math",
+      "line": 14
+    },
+    {
+      "name": "numpy",
+      "line": 15
+    },
+    {
+      "name": "isekaizen.core.mathematical_foundation.cognitive_efficiency.calculate_cognitive_efficiency",
+      "line": 23
+    },
+    {
+      "name": "isekaizen.core.mathematical_foundation.resource_allocation.optimize_resource_allocation",
+      "line": 24
+    },
+    {
+      "name": "isekaizen.core.mathematical_foundation.batch_optimization.calculate_optimal_batch_size",
+      "line": 25
+    },
+    {
+      "name": "isekaizen.core.mathematical_foundation.polling_optimization.calculate_polling_frequency",
+      "line": 26
+    },
+    {
+      "name": "isekaizen.core.tier_management.tier_manager.TierManager",
+      "line": 27
+    },
+    {
+      "name": "isekaizen.core.tier_management.tier_manager.TierComponent",
+      "line": 27
+    },
+    {
+      "name": "isekaizen.core.tier_management.tier_manager.TierBoundaries",
+      "line": 27
+    },
+    {
+      "name": "isekaizen.core.tier_management.tier_manager.TierType",
+      "line": 27
+    }
+  ],
+  "classes": {
+    "TestMathematicalImplementation": {
+      "start_line": 30,
+      "end_line": 301,
+      "methods": {
+        "test_cognitive_efficiency": {
+          "start_line": 33,
+          "end_line": 74,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "calculate_cognitive_efficiency",
+              "line": 36
+            },
+            {
+              "name": "self.assertGreaterEqual",
+              "line": 41
+            },
+            {
+              "name": "self.assertLessEqual",
+              "line": 42
+            },
+            {
+              "name": "calculate_cognitive_efficiency",
+              "line": 45
+            },
+            {
+              "name": "self.assertGreaterEqual",
+              "line": 50
+            },
+            {
+              "name": "self.assertLessEqual",
+              "line": 51
+            },
+            {
+              "name": "self.assertLess",
+              "line": 52
+            },
+            {
+              "name": "calculate_cognitive_efficiency",
+              "line": 55
+            },
+            {
+              "name": "self.assertGreaterEqual",
+              "line": 60
+            },
+            {
+              "name": "self.assertLessEqual",
+              "line": 61
+            },
+            {
+              "name": "self.assertLess",
+              "line": 62
+            },
+            {
+              "name": "calculate_cognitive_efficiency",
+              "line": 65
+            },
+            {
+              "name": "self.assertGreaterEqual",
+              "line": 70
+            },
+            {
+              "name": "self.assertLessEqual",
+              "line": 71
+            },
+            {
+              "name": "self.assertNotEqual",
+              "line": 72
+            }
+          ],
+          "docstring": "Test the cognitive efficiency function.",
+          "code_snippet": "    \"\"\"Test cases for mathematical foundation implementation.\"\"\"\n    \n    def test_cognitive_efficiency(self):\n        \"\"\"Test the cognitive efficiency function.\"\"\"\n        # Test with default parameters\n        efficiency = calculate_cognitive_efficiency(\n            available_energy=1.0,\n            cognitive_load=2.0,\n            parallel_processors=1\n        )\n        self.assertGreaterEqual(efficiency, 0.0)\n        self.assertLessEqual(efficiency, 1.0)\n        \n        # Test with zero energy\n        efficiency_zero_energy = calculate_cognitive_efficiency(\n            available_energy=0.0,\n            cognitive_load=2.0,\n            parallel_processors=1\n        )\n        self.assertGreaterEqual(efficiency_zero_energy, 0.0)\n        self.assertLessEqual(efficiency_zero_energy, 1.0)\n        self.assertLess(efficiency_zero_energy, efficiency)\n        \n        # Test with high load\n        efficiency_high_load = calculate_cognitive_efficiency(\n            available_energy=1.0,\n            cognitive_load=10.0,\n            parallel_processors=1\n        )\n        self.assertGreaterEqual(efficiency_high_load, 0.0)\n        self.assertLessEqual(efficiency_high_load, 1.0)\n        self.assertLess(efficiency_high_load, efficiency)\n        \n        # Test with multiple processors\n        efficiency_parallel = calculate_cognitive_efficiency(\n            available_energy=1.0,\n            cognitive_load=2.0,\n            parallel_processors=4\n        )\n        self.assertGreaterEqual(efficiency_parallel, 0.0)\n        self.assertLessEqual(efficiency_parallel, 1.0)\n        self.assertNotEqual(efficiency_parallel, efficiency)\n    \n    def test_resource_allocation(self):\n        \"\"\"Test the resource allocation optimization.\"\"\"\n        # Test with equal priorities"
+        },
+        "test_resource_allocation": {
+          "start_line": 74,
+          "end_line": 128,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "optimize_resource_allocation",
+              "line": 81
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 87
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 88
+            },
+            {
+              "name": "enumerate",
+              "line": 91
+            },
+            {
+              "name": "optimize_resource_allocation",
+              "line": 98
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 104
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 105
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 108
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 109
+            },
+            {
+              "name": "sum",
+              "line": 113
+            },
+            {
+              "name": "optimize_resource_allocation",
+              "line": 115
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 121
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 122
+            },
+            {
+              "name": "enumerate",
+              "line": 125
+            },
+            {
+              "name": "len",
+              "line": 87
+            },
+            {
+              "name": "len",
+              "line": 87
+            },
+            {
+              "name": "sum",
+              "line": 88
+            },
+            {
+              "name": "self.assertGreaterEqual",
+              "line": 92
+            },
+            {
+              "name": "len",
+              "line": 104
+            },
+            {
+              "name": "len",
+              "line": 104
+            },
+            {
+              "name": "sum",
+              "line": 105
+            },
+            {
+              "name": "len",
+              "line": 121
+            },
+            {
+              "name": "len",
+              "line": 121
+            },
+            {
+              "name": "sum",
+              "line": 122
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 126
+            }
+          ],
+          "docstring": "Test the resource allocation optimization.",
+          "code_snippet": "        self.assertNotEqual(efficiency_parallel, efficiency)\n    \n    def test_resource_allocation(self):\n        \"\"\"Test the resource allocation optimization.\"\"\"\n        # Test with equal priorities\n        priorities = [0.5, 0.5, 0.5]\n        min_resources = [0.1, 0.1, 0.1]\n        total_resources = 1.0\n        \n        allocations = optimize_resource_allocation(\n            priorities=priorities,\n            min_resources=min_resources,\n            total_resources=total_resources\n        )\n        \n        self.assertEqual(len(allocations), len(priorities))\n        self.assertAlmostEqual(sum(allocations), total_resources, delta=1e-6)\n        \n        # Verify minimum resources are satisfied\n        for i, min_req in enumerate(min_resources):\n            self.assertGreaterEqual(allocations[i], min_req)\n        \n        # Test with different priorities\n        priorities = [0.8, 0.5, 0.2]\n        min_resources = [0.1, 0.1, 0.1]\n        \n        allocations_diff_priorities = optimize_resource_allocation(\n            priorities=priorities,\n            min_resources=min_resources,\n            total_resources=total_resources\n        )\n        \n        self.assertEqual(len(allocations_diff_priorities), len(priorities))\n        self.assertAlmostEqual(sum(allocations_diff_priorities), total_resources, delta=1e-6)\n        \n        # Higher priority should get more resources\n        self.assertGreater(allocations_diff_priorities[0], allocations_diff_priorities[1])\n        self.assertGreater(allocations_diff_priorities[1], allocations_diff_priorities[2])\n        \n        # Test with minimum requirements exceeding total resources\n        min_resources_high = [0.3, 0.3, 0.3]\n        total_resources_high = min_sum = sum(min_resources_high) # Ensure exactly enough resources\n        \n        allocations_high_min = optimize_resource_allocation(\n            priorities=priorities,\n            min_resources=min_resources_high,\n            total_resources=total_resources_high\n        )\n        \n        self.assertEqual(len(allocations_high_min), len(priorities))\n        self.assertAlmostEqual(sum(allocations_high_min), total_resources_high, delta=1e-6)\n        \n        # With exactly minimum resources, each component should get its minimum\n        for i, min_req in enumerate(min_resources_high):\n            self.assertAlmostEqual(allocations_high_min[i], min_req, delta=1e-6)\n    \n    def test_batch_optimization(self):\n        \"\"\"Test the batch size optimization.\"\"\"\n        # Test with default parameters"
+        },
+        "test_batch_optimization": {
+          "start_line": 128,
+          "end_line": 173,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "calculate_optimal_batch_size",
+              "line": 135
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 141
+            },
+            {
+              "name": "calculate_optimal_batch_size",
+              "line": 144
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 150
+            },
+            {
+              "name": "calculate_optimal_batch_size",
+              "line": 153
+            },
+            {
+              "name": "self.assertLess",
+              "line": 159
+            },
+            {
+              "name": "calculate_optimal_batch_size",
+              "line": 162
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 171
+            }
+          ],
+          "docstring": "Test the batch size optimization.",
+          "code_snippet": "            self.assertAlmostEqual(allocations_high_min[i], min_req, delta=1e-6)\n    \n    def test_batch_optimization(self):\n        \"\"\"Test the batch size optimization.\"\"\"\n        # Test with default parameters\n        base_size = 64\n        resource_share = 0.5\n        polling_frequency = 0.2\n        \n        batch_size = calculate_optimal_batch_size(\n            base_size=base_size,\n            resource_share=resource_share,\n            polling_frequency=polling_frequency\n        )\n        \n        self.assertGreater(batch_size, 0)\n        \n        # Test with higher resource share\n        high_resource_batch_size = calculate_optimal_batch_size(\n            base_size=base_size,\n            resource_share=1.0,\n            polling_frequency=polling_frequency\n        )\n        \n        self.assertGreater(high_resource_batch_size, batch_size)\n        \n        # Test with higher polling frequency\n        high_polling_batch_size = calculate_optimal_batch_size(\n            base_size=base_size,\n            resource_share=resource_share,\n            polling_frequency=0.4\n        )\n        \n        self.assertLess(high_polling_batch_size, batch_size)\n        \n        # Test with cognitive efficiency parameters\n        efficient_batch_size = calculate_optimal_batch_size(\n            base_size=base_size,\n            resource_share=resource_share,\n            polling_frequency=polling_frequency,\n            available_energy=1.0,\n            cognitive_load=2.0,\n            parallel_processors=1\n        )\n        \n        self.assertGreater(efficient_batch_size, 0)\n    \n    def test_polling_optimization(self):\n        \"\"\"Test the polling frequency optimization.\"\"\"\n        # Test with default parameters"
+        },
+        "test_polling_optimization": {
+          "start_line": 173,
+          "end_line": 221,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "calculate_polling_frequency",
+              "line": 181
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 188
+            },
+            {
+              "name": "calculate_polling_frequency",
+              "line": 191
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 198
+            },
+            {
+              "name": "calculate_polling_frequency",
+              "line": 201
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 208
+            },
+            {
+              "name": "calculate_polling_frequency",
+              "line": 211
+            },
+            {
+              "name": "self.assertLess",
+              "line": 219
+            }
+          ],
+          "docstring": "Test the polling frequency optimization.",
+          "code_snippet": "        self.assertGreater(efficient_batch_size, 0)\n    \n    def test_polling_optimization(self):\n        \"\"\"Test the polling frequency optimization.\"\"\"\n        # Test with default parameters\n        base_frequency = 1.0\n        priority = 0.8\n        volatility = 0.5\n        component_count = 3\n        \n        polling_frequency = calculate_polling_frequency(\n            base_frequency=base_frequency,\n            priority=priority,\n            volatility=volatility,\n            component_count=component_count\n        )\n        \n        self.assertGreater(polling_frequency, 0)\n        \n        # Test with higher priority\n        high_priority_frequency = calculate_polling_frequency(\n            base_frequency=base_frequency,\n            priority=1.0,\n            volatility=volatility,\n            component_count=component_count\n        )\n        \n        self.assertGreater(high_priority_frequency, polling_frequency)\n        \n        # Test with higher volatility\n        high_volatility_frequency = calculate_polling_frequency(\n            base_frequency=base_frequency,\n            priority=priority,\n            volatility=1.0,\n            component_count=component_count\n        )\n        \n        self.assertGreater(high_volatility_frequency, polling_frequency)\n        \n        # Test with cognitive load adjustment\n        adjusted_frequency = calculate_polling_frequency(\n            base_frequency=base_frequency,\n            priority=priority,\n            volatility=volatility,\n            component_count=component_count,\n            cognitive_load=10.0\n        )\n        \n        self.assertLess(adjusted_frequency, polling_frequency)\n    \n    def test_tier_management(self):\n        \"\"\"Test the tier management implementation.\"\"\"\n        # Initialize tier manager"
+        },
+        "test_tier_management": {
+          "start_line": 221,
+          "end_line": 301,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "TierManager",
+              "line": 224
+            },
+            {
+              "name": "TierBoundaries",
+              "line": 227
+            },
+            {
+              "name": "TierComponent",
+              "line": 231
+            },
+            {
+              "name": "TierComponent",
+              "line": 237
+            },
+            {
+              "name": "TierComponent",
+              "line": 243
+            },
+            {
+              "name": "tier_manager.add_component",
+              "line": 249
+            },
+            {
+              "name": "tier_manager.add_component",
+              "line": 250
+            },
+            {
+              "name": "tier_manager.add_component",
+              "line": 251
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 254
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 255
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 256
+            },
+            {
+              "name": "tier_manager.allocate_resources",
+              "line": 259
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 262
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 263
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 264
+            },
+            {
+              "name": "sum",
+              "line": 267
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 268
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 271
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 277
+            },
+            {
+              "name": "tier_manager.update_component_priority",
+              "line": 283
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 286
+            },
+            {
+              "name": "tier_manager.get_tier_components",
+              "line": 289
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 290
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 291
+            },
+            {
+              "name": "tier_manager.get_tier_components",
+              "line": 293
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 294
+            },
+            {
+              "name": "tier_manager.get_tier_components",
+              "line": 296
+            },
+            {
+              "name": "self.assertEqual",
+              "line": 297
+            },
+            {
+              "name": "self.assertTrue",
+              "line": 298
+            },
+            {
+              "name": "self.assertTrue",
+              "line": 299
+            },
+            {
+              "name": "allocations.values",
+              "line": 267
+            },
+            {
+              "name": "len",
+              "line": 290
+            },
+            {
+              "name": "len",
+              "line": 294
+            },
+            {
+              "name": "len",
+              "line": 297
+            },
+            {
+              "name": "any",
+              "line": 298
+            },
+            {
+              "name": "any",
+              "line": 299
+            }
+          ],
+          "docstring": "Test the tier management implementation.",
+          "code_snippet": "        self.assertLess(adjusted_frequency, polling_frequency)\n    \n    def test_tier_management(self):\n        \"\"\"Test the tier management implementation.\"\"\"\n        # Initialize tier manager\n        tier_manager = TierManager(total_resources=1.0)\n        \n        # Create custom boundaries to ensure our test works correctly\n        custom_boundaries = TierBoundaries(low=0.25, medium=0.5, high=0.75)\n        tier_manager.boundaries = custom_boundaries\n        \n        # Add components\n        high_component = TierComponent(\n            name=\"high_priority\",\n            priority=0.9,\n            min_resources=0.1\n        )\n        \n        medium_component = TierComponent(\n            name=\"medium_priority\",\n            priority=0.6,\n            min_resources=0.1\n        )\n        \n        low_component = TierComponent(\n            name=\"low_priority\",\n            priority=0.2,  # Changed to 0.2 to ensure it's below the low boundary\n            min_resources=0.1\n        )\n        \n        tier_manager.add_component(high_component)\n        tier_manager.add_component(medium_component)\n        tier_manager.add_component(low_component)\n        \n        # Check tier assignments\n        self.assertEqual(high_component.tier, TierType.HIGH)\n        self.assertEqual(medium_component.tier, TierType.MEDIUM)\n        self.assertEqual(low_component.tier, TierType.LOW)\n        \n        # Allocate resources\n        allocations = tier_manager.allocate_resources()\n        \n        # Verify components received allocations\n        self.assertGreater(high_component.allocated_resources, 0)\n        self.assertGreater(medium_component.allocated_resources, 0)\n        self.assertGreater(low_component.allocated_resources, 0)\n        \n        # Check total allocation\n        total_allocated = sum(allocations.values())\n        self.assertAlmostEqual(total_allocated, tier_manager.total_resources, delta=1e-6)\n        \n        # High tier should receive more resources than medium tier\n        self.assertGreater(\n            tier_manager.tier_allocations[TierType.HIGH],\n            tier_manager.tier_allocations[TierType.MEDIUM]\n        )\n        \n        # Medium tier should receive more resources than low tier\n        self.assertGreater(\n            tier_manager.tier_allocations[TierType.MEDIUM],\n            tier_manager.tier_allocations[TierType.LOW]\n        )\n        \n        # Update component priority and check tier reassignment\n        tier_manager.update_component_priority(\"medium_priority\", 0.2)\n        \n        # Medium component should now be in low tier\n        self.assertEqual(medium_component.tier, TierType.LOW)\n        \n        # Check tier components lists\n        high_tier_components = tier_manager.get_tier_components(TierType.HIGH)\n        self.assertEqual(len(high_tier_components), 1)\n        self.assertEqual(high_tier_components[0].name, \"high_priority\")\n        \n        medium_tier_components = tier_manager.get_tier_components(TierType.MEDIUM)\n        self.assertEqual(len(medium_tier_components), 0)\n        \n        low_tier_components = tier_manager.get_tier_components(TierType.LOW)\n        self.assertEqual(len(low_tier_components), 2)\n        self.assertTrue(any(c.name == \"low_priority\" for c in low_tier_components))\n        self.assertTrue(any(c.name == \"medium_priority\" for c in low_tier_components))\n\n\nif __name__ == \"__main__\":\n    unittest.main()"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "..."
+      ],
+      "docstring": "Test cases for mathematical foundation implementation."
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

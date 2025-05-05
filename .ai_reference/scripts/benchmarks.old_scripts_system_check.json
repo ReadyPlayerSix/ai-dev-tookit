@@ -1,0 +1,12 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\scripts\\system_check.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 2
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

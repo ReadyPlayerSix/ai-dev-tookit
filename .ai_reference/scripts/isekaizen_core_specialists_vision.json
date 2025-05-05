@@ -1,0 +1,279 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\specialists\\vision.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 4
+    },
+    {
+      "name": "typing.Dict",
+      "line": 5
+    },
+    {
+      "name": "typing.Any",
+      "line": 5
+    },
+    {
+      "name": "typing.Optional",
+      "line": 5
+    },
+    {
+      "name": "typing.List",
+      "line": 5
+    },
+    {
+      "name": "numpy",
+      "line": 6
+    },
+    {
+      "name": "cv2",
+      "line": 7
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 8
+    },
+    {
+      "name": "isekaizen.core.specialists.base.BaseSpecialist",
+      "line": 11
+    },
+    {
+      "name": "isekaizen.utils.types.DomainType",
+      "line": 12
+    },
+    {
+      "name": "isekaizen.utils.types.PatternType",
+      "line": 12
+    }
+  ],
+  "classes": {
+    "SemanticPattern": {
+      "start_line": 15,
+      "end_line": 22,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Represents a pure visual semantic pattern"
+    },
+    "VisionSpecialist": {
+      "start_line": 22,
+      "end_line": 207,
+      "methods": {
+        "__init__": {
+          "start_line": 23,
+          "end_line": 49,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "resource_manager"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 24
+            },
+            {
+              "name": "super",
+              "line": 24
+            }
+          ],
+          "code_snippet": "\nclass VisionSpecialist(BaseSpecialist):\n    def __init__(self, resource_manager=None):\n        super().__init__(DomainType.VISUAL, resource_manager)\n        self.memory_requirement = 100  # Only using CV methods now, not full YOLO\n        \n        # Initialize patterns\n        self.visual_patterns = {\n            \"spatial_dominance\": {\n                \"min_area_ratio\": 0.3,  # Object takes up significant space\n                \"confidence_threshold\": 0.85\n            },\n            \"spatial_relationship\": {\n                \"proximity_threshold\": 500,  # pixels\n                \"overlap_threshold\": 0.3\n            }\n        }\n        \n        # Track semantic translations\n        self.translation_metrics = {\n            \"patterns_identified\": 0,\n            \"high_confidence_patterns\": 0,\n            \"pattern_preservation_score\": 0.0\n        }\n        \n        # Instead of YOLO, use OpenCV for now\n        self.model_initialized = True\n        \n    def _calculate_spatial_metrics(self, image):\n        \"\"\"Calculate pure spatial characteristics using OpenCV\"\"\"\n        if len(image.shape) == 3:"
+        },
+        "_calculate_spatial_metrics": {
+          "start_line": 49,
+          "end_line": 99,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "image"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "cv2.Canny",
+              "line": 57
+            },
+            {
+              "name": "np.mean",
+              "line": 61
+            },
+            {
+              "name": "np.std",
+              "line": 62
+            },
+            {
+              "name": "cv2.Sobel",
+              "line": 65
+            },
+            {
+              "name": "cv2.Sobel",
+              "line": 66
+            },
+            {
+              "name": "cv2.cartToPolar",
+              "line": 67
+            },
+            {
+              "name": "cv2.threshold",
+              "line": 71
+            },
+            {
+              "name": "cv2.findContours",
+              "line": 72
+            },
+            {
+              "name": "len",
+              "line": 51
+            },
+            {
+              "name": "cv2.cvtColor",
+              "line": 52
+            },
+            {
+              "name": "np.sum",
+              "line": 58
+            },
+            {
+              "name": "np.mean",
+              "line": 68
+            },
+            {
+              "name": "max",
+              "line": 76
+            },
+            {
+              "name": "cv2.contourArea",
+              "line": 77
+            },
+            {
+              "name": "cv2.boundingRect",
+              "line": 78
+            }
+          ],
+          "docstring": "Calculate pure spatial characteristics using OpenCV",
+          "code_snippet": "        self.model_initialized = True\n        \n    def _calculate_spatial_metrics(self, image):\n        \"\"\"Calculate pure spatial characteristics using OpenCV\"\"\"\n        if len(image.shape) == 3:\n            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)\n        else:\n            gray = image\n            \n        # Find edges\n        edges = cv2.Canny(gray, 100, 200)\n        edge_density = np.sum(edges > 0) / (gray.shape[0] * gray.shape[1])\n        \n        # Calculate intensity\n        mean_intensity = np.mean(gray)\n        std_intensity = np.std(gray)\n        \n        # Calculate texture\n        gx = cv2.Sobel(gray, cv2.CV_32F, 1, 0, ksize=3)\n        gy = cv2.Sobel(gray, cv2.CV_32F, 0, 1, ksize=3)\n        mag, angle = cv2.cartToPolar(gx, gy)\n        texture_complexity = np.mean(mag) / 255.0\n        \n        # Calculate dominant region\n        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)\n        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)\n        \n        # Find largest contour\n        if contours:\n            largest_contour = max(contours, key=cv2.contourArea)\n            area = cv2.contourArea(largest_contour)\n            x, y, w, h = cv2.boundingRect(largest_contour)\n            center_x = x + w/2\n            center_y = y + h/2\n            aspect_ratio = w / h if h > 0 else 0\n            \n            # Calculate relative area\n            relative_area = area / (gray.shape[0] * gray.shape[1])\n        else:\n            relative_area = 0\n            center_x, center_y = gray.shape[1]/2, gray.shape[0]/2\n            aspect_ratio = 1.0\n        \n        return {\n            \"area\": relative_area,\n            \"aspect_ratio\": aspect_ratio,\n            \"center_position\": (center_x, center_y),\n            \"edge_density\": edge_density,\n            \"mean_intensity\": mean_intensity,\n            \"std_intensity\": std_intensity,\n            \"texture_complexity\": texture_complexity\n        }\n        \n    def _identify_spatial_patterns(self, metrics):\n        \"\"\"Identify pure visual patterns from spatial information\"\"\""
+        },
+        "_identify_spatial_patterns": {
+          "start_line": 100,
+          "end_line": 131,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "metrics"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "min",
+              "line": 120
+            },
+            {
+              "name": "SemanticPattern",
+              "line": 122
+            },
+            {
+              "name": "min",
+              "line": 111
+            }
+          ],
+          "docstring": "Identify pure visual patterns from spatial information",
+          "code_snippet": "        }\n        \n    def _identify_spatial_patterns(self, metrics):\n        \"\"\"Identify pure visual patterns from spatial information\"\"\"\n        # Determine most likely pattern type based on metrics\n        if metrics[\"edge_density\"] > 0.2:\n            pattern_type = \"structure\"\n            confidence = 0.7 + (metrics[\"edge_density\"] - 0.2) * 1.0\n        elif metrics[\"texture_complexity\"] > 0.1:\n            pattern_type = \"relationship\"\n            confidence = 0.7 + (metrics[\"texture_complexity\"] - 0.1) * 1.0\n        elif metrics[\"std_intensity\"] > 30:\n            pattern_type = \"intensity\"\n            confidence = 0.7 + min(1.0, metrics[\"std_intensity\"] / 255.0)\n        elif metrics[\"area\"] > 0.3:\n            pattern_type = \"dominance\"\n            confidence = 0.7 + (metrics[\"area\"] - 0.3) * 1.0\n        else:\n            pattern_type = \"neutral\"\n            confidence = 0.6\n            \n        # Cap confidence\n        confidence = min(0.95, confidence)\n            \n        return SemanticPattern(\n            pattern_type=pattern_type,\n            spatial_relationship={\n                \"relative_size\": metrics[\"area\"],\n                \"position\": metrics[\"center_position\"],\n                \"proportions\": metrics[\"aspect_ratio\"]\n            },\n            confidence=confidence\n        )\n        \n    def process_input(self, input_data: Any) -> Dict[str, Any]:\n        \"\"\"Process image through CV methods and extract patterns\"\"\""
+        },
+        "process_input": {
+          "start_line": 132,
+          "end_line": 207,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "input_data",
+              "type": "Any"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 147
+            },
+            {
+              "name": "self._calculate_spatial_metrics",
+              "line": 162
+            },
+            {
+              "name": "self._identify_spatial_patterns",
+              "line": 165
+            },
+            {
+              "name": "self.update_metrics",
+              "line": 180
+            },
+            {
+              "name": "self.resource_manager.allocate_resources",
+              "line": 135
+            },
+            {
+              "name": "input_data.numpy",
+              "line": 151
+            },
+            {
+              "name": "....astype",
+              "line": 159
+            },
+            {
+              "name": "self.update_metrics",
+              "line": 194
+            },
+            {
+              "name": "self.resource_manager.release_resources",
+              "line": 203
+            },
+            {
+              "name": "str",
+              "line": 136
+            },
+            {
+              "name": "torch.device",
+              "line": 149
+            },
+            {
+              "name": "input_data.cpu",
+              "line": 150
+            },
+            {
+              "name": "np.transpose",
+              "line": 155
+            },
+            {
+              "name": "str",
+              "line": 197
+            },
+            {
+              "name": "str",
+              "line": 204
+            }
+          ],
+          "docstring": "Process image through CV methods and extract patterns",
+          "code_snippet": "        )\n        \n    def process_input(self, input_data: Any) -> Dict[str, Any]:\n        \"\"\"Process image through CV methods and extract patterns\"\"\"\n        # Try to allocate resources if resource manager is available\n        if self.resource_manager and not self.resource_manager.allocate_resources(\n            str(self.domain), \n            self.memory_requirement\n        ):\n            return {\n                \"success\": False,\n                \"error\": \"Failed to allocate resources\",\n                \"domain\": self.domain\n            }\n        \n        try:\n            # Ensure input is in the right format\n            if isinstance(input_data, torch.Tensor):\n                # Convert tensor to numpy\n                if input_data.device != torch.device('cpu'):\n                    input_data = input_data.cpu()\n                input_data = input_data.numpy()\n                \n                # Handle channel dimension\n                if input_data.shape[0] == 3:  # CxHxW format\n                    input_data = np.transpose(input_data, (1, 2, 0))\n            \n            # Convert to uint8 if needed\n            if input_data.dtype != np.uint8:\n                input_data = (input_data * 255).astype(np.uint8)\n            \n            # Calculate spatial metrics\n            metrics = self._calculate_spatial_metrics(input_data)\n            \n            # Identify patterns\n            pattern = self._identify_spatial_patterns(metrics)\n            \n            # Update metrics\n            self.translation_metrics[\"patterns_identified\"] += 1\n            if pattern.confidence >= 0.85:\n                self.translation_metrics[\"high_confidence_patterns\"] += 1\n            \n            # Calculate pattern preservation score\n            if self.translation_metrics[\"patterns_identified\"] > 0:\n                self.translation_metrics[\"pattern_preservation_score\"] = (\n                    self.translation_metrics[\"high_confidence_patterns\"] / \n                    self.translation_metrics[\"patterns_identified\"]\n                )\n            \n            # Update general metrics\n            self.update_metrics(True, pattern.confidence)\n            \n            return {\n                \"success\": True,\n                \"pattern\": {\n                    \"pattern_type\": pattern.pattern_type,\n                    \"confidence\": pattern.confidence,\n                    \"metrics\": metrics\n                },\n                \"metrics\": self.metrics,\n                \"domain\": self.domain\n            }\n        except Exception as e:\n            # Update failure metrics\n            self.update_metrics(False)\n            return {\n                \"success\": False,\n                \"error\": str(e),\n                \"domain\": self.domain\n            }\n        finally:\n            # Release resources if using resource manager\n            if self.resource_manager:\n                self.resource_manager.release_resources(\n                    str(self.domain),\n                    self.memory_requirement\n                )"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "BaseSpecialist"
+      ]
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

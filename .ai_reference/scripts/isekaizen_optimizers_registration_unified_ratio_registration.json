@@ -1,0 +1,109 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\optimizers\\registration\\unified_ratio_registration.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 11
+    },
+    {
+      "name": "torch.optim",
+      "line": 12
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "register_unified_ratio_optimizer": {
+      "start_line": 17,
+      "end_line": 100,
+      "parameters": [
+        {
+          "name": "ALL_CONFIGS"
+        },
+        {
+          "name": "EVEUnifiedRatio"
+        },
+        {
+          "name": "config_params"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 90
+        },
+        {
+          "name": "logger.info",
+          "line": 91
+        },
+        {
+          "name": "logger.info",
+          "line": 92
+        },
+        {
+          "name": "logger.info",
+          "line": 93
+        },
+        {
+          "name": "logger.info",
+          "line": 96
+        },
+        {
+          "name": "config_params.get",
+          "line": 47
+        },
+        {
+          "name": "config_params.get",
+          "line": 48
+        },
+        {
+          "name": "config_params.get",
+          "line": 49
+        },
+        {
+          "name": "config_params.get",
+          "line": 50
+        },
+        {
+          "name": "config_params.get",
+          "line": 51
+        },
+        {
+          "name": "config_params.get",
+          "line": 52
+        },
+        {
+          "name": "config_params.get",
+          "line": 53
+        },
+        {
+          "name": "config_params.get",
+          "line": 54
+        },
+        {
+          "name": "....format",
+          "line": 91
+        },
+        {
+          "name": "....format",
+          "line": 92
+        },
+        {
+          "name": "....format",
+          "line": 93
+        },
+        {
+          "name": "logger.info",
+          "line": 95
+        },
+        {
+          "name": "....format",
+          "line": 96
+        }
+      ],
+      "docstring": "\n    Register the EVEUnifiedRatio optimizer in the available optimizers.\n    \n    This function creates and registers the configuration for the EVEUnifiedRatio optimizer,\n    which implements the unified risk/accuracy perspective for optimization.\n    \n    Args:\n        ALL_CONFIGS (dict): The global optimizer configurations dictionary\n        EVEUnifiedRatio (class): The EVEUnifiedRatio optimizer class\n        config_params (dict, optional): Optional dictionary with configuration parameters\n        \n    Returns:\n        dict: The updated optimizer configurations dictionary\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef register_unified_ratio_optimizer(ALL_CONFIGS, EVEUnifiedRatio, config_params=None):\n    \"\"\"\n    Register the EVEUnifiedRatio optimizer in the available optimizers.\n    \n    This function creates and registers the configuration for the EVEUnifiedRatio optimizer,\n    which implements the unified risk/accuracy perspective for optimization.\n    \n    Args:\n        ALL_CONFIGS (dict): The global optimizer configurations dictionary\n        EVEUnifiedRatio (class): The EVEUnifiedRatio optimizer class\n        config_params (dict, optional): Optional dictionary with configuration parameters\n        \n    Returns:\n        dict: The updated optimizer configurations dictionary\n    \"\"\"\n    # Set default configuration values\n    debug_ratios = False\n    debug_bounds = False\n    weight_adjustment_range = \"default\"  # Default value (0.85-1.15)\n    weight_range_iris = False  # Default to disabled iris feature\n    lr_check_interval = 10  # Default value\n    lr_change_threshold = 0.005  # Default value\n    lr_log_threshold = 0.05  # Default value\n    fibonacci_intervals = None  # For Fibonacci-based sensitivity\n    \n    # Equilibrium bounds are always enabled - this is a core feature of EVE Unified Ratio\n    use_equilibrium_bounds = True\n    \n    # Override with provided parameters if any\n    if config_params:\n        debug_ratios = config_params.get('debug_ratios', debug_ratios)\n        debug_bounds = config_params.get('debug_bounds', debug_bounds)\n        weight_adjustment_range = config_params.get('weight_adjustment_range', weight_adjustment_range)\n        weight_range_iris = config_params.get('weight_range_iris', weight_range_iris)\n        lr_check_interval = config_params.get('lr_check_interval', lr_check_interval)\n        lr_change_threshold = config_params.get('lr_change_threshold', lr_change_threshold)\n        lr_log_threshold = config_params.get('lr_log_threshold', lr_log_threshold)\n        fibonacci_intervals = config_params.get('fibonacci_intervals', None)\n        # Note: We ignore any use_equilibrium_bounds setting - it's always enabled\n    \n    # Create configuration for the unified ratio optimizer\n    unified_config = {\n        'default': {\n            'optimizer_class': EVEUnifiedRatio,\n            'optimizer_kwargs': {\n                'lr': 0.01,\n                'eps': 1e-8,\n                'base_confidence_threshold': 0.7,\n                'weight_decay': 0.0001,\n                'debug_ratios': debug_ratios,\n                'debug_bounds': debug_bounds,\n                'warmup_epochs': 1,  # Faster warmup\n                'weight_adjustment_range': weight_adjustment_range,\n                'weight_range_iris': weight_range_iris,\n                'lr_check_interval': lr_check_interval,\n                'lr_change_threshold': lr_change_threshold,\n                'lr_log_threshold': lr_log_threshold,\n                'use_equilibrium_bounds': use_equilibrium_bounds\n            },\n            'scheduler_class': optim.lr_scheduler.CosineAnnealingLR,\n            'scheduler_kwargs': {\n                'T_max': 200\n            }\n        }\n    }\n    \n    # If using Fibonacci intervals, we'll set them as an attribute on the optimizer after creation\n    if fibonacci_intervals:\n        unified_config['default']['optimizer_kwargs']['fibonacci_intervals'] = fibonacci_intervals\n    \n    # Update ALL_CONFIGS with the new optimizer\n    ALL_CONFIGS['eve_unified'] = unified_config\n    \n    logger.info(\"EVEUnifiedRatio optimizer registered successfully\")\n    logger.info(\"  Weight adjustment range: {}\".format(weight_adjustment_range))\n    logger.info(\"  Weight range iris: {}\".format(\"Enabled\" if weight_range_iris else \"Disabled\"))\n    logger.info(\"  LR sensitivity: check interval={}, threshold={:.4f}\".format(lr_check_interval, lr_change_threshold))\n    if fibonacci_intervals:\n        logger.info(\"  Using Fibonacci intervals for dynamic sensitivity\")\n    logger.info(\"  Using equilibrium bounds: {}\".format(use_equilibrium_bounds))\n    \n    return ALL_CONFIGS"
+    }
+  },
+  "constants": {}
+}

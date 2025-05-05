@@ -1,0 +1,733 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\semantic\\clean_specialists.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 8
+    },
+    {
+      "name": "typing.Dict",
+      "line": 9
+    },
+    {
+      "name": "typing.List",
+      "line": 9
+    },
+    {
+      "name": "typing.Any",
+      "line": 9
+    },
+    {
+      "name": "typing.Optional",
+      "line": 9
+    },
+    {
+      "name": "typing.Union",
+      "line": 9
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 9
+    },
+    {
+      "name": "torch",
+      "line": 131
+    },
+    {
+      "name": "random",
+      "line": 282
+    },
+    {
+      "name": "torch",
+      "line": 315
+    },
+    {
+      "name": "isekaizen.semantic.mapper_math.SemanticTopographicalMapper",
+      "line": 446
+    },
+    {
+      "name": "torch",
+      "line": 235
+    },
+    {
+      "name": "isekaizen.semantic.mapper_math.SemanticTopographicalMapper",
+      "line": 482
+    },
+    {
+      "name": "isekaizen.core.specialists.vision.VisionSpecialist",
+      "line": 56
+    },
+    {
+      "name": "isekaizen.core.specialists.text.TextSpecialist",
+      "line": 66
+    },
+    {
+      "name": "isekaizen.core.specialists.audio.AudioSpecialist",
+      "line": 76
+    }
+  ],
+  "classes": {
+    "SpecialistRegistry": {
+      "start_line": 15,
+      "end_line": 115,
+      "methods": {
+        "__init__": {
+          "start_line": 20,
+          "end_line": 31,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "resource_manager"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "set",
+              "line": 29
+            }
+          ],
+          "docstring": "\n        Initialize the registry.\n        \n        Args:\n            resource_manager: Optional resource manager for specialist initialization\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, resource_manager=None):\n        \"\"\"\n        Initialize the registry.\n        \n        Args:\n            resource_manager: Optional resource manager for specialist initialization\n        \"\"\"\n        self.specialists = {}\n        self.resource_manager = resource_manager\n        self.available_domains = set()\n    \n    def register_specialist(self, domain, specialist):\n        \"\"\"\n        Register a specialist for a specific domain."
+        },
+        "register_specialist": {
+          "start_line": 31,
+          "end_line": 43,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "domain"
+            },
+            {
+              "name": "specialist"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.available_domains.add",
+              "line": 40
+            },
+            {
+              "name": "logger.info",
+              "line": 41
+            }
+          ],
+          "docstring": "\n        Register a specialist for a specific domain.\n        \n        Args:\n            domain: Domain name (e.g., 'vision', 'text', 'audio')\n            specialist: Specialist object for the domain\n        ",
+          "code_snippet": "        self.available_domains = set()\n    \n    def register_specialist(self, domain, specialist):\n        \"\"\"\n        Register a specialist for a specific domain.\n        \n        Args:\n            domain: Domain name (e.g., 'vision', 'text', 'audio')\n            specialist: Specialist object for the domain\n        \"\"\"\n        self.specialists[domain] = specialist\n        self.available_domains.add(domain)\n        logger.info(f\"Registered specialist for domain: {domain}\")\n    \n    def load_available_specialists(self):\n        \"\"\"\n        Dynamically load available specialists without fallbacks."
+        },
+        "load_available_specialists": {
+          "start_line": 43,
+          "end_line": 91,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "VisionSpecialist",
+              "line": 57
+            },
+            {
+              "name": "self.register_specialist",
+              "line": 58
+            },
+            {
+              "name": "TextSpecialist",
+              "line": 67
+            },
+            {
+              "name": "self.register_specialist",
+              "line": 68
+            },
+            {
+              "name": "AudioSpecialist",
+              "line": 77
+            },
+            {
+              "name": "self.register_specialist",
+              "line": 78
+            },
+            {
+              "name": "logger.error",
+              "line": 87
+            },
+            {
+              "name": "logger.info",
+              "line": 61
+            },
+            {
+              "name": "logger.info",
+              "line": 71
+            },
+            {
+              "name": "logger.info",
+              "line": 81
+            }
+          ],
+          "docstring": "\n        Dynamically load available specialists without fallbacks.\n        \n        Returns:\n            Dictionary of successfully loaded domain specialists\n        ",
+          "code_snippet": "        logger.info(f\"Registered specialist for domain: {domain}\")\n    \n    def load_available_specialists(self):\n        \"\"\"\n        Dynamically load available specialists without fallbacks.\n        \n        Returns:\n            Dictionary of successfully loaded domain specialists\n        \"\"\"\n        loaded = {}\n        \n        # Try to import each specialist type separately\n        try:\n            # Vision specialist\n            try:\n                from isekaizen.core.specialists.vision import VisionSpecialist\n                vision_specialist = VisionSpecialist(self.resource_manager)\n                self.register_specialist('vision', vision_specialist)\n                loaded['vision'] = True\n            except (ImportError, Exception) as e:\n                logger.info(f\"Vision specialist not available: {e}\")\n                loaded['vision'] = False\n            \n            # Text specialist\n            try:\n                from isekaizen.core.specialists.text import TextSpecialist\n                text_specialist = TextSpecialist(self.resource_manager)\n                self.register_specialist('text', text_specialist)\n                loaded['text'] = True\n            except (ImportError, Exception) as e:\n                logger.info(f\"Text specialist not available: {e}\")\n                loaded['text'] = False\n            \n            # Audio specialist\n            try:\n                from isekaizen.core.specialists.audio import AudioSpecialist\n                audio_specialist = AudioSpecialist(self.resource_manager)\n                self.register_specialist('audio', audio_specialist)\n                loaded['audio'] = True\n            except (ImportError, Exception) as e:\n                logger.info(f\"Audio specialist not available: {e}\")\n                loaded['audio'] = False\n                \n            # More specialists can be added here\n                \n        except Exception as e:\n            logger.error(f\"Error loading specialists: {e}\")\n        \n        return loaded\n    \n    def get_specialist(self, domain):\n        \"\"\"\n        Get the specialist for a specific domain."
+        },
+        "get_specialist": {
+          "start_line": 91,
+          "end_line": 103,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "domain"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.specialists.get",
+              "line": 101
+            }
+          ],
+          "docstring": "\n        Get the specialist for a specific domain.\n        \n        Args:\n            domain: Domain name\n            \n        Returns:\n            Specialist for the domain or None if not available\n        ",
+          "code_snippet": "        return loaded\n    \n    def get_specialist(self, domain):\n        \"\"\"\n        Get the specialist for a specific domain.\n        \n        Args:\n            domain: Domain name\n            \n        Returns:\n            Specialist for the domain or None if not available\n        \"\"\"\n        return self.specialists.get(domain)\n    \n    def has_specialist(self, domain):\n        \"\"\"\n        Check if a specialist is available for a domain."
+        },
+        "has_specialist": {
+          "start_line": 103,
+          "end_line": 115,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "domain"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Check if a specialist is available for a domain.\n        \n        Args:\n            domain: Domain name\n            \n        Returns:\n            True if specialist is available for the domain\n        ",
+          "code_snippet": "        return self.specialists.get(domain)\n    \n    def has_specialist(self, domain):\n        \"\"\"\n        Check if a specialist is available for a domain.\n        \n        Args:\n            domain: Domain name\n            \n        Returns:\n            True if specialist is available for the domain\n        \"\"\"\n        return domain in self.specialists\n\n\nclass EnhancedPatternMapperClean:\n    \"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Registry for domain-specific specialists that doesn't rely on fallbacks.\n    "
+    },
+    "EnhancedPatternMapperClean": {
+      "start_line": 116,
+      "end_line": 490,
+      "methods": {
+        "__init__": {
+          "start_line": 123,
+          "end_line": 156,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "resource_manager"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "SpecialistRegistry",
+              "line": 138
+            },
+            {
+              "name": "self.specialist_registry.load_available_specialists",
+              "line": 141
+            },
+            {
+              "name": "sum",
+              "line": 142
+            },
+            {
+              "name": "torch.device",
+              "line": 132
+            },
+            {
+              "name": "logger.info",
+              "line": 145
+            },
+            {
+              "name": "logger.warning",
+              "line": 147
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 132
+            },
+            {
+              "name": "loaded_specialists.values",
+              "line": 142
+            }
+          ],
+          "docstring": "\n        Initialize the enhanced pattern mapper.\n        \n        Args:\n            device: Computing device\n            resource_manager: Resource manager for specialists\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, device=None, resource_manager=None):\n        \"\"\"\n        Initialize the enhanced pattern mapper.\n        \n        Args:\n            device: Computing device\n            resource_manager: Resource manager for specialists\n        \"\"\"\n        import torch\n        self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Initialize resource manager if needed\n        self.resource_manager = resource_manager\n        \n        # Initialize specialist registry\n        self.specialist_registry = SpecialistRegistry(self.resource_manager)\n        \n        # Load available specialists\n        loaded_specialists = self.specialist_registry.load_available_specialists()\n        specialists_count = sum(1 for v in loaded_specialists.values() if v)\n        \n        if specialists_count > 0:\n            logger.info(f\"Successfully loaded {specialists_count} specialists\")\n        else:\n            logger.warning(\"No specialists were loaded - pattern enhancement will be limited\")\n        \n        # Initialize stats\n        self.stats = {\n            \"base_patterns_identified\": 0,\n            \"specialist_patterns_identified\": 0,\n            \"specialist_pattern_types\": {},\n            \"specialists_used\": specialists_count\n        }\n    \n    def _process_with_specialist(self, domain, data, idx=None):\n        \"\"\""
+        },
+        "_process_with_specialist": {
+          "start_line": 157,
+          "end_line": 196,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "domain"
+            },
+            {
+              "name": "data"
+            },
+            {
+              "name": "idx"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.specialist_registry.get_specialist",
+              "line": 172
+            },
+            {
+              "name": "self.specialist_registry.has_specialist",
+              "line": 169
+            },
+            {
+              "name": "specialist.process_input",
+              "line": 176
+            },
+            {
+              "name": "result.get",
+              "line": 179
+            },
+            {
+              "name": "result.get",
+              "line": 183
+            },
+            {
+              "name": "pattern.get",
+              "line": 184
+            },
+            {
+              "name": "logger.error",
+              "line": 193
+            }
+          ],
+          "docstring": "\n        Process data with a domain specialist if available.\n        \n        Args:\n            domain: Domain name\n            data: Data to process\n            idx: Optional sample index\n            \n        Returns:\n            Specialist result or None if not available\n        ",
+          "code_snippet": "        }\n    \n    def _process_with_specialist(self, domain, data, idx=None):\n        \"\"\"\n        Process data with a domain specialist if available.\n        \n        Args:\n            domain: Domain name\n            data: Data to process\n            idx: Optional sample index\n            \n        Returns:\n            Specialist result or None if not available\n        \"\"\"\n        if not self.specialist_registry.has_specialist(domain):\n            return None\n        \n        specialist = self.specialist_registry.get_specialist(domain)\n        \n        try:\n            # Process data with specialist\n            result = specialist.process_input(data, idx)\n            \n            # Update statistics if successful\n            if result and result.get('success', False):\n                self.stats[\"specialist_patterns_identified\"] += 1\n                \n                # Track pattern types\n                pattern = result.get('pattern', {})\n                pattern_type = pattern.get('pattern_type', 'unknown')\n                \n                if pattern_type not in self.stats[\"specialist_pattern_types\"]:\n                    self.stats[\"specialist_pattern_types\"][pattern_type] = 0\n                self.stats[\"specialist_pattern_types\"][pattern_type] += 1\n                \n            return result\n        \n        except Exception as e:\n            logger.error(f\"Error processing with {domain} specialist: {e}\")\n            return None\n    \n    def _enhance_with_specialists(self, dataset, difficulty_map):\n        \"\"\"\n        Enhance difficulty map with specialist pattern recognition."
+        },
+        "_enhance_with_specialists": {
+          "start_line": 196,
+          "end_line": 271,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "difficulty_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "dict",
+              "line": 208
+            },
+            {
+              "name": "difficulty_map.get",
+              "line": 218
+            },
+            {
+              "name": "self._select_stratified_samples",
+              "line": 221
+            },
+            {
+              "name": "logger.info",
+              "line": 267
+            },
+            {
+              "name": "logger.warning",
+              "line": 213
+            },
+            {
+              "name": "difficulty_ratings.get",
+              "line": 229
+            },
+            {
+              "name": "self.specialist_registry.has_specialist",
+              "line": 212
+            },
+            {
+              "name": "self.specialist_registry.has_specialist",
+              "line": 212
+            },
+            {
+              "name": "int",
+              "line": 226
+            },
+            {
+              "name": "self.specialist_registry.has_specialist",
+              "line": 236
+            },
+            {
+              "name": "isinstance",
+              "line": 236
+            },
+            {
+              "name": "self._process_with_specialist",
+              "line": 238
+            },
+            {
+              "name": "self.specialist_registry.has_specialist",
+              "line": 243
+            },
+            {
+              "name": "self._get_text_for_label",
+              "line": 246
+            },
+            {
+              "name": "logger.info",
+              "line": 262
+            },
+            {
+              "name": "len",
+              "line": 236
+            },
+            {
+              "name": "vision_result.get",
+              "line": 239
+            },
+            {
+              "name": "self._process_with_specialist",
+              "line": 248
+            },
+            {
+              "name": "text_result.get",
+              "line": 249
+            }
+          ],
+          "docstring": "\n        Enhance difficulty map with specialist pattern recognition.\n        \n        Args:\n            dataset: Dataset to analyze\n            difficulty_map: Base difficulty map\n            \n        Returns:\n            Enhanced map with specialist pattern insights\n        ",
+          "code_snippet": "            return None\n    \n    def _enhance_with_specialists(self, dataset, difficulty_map):\n        \"\"\"\n        Enhance difficulty map with specialist pattern recognition.\n        \n        Args:\n            dataset: Dataset to analyze\n            difficulty_map: Base difficulty map\n            \n        Returns:\n            Enhanced map with specialist pattern insights\n        \"\"\"\n        # Copy base map\n        enhanced_map = dict(difficulty_map)\n        enhanced_map['specialist_patterns'] = {}\n        \n        # If no specialists are available, simply return the original map\n        if not self.specialist_registry.has_specialist('vision') and not self.specialist_registry.has_specialist('text'):\n            logger.warning(\"No specialists available - proceeding with base map only\")\n            enhanced_map['pattern_stats'] = self.stats\n            return enhanced_map\n        \n        # Get difficulty ratings\n        difficulty_ratings = difficulty_map.get('difficulty_ratings', {})\n        \n        # Process a subset of examples across difficulty levels\n        stratified_samples = self._select_stratified_samples(difficulty_ratings, 500)\n        \n        # Process samples with available specialists\n        processed_count = 0\n        for idx in stratified_samples:\n            example, label = dataset[int(idx)]\n            \n            # Get the example difficulty\n            difficulty = difficulty_ratings.get(idx, 2)  # Default to medium difficulty if not found\n            \n            # Process with available specialists\n            specialist_patterns = {}\n            \n            # Process with vision specialist if available and input is an image\n            import torch\n            if self.specialist_registry.has_specialist('vision') and isinstance(example, torch.Tensor) and len(example.shape) == 3:\n                # The example is an image\n                vision_result = self._process_with_specialist('vision', example, idx)\n                if vision_result and vision_result.get('success', False):\n                    specialist_patterns['vision'] = vision_result\n            \n            # Process with text specialist if available and we have a text representation\n            if self.specialist_registry.has_specialist('text') and label is not None:\n                # Try to get a text representation of the label (e.g., class name)\n                # For CIFAR-10, we might map numeric labels to class names\n                text_input = self._get_text_for_label(label)\n                if text_input:\n                    text_result = self._process_with_specialist('text', text_input, idx)\n                    if text_result and text_result.get('success', False):\n                        specialist_patterns['text'] = text_result\n            \n            # Store the specialist pattern results for this example\n            if specialist_patterns:\n                enhanced_map['specialist_patterns'][idx] = {\n                    'difficulty': difficulty,\n                    'specialist_patterns': specialist_patterns\n                }\n                processed_count += 1\n            \n            # Log progress\n            if processed_count % 50 == 0 and processed_count > 0:\n                logger.info(f\"Processed {processed_count} samples with specialists\")\n        \n        # Add pattern distribution stats\n        enhanced_map['pattern_stats'] = self.stats\n        \n        logger.info(f\"Enhanced map with {self.stats['specialist_patterns_identified']} specialist patterns\")\n        \n        return enhanced_map\n    \n    def _select_stratified_samples(self, difficulty_ratings, max_samples):\n        \"\"\"\n        Select a stratified sample of examples across difficulty levels."
+        },
+        "_select_stratified_samples": {
+          "start_line": 271,
+          "end_line": 304,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "difficulty_ratings"
+            },
+            {
+              "name": "max_samples"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "difficulty_ratings.items",
+              "line": 286
+            },
+            {
+              "name": "....append",
+              "line": 290
+            },
+            {
+              "name": "difficulty_groups.items",
+              "line": 297
+            },
+            {
+              "name": "isinstance",
+              "line": 287
+            },
+            {
+              "name": "int",
+              "line": 287
+            },
+            {
+              "name": "len",
+              "line": 295
+            },
+            {
+              "name": "random.sample",
+              "line": 299
+            },
+            {
+              "name": "selected_samples.extend",
+              "line": 300
+            },
+            {
+              "name": "min",
+              "line": 299
+            },
+            {
+              "name": "len",
+              "line": 299
+            }
+          ],
+          "docstring": "\n        Select a stratified sample of examples across difficulty levels.\n        \n        Args:\n            difficulty_ratings: Difficulty ratings dictionary\n            max_samples: Maximum number of samples to select\n            \n        Returns:\n            List of selected sample indices\n        ",
+          "code_snippet": "        return enhanced_map\n    \n    def _select_stratified_samples(self, difficulty_ratings, max_samples):\n        \"\"\"\n        Select a stratified sample of examples across difficulty levels.\n        \n        Args:\n            difficulty_ratings: Difficulty ratings dictionary\n            max_samples: Maximum number of samples to select\n            \n        Returns:\n            List of selected sample indices\n        \"\"\"\n        import random\n        \n        # Group by difficulty\n        difficulty_groups = {}\n        for idx, difficulty in difficulty_ratings.items():\n            difficulty_level = int(difficulty) if isinstance(difficulty, (int, float, str)) else 2\n            if difficulty_level not in difficulty_groups:\n                difficulty_groups[difficulty_level] = []\n            difficulty_groups[difficulty_level].append(idx)\n        \n        # Select samples from each difficulty level\n        selected_samples = []\n        if difficulty_groups:\n            samples_per_level = max_samples // len(difficulty_groups)\n            \n            for difficulty, indices in difficulty_groups.items():\n                # Randomly select indices from this difficulty level\n                selected = random.sample(indices, min(samples_per_level, len(indices)))\n                selected_samples.extend(selected)\n        \n        return selected_samples\n    \n    def _get_text_for_label(self, label):\n        \"\"\"\n        Get text representation for a label."
+        },
+        "_get_text_for_label": {
+          "start_line": 304,
+          "end_line": 344,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "label"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 318
+            },
+            {
+              "name": "isinstance",
+              "line": 329
+            },
+            {
+              "name": "str",
+              "line": 342
+            },
+            {
+              "name": "len",
+              "line": 324
+            },
+            {
+              "name": "isinstance",
+              "line": 337
+            },
+            {
+              "name": "len",
+              "line": 331
+            },
+            {
+              "name": "....item",
+              "line": 332
+            },
+            {
+              "name": "self._get_text_for_label",
+              "line": 333
+            },
+            {
+              "name": "torch.argmax",
+              "line": 332
+            }
+          ],
+          "docstring": "\n        Get text representation for a label.\n        This is dataset-specific but implemented in a domain-agnostic way.\n        \n        Args:\n            label: The label (could be int, string, tensor, etc.)\n            \n        Returns:\n            Text representation of the label or None if not available\n        ",
+          "code_snippet": "        return selected_samples\n    \n    def _get_text_for_label(self, label):\n        \"\"\"\n        Get text representation for a label.\n        This is dataset-specific but implemented in a domain-agnostic way.\n        \n        Args:\n            label: The label (could be int, string, tensor, etc.)\n            \n        Returns:\n            Text representation of the label or None if not available\n        \"\"\"\n        import torch\n        \n        # Handle different label types\n        if isinstance(label, int):\n            # For CIFAR-10 or similar datasets with integer labels\n            # Map to class names if possible\n            cifar10_classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', \n                              'dog', 'frog', 'horse', 'ship', 'truck']\n            \n            if 0 <= label < len(cifar10_classes):\n                return cifar10_classes[label]\n            else:\n                return f\"class_{label}\"\n                \n        elif isinstance(label, torch.Tensor):\n            # For one-hot encoded labels\n            if len(label.shape) == 1:\n                max_idx = torch.argmax(label).item()\n                return self._get_text_for_label(max_idx)\n            else:\n                return None\n                \n        elif isinstance(label, str):\n            # Already a text label\n            return label\n            \n        # Fallback\n        return str(label) if label is not None else None\n    \n    def _analyze_pattern_relationships(self, enhanced_map):\n        \"\"\"\n        Analyze relationships between difficulty and specialist patterns."
+        },
+        "_analyze_pattern_relationships": {
+          "start_line": 344,
+          "end_line": 435,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "enhanced_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "dict",
+              "line": 355
+            },
+            {
+              "name": "enhanced_map.get",
+              "line": 358
+            },
+            {
+              "name": "enhanced_map.get",
+              "line": 368
+            },
+            {
+              "name": "specialist_patterns.items",
+              "line": 376
+            },
+            {
+              "name": "patterns_by_difficulty.items",
+              "line": 410
+            },
+            {
+              "name": "cross_domain_relationships.items",
+              "line": 418
+            },
+            {
+              "name": "set",
+              "line": 384
+            },
+            {
+              "name": "....items",
+              "line": 386
+            },
+            {
+              "name": "patterns.items",
+              "line": 411
+            },
+            {
+              "name": "....join",
+              "line": 419
+            },
+            {
+              "name": "isinstance",
+              "line": 378
+            },
+            {
+              "name": "int",
+              "line": 378
+            },
+            {
+              "name": "pattern_data.get",
+              "line": 387
+            },
+            {
+              "name": "pattern.get",
+              "line": 388
+            },
+            {
+              "name": "domains_present.add",
+              "line": 389
+            },
+            {
+              "name": "len",
+              "line": 399
+            },
+            {
+              "name": "frozenset",
+              "line": 400
+            },
+            {
+              "name": "....append",
+              "line": 407
+            },
+            {
+              "name": "sorted",
+              "line": 419
+            },
+            {
+              "name": "list",
+              "line": 423
+            },
+            {
+              "name": "sum",
+              "line": 422
+            },
+            {
+              "name": "len",
+              "line": 422
+            }
+          ],
+          "docstring": "\n        Analyze relationships between difficulty and specialist patterns.\n        \n        Args:\n            enhanced_map: Enhanced map with specialist patterns\n            \n        Returns:\n            Map with pattern relationship analysis\n        ",
+          "code_snippet": "        return str(label) if label is not None else None\n    \n    def _analyze_pattern_relationships(self, enhanced_map):\n        \"\"\"\n        Analyze relationships between difficulty and specialist patterns.\n        \n        Args:\n            enhanced_map: Enhanced map with specialist patterns\n            \n        Returns:\n            Map with pattern relationship analysis\n        \"\"\"\n        # Copy the enhanced map\n        analyzed_map = dict(enhanced_map)\n        \n        # Check if we have specialist patterns\n        specialist_patterns = enhanced_map.get('specialist_patterns', {})\n        if not specialist_patterns:\n            # No specialist patterns to analyze\n            analyzed_map['pattern_relationships'] = {}\n            return analyzed_map\n        \n        # Pattern correlation analysis\n        pattern_difficulty_correlation = {}\n        \n        # Get difficulty ratings\n        difficulty_ratings = enhanced_map.get('difficulty_ratings', {})\n        \n        # Count patterns by difficulty level\n        patterns_by_difficulty = {}\n        \n        # Track cross-domain relationships\n        cross_domain_relationships = {}\n        \n        for idx, item in specialist_patterns.items():\n            difficulty = item['difficulty']\n            difficulty_level = int(difficulty) if isinstance(difficulty, (int, float, str)) else 2\n            \n            if difficulty_level not in patterns_by_difficulty:\n                patterns_by_difficulty[difficulty_level] = {}\n            \n            # Track which domains are present for this example\n            domains_present = set()\n            \n            for domain, pattern_data in item['specialist_patterns'].items():\n                pattern = pattern_data.get('pattern', {})\n                pattern_type = pattern.get('pattern_type', 'unknown')\n                domains_present.add(domain)\n                \n                # Create pattern key\n                pattern_key = f\"{domain}:{pattern_type}\"\n                \n                if pattern_key not in patterns_by_difficulty[difficulty_level]:\n                    patterns_by_difficulty[difficulty_level][pattern_key] = 0\n                patterns_by_difficulty[difficulty_level][pattern_key] += 1\n            \n            # Record cross-domain relationships\n            if len(domains_present) > 1:\n                domain_key = frozenset(domains_present)\n                if domain_key not in cross_domain_relationships:\n                    cross_domain_relationships[domain_key] = {\n                        'count': 0,\n                        'difficulties': []\n                    }\n                cross_domain_relationships[domain_key]['count'] += 1\n                cross_domain_relationships[domain_key]['difficulties'].append(difficulty_level)\n        \n        # Calculate correlation between patterns and difficulty\n        for difficulty, patterns in patterns_by_difficulty.items():\n            for pattern_key, count in patterns.items():\n                if pattern_key not in pattern_difficulty_correlation:\n                    pattern_difficulty_correlation[pattern_key] = {}\n                pattern_difficulty_correlation[pattern_key][difficulty] = count\n        \n        # Convert frozenset keys to strings for JSON serialization\n        cross_domain_json = {}\n        for domains, data in cross_domain_relationships.items():\n            domain_key = '+'.join(sorted(domains))\n            cross_domain_json[domain_key] = {\n                'count': data['count'],\n                'avg_difficulty': sum(data['difficulties']) / len(data['difficulties']) if data['difficulties'] else 0,\n                'domains': list(domains)\n            }\n        \n        # Add to map\n        analyzed_map['pattern_relationships'] = {\n            'patterns_by_difficulty': patterns_by_difficulty,\n            'pattern_difficulty_correlation': pattern_difficulty_correlation,\n            'cross_domain_relationships': cross_domain_json\n        }\n        \n        return analyzed_map\n    \n    def create_map(self, trainset, testset=None):\n        \"\"\"\n        Create an enhanced pattern map using specialists."
+        },
+        "create_map": {
+          "start_line": 435,
+          "end_line": 470,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "trainset"
+            },
+            {
+              "name": "testset"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 449
+            },
+            {
+              "name": "SemanticTopographicalMapper",
+              "line": 450
+            },
+            {
+              "name": "semantic_mapper.create_map",
+              "line": 458
+            },
+            {
+              "name": "logger.info",
+              "line": 461
+            },
+            {
+              "name": "self._enhance_with_specialists",
+              "line": 462
+            },
+            {
+              "name": "logger.info",
+              "line": 465
+            },
+            {
+              "name": "self._analyze_pattern_relationships",
+              "line": 466
+            }
+          ],
+          "docstring": "\n        Create an enhanced pattern map using specialists.\n        \n        Args:\n            trainset: Training dataset\n            testset: Optional test dataset\n            \n        Returns:\n            Enhanced pattern map\n        ",
+          "code_snippet": "        return analyzed_map\n    \n    def create_map(self, trainset, testset=None):\n        \"\"\"\n        Create an enhanced pattern map using specialists.\n        \n        Args:\n            trainset: Training dataset\n            testset: Optional test dataset\n            \n        Returns:\n            Enhanced pattern map\n        \"\"\"\n        from isekaizen.semantic.mapper_math import SemanticTopographicalMapper\n        \n        # First create base difficulty map\n        logger.info(\"Creating base semantic difficulty map...\")\n        semantic_mapper = SemanticTopographicalMapper(\n            proxy_model_types=['forest', 'logistic', 'svm'],\n            ensemble_size=None,  # Auto-detect based on system resources\n            difficulty_levels=5,\n            batch_size=None,  # Auto-detect based on system resources\n            device=self.device\n        )\n        \n        difficulty_map = semantic_mapper.create_map(trainset, testset)\n        \n        # Enhance with specialist pattern recognition\n        logger.info(\"Enhancing map with specialist pattern recognition...\")\n        enhanced_map = self._enhance_with_specialists(trainset, difficulty_map)\n        \n        # Analyze pattern relationships\n        logger.info(\"Analyzing pattern relationships...\")\n        enhanced_map = self._analyze_pattern_relationships(enhanced_map)\n        \n        return enhanced_map\n    \n    def visualize_map(self, output_file=None):\n        \"\"\"\n        Create visualizations of the pattern map."
+        },
+        "visualize_map": {
+          "start_line": 470,
+          "end_line": 490,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "output_file"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "SemanticTopographicalMapper",
+              "line": 483
+            },
+            {
+              "name": "visualizer.visualize_map",
+              "line": 485
+            },
+            {
+              "name": "hasattr",
+              "line": 484
+            },
+            {
+              "name": "logger.error",
+              "line": 487
+            },
+            {
+              "name": "str",
+              "line": 488
+            }
+          ],
+          "docstring": "\n        Create visualizations of the pattern map.\n        \n        Args:\n            output_file: Optional path to save visualization\n            \n        Returns:\n            Visualization data\n        ",
+          "code_snippet": "        return enhanced_map\n    \n    def visualize_map(self, output_file=None):\n        \"\"\"\n        Create visualizations of the pattern map.\n        \n        Args:\n            output_file: Optional path to save visualization\n            \n        Returns:\n            Visualization data\n        \"\"\"\n        # If we have an instance of the semantic mapper, use it\n        try:\n            from isekaizen.semantic.mapper_math import SemanticTopographicalMapper\n            visualizer = SemanticTopographicalMapper()\n            visualizer.map = self.map if hasattr(self, 'map') else None\n            return visualizer.visualize_map(output_file)\n        except (ImportError, Exception) as e:\n            logger.error(f\"Could not create visualization: {e}\")\n            return {\"error\": str(e)}"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Enhanced pattern mapper that uses specialists without fallbacks.\n    This is a refactored version of EnhancedPatternMapper that follows\n    the domain-agnostic philosophy of isekaiZen.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

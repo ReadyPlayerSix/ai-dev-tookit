@@ -1,0 +1,338 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\vision_diagnostic.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 1
+    },
+    {
+      "name": "numpy",
+      "line": 2
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 3
+    },
+    {
+      "name": "typing.Dict",
+      "line": 4
+    },
+    {
+      "name": "typing.List",
+      "line": 4
+    },
+    {
+      "name": "typing.Optional",
+      "line": 4
+    },
+    {
+      "name": "typing.Any",
+      "line": 4
+    },
+    {
+      "name": "enum.Enum",
+      "line": 5
+    },
+    {
+      "name": "time",
+      "line": 6
+    }
+  ],
+  "classes": {
+    "YOLOMetrics": {
+      "start_line": 9,
+      "end_line": 15,
+      "methods": {},
+      "class_variables": [],
+      "bases": []
+    },
+    "VisionDiagnostic": {
+      "start_line": 15,
+      "end_line": 150,
+      "methods": {
+        "__init__": {
+          "start_line": 16,
+          "end_line": 35,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.device",
+              "line": 17
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 17
+            }
+          ],
+          "code_snippet": "\nclass VisionDiagnostic:\n    def __init__(self):\n        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        self.target_inference_time = 7.0  # ms from docs\n        self.memory_limit = 4089  # MB for RTX 4070 SUPER\n        \n        # Performance tracking\n        self.performance_metrics = {\n            \"inference_times\": [],\n            \"memory_usage\": [],\n            \"confidence_scores\": [],\n            \"pattern_matches\": 0\n        }\n        \n        # Target settings from successful implementation\n        self.target_metrics = {\n            \"confidence_threshold\": 0.85,\n            \"class_id\": 15,\n            \"success_rate\": 0.82\n        }\n    \n    def _simulate_yolo_inference(self, batch_size: int = 1) -> YOLOMetrics:\n        \"\"\"Simulate YOLO inference with actual GPU memory allocation\"\"\""
+        },
+        "_simulate_yolo_inference": {
+          "start_line": 36,
+          "end_line": 66,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "YOLOMetrics",
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 38
+            },
+            {
+              "name": "torch.zeros",
+              "line": 42
+            },
+            {
+              "name": "time.sleep",
+              "line": 46
+            },
+            {
+              "name": "np.random.normal",
+              "line": 49
+            },
+            {
+              "name": "float",
+              "line": 50
+            },
+            {
+              "name": "YOLOMetrics",
+              "line": 54
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 63
+            },
+            {
+              "name": "torch.cuda.memory_allocated",
+              "line": 43
+            },
+            {
+              "name": "np.clip",
+              "line": 50
+            },
+            {
+              "name": "torch.cuda.empty_cache",
+              "line": 64
+            },
+            {
+              "name": "time.time",
+              "line": 52
+            },
+            {
+              "name": "int",
+              "line": 56
+            }
+          ],
+          "docstring": "Simulate YOLO inference with actual GPU memory allocation",
+          "code_snippet": "        }\n    \n    def _simulate_yolo_inference(self, batch_size: int = 1) -> YOLOMetrics:\n        \"\"\"Simulate YOLO inference with actual GPU memory allocation\"\"\"\n        start_time = time.time()\n        \n        try:\n            # Allocate GPU memory similar to YOLO's requirements\n            test_tensor = torch.zeros((batch_size, 3, 640, 640), device=self.device)\n            memory_used = torch.cuda.memory_allocated() / (1024 * 1024)  # Convert to MB\n            \n            # Simulate processing time\n            time.sleep(self.target_inference_time / 1000)  # Convert ms to seconds\n            \n            # Generate confidence score with bias towards target rate\n            base_confidence = np.random.normal(self.target_metrics[\"success_rate\"], 0.1)\n            confidence = float(np.clip(base_confidence, 0, 1))\n            \n            inference_time = (time.time() - start_time) * 1000  # Convert to ms\n            \n            return YOLOMetrics(\n                inference_time=inference_time,\n                memory_used=int(memory_used),\n                pattern_confidence=confidence,\n                batch_processed=(batch_size > 1)\n            )\n            \n        finally:\n            # Clear GPU memory\n            if torch.cuda.is_available():\n                torch.cuda.empty_cache()\n    \n    def run_diagnostics(self, num_tests: int = 100) -> Dict[str, Any]:\n        \"\"\"Run comprehensive YOLO diagnostics\"\"\"\n        print(\"\\nRunning YOLO Vision Specialist Diagnostics...\")"
+        },
+        "run_diagnostics": {
+          "start_line": 66,
+          "end_line": 115,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "num_tests",
+              "type": "int"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "print",
+              "line": 68
+            },
+            {
+              "name": "range",
+              "line": 71
+            },
+            {
+              "name": "np.mean",
+              "line": 94
+            },
+            {
+              "name": "np.mean",
+              "line": 95
+            },
+            {
+              "name": "np.mean",
+              "line": 96
+            },
+            {
+              "name": "self._simulate_yolo_inference",
+              "line": 74
+            },
+            {
+              "name": "....append",
+              "line": 77
+            },
+            {
+              "name": "....append",
+              "line": 78
+            },
+            {
+              "name": "....append",
+              "line": 79
+            },
+            {
+              "name": "results.append",
+              "line": 84
+            },
+            {
+              "name": "self._generate_recommendations",
+              "line": 112
+            },
+            {
+              "name": "print",
+              "line": 88
+            },
+            {
+              "name": "print",
+              "line": 89
+            },
+            {
+              "name": "print",
+              "line": 90
+            },
+            {
+              "name": "print",
+              "line": 91
+            }
+          ],
+          "docstring": "Run comprehensive YOLO diagnostics",
+          "code_snippet": "                torch.cuda.empty_cache()\n    \n    def run_diagnostics(self, num_tests: int = 100) -> Dict[str, Any]:\n        \"\"\"Run comprehensive YOLO diagnostics\"\"\"\n        print(\"\\nRunning YOLO Vision Specialist Diagnostics...\")\n        \n        results = []\n        for i in range(num_tests):\n            # Test both single and batch processing\n            batch_size = 2 if i % 10 == 0 else 1\n            metrics = self._simulate_yolo_inference(batch_size)\n            \n            # Track metrics\n            self.performance_metrics[\"inference_times\"].append(metrics.inference_time)\n            self.performance_metrics[\"memory_usage\"].append(metrics.memory_used)\n            self.performance_metrics[\"confidence_scores\"].append(metrics.pattern_confidence)\n            \n            if metrics.pattern_confidence >= self.target_metrics[\"confidence_threshold\"]:\n                self.performance_metrics[\"pattern_matches\"] += 1\n            \n            results.append(metrics)\n            \n            # Progress update\n            if (i + 1) % 20 == 0:\n                print(f\"\\nProcessed {i + 1}/{num_tests} tests:\")\n                print(f\"Latest inference time: {metrics.inference_time:.2f}ms\")\n                print(f\"Memory used: {metrics.memory_used}MB\")\n                print(f\"Confidence: {metrics.pattern_confidence:.3f}\")\n        \n        # Calculate final metrics\n        avg_inference = np.mean(self.performance_metrics[\"inference_times\"])\n        avg_memory = np.mean(self.performance_metrics[\"memory_usage\"])\n        avg_confidence = np.mean(self.performance_metrics[\"confidence_scores\"])\n        success_rate = self.performance_metrics[\"pattern_matches\"] / num_tests\n        \n        return {\n            \"summary\": {\n                \"average_inference_time\": avg_inference,\n                \"average_memory_usage\": avg_memory,\n                \"average_confidence\": avg_confidence,\n                \"pattern_success_rate\": success_rate,\n                \"tests_run\": num_tests\n            },\n            \"target_comparison\": {\n                \"inference_time_delta\": avg_inference - self.target_inference_time,\n                \"confidence_gap\": self.target_metrics[\"success_rate\"] - avg_confidence,\n                \"memory_efficiency\": 1 - (avg_memory / self.memory_limit)\n            },\n            \"recommendations\": self._generate_recommendations(\n                avg_inference, avg_memory, avg_confidence\n            )\n        }\n    \n    def _generate_recommendations(self, "
+        },
+        "_generate_recommendations": {
+          "start_line": 117,
+          "end_line": 150,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "avg_inference",
+              "type": "float"
+            },
+            {
+              "name": "avg_memory",
+              "type": "float"
+            },
+            {
+              "name": "avg_confidence",
+              "type": "float"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "recommendations.append",
+              "line": 126
+            },
+            {
+              "name": "recommendations.append",
+              "line": 135
+            },
+            {
+              "name": "recommendations.append",
+              "line": 142
+            }
+          ],
+          "docstring": "Generate optimization recommendations based on metrics",
+          "code_snippet": "        }\n    \n    def _generate_recommendations(self, \n                                avg_inference: float, \n                                avg_memory: float,\n                                avg_confidence: float) -> List[str]:\n        \"\"\"Generate optimization recommendations based on metrics\"\"\"\n        recommendations = []\n        \n        # Check inference time\n        if avg_inference > self.target_inference_time * 1.1:  # 10% margin\n            recommendations.append(\n                f\"Inference time ({avg_inference:.2f}ms) exceeds target \"\n                f\"({self.target_inference_time}ms). Consider batch processing \"\n                \"or model optimization.\"\n            )\n        \n        # Check memory usage\n        memory_usage_ratio = avg_memory / self.memory_limit\n        if memory_usage_ratio > 0.8:  # 80% threshold\n            recommendations.append(\n                f\"High memory usage ({avg_memory:.0f}MB). Consider reducing \"\n                \"batch size or using model pruning.\"\n            )\n        \n        # Check confidence\n        if avg_confidence < self.target_metrics[\"success_rate\"] * 0.9:  # 90% of target\n            recommendations.append(\n                f\"Low confidence ({avg_confidence:.3f} vs target \"\n                f\"{self.target_metrics['success_rate']}). Verify model weights \"\n                \"and pattern matching thresholds.\"\n            )\n        \n        return recommendations\n\ndef run_vision_diagnostics():\n    \"\"\"Run vision specialist diagnostics\"\"\"\n    diagnostic = VisionDiagnostic()"
+        }
+      },
+      "class_variables": [],
+      "bases": []
+    }
+  },
+  "functions": {
+    "run_vision_diagnostics": {
+      "start_line": 150,
+      "end_line": 169,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "VisionDiagnostic",
+          "line": 152
+        },
+        {
+          "name": "diagnostic.run_diagnostics",
+          "line": 153
+        },
+        {
+          "name": "print",
+          "line": 155
+        },
+        {
+          "name": "print",
+          "line": 156
+        },
+        {
+          "name": "....items",
+          "line": 157
+        },
+        {
+          "name": "print",
+          "line": 160
+        },
+        {
+          "name": "....items",
+          "line": 161
+        },
+        {
+          "name": "print",
+          "line": 158
+        },
+        {
+          "name": "print",
+          "line": 162
+        },
+        {
+          "name": "print",
+          "line": 165
+        },
+        {
+          "name": "enumerate",
+          "line": 166
+        },
+        {
+          "name": "print",
+          "line": 167
+        },
+        {
+          "name": "....title",
+          "line": 158
+        },
+        {
+          "name": "....title",
+          "line": 162
+        },
+        {
+          "name": "metric.replace",
+          "line": 158
+        },
+        {
+          "name": "metric.replace",
+          "line": 162
+        }
+      ],
+      "docstring": "Run vision specialist diagnostics",
+      "code_snippet": "        return recommendations\n\ndef run_vision_diagnostics():\n    \"\"\"Run vision specialist diagnostics\"\"\"\n    diagnostic = VisionDiagnostic()\n    results = diagnostic.run_diagnostics(100)\n    \n    print(\"\\nDiagnostic Results:\")\n    print(\"\\nPerformance Summary:\")\n    for metric, value in results[\"summary\"].items():\n        print(f\"{metric.replace('_', ' ').title()}: {value:.3f}\")\n    \n    print(\"\\nTarget Comparison:\")\n    for metric, value in results[\"target_comparison\"].items():\n        print(f\"{metric.replace('_', ' ').title()}: {value:.3f}\")\n    \n    if results[\"recommendations\"]:\n        print(\"\\nRecommendations:\")\n        for i, rec in enumerate(results[\"recommendations\"], 1):\n            print(f\"{i}. {rec}\")\n\nif __name__ == \"__main__\":\n    run_vision_diagnostics()"
+    }
+  },
+  "constants": {}
+}

@@ -1,0 +1,362 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\testing\\math_validation\\test_resource_allocation.py",
+  "imports": [
+    {
+      "name": "unittest",
+      "line": 11
+    },
+    {
+      "name": "sys",
+      "line": 12
+    },
+    {
+      "name": "os",
+      "line": 13
+    },
+    {
+      "name": "math",
+      "line": 14
+    },
+    {
+      "name": "numpy",
+      "line": 15
+    },
+    {
+      "name": "isekaizen.core.mathematical_foundation.resource_allocation.optimize_resource_allocation",
+      "line": 21
+    },
+    {
+      "name": "isekaizen.core.mathematical_foundation.resource_allocation.component_utility_function",
+      "line": 21
+    }
+  ],
+  "classes": {
+    "TestResourceAllocation": {
+      "start_line": 26,
+      "end_line": 196,
+      "methods": {
+        "test_component_utility_function": {
+          "start_line": 31,
+          "end_line": 47,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "component_utility_function",
+              "line": 43
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 44
+            }
+          ],
+          "docstring": "Test the component utility function against known values.",
+          "code_snippet": "    \"\"\"\n    \n    def test_component_utility_function(self):\n        \"\"\"Test the component utility function against known values.\"\"\"\n        # Test cases from the mathematical foundation\n        test_cases = [\n            (0.0, 1.0, 1.0, 0.0),        # Zero resources \u2192 zero utility\n            (1.0, 1.0, 1.0, 0.693),      # ln(2) \u2248 0.693\n            (2.0, 1.0, 1.0, 1.099),      # ln(3) \u2248 1.099\n            (1.0, 2.0, 1.0, 1.386),      # 2 * ln(2) \u2248 1.386\n            (1.0, 1.0, 2.0, 1.099)       # ln(3) \u2248 1.099\n        ]\n        \n        for resource, alpha, beta, expected in test_cases:\n            result = component_utility_function(resource, alpha, beta)\n            self.assertAlmostEqual(result, expected, delta=0.001, \n                                 msg=f\"Resource {resource}, Alpha {alpha}, Beta {beta}: expected {expected}, got {result}\")\n    \n    def test_optimize_resource_allocation_simple(self):\n        \"\"\"Test resource allocation with simple equal priorities.\"\"\"\n        # Two components with equal priority and min requirements"
+        },
+        "test_optimize_resource_allocation_simple": {
+          "start_line": 47,
+          "end_line": 64,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "optimize_resource_allocation",
+              "line": 55
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 58
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 59
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 62
+            },
+            {
+              "name": "sum",
+              "line": 62
+            }
+          ],
+          "docstring": "Test resource allocation with simple equal priorities.",
+          "code_snippet": "                                 msg=f\"Resource {resource}, Alpha {alpha}, Beta {beta}: expected {expected}, got {result}\")\n    \n    def test_optimize_resource_allocation_simple(self):\n        \"\"\"Test resource allocation with simple equal priorities.\"\"\"\n        # Two components with equal priority and min requirements\n        priorities = [0.5, 0.5]\n        min_resources = [1.0, 1.0]\n        total_resources = 5.0\n        \n        # Expected: equal allocation beyond minimums\n        result = optimize_resource_allocation(priorities, min_resources, total_resources)\n        \n        # Both should get 2.5\n        self.assertAlmostEqual(result[0], 2.5, delta=0.01)\n        self.assertAlmostEqual(result[1], 2.5, delta=0.01)\n        \n        # Sum should equal total resources\n        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_priority(self):\n        \"\"\"Test resource allocation with different priorities.\"\"\"\n        # Two components with different priorities but same min requirements"
+        },
+        "test_optimize_resource_allocation_priority": {
+          "start_line": 64,
+          "end_line": 84,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "optimize_resource_allocation",
+              "line": 72
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 75
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 78
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 79
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 82
+            },
+            {
+              "name": "sum",
+              "line": 82
+            }
+          ],
+          "docstring": "Test resource allocation with different priorities.",
+          "code_snippet": "        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_priority(self):\n        \"\"\"Test resource allocation with different priorities.\"\"\"\n        # Two components with different priorities but same min requirements\n        priorities = [0.75, 0.25]\n        min_resources = [1.0, 1.0]\n        total_resources = 5.0\n        \n        # Expected: allocation beyond minimums proportional to priority\n        result = optimize_resource_allocation(priorities, min_resources, total_resources)\n        \n        # First should get more than second\n        self.assertGreater(result[0], result[1])\n        \n        # First should get 3.5, second should get 1.5\n        self.assertAlmostEqual(result[0], 3.5, delta=0.1)\n        self.assertAlmostEqual(result[1], 1.5, delta=0.1)\n        \n        # Sum should equal total resources\n        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_min_requirements(self):\n        \"\"\"Test resource allocation with different minimum requirements.\"\"\"\n        # Two components with equal priorities but different min requirements"
+        },
+        "test_optimize_resource_allocation_min_requirements": {
+          "start_line": 84,
+          "end_line": 101,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "optimize_resource_allocation",
+              "line": 92
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 95
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 96
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 99
+            },
+            {
+              "name": "sum",
+              "line": 99
+            }
+          ],
+          "docstring": "Test resource allocation with different minimum requirements.",
+          "code_snippet": "        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_min_requirements(self):\n        \"\"\"Test resource allocation with different minimum requirements.\"\"\"\n        # Two components with equal priorities but different min requirements\n        priorities = [0.5, 0.5]\n        min_resources = [2.0, 1.0]\n        total_resources = 5.0\n        \n        # Expected: equal allocation beyond minimums\n        result = optimize_resource_allocation(priorities, min_resources, total_resources)\n        \n        # First gets 2 + 1 = 3, second gets 1 + 1 = 2\n        self.assertAlmostEqual(result[0], 3.0, delta=0.1)\n        self.assertAlmostEqual(result[1], 2.0, delta=0.1)\n        \n        # Sum should equal total resources\n        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_insufficient(self):\n        \"\"\"Test resource allocation when total resources are insufficient for minimums.\"\"\"\n        # Two components with requirements greater than total"
+        },
+        "test_optimize_resource_allocation_insufficient": {
+          "start_line": 101,
+          "end_line": 118,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "optimize_resource_allocation",
+              "line": 109
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 112
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 113
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 116
+            },
+            {
+              "name": "sum",
+              "line": 116
+            }
+          ],
+          "docstring": "Test resource allocation when total resources are insufficient for minimums.",
+          "code_snippet": "        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_insufficient(self):\n        \"\"\"Test resource allocation when total resources are insufficient for minimums.\"\"\"\n        # Two components with requirements greater than total\n        priorities = [0.6, 0.4]\n        min_resources = [3.0, 2.0]\n        total_resources = 4.0\n        \n        # Expected: proportional allocation based on min requirements\n        result = optimize_resource_allocation(priorities, min_resources, total_resources)\n        \n        # First should get 3/5 of total, second should get 2/5 of total\n        self.assertAlmostEqual(result[0], 2.4, delta=0.1)\n        self.assertAlmostEqual(result[1], 1.6, delta=0.1)\n        \n        # Sum should equal total resources\n        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_many_components(self):\n        \"\"\"Test resource allocation with many components.\"\"\"\n        # Five components with varying priorities and requirements"
+        },
+        "test_optimize_resource_allocation_many_components": {
+          "start_line": 118,
+          "end_line": 138,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "optimize_resource_allocation",
+              "line": 126
+            },
+            {
+              "name": "self.assertLess",
+              "line": 129
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 132
+            },
+            {
+              "name": "enumerate",
+              "line": 135
+            },
+            {
+              "name": "sum",
+              "line": 132
+            },
+            {
+              "name": "self.assertGreaterEqual",
+              "line": 136
+            }
+          ],
+          "docstring": "Test resource allocation with many components.",
+          "code_snippet": "        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_many_components(self):\n        \"\"\"Test resource allocation with many components.\"\"\"\n        # Five components with varying priorities and requirements\n        priorities = [0.1, 0.2, 0.3, 0.2, 0.2]\n        min_resources = [1.0, 1.5, 2.0, 1.0, 0.5]\n        total_resources = 10.0\n        \n        # Expected: allocation based on priorities beyond minimums\n        result = optimize_resource_allocation(priorities, min_resources, total_resources)\n        \n        # Check that higher priority gets more resources\n        self.assertLess(result[0], result[2])  # Priority 0.1 < 0.3\n        \n        # Sum should equal total resources\n        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n        \n        # All components should get at least their minimum\n        for i, min_req in enumerate(min_resources):\n            self.assertGreaterEqual(result[i], min_req)\n    \n    def test_optimize_resource_allocation_utility_parameters(self):\n        \"\"\"Test resource allocation with custom utility function parameters.\"\"\"\n        # Three components with different utility scaling and sensitivity"
+        },
+        "test_optimize_resource_allocation_utility_parameters": {
+          "start_line": 138,
+          "end_line": 159,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "optimize_resource_allocation",
+              "line": 148
+            },
+            {
+              "name": "self.assertGreater",
+              "line": 154
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 157
+            },
+            {
+              "name": "sum",
+              "line": 157
+            }
+          ],
+          "docstring": "Test resource allocation with custom utility function parameters.",
+          "code_snippet": "            self.assertGreaterEqual(result[i], min_req)\n    \n    def test_optimize_resource_allocation_utility_parameters(self):\n        \"\"\"Test resource allocation with custom utility function parameters.\"\"\"\n        # Three components with different utility scaling and sensitivity\n        priorities = [0.5, 0.5, 0.5]\n        min_resources = [1.0, 1.0, 1.0]\n        total_resources = 9.0\n        alpha_values = [2.0, 1.0, 0.5]  # First has higher utility scaling\n        beta_values = [0.5, 1.0, 2.0]   # Third has higher resource sensitivity\n        \n        # Expected: allocation based on utility function parameters\n        result = optimize_resource_allocation(\n            priorities, min_resources, total_resources, \n            alpha_values, beta_values\n        )\n        \n        # First should get more resources due to higher alpha\n        self.assertGreater(result[0], result[1])\n        \n        # Sum should equal total resources\n        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_zero_priority(self):\n        \"\"\"Test resource allocation with zero priorities.\"\"\"\n        # Components where some have zero priority"
+        },
+        "test_optimize_resource_allocation_zero_priority": {
+          "start_line": 159,
+          "end_line": 178,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "optimize_resource_allocation",
+              "line": 167
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 170
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 173
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 176
+            },
+            {
+              "name": "sum",
+              "line": 176
+            }
+          ],
+          "docstring": "Test resource allocation with zero priorities.",
+          "code_snippet": "        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_zero_priority(self):\n        \"\"\"Test resource allocation with zero priorities.\"\"\"\n        # Components where some have zero priority\n        priorities = [0.5, 0.0, 0.5]\n        min_resources = [1.0, 0.5, 1.0]\n        total_resources = 5.0\n        \n        # Expected: zero priority components get only minimum resources\n        result = optimize_resource_allocation(priorities, min_resources, total_resources)\n        \n        # Second component should get exactly its minimum\n        self.assertAlmostEqual(result[1], min_resources[1], delta=0.01)\n        \n        # First and third components should get equal resources\n        self.assertAlmostEqual(result[0], result[2], delta=0.01)\n        \n        # Sum should equal total resources\n        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_edge_cases(self):\n        \"\"\"Test resource allocation with edge cases.\"\"\"\n        # Test with single component"
+        },
+        "test_optimize_resource_allocation_edge_cases": {
+          "start_line": 178,
+          "end_line": 196,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "optimize_resource_allocation",
+              "line": 181
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 182
+            },
+            {
+              "name": "optimize_resource_allocation",
+              "line": 185
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 186
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 187
+            },
+            {
+              "name": "optimize_resource_allocation",
+              "line": 190
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 192
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 193
+            },
+            {
+              "name": "self.assertAlmostEqual",
+              "line": 194
+            }
+          ],
+          "docstring": "Test resource allocation with edge cases.",
+          "code_snippet": "        self.assertAlmostEqual(sum(result), total_resources, delta=0.01)\n    \n    def test_optimize_resource_allocation_edge_cases(self):\n        \"\"\"Test resource allocation with edge cases.\"\"\"\n        # Test with single component\n        result = optimize_resource_allocation([1.0], [1.0], 5.0)\n        self.assertAlmostEqual(result[0], 5.0, delta=0.01)\n        \n        # Test with no resources\n        result = optimize_resource_allocation([0.5, 0.5], [0.0, 0.0], 0.0)\n        self.assertAlmostEqual(result[0], 0.0, delta=0.01)\n        self.assertAlmostEqual(result[1], 0.0, delta=0.01)\n        \n        # Test with all zero priorities\n        result = optimize_resource_allocation([0.0, 0.0, 0.0], [1.0, 1.0, 1.0], 6.0)\n        # All should get equal resources beyond minimums\n        self.assertAlmostEqual(result[0], 2.0, delta=0.1)\n        self.assertAlmostEqual(result[1], 2.0, delta=0.1)\n        self.assertAlmostEqual(result[2], 2.0, delta=0.1)\n\n\nif __name__ == '__main__':\n    unittest.main()"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "..."
+      ],
+      "docstring": "\n    Test the resource allocation implementation against known test cases.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

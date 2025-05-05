@@ -1,0 +1,90 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\optimizers\\lr\\boundary_calculator.py",
+  "imports": [
+    {
+      "name": "math",
+      "line": 7
+    },
+    {
+      "name": "numpy",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "typing.Dict",
+      "line": 10
+    },
+    {
+      "name": "typing.List",
+      "line": 10
+    },
+    {
+      "name": "typing.Optional",
+      "line": 10
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 10
+    },
+    {
+      "name": "typing.Any",
+      "line": 10
+    },
+    {
+      "name": "typing.Union",
+      "line": 10
+    }
+  ],
+  "classes": {
+    "LRBoundaryCalculator": {
+      "start_line": 14,
+      "end_line": 47,
+      "methods": {
+        "__init__": {
+          "start_line": 17,
+          "end_line": 37,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "initial_lr"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._initialize_pattern_factors",
+              "line": 35
+            }
+          ],
+          "code_snippet": "    \"\"\"Calculate optimal learning rate boundaries based on isekaiZen framework concepts.\"\"\"\n    \n    def __init__(self, initial_lr=0.01, pattern_map=None):\n        # Core parameters\n        self.initial_lr = initial_lr\n        self.pattern_map = pattern_map\n        self.Lc = 8.0  # Critical cognitive threshold\n        self.\u03c3 = 0.8   # Cognitive transition sharpness\n        \n        # Learning rate bounds\n        self.global_min_lr = 0.0001\n        self.global_max_lr = 0.1\n        \n        # History tracking\n        self.train_acc_history = []\n        self.val_acc_history = []\n        self.lr_history = []\n        self.gap_history = []\n        \n        # Initialize pattern factors\n        self.pattern_lr_factors = self._initialize_pattern_factors()\n\n    def _initialize_pattern_factors(self):\n        \"\"\"Initialize pattern-specific LR adjustment factors.\"\"\"\n        return {"
+        },
+        "_initialize_pattern_factors": {
+          "start_line": 37,
+          "end_line": 47,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "Initialize pattern-specific LR adjustment factors.",
+          "code_snippet": "        self.pattern_lr_factors = self._initialize_pattern_factors()\n\n    def _initialize_pattern_factors(self):\n        \"\"\"Initialize pattern-specific LR adjustment factors.\"\"\"\n        return {\n            'structure': 1.0,\n            'relationship': 0.9,\n            'intensity': 1.1,\n            'dominance': 1.0,\n            'temporal': 0.8,\n            'default': 1.0\n        }"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Calculate optimal learning rate boundaries based on isekaiZen framework concepts."
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

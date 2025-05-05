@@ -1,0 +1,1167 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\pattern_map_utils.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "copy",
+      "line": 10
+    },
+    {
+      "name": "time",
+      "line": 11
+    },
+    {
+      "name": "numpy",
+      "line": 12
+    },
+    {
+      "name": "typing.Dict",
+      "line": 13
+    },
+    {
+      "name": "typing.Any",
+      "line": 13
+    },
+    {
+      "name": "typing.Optional",
+      "line": 13
+    },
+    {
+      "name": "typing.Set",
+      "line": 13
+    },
+    {
+      "name": "typing.List",
+      "line": 13
+    },
+    {
+      "name": "typing.Union",
+      "line": 13
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "translate_pattern_map_to_standard_format": {
+      "start_line": 17,
+      "end_line": 86,
+      "parameters": [
+        {
+          "name": "pattern_map"
+        }
+      ],
+      "return_type": "complex_type",
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 30
+        },
+        {
+          "name": "detect_pattern_map_format",
+          "line": 53
+        },
+        {
+          "name": "logger.info",
+          "line": 55
+        },
+        {
+          "name": "copy.deepcopy",
+          "line": 45
+        },
+        {
+          "name": "isinstance",
+          "line": 48
+        },
+        {
+          "name": "logger.error",
+          "line": 49
+        },
+        {
+          "name": "create_fallback_pattern_map",
+          "line": 50
+        },
+        {
+          "name": "validate_standardized_map",
+          "line": 71
+        },
+        {
+          "name": "calculate_derived_metrics",
+          "line": 74
+        },
+        {
+          "name": "log_translation_statistics",
+          "line": 77
+        },
+        {
+          "name": "process_streamlined_format",
+          "line": 60
+        },
+        {
+          "name": "logger.error",
+          "line": 82
+        },
+        {
+          "name": "create_fallback_pattern_map",
+          "line": 84
+        },
+        {
+          "name": "process_original_format",
+          "line": 62
+        },
+        {
+          "name": "type",
+          "line": 49
+        },
+        {
+          "name": "process_nested_format",
+          "line": 64
+        },
+        {
+          "name": "logger.warning",
+          "line": 67
+        },
+        {
+          "name": "process_unknown_format",
+          "line": 68
+        },
+        {
+          "name": "str",
+          "line": 82
+        }
+      ],
+      "docstring": "\n    Translate pattern map from any format to a standardized internal format.\n    \n    This function serves as a single source of truth for pattern map translation,\n    ensuring all components work with a consistent data format.\n    \n    Args:\n        pattern_map: Original pattern map in any format\n        \n    Returns:\n        Standardized pattern map with all necessary components\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef translate_pattern_map_to_standard_format(pattern_map: Dict[str, Any]) -> Dict[str, Any]:\n    \"\"\"\n    Translate pattern map from any format to a standardized internal format.\n    \n    This function serves as a single source of truth for pattern map translation,\n    ensuring all components work with a consistent data format.\n    \n    Args:\n        pattern_map: Original pattern map in any format\n        \n    Returns:\n        Standardized pattern map with all necessary components\n    \"\"\"\n    logger.info(\"Starting pattern map translation to standardized format\")\n    \n    # Create empty standardized format\n    standard_map = {\n        'format_version': '1.0',\n        'pattern_assignments': {},  # Maps indices to pattern types\n        'pattern_distribution': {}, # Count per pattern type\n        'pattern_complexities': {}, # Complexity metrics\n        'pattern_features': {},     # Feature values per pattern\n        'pattern_risks': {},        # Initial risk assessments\n        'pattern_metadata': {},     # Additional metadata\n        'source_format': 'unknown'  # Track source format for debugging\n    }\n    \n    # Start by making a deep copy to avoid modifying the original\n    original_map = copy.deepcopy(pattern_map) if pattern_map else {}\n    \n    # Validate input\n    if not isinstance(original_map, dict):\n        logger.error(f\"Invalid pattern map format: expected dictionary, got {type(original_map)}\")\n        return create_fallback_pattern_map()\n    \n    # Detect pattern map format\n    format_type = detect_pattern_map_format(original_map)\n    standard_map['source_format'] = format_type\n    logger.info(f\"Detected pattern map format: {format_type}\")\n    \n    try:\n        # Process based on detected format\n        if format_type == 'streamlined':\n            process_streamlined_format(original_map, standard_map)\n        elif format_type == 'original':\n            process_original_format(original_map, standard_map)\n        elif format_type == 'nested':\n            process_nested_format(original_map, standard_map)\n        else:\n            # Unknown format, create best-effort translation\n            logger.warning(\"Unknown pattern map format. Creating best-effort translation.\")\n            process_unknown_format(original_map, standard_map)\n        \n        # Validate the standardized map\n        validate_standardized_map(standard_map)\n        \n        # Calculate derived metrics\n        calculate_derived_metrics(standard_map)\n        \n        # Log translation statistics\n        log_translation_statistics(standard_map)\n        \n        return standard_map\n        \n    except Exception as e:\n        logger.error(f\"Error translating pattern map: {str(e)}\", exc_info=True)\n        # Fallback to a minimal valid pattern map\n        return create_fallback_pattern_map()\n\ndef detect_pattern_map_format(pattern_map: Dict[str, Any]) -> str:\n    \"\"\"Detect the format of the input pattern map.\"\"\"\n    "
+    },
+    "detect_pattern_map_format": {
+      "start_line": 86,
+      "end_line": 104,
+      "parameters": [
+        {
+          "name": "pattern_map"
+        }
+      ],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "isinstance",
+          "line": 94
+        },
+        {
+          "name": "isinstance",
+          "line": 96
+        }
+      ],
+      "docstring": "Detect the format of the input pattern map.",
+      "code_snippet": "        return create_fallback_pattern_map()\n\ndef detect_pattern_map_format(pattern_map: Dict[str, Any]) -> str:\n    \"\"\"Detect the format of the input pattern map.\"\"\"\n    \n    # Check for streamlined format (direct pattern_distribution and pattern_complexities)\n    if 'pattern_distribution' in pattern_map and 'pattern_complexities' in pattern_map:\n        return 'streamlined'\n    \n    # Check for original format (nested pattern_map with pattern_map key)\n    if 'pattern_map' in pattern_map and isinstance(pattern_map['pattern_map'], dict):\n        nested_map = pattern_map['pattern_map']\n        if 'pattern_map' in nested_map and isinstance(nested_map['pattern_map'], dict):\n            return 'nested'\n        elif 'pattern_distribution' in nested_map:\n            return 'original'\n    \n    # Unknown format\n    return 'unknown'\n\ndef process_streamlined_format(original_map: Dict[str, Any], standard_map: Dict[str, Any]):\n    \"\"\"Process streamlined pattern map format.\"\"\"\n    logger.info(\"Processing streamlined pattern map format\")"
+    },
+    "process_streamlined_format": {
+      "start_line": 104,
+      "end_line": 153,
+      "parameters": [
+        {
+          "name": "original_map"
+        },
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 106
+        },
+        {
+          "name": "original_map.get",
+          "line": 109
+        },
+        {
+          "name": "copy.deepcopy",
+          "line": 110
+        },
+        {
+          "name": "original_map.get",
+          "line": 113
+        },
+        {
+          "name": "pattern_complexities.items",
+          "line": 117
+        },
+        {
+          "name": "create_pattern_assignments_from_distribution",
+          "line": 140
+        },
+        {
+          "name": "calculate_initial_risks",
+          "line": 147
+        },
+        {
+          "name": "extract_pattern_features",
+          "line": 144
+        },
+        {
+          "name": "copy.deepcopy",
+          "line": 151
+        },
+        {
+          "name": "isinstance",
+          "line": 118
+        },
+        {
+          "name": "float",
+          "line": 121
+        },
+        {
+          "name": "float",
+          "line": 122
+        },
+        {
+          "name": "float",
+          "line": 123
+        },
+        {
+          "name": "int",
+          "line": 124
+        },
+        {
+          "name": "isinstance",
+          "line": 128
+        },
+        {
+          "name": "float",
+          "line": 128
+        },
+        {
+          "name": "max",
+          "line": 131
+        },
+        {
+          "name": "min",
+          "line": 132
+        },
+        {
+          "name": "pattern_distribution.get",
+          "line": 133
+        },
+        {
+          "name": "complexity_data.get",
+          "line": 121
+        },
+        {
+          "name": "complexity_data.get",
+          "line": 122
+        },
+        {
+          "name": "complexity_data.get",
+          "line": 123
+        },
+        {
+          "name": "complexity_data.get",
+          "line": 124
+        }
+      ],
+      "docstring": "Process streamlined pattern map format.",
+      "code_snippet": "    return 'unknown'\n\ndef process_streamlined_format(original_map: Dict[str, Any], standard_map: Dict[str, Any]):\n    \"\"\"Process streamlined pattern map format.\"\"\"\n    logger.info(\"Processing streamlined pattern map format\")\n    \n    # Extract pattern distribution\n    pattern_distribution = original_map.get('pattern_distribution', {})\n    standard_map['pattern_distribution'] = copy.deepcopy(pattern_distribution)\n    \n    # Extract pattern complexities - preserving original scale\n    pattern_complexities = original_map.get('pattern_complexities', {})\n    \n    # Process complexities into a standard format while preserving their original values\n    standard_complexities = {}\n    for pattern_type, complexity_data in pattern_complexities.items():\n        if isinstance(complexity_data, dict) and 'avg_complexity' in complexity_data:\n            # Already in detailed format - keep values as is\n            standard_complexities[pattern_type] = {\n                'avg_complexity': float(complexity_data.get('avg_complexity', 0.5)),\n                'min_complexity': float(complexity_data.get('min_complexity', 0.1)),\n                'max_complexity': float(complexity_data.get('max_complexity', 0.9)),\n                'pattern_count': int(complexity_data.get('pattern_count', 0))\n            }\n        else:\n            # Simple value format - keep original value\n            complexity_value = float(complexity_data) if isinstance(complexity_data, (int, float)) else 0.5\n            standard_complexities[pattern_type] = {\n                'avg_complexity': complexity_value,\n                'min_complexity': max(0.1, complexity_value * 0.5),\n                'max_complexity': min(4.9, complexity_value * 1.5),\n                'pattern_count': pattern_distribution.get(pattern_type, 0)\n            }\n    \n    standard_map['pattern_complexities'] = standard_complexities\n    \n    # Create pattern assignments - streamlined format doesn't have explicit assignments\n    # so we need to generate them based on distribution\n    create_pattern_assignments_from_distribution(pattern_distribution, standard_map)\n    \n    # Extract pattern features if available\n    if 'patterns_by_type' in original_map:\n        extract_pattern_features(original_map['patterns_by_type'], standard_map)\n    \n    # Calculate initial risk values\n    calculate_initial_risks(standard_map)\n    \n    # Copy metadata\n    if 'metadata' in original_map:\n        standard_map['pattern_metadata'] = copy.deepcopy(original_map['metadata'])\n\ndef process_original_format(original_map: Dict[str, Any], standard_map: Dict[str, Any]):\n    \"\"\"Process original pattern map format.\"\"\"\n    logger.info(\"Processing original pattern map format\")"
+    },
+    "process_original_format": {
+      "start_line": 153,
+      "end_line": 197,
+      "parameters": [
+        {
+          "name": "original_map"
+        },
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 155
+        },
+        {
+          "name": "original_map.get",
+          "line": 157
+        },
+        {
+          "name": "nested_map.get",
+          "line": 160
+        },
+        {
+          "name": "copy.deepcopy",
+          "line": 161
+        },
+        {
+          "name": "calculate_initial_risks",
+          "line": 191
+        },
+        {
+          "name": "....items",
+          "line": 166
+        },
+        {
+          "name": "create_pattern_assignments_from_distribution",
+          "line": 177
+        },
+        {
+          "name": "copy.deepcopy",
+          "line": 181
+        },
+        {
+          "name": "calculate_complexities_from_assignments",
+          "line": 184
+        },
+        {
+          "name": "extract_pattern_features",
+          "line": 188
+        },
+        {
+          "name": "copy.deepcopy",
+          "line": 195
+        },
+        {
+          "name": "data.get",
+          "line": 167
+        },
+        {
+          "name": "str",
+          "line": 169
+        },
+        {
+          "name": "float",
+          "line": 171
+        },
+        {
+          "name": "float",
+          "line": 172
+        },
+        {
+          "name": "data.get",
+          "line": 171
+        },
+        {
+          "name": "data.get",
+          "line": 172
+        }
+      ],
+      "docstring": "Process original pattern map format.",
+      "code_snippet": "        standard_map['pattern_metadata'] = copy.deepcopy(original_map['metadata'])\n\ndef process_original_format(original_map: Dict[str, Any], standard_map: Dict[str, Any]):\n    \"\"\"Process original pattern map format.\"\"\"\n    logger.info(\"Processing original pattern map format\")\n    \n    nested_map = original_map.get('pattern_map', {})\n    \n    # Extract pattern distribution\n    pattern_distribution = nested_map.get('pattern_distribution', {})\n    standard_map['pattern_distribution'] = copy.deepcopy(pattern_distribution)\n    \n    # Extract pattern assignments\n    if 'pattern_map' in nested_map:\n        pattern_assignments = {}\n        for idx, data in nested_map['pattern_map'].items():\n            pattern_type = data.get('pattern_type')\n            if pattern_type:\n                pattern_assignments[str(idx)] = {\n                    'pattern_type': pattern_type,\n                    'complexity': float(data.get('complexity', 0.5)),\n                    'confidence': float(data.get('confidence', 0.8))\n                }\n        standard_map['pattern_assignments'] = pattern_assignments\n    else:\n        # No explicit assignments, create from distribution\n        create_pattern_assignments_from_distribution(pattern_distribution, standard_map)\n    \n    # Extract pattern complexities\n    if 'pattern_complexities' in nested_map:\n        standard_map['pattern_complexities'] = copy.deepcopy(nested_map['pattern_complexities'])\n    else:\n        # Calculate complexities from assignments\n        calculate_complexities_from_assignments(standard_map)\n    \n    # Extract pattern features if available\n    if 'patterns_by_type' in nested_map:\n        extract_pattern_features(nested_map['patterns_by_type'], standard_map)\n    \n    # Calculate initial risks\n    calculate_initial_risks(standard_map)\n    \n    # Copy metadata\n    if 'metadata' in nested_map:\n        standard_map['pattern_metadata'] = copy.deepcopy(nested_map['metadata'])\n\ndef process_nested_format(original_map: Dict[str, Any], standard_map: Dict[str, Any]):\n    \"\"\"Process nested pattern map format.\"\"\"\n    logger.info(\"Processing nested pattern map format\")"
+    },
+    "process_nested_format": {
+      "start_line": 197,
+      "end_line": 246,
+      "parameters": [
+        {
+          "name": "original_map"
+        },
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 199
+        },
+        {
+          "name": "....get",
+          "line": 201
+        },
+        {
+          "name": "nested_map.items",
+          "line": 219
+        },
+        {
+          "name": "calculate_initial_risks",
+          "line": 239
+        },
+        {
+          "name": "original_map.get",
+          "line": 204
+        },
+        {
+          "name": "copy.deepcopy",
+          "line": 205
+        },
+        {
+          "name": "nested_map.values",
+          "line": 211
+        },
+        {
+          "name": "data.get",
+          "line": 220
+        },
+        {
+          "name": "original_map.get",
+          "line": 230
+        },
+        {
+          "name": "copy.deepcopy",
+          "line": 231
+        },
+        {
+          "name": "calculate_complexities_from_assignments",
+          "line": 236
+        },
+        {
+          "name": "original_map.get",
+          "line": 242
+        },
+        {
+          "name": "copy.deepcopy",
+          "line": 243
+        },
+        {
+          "name": "original_map.get",
+          "line": 201
+        },
+        {
+          "name": "data.get",
+          "line": 212
+        },
+        {
+          "name": "str",
+          "line": 222
+        },
+        {
+          "name": "float",
+          "line": 224
+        },
+        {
+          "name": "float",
+          "line": 225
+        },
+        {
+          "name": "pattern_counts.get",
+          "line": 214
+        },
+        {
+          "name": "data.get",
+          "line": 224
+        },
+        {
+          "name": "data.get",
+          "line": 225
+        }
+      ],
+      "docstring": "Process nested pattern map format.",
+      "code_snippet": "        standard_map['pattern_metadata'] = copy.deepcopy(nested_map['metadata'])\n\ndef process_nested_format(original_map: Dict[str, Any], standard_map: Dict[str, Any]):\n    \"\"\"Process nested pattern map format.\"\"\"\n    logger.info(\"Processing nested pattern map format\")\n    \n    nested_map = original_map.get('pattern_map', {}).get('pattern_map', {})\n    \n    # Extract pattern distribution from nested structure\n    if 'pattern_distribution' in original_map.get('pattern_map', {}):\n        standard_map['pattern_distribution'] = copy.deepcopy(\n            original_map['pattern_map']['pattern_distribution']\n        )\n    else:\n        # Calculate distribution from nested pattern assignments\n        pattern_counts = {}\n        for data in nested_map.values():\n            pattern_type = data.get('pattern_type')\n            if pattern_type:\n                pattern_counts[pattern_type] = pattern_counts.get(pattern_type, 0) + 1\n        standard_map['pattern_distribution'] = pattern_counts\n    \n    # Extract pattern assignments from nested structure\n    pattern_assignments = {}\n    for idx, data in nested_map.items():\n        pattern_type = data.get('pattern_type')\n        if pattern_type:\n            pattern_assignments[str(idx)] = {\n                'pattern_type': pattern_type,\n                'complexity': float(data.get('complexity', 0.5)),\n                'confidence': float(data.get('confidence', 0.8))\n            }\n    standard_map['pattern_assignments'] = pattern_assignments\n    \n    # Extract or calculate pattern complexities\n    if 'pattern_complexities' in original_map.get('pattern_map', {}):\n        standard_map['pattern_complexities'] = copy.deepcopy(\n            original_map['pattern_map']['pattern_complexities']\n        )\n    else:\n        # Calculate complexities from assignments\n        calculate_complexities_from_assignments(standard_map)\n    \n    # Calculate initial risks\n    calculate_initial_risks(standard_map)\n    \n    # Copy metadata if available\n    if 'metadata' in original_map.get('pattern_map', {}):\n        standard_map['pattern_metadata'] = copy.deepcopy(\n            original_map['pattern_map']['metadata']\n        )\n\ndef process_unknown_format(original_map: Dict[str, Any], standard_map: Dict[str, Any]):\n    \"\"\"Process unknown pattern map format, creating a best-effort translation.\"\"\""
+    },
+    "process_unknown_format": {
+      "start_line": 247,
+      "end_line": 288,
+      "parameters": [
+        {
+          "name": "original_map"
+        },
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.warning",
+          "line": 249
+        },
+        {
+          "name": "set",
+          "line": 252
+        },
+        {
+          "name": "create_pattern_assignments_from_distribution",
+          "line": 271
+        },
+        {
+          "name": "calculate_initial_risks",
+          "line": 280
+        },
+        {
+          "name": "logger.warning",
+          "line": 262
+        },
+        {
+          "name": "len",
+          "line": 266
+        },
+        {
+          "name": "list",
+          "line": 286
+        },
+        {
+          "name": "isinstance",
+          "line": 256
+        },
+        {
+          "name": "pattern_types.update",
+          "line": 257
+        },
+        {
+          "name": "original_map.keys",
+          "line": 286
+        },
+        {
+          "name": "....keys",
+          "line": 257
+        }
+      ],
+      "docstring": "Process unknown pattern map format, creating a best-effort translation.",
+      "code_snippet": "        )\n\ndef process_unknown_format(original_map: Dict[str, Any], standard_map: Dict[str, Any]):\n    \"\"\"Process unknown pattern map format, creating a best-effort translation.\"\"\"\n    logger.warning(\"Processing unknown pattern map format with best-effort approach\")\n    \n    # Try to extract pattern types from any available keys\n    pattern_types = set()\n    \n    # Look for common keys that might contain pattern information\n    for key in ['pattern_distribution', 'pattern_types', 'patterns', 'categories']:\n        if key in original_map and isinstance(original_map[key], dict):\n            pattern_types.update(original_map[key].keys())\n    \n    # If still no pattern types found, use default set\n    if not pattern_types:\n        pattern_types = {\"structure\", \"relationship\", \"intensity\", \"dominance\", \"temporal\"}\n        logger.warning(f\"No pattern types found. Using defaults: {pattern_types}\")\n    \n    # Create even distribution\n    total_examples = 1000  # Arbitrary default\n    examples_per_pattern = total_examples // len(pattern_types)\n    pattern_distribution = {p: examples_per_pattern for p in pattern_types}\n    standard_map['pattern_distribution'] = pattern_distribution\n    \n    # Create synthetic pattern assignments\n    create_pattern_assignments_from_distribution(pattern_distribution, standard_map)\n    \n    # Create default complexities\n    standard_map['pattern_complexities'] = {\n        p: {'avg_complexity': 0.5, 'min_complexity': 0.2, 'max_complexity': 0.8, 'pattern_count': examples_per_pattern}\n        for p in pattern_types\n    }\n    \n    # Calculate initial risks\n    calculate_initial_risks(standard_map)\n    \n    # Add metadata\n    standard_map['pattern_metadata'] = {\n        'synthetic': True,\n        'created_from_unknown_format': True,\n        'original_keys': list(original_map.keys())\n    }\n\ndef create_pattern_assignments_from_distribution(distribution: Dict[str, Union[int, float]], standard_map: Dict[str, Any]):\n    \"\"\"Create pattern assignments based on pattern distribution.\"\"\""
+    },
+    "create_pattern_assignments_from_distribution": {
+      "start_line": 289,
+      "end_line": 378,
+      "parameters": [
+        {
+          "name": "distribution"
+        },
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 291
+        },
+        {
+          "name": "standard_map.get",
+          "line": 297
+        },
+        {
+          "name": "all",
+          "line": 300
+        },
+        {
+          "name": "working_distribution.items",
+          "line": 313
+        },
+        {
+          "name": "logger.info",
+          "line": 376
+        },
+        {
+          "name": "distribution.items",
+          "line": 306
+        },
+        {
+          "name": "logger.info",
+          "line": 308
+        },
+        {
+          "name": "max",
+          "line": 335
+        },
+        {
+          "name": "range",
+          "line": 340
+        },
+        {
+          "name": "int",
+          "line": 307
+        },
+        {
+          "name": "isinstance",
+          "line": 339
+        },
+        {
+          "name": "int",
+          "line": 339
+        },
+        {
+          "name": "isinstance",
+          "line": 300
+        },
+        {
+          "name": "distribution.values",
+          "line": 300
+        },
+        {
+          "name": "isinstance",
+          "line": 322
+        },
+        {
+          "name": "complexity_data.get",
+          "line": 326
+        },
+        {
+          "name": "complexity_data.get",
+          "line": 327
+        },
+        {
+          "name": "isinstance",
+          "line": 330
+        },
+        {
+          "name": "max",
+          "line": 351
+        },
+        {
+          "name": "min",
+          "line": 355
+        },
+        {
+          "name": "max",
+          "line": 356
+        },
+        {
+          "name": "len",
+          "line": 376
+        },
+        {
+          "name": "float",
+          "line": 331
+        },
+        {
+          "name": "min",
+          "line": 351
+        },
+        {
+          "name": "min",
+          "line": 356
+        },
+        {
+          "name": "str",
+          "line": 358
+        },
+        {
+          "name": "logger.warning",
+          "line": 365
+        },
+        {
+          "name": "str",
+          "line": 367
+        },
+        {
+          "name": "str",
+          "line": 365
+        }
+      ],
+      "docstring": "Create pattern assignments based on pattern distribution.",
+      "code_snippet": "    }\n\ndef create_pattern_assignments_from_distribution(distribution: Dict[str, Union[int, float]], standard_map: Dict[str, Any]):\n    \"\"\"Create pattern assignments based on pattern distribution.\"\"\"\n    logger.info(\"Creating pattern assignments from distribution\")\n    \n    pattern_assignments = {}\n    idx = 0\n    \n    # Get complexity values for each pattern type from the standard map\n    pattern_complexities = standard_map.get('pattern_complexities', {})\n    \n    # Check if we're dealing with weighted scores (distribution values are floats < 1.0)\n    is_weighted_distribution = all(isinstance(v, float) and v < 1.0 for v in distribution.values() if v)\n    \n    # If using weighted distribution, scale up to reasonable counts\n    if is_weighted_distribution:\n        total_examples = 1000  # Default sample count for weighted distributions\n        scaled_distribution = {}\n        for pattern_type, weight in distribution.items():\n            scaled_distribution[pattern_type] = int(weight * total_examples)\n        logger.info(f\"Converting weighted distribution to counts: {scaled_distribution}\")\n        working_distribution = scaled_distribution\n    else:\n        working_distribution = distribution\n    \n    for pattern_type, count in working_distribution.items():\n        # Extract actual complexity value for this pattern type\n        pattern_complexity = 0.5  # Default fallback\n        complexity_range = (0.3, 0.7)  # Default variation range\n        \n        if pattern_type in pattern_complexities:\n            complexity_data = pattern_complexities[pattern_type]\n            \n            # Handle different complexity data formats\n            if isinstance(complexity_data, dict) and 'avg_complexity' in complexity_data:\n                pattern_complexity = complexity_data['avg_complexity']\n                \n                # Get min/max for variation range if available\n                min_complexity = complexity_data.get('min_complexity', pattern_complexity * 0.8)\n                max_complexity = complexity_data.get('max_complexity', pattern_complexity * 1.2)\n                complexity_range = (min_complexity, max_complexity)\n                \n            elif isinstance(complexity_data, (int, float)):\n                pattern_complexity = float(complexity_data)\n                complexity_range = (pattern_complexity * 0.8, pattern_complexity * 1.2)\n        \n        # Ensure we have a non-zero complexity value\n        pattern_complexity = max(0.1, pattern_complexity)\n        min_range, max_range = complexity_range\n        \n        # Create assignments with proper complexity values\n        count_int = int(count) if isinstance(count, (int, float)) else 0\n        for i in range(count_int):\n            try:\n                # Create slight variations around the actual complexity\n                # Use deterministic variation based on index to ensure reproducibility\n                variation_factor = (i % 10) / 10.0  # 0.0 to 0.9 in steps of 0.1\n                \n                # Calculate complexity within the appropriate range\n                range_width = max_range - min_range\n                actual_complexity = min_range + (range_width * variation_factor)\n                \n                # Ensure within global bounds (0.1 - 4.9 for complexity values)\n                actual_complexity = max(0.1, min(4.9, actual_complexity))\n                \n                # Confidence can be derived inversely from complexity\n                # Higher complexity \u2192 lower confidence, but keep in reasonable range\n                normalized_complexity = min(1.0, actual_complexity / 5.0)  # Scale to 0-1 range\n                confidence = max(0.6, min(0.95, 1.0 - (normalized_complexity * 0.3)))\n                \n                pattern_assignments[str(idx)] = {\n                    'pattern_type': pattern_type,\n                    'complexity': actual_complexity,\n                    'confidence': confidence\n                }\n                \n            except Exception as e:\n                logger.warning(f\"Error creating assignment for {pattern_type} index {i}: {str(e)}\")\n                # Fallback to safe values on error\n                pattern_assignments[str(idx)] = {\n                    'pattern_type': pattern_type,\n                    'complexity': pattern_complexity,  # Use the base complexity value\n                    'confidence': 0.8  # Default confidence\n                }\n                \n            idx += 1\n    \n    standard_map['pattern_assignments'] = pattern_assignments\n    logger.info(f\"Created {len(pattern_assignments)} pattern assignments\")\n\ndef extract_pattern_features(patterns_by_type: Dict[str, List], standard_map: Dict[str, Any]):\n    \"\"\"Extract pattern features from patterns_by_type structure.\"\"\"\n    logger.info(\"Extracting pattern features\")"
+    },
+    "extract_pattern_features": {
+      "start_line": 378,
+      "end_line": 409,
+      "parameters": [
+        {
+          "name": "patterns_by_type"
+        },
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 380
+        },
+        {
+          "name": "patterns_by_type.items",
+          "line": 384
+        },
+        {
+          "name": "isinstance",
+          "line": 388
+        },
+        {
+          "name": "set",
+          "line": 390
+        },
+        {
+          "name": "isinstance",
+          "line": 392
+        },
+        {
+          "name": "feature_keys.update",
+          "line": 393
+        },
+        {
+          "name": "....keys",
+          "line": 393
+        },
+        {
+          "name": "isinstance",
+          "line": 401
+        },
+        {
+          "name": "sum",
+          "line": 405
+        },
+        {
+          "name": "len",
+          "line": 405
+        },
+        {
+          "name": "values.append",
+          "line": 402
+        }
+      ],
+      "docstring": "Extract pattern features from patterns_by_type structure.",
+      "code_snippet": "    logger.info(f\"Created {len(pattern_assignments)} pattern assignments\")\n\ndef extract_pattern_features(patterns_by_type: Dict[str, List], standard_map: Dict[str, Any]):\n    \"\"\"Extract pattern features from patterns_by_type structure.\"\"\"\n    logger.info(\"Extracting pattern features\")\n    \n    pattern_features = {}\n    \n    for pattern_type, examples in patterns_by_type.items():\n        pattern_features[pattern_type] = {}\n        \n        # Find common features across examples\n        if examples and isinstance(examples[0], dict) and 'features' in examples[0]:\n            # Get all feature keys\n            feature_keys = set()\n            for example in examples:\n                if 'features' in example and isinstance(example['features'], dict):\n                    feature_keys.update(example['features'].keys())\n            \n            # Calculate average feature values\n            for feature_key in feature_keys:\n                values = []\n                for example in examples:\n                    if 'features' in example and feature_key in example['features']:\n                        value = example['features'][feature_key]\n                        if isinstance(value, (int, float)):\n                            values.append(value)\n                \n                if values:\n                    pattern_features[pattern_type][feature_key] = sum(values) / len(values)\n    \n    standard_map['pattern_features'] = pattern_features\n\ndef calculate_complexities_from_assignments(standard_map: Dict[str, Any]):\n    \"\"\"Calculate pattern complexities from assignments.\"\"\"\n    logger.info(\"Calculating pattern complexities from assignments\")"
+    },
+    "calculate_complexities_from_assignments": {
+      "start_line": 409,
+      "end_line": 447,
+      "parameters": [
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 411
+        },
+        {
+          "name": "standard_map.get",
+          "line": 413
+        },
+        {
+          "name": "set",
+          "line": 414
+        },
+        {
+          "name": "pattern_assignments.values",
+          "line": 417
+        },
+        {
+          "name": "pattern_types.add",
+          "line": 418
+        },
+        {
+          "name": "pattern_assignments.values",
+          "line": 426
+        },
+        {
+          "name": "assignment.get",
+          "line": 418
+        },
+        {
+          "name": "complexities.append",
+          "line": 428
+        },
+        {
+          "name": "min",
+          "line": 433
+        },
+        {
+          "name": "max",
+          "line": 434
+        },
+        {
+          "name": "len",
+          "line": 435
+        },
+        {
+          "name": "assignment.get",
+          "line": 427
+        },
+        {
+          "name": "sum",
+          "line": 432
+        },
+        {
+          "name": "len",
+          "line": 432
+        }
+      ],
+      "docstring": "Calculate pattern complexities from assignments.",
+      "code_snippet": "    standard_map['pattern_features'] = pattern_features\n\ndef calculate_complexities_from_assignments(standard_map: Dict[str, Any]):\n    \"\"\"Calculate pattern complexities from assignments.\"\"\"\n    logger.info(\"Calculating pattern complexities from assignments\")\n    \n    pattern_assignments = standard_map.get('pattern_assignments', {})\n    pattern_types = set()\n    \n    # Extract pattern types\n    for assignment in pattern_assignments.values():\n        pattern_types.add(assignment.get('pattern_type'))\n    \n    # Calculate complexity statistics\n    pattern_complexities = {}\n    \n    for pattern_type in pattern_types:\n        complexities = []\n        \n        for assignment in pattern_assignments.values():\n            if assignment.get('pattern_type') == pattern_type and 'complexity' in assignment:\n                complexities.append(assignment['complexity'])\n        \n        if complexities:\n            pattern_complexities[pattern_type] = {\n                'avg_complexity': sum(complexities) / len(complexities),\n                'min_complexity': min(complexities),\n                'max_complexity': max(complexities),\n                'pattern_count': len(complexities)\n            }\n        else:\n            pattern_complexities[pattern_type] = {\n                'avg_complexity': 0.5,\n                'min_complexity': 0.2,\n                'max_complexity': 0.8,\n                'pattern_count': 0\n            }\n    \n    standard_map['pattern_complexities'] = pattern_complexities\n\ndef calculate_initial_risks(standard_map: Dict[str, Any]):\n    \"\"\"Calculate initial risk values from complexities.\"\"\"\n    logger.info(\"Calculating initial risk values\")"
+    },
+    "calculate_initial_risks": {
+      "start_line": 447,
+      "end_line": 484,
+      "parameters": [
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 449
+        },
+        {
+          "name": "standard_map.get",
+          "line": 452
+        },
+        {
+          "name": "complexities.items",
+          "line": 454
+        },
+        {
+          "name": "max",
+          "line": 477
+        },
+        {
+          "name": "logger.debug",
+          "line": 480
+        },
+        {
+          "name": "isinstance",
+          "line": 456
+        },
+        {
+          "name": "isinstance",
+          "line": 458
+        },
+        {
+          "name": "min",
+          "line": 477
+        },
+        {
+          "name": "float",
+          "line": 459
+        },
+        {
+          "name": "min",
+          "line": 472
+        }
+      ],
+      "docstring": "Calculate initial risk values from complexities.",
+      "code_snippet": "    standard_map['pattern_complexities'] = pattern_complexities\n\ndef calculate_initial_risks(standard_map: Dict[str, Any]):\n    \"\"\"Calculate initial risk values from complexities.\"\"\"\n    logger.info(\"Calculating initial risk values\")\n    \n    pattern_risks = {}\n    complexities = standard_map.get('pattern_complexities', {})\n    \n    for pattern_type, complexity_data in complexities.items():\n        # Extract complexity value properly based on format\n        if isinstance(complexity_data, dict) and 'avg_complexity' in complexity_data:\n            complexity = complexity_data['avg_complexity']\n        elif isinstance(complexity_data, (int, float)):\n            complexity = float(complexity_data)\n        else:\n            complexity = 0.5  # Default\n        \n        # Translate complexity to risk based on scale\n        # Streamlined pattern maps can have complexities in 0.1-4.9 range\n        # Convert to 0.1-0.9 risk range\n        \n        if complexity < 0.2:  # Very low complexity\n            # Scale up for very low values to ensure they're meaningful\n            risk = complexity * 2.5  # 0.1 -> 0.25, ensuring visible risk\n        elif complexity > 1.0:  # Higher complexity range (likely 0.1-4.9 scale)\n            # Scale down to 0-1 risk range with sensitivity to higher values\n            risk = min(0.9, (0.2 + (complexity / 6.0)))  # 1.0 -> ~0.37, 4.9 -> ~0.9\n        else:  # Standard complexity scale (0.2-1.0)\n            # Direct mapping with slight scaling\n            risk = complexity / 5.0 + 0.1  # 0.2 -> 0.14, 1.0 -> 0.3\n        \n        pattern_risks[pattern_type] = max(0.1, min(0.9, risk))  # Keep in reasonable range\n        \n        # Log the conversion for debugging\n        logger.debug(f\"Pattern {pattern_type}: complexity {complexity:.2f} -> risk {risk:.2f}\")\n    \n    standard_map['pattern_risks'] = pattern_risks\n\ndef calculate_derived_metrics(standard_map: Dict[str, Any]):\n    \"\"\"Calculate additional derived metrics for the standardized map.\"\"\"\n    # Calculate total pattern count"
+    },
+    "calculate_derived_metrics": {
+      "start_line": 484,
+      "end_line": 518,
+      "parameters": [
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "sum",
+          "line": 487
+        },
+        {
+          "name": "standard_map.get",
+          "line": 496
+        },
+        {
+          "name": "standard_map.get",
+          "line": 506
+        },
+        {
+          "name": "standard_map.get",
+          "line": 514
+        },
+        {
+          "name": "....values",
+          "line": 487
+        },
+        {
+          "name": "isinstance",
+          "line": 490
+        },
+        {
+          "name": "sum",
+          "line": 516
+        },
+        {
+          "name": "len",
+          "line": 516
+        },
+        {
+          "name": "standard_map.get",
+          "line": 487
+        },
+        {
+          "name": "sum",
+          "line": 500
+        },
+        {
+          "name": "logger.warning",
+          "line": 503
+        },
+        {
+          "name": "complexities.values",
+          "line": 508
+        },
+        {
+          "name": "sum",
+          "line": 511
+        },
+        {
+          "name": "len",
+          "line": 511
+        },
+        {
+          "name": "risks.values",
+          "line": 516
+        },
+        {
+          "name": "distribution.values",
+          "line": 499
+        },
+        {
+          "name": "isinstance",
+          "line": 509
+        },
+        {
+          "name": "np.log2",
+          "line": 500
+        },
+        {
+          "name": "str",
+          "line": 503
+        }
+      ],
+      "docstring": "Calculate additional derived metrics for the standardized map.",
+      "code_snippet": "    standard_map['pattern_risks'] = pattern_risks\n\ndef calculate_derived_metrics(standard_map: Dict[str, Any]):\n    \"\"\"Calculate additional derived metrics for the standardized map.\"\"\"\n    # Calculate total pattern count\n    total_patterns = sum(standard_map.get('pattern_distribution', {}).values())\n    \n    # Initialize pattern_metadata if needed\n    if 'pattern_metadata' not in standard_map or not isinstance(standard_map['pattern_metadata'], dict):\n        standard_map['pattern_metadata'] = {}\n        \n    standard_map['pattern_metadata']['total_patterns'] = total_patterns\n    \n    # Calculate pattern diversity (entropy)\n    distribution = standard_map.get('pattern_distribution', {})\n    if distribution:\n        try:\n            probabilities = [count/total_patterns for count in distribution.values() if total_patterns > 0]\n            entropy = -sum(p * np.log2(p) for p in probabilities if p > 0)\n            standard_map['pattern_metadata']['pattern_entropy'] = entropy\n        except Exception as e:\n            logger.warning(f\"Couldn't calculate pattern entropy: {str(e)}\")\n    \n    # Calculate average complexity across all patterns\n    complexities = standard_map.get('pattern_complexities', {})\n    if complexities:\n        avg_values = [data['avg_complexity'] for data in complexities.values() \n                    if isinstance(data, dict) and 'avg_complexity' in data]\n        if avg_values:\n            standard_map['pattern_metadata']['overall_avg_complexity'] = sum(avg_values) / len(avg_values)\n    \n    # Calculate overall risk\n    risks = standard_map.get('pattern_risks', {})\n    if risks:\n        standard_map['pattern_metadata']['overall_avg_risk'] = sum(risks.values()) / len(risks)\n\ndef validate_standardized_map(standard_map: Dict[str, Any]):\n    \"\"\"Validate the standardized map for consistency and completeness.\"\"\"\n    # Check required keys"
+    },
+    "validate_standardized_map": {
+      "start_line": 518,
+      "end_line": 552,
+      "parameters": [
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "....values",
+          "line": 528
+        },
+        {
+          "name": "standard_map.get",
+          "line": 533
+        },
+        {
+          "name": "pattern_counts.items",
+          "line": 534
+        },
+        {
+          "name": "assignment.get",
+          "line": 529
+        },
+        {
+          "name": "set",
+          "line": 540
+        },
+        {
+          "name": "set",
+          "line": 541
+        },
+        {
+          "name": "set",
+          "line": 542
+        },
+        {
+          "name": "all",
+          "line": 545
+        },
+        {
+          "name": "set.union",
+          "line": 546
+        },
+        {
+          "name": "logger.warning",
+          "line": 524
+        },
+        {
+          "name": "standard_map.get",
+          "line": 528
+        },
+        {
+          "name": "logger.warning",
+          "line": 536
+        },
+        {
+          "name": "....keys",
+          "line": 540
+        },
+        {
+          "name": "....keys",
+          "line": 541
+        },
+        {
+          "name": "....keys",
+          "line": 542
+        },
+        {
+          "name": "pattern_counts.get",
+          "line": 531
+        },
+        {
+          "name": "logger.warning",
+          "line": 550
+        },
+        {
+          "name": "standard_map.get",
+          "line": 540
+        },
+        {
+          "name": "standard_map.get",
+          "line": 541
+        },
+        {
+          "name": "standard_map.get",
+          "line": 542
+        }
+      ],
+      "docstring": "Validate the standardized map for consistency and completeness.",
+      "code_snippet": "        standard_map['pattern_metadata']['overall_avg_risk'] = sum(risks.values()) / len(risks)\n\ndef validate_standardized_map(standard_map: Dict[str, Any]):\n    \"\"\"Validate the standardized map for consistency and completeness.\"\"\"\n    # Check required keys\n    required_keys = ['pattern_assignments', 'pattern_distribution', 'pattern_complexities', 'pattern_risks']\n    for key in required_keys:\n        if key not in standard_map or not standard_map[key]:\n            logger.warning(f\"Standardized map missing or empty key: {key}\")\n    \n    # Check consistency between distribution and assignments\n    pattern_counts = {}\n    for assignment in standard_map.get('pattern_assignments', {}).values():\n        pattern_type = assignment.get('pattern_type')\n        if pattern_type:\n            pattern_counts[pattern_type] = pattern_counts.get(pattern_type, 0) + 1\n    \n    distribution = standard_map.get('pattern_distribution', {})\n    for pattern_type, count in pattern_counts.items():\n        if pattern_type in distribution and distribution[pattern_type] != count:\n            logger.warning(f\"Inconsistency: Pattern {pattern_type} has {count} assignments but distribution says {distribution[pattern_type]}\")\n    \n    # Check all pattern types are consistent across dictionaries\n    pattern_types_sets = [\n        set(standard_map.get('pattern_distribution', {}).keys()),\n        set(standard_map.get('pattern_complexities', {}).keys()),\n        set(standard_map.get('pattern_risks', {}).keys())\n    ]\n    \n    if pattern_types_sets and all(pattern_types_sets):\n        all_pattern_types = set.union(*pattern_types_sets)\n        for pattern_set in pattern_types_sets:\n            missing = all_pattern_types - pattern_set\n            if missing:\n                logger.warning(f\"Pattern type inconsistency: {missing} not in all dictionaries\")\n\ndef log_translation_statistics(standard_map: Dict[str, Any]):\n    \"\"\"Log statistics about the translated pattern map.\"\"\"\n    pattern_types = list(standard_map.get('pattern_distribution', {}).keys())"
+    },
+    "log_translation_statistics": {
+      "start_line": 552,
+      "end_line": 587,
+      "parameters": [
+        {
+          "name": "standard_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "list",
+          "line": 554
+        },
+        {
+          "name": "sum",
+          "line": 555
+        },
+        {
+          "name": "logger.info",
+          "line": 557
+        },
+        {
+          "name": "logger.info",
+          "line": 558
+        },
+        {
+          "name": "logger.info",
+          "line": 559
+        },
+        {
+          "name": "logger.info",
+          "line": 560
+        },
+        {
+          "name": "logger.info",
+          "line": 561
+        },
+        {
+          "name": "....items",
+          "line": 565
+        },
+        {
+          "name": "....items",
+          "line": 574
+        },
+        {
+          "name": "standard_map.get",
+          "line": 581
+        },
+        {
+          "name": "....keys",
+          "line": 554
+        },
+        {
+          "name": "....values",
+          "line": 555
+        },
+        {
+          "name": "logger.info",
+          "line": 570
+        },
+        {
+          "name": "risk_summary.append",
+          "line": 575
+        },
+        {
+          "name": "logger.info",
+          "line": 578
+        },
+        {
+          "name": "logger.info",
+          "line": 583
+        },
+        {
+          "name": "logger.info",
+          "line": 585
+        },
+        {
+          "name": "standard_map.get",
+          "line": 565
+        },
+        {
+          "name": "isinstance",
+          "line": 566
+        },
+        {
+          "name": "complexity_summary.append",
+          "line": 567
+        },
+        {
+          "name": "standard_map.get",
+          "line": 574
+        },
+        {
+          "name": "standard_map.get",
+          "line": 554
+        },
+        {
+          "name": "standard_map.get",
+          "line": 555
+        },
+        {
+          "name": "standard_map.get",
+          "line": 558
+        },
+        {
+          "name": "len",
+          "line": 561
+        },
+        {
+          "name": "standard_map.get",
+          "line": 561
+        },
+        {
+          "name": "....join",
+          "line": 570
+        },
+        {
+          "name": "....join",
+          "line": 578
+        }
+      ],
+      "docstring": "Log statistics about the translated pattern map.",
+      "code_snippet": "                logger.warning(f\"Pattern type inconsistency: {missing} not in all dictionaries\")\n\ndef log_translation_statistics(standard_map: Dict[str, Any]):\n    \"\"\"Log statistics about the translated pattern map.\"\"\"\n    pattern_types = list(standard_map.get('pattern_distribution', {}).keys())\n    total_patterns = sum(standard_map.get('pattern_distribution', {}).values())\n    \n    logger.info(f\"Pattern map translation complete:\")\n    logger.info(f\"  Format: {standard_map.get('source_format', 'unknown')}\")\n    logger.info(f\"  Pattern types: {pattern_types}\")\n    logger.info(f\"  Total patterns: {total_patterns}\")\n    logger.info(f\"  Assignments: {len(standard_map.get('pattern_assignments', {}))}\")\n    \n    # Log complexity ranges\n    complexity_summary = []\n    for pattern_type, data in standard_map.get('pattern_complexities', {}).items():\n        if isinstance(data, dict) and 'avg_complexity' in data:\n            complexity_summary.append(f\"{pattern_type}: {data['avg_complexity']:.2f}\")\n    \n    if complexity_summary:\n        logger.info(f\"  Avg. complexities: {', '.join(complexity_summary)}\")\n    \n    # Log risk values\n    risk_summary = []\n    for pattern_type, risk in standard_map.get('pattern_risks', {}).items():\n        risk_summary.append(f\"{pattern_type}: {risk:.2f}\")\n    \n    if risk_summary:\n        logger.info(f\"  Risk values: {', '.join(risk_summary)}\")\n    \n    # Log overall metrics\n    metadata = standard_map.get('pattern_metadata', {})\n    if 'overall_avg_complexity' in metadata:\n        logger.info(f\"  Overall avg. complexity: {metadata['overall_avg_complexity']:.2f}\")\n    if 'overall_avg_risk' in metadata:\n        logger.info(f\"  Overall avg. risk: {metadata['overall_avg_risk']:.2f}\")\n\ndef create_fallback_pattern_map():\n    \"\"\"Create a minimal valid pattern map as a fallback.\"\"\"\n    logger.warning(\"Creating fallback pattern map\")"
+    },
+    "create_fallback_pattern_map": {
+      "start_line": 587,
+      "end_line": 621,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.warning",
+          "line": 589
+        },
+        {
+          "name": "create_pattern_assignments_from_distribution",
+          "line": 617
+        },
+        {
+          "name": "time.time",
+          "line": 608
+        }
+      ],
+      "docstring": "Create a minimal valid pattern map as a fallback.",
+      "code_snippet": "        logger.info(f\"  Overall avg. risk: {metadata['overall_avg_risk']:.2f}\")\n\ndef create_fallback_pattern_map():\n    \"\"\"Create a minimal valid pattern map as a fallback.\"\"\"\n    logger.warning(\"Creating fallback pattern map\")\n    \n    pattern_types = [\"structure\", \"relationship\", \"intensity\", \"dominance\", \"temporal\"]\n    \n    # Create even distribution\n    pattern_distribution = {p: 200 for p in pattern_types}\n    \n    # Create fallback map\n    fallback_map = {\n        'format_version': '1.0',\n        'pattern_distribution': pattern_distribution,\n        'pattern_complexities': {\n            p: {'avg_complexity': 0.5, 'min_complexity': 0.2, 'max_complexity': 0.8, 'pattern_count': 200}\n            for p in pattern_types\n        },\n        'pattern_risks': {p: 0.5 for p in pattern_types},\n        'pattern_assignments': {},\n        'pattern_metadata': {\n            'fallback': True,\n            'created_at': time.time(),\n            'total_patterns': 1000,\n            'overall_avg_complexity': 0.5,\n            'overall_avg_risk': 0.5\n        },\n        'source_format': 'fallback'\n    }\n    \n    # Create pattern assignments\n    create_pattern_assignments_from_distribution(pattern_distribution, fallback_map)\n    \n    return fallback_map"
+    }
+  },
+  "constants": {}
+}

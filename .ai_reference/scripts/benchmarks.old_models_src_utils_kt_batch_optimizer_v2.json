@@ -1,0 +1,342 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\kt_batch_optimizer_v2.py",
+  "imports": [
+    {
+      "name": "numpy",
+      "line": 4
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 5
+    },
+    {
+      "name": "typing.Dict",
+      "line": 6
+    },
+    {
+      "name": "typing.List",
+      "line": 6
+    },
+    {
+      "name": "typing.Optional",
+      "line": 6
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 6
+    },
+    {
+      "name": "typing.Any",
+      "line": 6
+    },
+    {
+      "name": "torch",
+      "line": 7
+    },
+    {
+      "name": "math",
+      "line": 8
+    }
+  ],
+  "classes": {
+    "KTParameters": {
+      "start_line": 11,
+      "end_line": 19,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Parameters from the K(t) framework"
+    },
+    "GPUSpecs": {
+      "start_line": 20,
+      "end_line": 27,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "RTX 4070 SUPER specifications"
+    },
+    "KTBatchOptimizer": {
+      "start_line": 27,
+      "end_line": 162,
+      "methods": {
+        "__init__": {
+          "start_line": 28,
+          "end_line": 41,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "KTParameters",
+              "line": 29
+            },
+            {
+              "name": "GPUSpecs",
+              "line": 30
+            },
+            {
+              "name": "torch.device",
+              "line": 31
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 31
+            }
+          ],
+          "code_snippet": "\nclass KTBatchOptimizer:\n    def __init__(self):\n        self.kt_params = KTParameters()\n        self.gpu_specs = GPUSpecs()\n        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Enhanced thresholds based on GPU capabilities\n        self.min_efficiency = 0.65\n        self.max_sync_cost = 0.35\n        \n        # GPU utilization targets\n        self.target_memory_utilization = 0.7  # Aim for 70% memory usage\n        self.min_batch_efficiency = 0.4      # Minimum acceptable batch efficiency\n    \n    def _calculate_gpu_efficiency(self, memory_used: float) -> float:\n        \"\"\"Calculate GPU efficiency based on memory and compute utilization\"\"\"\n        # Memory utilization factor"
+        },
+        "_calculate_gpu_efficiency": {
+          "start_line": 41,
+          "end_line": 52,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "memory_used",
+              "type": "float"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "np.exp",
+              "line": 47
+            }
+          ],
+          "docstring": "Calculate GPU efficiency based on memory and compute utilization",
+          "code_snippet": "        self.min_batch_efficiency = 0.4      # Minimum acceptable batch efficiency\n    \n    def _calculate_gpu_efficiency(self, memory_used: float) -> float:\n        \"\"\"Calculate GPU efficiency based on memory and compute utilization\"\"\"\n        # Memory utilization factor\n        memory_factor = memory_used / self.gpu_specs.total_memory\n        \n        # Apply efficiency curve (sigmoid to prevent extremes)\n        efficiency = 1 / (1 + np.exp(-10 * (memory_factor - 0.5)))\n        \n        # Scale to target range\n        return efficiency * self.target_memory_utilization\n    \n    def _calculate_cognitive_load(self, batch_size: int) -> float:\n        \"\"\"Enhanced cognitive load calculation\"\"\"\n        # Base load from batch size"
+        },
+        "_calculate_cognitive_load": {
+          "start_line": 52,
+          "end_line": 67,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "np.log2",
+              "line": 58
+            },
+            {
+              "name": "np.sqrt",
+              "line": 61
+            },
+            {
+              "name": "np.exp",
+              "line": 65
+            }
+          ],
+          "docstring": "Enhanced cognitive load calculation",
+          "code_snippet": "        return efficiency * self.target_memory_utilization\n    \n    def _calculate_cognitive_load(self, batch_size: int) -> float:\n        \"\"\"Enhanced cognitive load calculation\"\"\"\n        # Base load from batch size\n        base_load = batch_size / self.kt_params.Lc\n        \n        # Enhanced sync cost calculation\n        sync_cost = self.kt_params.sync_cost * np.log2(batch_size + 1)\n        \n        # Revised complexity scaling using square root to reduce growth rate\n        complexity_factor = 1 + np.sqrt(batch_size) * 0.05\n        \n        # Apply dampening factor to keep load within theoretical limits\n        load = (base_load + sync_cost) * complexity_factor\n        return load * (1 / (1 + np.exp((load - self.kt_params.Lc * 2) / 2)))\n    \n    def _calculate_efficiency(self, memory_used: float, cognitive_load: float) -> float:\n        \"\"\"Enhanced efficiency calculation incorporating GPU specs\"\"\"\n        # GPU efficiency component"
+        },
+        "_calculate_efficiency": {
+          "start_line": 67,
+          "end_line": 79,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "memory_used",
+              "type": "float"
+            },
+            {
+              "name": "cognitive_load",
+              "type": "float"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "self._calculate_gpu_efficiency",
+              "line": 70
+            },
+            {
+              "name": "np.exp",
+              "line": 73
+            }
+          ],
+          "docstring": "Enhanced efficiency calculation incorporating GPU specs",
+          "code_snippet": "        return load * (1 / (1 + np.exp((load - self.kt_params.Lc * 2) / 2)))\n    \n    def _calculate_efficiency(self, memory_used: float, cognitive_load: float) -> float:\n        \"\"\"Enhanced efficiency calculation incorporating GPU specs\"\"\"\n        # GPU efficiency component\n        gpu_efficiency = self._calculate_gpu_efficiency(memory_used)\n        \n        # Cognitive efficiency component (from K(t) framework)\n        cognitive_efficiency = 1 / (1 + np.exp((cognitive_load - self.kt_params.Lc) / \n                                             self.kt_params.efficiency_coefficient))\n        \n        # Combine both factors with GPU-specific weighting\n        return (gpu_efficiency * 0.7 + cognitive_efficiency * 0.3)\n    \n    def _estimate_memory_requirement(self, batch_size: int) -> float:\n        \"\"\"Estimate memory requirement for a given batch size\"\"\"\n        # Base memory for input tensor (batch_size, 3, 640, 640)"
+        },
+        "_estimate_memory_requirement": {
+          "start_line": 79,
+          "end_line": 92,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [],
+          "docstring": "Estimate memory requirement for a given batch size",
+          "code_snippet": "        return (gpu_efficiency * 0.7 + cognitive_efficiency * 0.3)\n    \n    def _estimate_memory_requirement(self, batch_size: int) -> float:\n        \"\"\"Estimate memory requirement for a given batch size\"\"\"\n        # Base memory for input tensor (batch_size, 3, 640, 640)\n        input_memory = batch_size * 3 * 640 * 640 * 4  # 4 bytes per float32\n        \n        # Estimate YOLO model memory (based on typical requirements)\n        model_memory = 250 * 1024 * 1024  # ~250MB base model size\n        \n        # Estimate intermediate activations\n        activations_memory = input_memory * 2.5  # Typical multiplication factor\n        \n        return (input_memory + model_memory + activations_memory) / (1024 * 1024)  # Convert to MB\n    \n    def optimize_batch_size(self) -> Dict[str, Any]:\n        \"\"\"Find optimal batch size using enhanced K(t) framework\"\"\"\n        best_efficiency = 0"
+        },
+        "optimize_batch_size": {
+          "start_line": 92,
+          "end_line": 162,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "print",
+              "line": 98
+            },
+            {
+              "name": "print",
+              "line": 99
+            },
+            {
+              "name": "print",
+              "line": 100
+            },
+            {
+              "name": "print",
+              "line": 101
+            },
+            {
+              "name": "print",
+              "line": 102
+            },
+            {
+              "name": "min",
+              "line": 106
+            },
+            {
+              "name": "range",
+              "line": 112
+            },
+            {
+              "name": "int",
+              "line": 108
+            },
+            {
+              "name": "self._estimate_memory_requirement",
+              "line": 114
+            },
+            {
+              "name": "self._calculate_cognitive_load",
+              "line": 121
+            },
+            {
+              "name": "self._calculate_efficiency",
+              "line": 122
+            },
+            {
+              "name": "results.append",
+              "line": 124
+            },
+            {
+              "name": "print",
+              "line": 117
+            },
+            {
+              "name": "print",
+              "line": 136
+            },
+            {
+              "name": "print",
+              "line": 137
+            },
+            {
+              "name": "print",
+              "line": 138
+            },
+            {
+              "name": "print",
+              "line": 139
+            }
+          ],
+          "docstring": "Find optimal batch size using enhanced K(t) framework",
+          "code_snippet": "        return (input_memory + model_memory + activations_memory) / (1024 * 1024)  # Convert to MB\n    \n    def optimize_batch_size(self) -> Dict[str, Any]:\n        \"\"\"Find optimal batch size using enhanced K(t) framework\"\"\"\n        best_efficiency = 0\n        optimal_batch = 1\n        results = []\n        \n        print(\"\\nOptimizing batch size using enhanced K(t) framework...\")\n        print(\"GPU Specs:\")\n        print(f\"Memory: {self.gpu_specs.total_memory}MB\")\n        print(f\"Clock Speed: {self.gpu_specs.clock_speed}MHz\")\n        print(f\"Memory Clock: {self.gpu_specs.memory_clock}MHz\")\n        \n        # Dynamic batch size range based on GPU memory\n        # Calculate max batch size based on memory limits\n        max_theoretical_batch = min(\n            256,  # Safety limit\n            int(self.gpu_specs.total_memory * 0.9 / \n                (3 * 640 * 640 * 4 / (1024 * 1024)))  # 90% of GPU memory\n        )\n        \n        for batch_size in range(1, max_theoretical_batch + 1):\n            # Estimate memory requirement\n            estimated_memory = self._estimate_memory_requirement(batch_size)\n            \n            if estimated_memory > self.gpu_specs.total_memory:\n                print(f\"\\nReached memory limit at batch size {batch_size}\")\n                break\n                \n            # Calculate metrics\n            cognitive_load = self._calculate_cognitive_load(batch_size)\n            efficiency = self._calculate_efficiency(estimated_memory, cognitive_load)\n            \n            results.append({\n                \"batch_size\": batch_size,\n                \"efficiency\": efficiency,\n                \"cognitive_load\": cognitive_load,\n                \"estimated_memory\": estimated_memory\n            })\n            \n            if efficiency > best_efficiency:\n                best_efficiency = efficiency\n                optimal_batch = batch_size\n            \n            if batch_size % 8 == 0 or batch_size == 1:\n                print(f\"\\nBatch {batch_size:3d}:\")\n                print(f\"  Efficiency: {efficiency:.3f}\")\n                print(f\"  Load: {cognitive_load:.3f}\")\n                print(f\"  Est. Memory: {estimated_memory:.1f}MB\")\n        \n        # Find the optimal point that balances all factors\n        optimal_result = results[optimal_batch - 1]\n        \n        return {\n            \"optimal_batch_size\": optimal_batch,\n            \"peak_efficiency\": best_efficiency,\n            \"metrics\": {\n                \"efficiency_curve\": [r[\"efficiency\"] for r in results],\n                \"cognitive_load_curve\": [r[\"cognitive_load\"] for r in results],\n                \"memory_curve\": [r[\"estimated_memory\"] for r in results]\n            },\n            \"optimal_metrics\": {\n                \"cognitive_load\": optimal_result[\"cognitive_load\"],\n                \"estimated_memory\": optimal_result[\"estimated_memory\"],\n                \"efficiency\": optimal_result[\"efficiency\"]\n            },\n            \"parameters\": {\n                \"Lc\": self.kt_params.Lc,\n                \"gamma\": self.kt_params.efficiency_coefficient,\n                \"beta\": self.kt_params.sync_cost\n            }\n        }\n\ndef test_kt_optimizer():"
+        }
+      },
+      "class_variables": [],
+      "bases": []
+    }
+  },
+  "functions": {
+    "test_kt_optimizer": {
+      "start_line": 164,
+      "end_line": 183,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "KTBatchOptimizer",
+          "line": 166
+        },
+        {
+          "name": "optimizer.optimize_batch_size",
+          "line": 167
+        },
+        {
+          "name": "print",
+          "line": 169
+        },
+        {
+          "name": "print",
+          "line": 170
+        },
+        {
+          "name": "print",
+          "line": 171
+        },
+        {
+          "name": "print",
+          "line": 173
+        },
+        {
+          "name": "print",
+          "line": 174
+        },
+        {
+          "name": "print",
+          "line": 175
+        },
+        {
+          "name": "print",
+          "line": 176
+        },
+        {
+          "name": "print",
+          "line": 178
+        },
+        {
+          "name": "print",
+          "line": 179
+        },
+        {
+          "name": "print",
+          "line": 180
+        },
+        {
+          "name": "print",
+          "line": 181
+        }
+      ],
+      "docstring": "Test the enhanced K(t) framework batch optimizer",
+      "code_snippet": "        }\n\ndef test_kt_optimizer():\n    \"\"\"Test the enhanced K(t) framework batch optimizer\"\"\"\n    optimizer = KTBatchOptimizer()\n    results = optimizer.optimize_batch_size()\n    \n    print(\"\\nOptimization Results:\")\n    print(f\"Optimal Batch Size: {results['optimal_batch_size']}\")\n    print(f\"Peak Efficiency: {results['peak_efficiency']:.3f}\")\n    \n    print(\"\\nOptimal Configuration Metrics:\")\n    print(f\"Cognitive Load: {results['optimal_metrics']['cognitive_load']:.3f}\")\n    print(f\"Estimated Memory Usage: {results['optimal_metrics']['estimated_memory']:.1f}MB\")\n    print(f\"Efficiency: {results['optimal_metrics']['efficiency']:.3f}\")\n    \n    print(\"\\nTheoretical Validation:\")\n    print(f\"Critical threshold (Lc): {results['parameters']['Lc']}\")\n    print(f\"Efficiency coefficient (\u03b3): {results['parameters']['gamma']}\")\n    print(f\"Sync cost (\u03b2): {results['parameters']['beta']}\")\n\nif __name__ == \"__main__\":\n    test_kt_optimizer()"
+    }
+  },
+  "constants": {}
+}

@@ -1,0 +1,38 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\training_utils\\fibonacci_intervals.py",
+  "imports": [],
+  "classes": {},
+  "functions": {
+    "get_fibonacci_check_intervals": {
+      "start_line": 11,
+      "end_line": 51,
+      "parameters": [
+        {
+          "name": "total_epochs"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "range",
+          "line": 40
+        },
+        {
+          "name": "fib_sequence.append",
+          "line": 33
+        },
+        {
+          "name": "intervals.append",
+          "line": 46
+        },
+        {
+          "name": "len",
+          "line": 42
+        }
+      ],
+      "docstring": "\n    Pre-calculate Fibonacci-based check intervals for the entire training.\n    \n    This function calculates check intervals based on the Fibonacci sequence, which\n    provides a natural progression of increasing intervals. These intervals can be\n    used for scheduling operations during training that don't need to happen every\n    epoch, such as learning rate checks or model swapping decisions.\n    \n    Args:\n        total_epochs (int): Total number of training epochs\n        \n    Returns:\n        list: List of check intervals for each epoch\n        \n    Example:\n        >>> get_fibonacci_check_intervals(10)\n        [1, 1, 2, 3, 5, 8, 8, 8, 8, 8]\n    ",
+      "code_snippet": "\"\"\"\n\ndef get_fibonacci_check_intervals(total_epochs):\n    \"\"\"\n    Pre-calculate Fibonacci-based check intervals for the entire training.\n    \n    This function calculates check intervals based on the Fibonacci sequence, which\n    provides a natural progression of increasing intervals. These intervals can be\n    used for scheduling operations during training that don't need to happen every\n    epoch, such as learning rate checks or model swapping decisions.\n    \n    Args:\n        total_epochs (int): Total number of training epochs\n        \n    Returns:\n        list: List of check intervals for each epoch\n        \n    Example:\n        >>> get_fibonacci_check_intervals(10)\n        [1, 1, 2, 3, 5, 8, 8, 8, 8, 8]\n    \"\"\"\n    # Generate Fibonacci sequence\n    fib_sequence = [1, 1]\n    while fib_sequence[-1] < total_epochs // 2:  # Generate enough Fibonacci numbers\n        fib_sequence.append(fib_sequence[-1] + fib_sequence[-2])\n    \n    # Create interval mapping for each epoch\n    intervals = []\n    current_fib_index = 0\n    epoch_counter = 0\n    \n    for epoch in range(total_epochs):\n        # Move to next Fibonacci number if we've used current one enough times\n        if epoch_counter >= fib_sequence[current_fib_index] and current_fib_index < len(fib_sequence) - 1:\n            current_fib_index += 1\n            epoch_counter = 0\n        \n        intervals.append(fib_sequence[current_fib_index])\n        epoch_counter += 1\n    \n    return intervals"
+    }
+  },
+  "constants": {}
+}

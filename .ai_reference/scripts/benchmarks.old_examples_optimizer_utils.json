@@ -1,0 +1,229 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\optimizer_utils.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "torch.nn",
+      "line": 9
+    },
+    {
+      "name": "logging",
+      "line": 10
+    },
+    {
+      "name": "typing.Dict",
+      "line": 11
+    },
+    {
+      "name": "typing.Any",
+      "line": 11
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 11
+    },
+    {
+      "name": "typing.Optional",
+      "line": 11
+    },
+    {
+      "name": "optimizer_configs.get_optimizer_config",
+      "line": 13
+    },
+    {
+      "name": "optimizer_configs.list_available_optimizers",
+      "line": 13
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "configure_optimizer": {
+      "start_line": 17,
+      "end_line": 69,
+      "parameters": [
+        {
+          "name": "model"
+        },
+        {
+          "name": "optimizer_type",
+          "type": "str"
+        },
+        {
+          "name": "optimizer_variant",
+          "type": "str"
+        },
+        {
+          "name": "custom_params"
+        }
+      ],
+      "return_type": "complex_type",
+      "calls": [
+        {
+          "name": "optimizer_class",
+          "line": 53
+        },
+        {
+          "name": "get_optimizer_config",
+          "line": 37
+        },
+        {
+          "name": "custom_params.items",
+          "line": 45
+        },
+        {
+          "name": "model.parameters",
+          "line": 53
+        },
+        {
+          "name": "scheduler_class",
+          "line": 65
+        },
+        {
+          "name": "logger.error",
+          "line": 39
+        },
+        {
+          "name": "logger.info",
+          "line": 40
+        },
+        {
+          "name": "get_optimizer_config",
+          "line": 41
+        },
+        {
+          "name": "isinstance",
+          "line": 62
+        },
+        {
+          "name": "str",
+          "line": 39
+        }
+      ],
+      "docstring": "\n    Configure an optimizer and scheduler for a model.\n    \n    Args:\n        model: PyTorch model to optimize\n        optimizer_type: Type of optimizer (sgd, adam, rmsprop, etc.)\n        optimizer_variant: Specific variant of the optimizer\n        custom_params: Optional custom parameters to override the defaults\n        \n    Returns:\n        Tuple of (optimizer, scheduler)\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef configure_optimizer(\n    model: nn.Module,\n    optimizer_type: str = 'sgd',\n    optimizer_variant: str = 'default',\n    custom_params: Optional[Dict[str, Any]] = None\n) -> Tuple[torch.optim.Optimizer, Optional[torch.optim.lr_scheduler._LRScheduler]]:\n    \"\"\"\n    Configure an optimizer and scheduler for a model.\n    \n    Args:\n        model: PyTorch model to optimize\n        optimizer_type: Type of optimizer (sgd, adam, rmsprop, etc.)\n        optimizer_variant: Specific variant of the optimizer\n        custom_params: Optional custom parameters to override the defaults\n        \n    Returns:\n        Tuple of (optimizer, scheduler)\n    \"\"\"\n    # Get base configuration\n    try:\n        config = get_optimizer_config(optimizer_type, optimizer_variant)\n    except ValueError as e:\n        logger.error(f\"Error getting optimizer configuration: {str(e)}\")\n        logger.info(\"Using default SGD configuration instead.\")\n        config = get_optimizer_config('sgd', 'default')\n    \n    # Override with custom parameters if provided\n    if custom_params:\n        for key, value in custom_params.items():\n            if key in config['optimizer_kwargs']:\n                config['optimizer_kwargs'][key] = value\n    \n    # Create optimizer\n    optimizer_class = config['optimizer_class']\n    optimizer_kwargs = config['optimizer_kwargs']\n    \n    optimizer = optimizer_class(model.parameters(), **optimizer_kwargs)\n    \n    # Create scheduler if specified\n    scheduler = None\n    if config['scheduler_class']:\n        scheduler_class = config['scheduler_class']\n        scheduler_kwargs = config['scheduler_kwargs']\n        \n        # For ReduceLROnPlateau, T_max should be set to the number of epochs\n        if 'T_max' in scheduler_kwargs and not isinstance(scheduler_kwargs['T_max'], int):\n            scheduler_kwargs['T_max'] = 200  # Default to 200 epochs\n            \n        scheduler = scheduler_class(optimizer, **scheduler_kwargs)\n    \n    return optimizer, scheduler\n\ndef get_optimizer_description(optimizer_type: str, optimizer_variant: str = 'default') -> str:\n    \"\"\"\n    Get a human-readable description of an optimizer configuration."
+    },
+    "get_optimizer_description": {
+      "start_line": 69,
+      "end_line": 100,
+      "parameters": [
+        {
+          "name": "optimizer_type",
+          "type": "str"
+        },
+        {
+          "name": "optimizer_variant",
+          "type": "str"
+        }
+      ],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "....items",
+          "line": 89
+        },
+        {
+          "name": "get_optimizer_config",
+          "line": 81
+        },
+        {
+          "name": "key_params.append",
+          "line": 90
+        },
+        {
+          "name": "....join",
+          "line": 98
+        }
+      ],
+      "docstring": "\n    Get a human-readable description of an optimizer configuration.\n    \n    Args:\n        optimizer_type: Type of optimizer (sgd, adam, rmsprop, etc.)\n        optimizer_variant: Specific variant of the optimizer\n        \n    Returns:\n        String with description\n    ",
+      "code_snippet": "    return optimizer, scheduler\n\ndef get_optimizer_description(optimizer_type: str, optimizer_variant: str = 'default') -> str:\n    \"\"\"\n    Get a human-readable description of an optimizer configuration.\n    \n    Args:\n        optimizer_type: Type of optimizer (sgd, adam, rmsprop, etc.)\n        optimizer_variant: Specific variant of the optimizer\n        \n    Returns:\n        String with description\n    \"\"\"\n    try:\n        config = get_optimizer_config(optimizer_type, optimizer_variant)\n    except ValueError:\n        return f\"Unknown optimizer: {optimizer_type}/{optimizer_variant}\"\n    \n    optimizer_name = config['optimizer_class'].__name__\n    \n    # List key parameters\n    key_params = []\n    for param, value in config['optimizer_kwargs'].items():\n        key_params.append(f\"{param}={value}\")\n    \n    # Scheduler info\n    scheduler_info = \"No scheduler\"\n    if config['scheduler_class']:\n        scheduler_name = config['scheduler_class'].__name__\n        scheduler_info = f\"{scheduler_name}\"\n    \n    return f\"{optimizer_name} ({', '.join(key_params)}) with {scheduler_info}\"\n\ndef print_available_optimizers():\n    \"\"\"Print all available optimizer configurations in a human-readable format.\"\"\"\n    available = list_available_optimizers()"
+    },
+    "print_available_optimizers": {
+      "start_line": 100,
+      "end_line": 120,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "list_available_optimizers",
+          "line": 102
+        },
+        {
+          "name": "print",
+          "line": 104
+        },
+        {
+          "name": "print",
+          "line": 105
+        },
+        {
+          "name": "available.items",
+          "line": 107
+        },
+        {
+          "name": "print",
+          "line": 108
+        },
+        {
+          "name": "get_optimizer_config",
+          "line": 111
+        },
+        {
+          "name": "....get",
+          "line": 113
+        },
+        {
+          "name": "print",
+          "line": 116
+        },
+        {
+          "name": "optimizer_type.upper",
+          "line": 108
+        },
+        {
+          "name": "print",
+          "line": 118
+        }
+      ],
+      "docstring": "Print all available optimizer configurations in a human-readable format.",
+      "code_snippet": "    return f\"{optimizer_name} ({', '.join(key_params)}) with {scheduler_info}\"\n\ndef print_available_optimizers():\n    \"\"\"Print all available optimizer configurations in a human-readable format.\"\"\"\n    available = list_available_optimizers()\n    \n    print(\"Available optimizer configurations:\")\n    print(\"==================================\")\n    \n    for optimizer_type, variants in available.items():\n        print(f\"\\n{optimizer_type.upper()}:\")\n        for variant in variants:\n            try:\n                config = get_optimizer_config(optimizer_type, variant)\n                optimizer_name = config['optimizer_class'].__name__\n                lr = config['optimizer_kwargs'].get('lr', 'N/A')\n                scheduler = config['scheduler_class'].__name__ if config['scheduler_class'] else \"None\"\n                \n                print(f\"  - {variant}: {optimizer_name} (lr={lr}, scheduler={scheduler})\")\n            except:\n                print(f\"  - {variant}: [Error loading configuration]\")\n                \ndef add_optimizer_arguments(parser):\n    \"\"\"\n    Add optimizer-related arguments to an ArgumentParser."
+    },
+    "add_optimizer_arguments": {
+      "start_line": 120,
+      "end_line": 136,
+      "parameters": [
+        {
+          "name": "parser"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "list_available_optimizers",
+          "line": 127
+        },
+        {
+          "name": "list",
+          "line": 128
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 131
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 133
+        },
+        {
+          "name": "available.keys",
+          "line": 128
+        }
+      ],
+      "docstring": "\n    Add optimizer-related arguments to an ArgumentParser.\n    \n    Args:\n        parser: ArgumentParser to add arguments to\n    ",
+      "code_snippet": "                print(f\"  - {variant}: [Error loading configuration]\")\n                \ndef add_optimizer_arguments(parser):\n    \"\"\"\n    Add optimizer-related arguments to an ArgumentParser.\n    \n    Args:\n        parser: ArgumentParser to add arguments to\n    \"\"\"\n    available = list_available_optimizers()\n    optimizer_types = list(available.keys())\n    \n    # Add optimizer arguments\n    parser.add_argument(\"--optimizer\", type=str, default=\"sgd\", choices=optimizer_types,\n                      help=\"Optimizer type (default: sgd)\")\n    parser.add_argument(\"--optimizer-variant\", type=str, default=\"default\",\n                      help=\"Optimizer variant (default: default)\")\n    # Removed manual overrides for learning rate and weight decay as they contradict\n    # the dynamic optimization philosophy of isekaiZen, particularly with the EVE optimizers"
+    }
+  },
+  "constants": {}
+}

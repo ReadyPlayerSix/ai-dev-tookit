@@ -1,0 +1,699 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\data\\augmented_dataset.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 11
+    },
+    {
+      "name": "logging",
+      "line": 12
+    },
+    {
+      "name": "random",
+      "line": 13
+    },
+    {
+      "name": "typing.Dict",
+      "line": 14
+    },
+    {
+      "name": "typing.List",
+      "line": 14
+    },
+    {
+      "name": "typing.Any",
+      "line": 14
+    },
+    {
+      "name": "typing.Optional",
+      "line": 14
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 14
+    },
+    {
+      "name": "typing.Union",
+      "line": 14
+    },
+    {
+      "name": "typing.Callable",
+      "line": 14
+    },
+    {
+      "name": "torch.utils.data.Dataset",
+      "line": 15
+    },
+    {
+      "name": "torch.utils.data.Subset",
+      "line": 15
+    }
+  ],
+  "classes": {
+    "AugmentedDataset": {
+      "start_line": 19,
+      "end_line": 374,
+      "methods": {
+        "__init__": {
+          "start_line": 34,
+          "end_line": 71,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "base_dataset",
+              "type": "Dataset"
+            },
+            {
+              "name": "augmentation_factor",
+              "type": "float"
+            },
+            {
+              "name": "transform"
+            },
+            {
+              "name": "focused_patterns"
+            },
+            {
+              "name": "augmentation_mediator"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "list",
+              "line": 60
+            },
+            {
+              "name": "self._generate_augmentations",
+              "line": 65
+            },
+            {
+              "name": "logger.info",
+              "line": 67
+            },
+            {
+              "name": "logger.info",
+              "line": 68
+            },
+            {
+              "name": "logger.info",
+              "line": 69
+            },
+            {
+              "name": "range",
+              "line": 60
+            },
+            {
+              "name": "len",
+              "line": 60
+            },
+            {
+              "name": "len",
+              "line": 67
+            },
+            {
+              "name": "len",
+              "line": 68
+            },
+            {
+              "name": "len",
+              "line": 69
+            }
+          ],
+          "docstring": "\n        Initialize the augmented dataset.\n        \n        Args:\n            base_dataset: Original dataset to augment\n            augmentation_factor: How much to augment (e.g., 0.2 adds 20% more examples)\n            transform: Transform to apply to augmented examples\n            focused_patterns: Optional list of pattern types to focus augmentation on\n            augmentation_mediator: Optional mediator to generate augmentations (legacy support)\n            pattern_map: Optional pattern map for focused augmentation\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, \n                 base_dataset: Dataset, \n                 augmentation_factor: float = 0.2,\n                 transform: Optional[Callable] = None,\n                 focused_patterns: Optional[List[str]] = None,\n                 augmentation_mediator=None,\n                 pattern_map: Optional[Dict[str, Any]] = None):\n        \"\"\"\n        Initialize the augmented dataset.\n        \n        Args:\n            base_dataset: Original dataset to augment\n            augmentation_factor: How much to augment (e.g., 0.2 adds 20% more examples)\n            transform: Transform to apply to augmented examples\n            focused_patterns: Optional list of pattern types to focus augmentation on\n            augmentation_mediator: Optional mediator to generate augmentations (legacy support)\n            pattern_map: Optional pattern map for focused augmentation\n        \"\"\"\n        self.base_dataset = base_dataset\n        self.augmentation_factor = augmentation_factor\n        self.transform = transform\n        self.focused_patterns = focused_patterns or []\n        self.augmentation_mediator = augmentation_mediator\n        self.pattern_map = pattern_map\n        \n        # Separate indices for original and augmented examples\n        self.original_indices = list(range(len(base_dataset)))\n        self.augmented_examples = []\n        self.augmentation_mapping = {}  # Maps index beyond original to (pattern_type, orig_idx)\n        \n        # Generate augmented examples \n        self._generate_augmentations()\n            \n        logger.info(f\"AugmentedDataset initialized with {len(self)} total examples\")\n        logger.info(f\"  {len(self.original_indices)} original examples\")\n        logger.info(f\"  {len(self.augmented_examples)} augmented examples\")\n    \n    def _generate_augmentations(self):\n        \"\"\"Generate augmented examples using transform or mediator.\"\"\"\n        start_idx = len(self.original_indices)"
+        },
+        "_generate_augmentations": {
+          "start_line": 71,
+          "end_line": 201,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 73
+            },
+            {
+              "name": "len",
+              "line": 75
+            },
+            {
+              "name": "int",
+              "line": 78
+            },
+            {
+              "name": "self.pattern_map.get",
+              "line": 90
+            },
+            {
+              "name": "pattern_mapping.items",
+              "line": 93
+            },
+            {
+              "name": "logger.info",
+              "line": 112
+            },
+            {
+              "name": "self.augmentation_mediator.get_augmentations",
+              "line": 136
+            },
+            {
+              "name": "enumerate",
+              "line": 141
+            },
+            {
+              "name": "enumerate",
+              "line": 173
+            },
+            {
+              "name": "logger.warning",
+              "line": 114
+            },
+            {
+              "name": "self.augmentation_mediator.get_augmentations",
+              "line": 124
+            },
+            {
+              "name": "augmentations.extend",
+              "line": 128
+            },
+            {
+              "name": "enumerate",
+              "line": 131
+            },
+            {
+              "name": "random.sample",
+              "line": 170
+            },
+            {
+              "name": "self.augmented_examples.append",
+              "line": 188
+            },
+            {
+              "name": "int",
+              "line": 95
+            },
+            {
+              "name": "pattern_info.get",
+              "line": 99
+            },
+            {
+              "name": "focused_indices.extend",
+              "line": 110
+            },
+            {
+              "name": "len",
+              "line": 153
+            },
+            {
+              "name": "random.sample",
+              "line": 154
+            },
+            {
+              "name": "focused_indices.copy",
+              "line": 157
+            },
+            {
+              "name": "range",
+              "line": 170
+            },
+            {
+              "name": "isinstance",
+              "line": 178
+            },
+            {
+              "name": "self.transform",
+              "line": 181
+            },
+            {
+              "name": "self.transform",
+              "line": 185
+            },
+            {
+              "name": "....get",
+              "line": 193
+            },
+            {
+              "name": "....append",
+              "line": 103
+            },
+            {
+              "name": "len",
+              "line": 112
+            },
+            {
+              "name": "len",
+              "line": 158
+            },
+            {
+              "name": "set",
+              "line": 162
+            },
+            {
+              "name": "list",
+              "line": 163
+            },
+            {
+              "name": "len",
+              "line": 178
+            },
+            {
+              "name": "str",
+              "line": 193
+            },
+            {
+              "name": "str",
+              "line": 114
+            },
+            {
+              "name": "range",
+              "line": 162
+            },
+            {
+              "name": "random.sample",
+              "line": 166
+            },
+            {
+              "name": "indices_to_augment.extend",
+              "line": 167
+            },
+            {
+              "name": "set",
+              "line": 163
+            },
+            {
+              "name": "min",
+              "line": 166
+            },
+            {
+              "name": "len",
+              "line": 166
+            }
+          ],
+          "docstring": "Generate augmented examples using transform or mediator.",
+          "code_snippet": "        logger.info(f\"  {len(self.augmented_examples)} augmented examples\")\n    \n    def _generate_augmentations(self):\n        \"\"\"Generate augmented examples using transform or mediator.\"\"\"\n        start_idx = len(self.original_indices)\n        current_idx = start_idx\n        orig_dataset_size = len(self.original_indices)\n        \n        # Calculate number of examples to augment\n        num_to_augment = int(orig_dataset_size * self.augmentation_factor)\n        if num_to_augment <= 0:\n            return\n        \n        # If we have focused patterns and a pattern map, use those to select indices\n        focused_indices = []\n        if self.focused_patterns and self.pattern_map:\n            try:\n                # Find examples corresponding to focused patterns\n                pattern_indices = {}\n                \n                # Get the pattern map lookup\n                pattern_mapping = self.pattern_map.get('pattern_map', {})\n                \n                # Group indices by pattern type\n                for idx_str, pattern_info in pattern_mapping.items():\n                    try:\n                        idx = int(idx_str)\n                        if idx >= orig_dataset_size:\n                            continue\n                            \n                        pattern_type = pattern_info.get('pattern_type')\n                        if pattern_type in self.focused_patterns:\n                            if pattern_type not in pattern_indices:\n                                pattern_indices[pattern_type] = []\n                            pattern_indices[pattern_type].append(idx)\n                    except (ValueError, TypeError):\n                        continue\n                \n                # Collect indices for focused patterns\n                for pattern_type in self.focused_patterns:\n                    if pattern_type in pattern_indices:\n                        focused_indices.extend(pattern_indices[pattern_type])\n                \n                logger.info(f\"Found {len(focused_indices)} examples for focused patterns: {self.focused_patterns}\")\n            except Exception as e:\n                logger.warning(f\"Error identifying focused pattern indices: {str(e)}\")\n        \n        # If using legacy augmentation mediator\n        if self.augmentation_mediator:\n            # Generate augmentations using mediator\n            augmentations = []\n            \n            # If we have focused patterns, use them\n            if self.focused_patterns:\n                for pattern_type in self.focused_patterns:\n                    pattern_augs = self.augmentation_mediator.get_augmentations(\n                        pattern_type=pattern_type,\n                        percentage=self.augmentation_factor\n                    )\n                    augmentations.extend(pattern_augs)\n                    \n                    # Update mapping\n                    for i, aug in enumerate(pattern_augs):\n                        self.augmentation_mapping[current_idx] = (pattern_type, -1)  # -1 means generated by mediator\n                        current_idx += 1\n            else:\n                # Generate general augmentations\n                augmentations = self.augmentation_mediator.get_augmentations(\n                    percentage=self.augmentation_factor\n                )\n                \n                # Update mapping\n                for i, aug in enumerate(augmentations):\n                    self.augmentation_mapping[current_idx] = (\"general\", -1)\n                    current_idx += 1\n            \n            # Store augmentations\n            self.augmented_examples = augmentations\n            \n        # Otherwise use transform directly\n        elif self.transform:\n            # If we have focused indices, use those, otherwise sample randomly\n            if focused_indices:\n                # If more indices than needed, sample from them\n                if len(focused_indices) > num_to_augment:\n                    indices_to_augment = random.sample(focused_indices, num_to_augment)\n                else:\n                    # Use all focused indices and sample additional if needed\n                    indices_to_augment = focused_indices.copy()\n                    additional_needed = num_to_augment - len(focused_indices)\n                    \n                    if additional_needed > 0:\n                        # Get all non-focused indices\n                        all_indices = set(range(orig_dataset_size))\n                        non_focused = list(all_indices - set(focused_indices))\n                        \n                        if non_focused:\n                            additional = random.sample(non_focused, min(additional_needed, len(non_focused)))\n                            indices_to_augment.extend(additional)\n            else:\n                # Random sampling\n                indices_to_augment = random.sample(range(orig_dataset_size), num_to_augment)\n            \n            # Generate augmented examples\n            for i, idx in enumerate(indices_to_augment):\n                # Get original example\n                original = self.base_dataset[idx]\n                \n                # Apply transform\n                if isinstance(original, tuple) and len(original) == 2:\n                    # Assume (data, label) format and transform only the data\n                    data, label = original\n                    transformed_data = self.transform(data)\n                    augmented = (transformed_data, label)\n                else:\n                    # Transform everything\n                    augmented = self.transform(original)\n                \n                # Store augmentation\n                self.augmented_examples.append(augmented)\n                \n                # Determine pattern type for this example\n                pattern_type = \"general\"\n                if self.pattern_map and 'pattern_map' in self.pattern_map:\n                    pattern_info = self.pattern_map['pattern_map'].get(str(idx), {})\n                    if 'pattern_type' in pattern_info:\n                        pattern_type = pattern_info['pattern_type']\n                \n                # Update mapping\n                self.augmentation_mapping[current_idx] = (pattern_type, idx)\n                current_idx += 1\n    \n    def add_augmentations(self, pattern_type: str, percentage: float):\n        \"\"\"\n        Add more augmentations for a specific pattern type."
+        },
+        "add_augmentations": {
+          "start_line": 201,
+          "end_line": 306,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            },
+            {
+              "name": "percentage",
+              "type": "float"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 215
+            },
+            {
+              "name": "self.augmentation_mediator.get_augmentations",
+              "line": 220
+            },
+            {
+              "name": "enumerate",
+              "line": 226
+            },
+            {
+              "name": "len",
+              "line": 231
+            },
+            {
+              "name": "logger.info",
+              "line": 232
+            },
+            {
+              "name": "len",
+              "line": 216
+            },
+            {
+              "name": "self.augmented_examples.append",
+              "line": 227
+            },
+            {
+              "name": "len",
+              "line": 238
+            },
+            {
+              "name": "int",
+              "line": 239
+            },
+            {
+              "name": "random.choices",
+              "line": 268
+            },
+            {
+              "name": "len",
+              "line": 271
+            },
+            {
+              "name": "enumerate",
+              "line": 277
+            },
+            {
+              "name": "logger.info",
+              "line": 299
+            },
+            {
+              "name": "logger.warning",
+              "line": 303
+            },
+            {
+              "name": "self.pattern_map.get",
+              "line": 244
+            },
+            {
+              "name": "pattern_mapping.items",
+              "line": 246
+            },
+            {
+              "name": "logger.info",
+              "line": 257
+            },
+            {
+              "name": "logger.warning",
+              "line": 264
+            },
+            {
+              "name": "len",
+              "line": 272
+            },
+            {
+              "name": "self.augmented_examples.append",
+              "line": 292
+            },
+            {
+              "name": "logger.warning",
+              "line": 259
+            },
+            {
+              "name": "isinstance",
+              "line": 282
+            },
+            {
+              "name": "self.transform",
+              "line": 285
+            },
+            {
+              "name": "self.transform",
+              "line": 289
+            },
+            {
+              "name": "int",
+              "line": 248
+            },
+            {
+              "name": "len",
+              "line": 282
+            },
+            {
+              "name": "pattern_info.get",
+              "line": 252
+            },
+            {
+              "name": "pattern_indices.append",
+              "line": 253
+            },
+            {
+              "name": "len",
+              "line": 257
+            },
+            {
+              "name": "str",
+              "line": 259
+            }
+          ],
+          "docstring": "\n        Add more augmentations for a specific pattern type.\n        \n        Args:\n            pattern_type: Type of pattern to augment\n            percentage: Percentage to augment\n            \n        Returns:\n            Number of augmentations added\n        ",
+          "code_snippet": "                current_idx += 1\n    \n    def add_augmentations(self, pattern_type: str, percentage: float):\n        \"\"\"\n        Add more augmentations for a specific pattern type.\n        \n        Args:\n            pattern_type: Type of pattern to augment\n            percentage: Percentage to augment\n            \n        Returns:\n            Number of augmentations added\n        \"\"\"\n        # If using mediator\n        if self.augmentation_mediator:\n            # Get current total count\n            start_count = len(self.augmented_examples)\n            start_idx = len(self.original_indices) + start_count\n            current_idx = start_idx\n            \n            # Get augmentations from mediator\n            augmentations = self.augmentation_mediator.get_augmentations(\n                pattern_type=pattern_type,\n                percentage=percentage\n            )\n            \n            # Store augmentations and update mapping\n            for i, augmentation in enumerate(augmentations):\n                self.augmented_examples.append(augmentation)\n                self.augmentation_mapping[current_idx] = (pattern_type, -1)\n                current_idx += 1\n                \n            added_count = len(augmentations)\n            logger.info(f\"Added {added_count} augmentations for pattern type '{pattern_type}'\")\n            \n            return added_count\n            \n        # If using transform\n        elif self.transform and self.pattern_map:\n            orig_dataset_size = len(self.original_indices)\n            num_to_add = int(orig_dataset_size * percentage)\n            \n            # Find examples of this pattern type\n            pattern_indices = []\n            try:\n                pattern_mapping = self.pattern_map.get('pattern_map', {})\n                \n                for idx_str, pattern_info in pattern_mapping.items():\n                    try:\n                        idx = int(idx_str)\n                        if idx >= orig_dataset_size:\n                            continue\n                            \n                        if pattern_info.get('pattern_type') == pattern_type:\n                            pattern_indices.append(idx)\n                    except (ValueError, TypeError):\n                        continue\n                        \n                logger.info(f\"Found {len(pattern_indices)} examples for pattern type '{pattern_type}'\")\n            except Exception as e:\n                logger.warning(f\"Error identifying pattern indices: {str(e)}\")\n                return 0\n            \n            # If no examples of this pattern type, can't augment\n            if not pattern_indices:\n                logger.warning(f\"No examples found for pattern type '{pattern_type}'\")\n                return 0\n            \n            # Randomly select indices to augment\n            indices_to_augment = random.choices(pattern_indices, k=num_to_add)\n            \n            # Get current total count\n            start_count = len(self.augmented_examples)\n            start_idx = len(self.original_indices) + start_count\n            current_idx = start_idx\n            \n            # Generate augmented examples\n            added_count = 0\n            for i, idx in enumerate(indices_to_augment):\n                # Get original example\n                original = self.base_dataset[idx]\n                \n                # Apply transform\n                if isinstance(original, tuple) and len(original) == 2:\n                    # Assume (data, label) format and transform only the data\n                    data, label = original\n                    transformed_data = self.transform(data)\n                    augmented = (transformed_data, label)\n                else:\n                    # Transform everything\n                    augmented = self.transform(original)\n                \n                # Store augmentation\n                self.augmented_examples.append(augmented)\n                \n                # Update mapping\n                self.augmentation_mapping[current_idx] = (pattern_type, idx)\n                current_idx += 1\n                added_count += 1\n            \n            logger.info(f\"Added {added_count} augmentations for pattern type '{pattern_type}'\")\n            return added_count\n        \n        else:\n            logger.warning(\"Cannot add augmentations: no mediator or transform provided\")\n            return 0\n    \n    def __len__(self):\n        \"\"\"Get the total number of examples (original + augmented).\"\"\"\n        return len(self.original_indices) + len(self.augmented_examples)"
+        },
+        "__len__": {
+          "start_line": 306,
+          "end_line": 310,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 308
+            },
+            {
+              "name": "len",
+              "line": 308
+            }
+          ],
+          "docstring": "Get the total number of examples (original + augmented).",
+          "code_snippet": "            return 0\n    \n    def __len__(self):\n        \"\"\"Get the total number of examples (original + augmented).\"\"\"\n        return len(self.original_indices) + len(self.augmented_examples)\n    \n    def __getitem__(self, idx):\n        \"\"\"\n        Get an example by index."
+        },
+        "__getitem__": {
+          "start_line": 310,
+          "end_line": 332,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "idx"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 321
+            },
+            {
+              "name": "len",
+              "line": 326
+            },
+            {
+              "name": "len",
+              "line": 327
+            },
+            {
+              "name": "IndexError",
+              "line": 330
+            },
+            {
+              "name": "len",
+              "line": 330
+            }
+          ],
+          "docstring": "\n        Get an example by index.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Tuple of (data, label)\n        ",
+          "code_snippet": "        return len(self.original_indices) + len(self.augmented_examples)\n    \n    def __getitem__(self, idx):\n        \"\"\"\n        Get an example by index.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Tuple of (data, label)\n        \"\"\"\n        # Check if this is an original or augmented example\n        if idx < len(self.original_indices):\n            # Original example - use the base dataset\n            return self.base_dataset[idx]\n        else:\n            # Augmented example - retrieve from stored augmentations\n            aug_idx = idx - len(self.original_indices)\n            if aug_idx < len(self.augmented_examples):\n                return self.augmented_examples[aug_idx]\n            else:\n                raise IndexError(f\"Index {idx} out of range for dataset of size {len(self)}\")\n    \n    def get_augmentation_info(self, idx):\n        \"\"\"\n        Get information about an augmentation."
+        },
+        "get_augmentation_info": {
+          "start_line": 332,
+          "end_line": 359,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "idx"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 342
+            },
+            {
+              "name": "len",
+              "line": 347
+            },
+            {
+              "name": "len",
+              "line": 348
+            },
+            {
+              "name": "self.augmentation_mapping.get",
+              "line": 350
+            },
+            {
+              "name": "IndexError",
+              "line": 357
+            },
+            {
+              "name": "len",
+              "line": 354
+            },
+            {
+              "name": "len",
+              "line": 357
+            }
+          ],
+          "docstring": "\n        Get information about an augmentation.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Dictionary with augmentation information or None if original example\n        ",
+          "code_snippet": "                raise IndexError(f\"Index {idx} out of range for dataset of size {len(self)}\")\n    \n    def get_augmentation_info(self, idx):\n        \"\"\"\n        Get information about an augmentation.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Dictionary with augmentation information or None if original example\n        \"\"\"\n        if idx < len(self.original_indices):\n            # Original example\n            return None\n        else:\n            # Augmented example\n            aug_idx = idx - len(self.original_indices)\n            if aug_idx < len(self.augmented_examples):\n                # Get pattern type from mapping\n                pattern_type, _ = self.augmentation_mapping.get(idx, (\"unknown\", 0))\n                return {\n                    \"pattern_type\": pattern_type,\n                    \"augmented\": True,\n                    \"original_dataset_size\": len(self.original_indices)\n                }\n            else:\n                raise IndexError(f\"Index {idx} out of range for dataset of size {len(self)}\")\n    \n    def get_augmentation_counts(self):\n        \"\"\"\n        Get counts of augmentations by pattern type."
+        },
+        "get_augmentation_counts": {
+          "start_line": 359,
+          "end_line": 374,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.augmentation_mapping.items",
+              "line": 367
+            }
+          ],
+          "docstring": "\n        Get counts of augmentations by pattern type.\n        \n        Returns:\n            Dictionary mapping pattern types to counts\n        ",
+          "code_snippet": "                raise IndexError(f\"Index {idx} out of range for dataset of size {len(self)}\")\n    \n    def get_augmentation_counts(self):\n        \"\"\"\n        Get counts of augmentations by pattern type.\n        \n        Returns:\n            Dictionary mapping pattern types to counts\n        \"\"\"\n        counts = {}\n        for _, (pattern_type, _) in self.augmentation_mapping.items():\n            if pattern_type not in counts:\n                counts[pattern_type] = 0\n            counts[pattern_type] += 1\n            \n        return counts\n\n\nclass TransformedSubset(Dataset):\n    \"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Dataset"
+      ],
+      "docstring": "\n    Dataset wrapper that provides a unified interface for original and augmented examples.\n    \n    This class augments a base dataset with transformed examples, focusing on\n    specific patterns if needed. It supports both using an augmentation mediator\n    or directly applying transforms.\n    \n    Attributes:\n        base_dataset: Original dataset to augment\n        augmentation_factor: How much to augment (e.g., 0.2 adds 20% more examples)\n        transform: Transform to apply to augmented examples\n        focused_patterns: Optional list of pattern types to focus augmentation on\n    "
+    },
+    "TransformedSubset": {
+      "start_line": 375,
+      "end_line": 455,
+      "methods": {
+        "__init__": {
+          "start_line": 389,
+          "end_line": 415,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset",
+              "type": "Dataset"
+            },
+            {
+              "name": "transform"
+            },
+            {
+              "name": "indices"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 406
+            },
+            {
+              "name": "list",
+              "line": 411
+            },
+            {
+              "name": "range",
+              "line": 411
+            },
+            {
+              "name": "len",
+              "line": 411
+            }
+          ],
+          "docstring": "\n        Initialize a transformed subset.\n        \n        Args:\n            dataset: The dataset to transform\n            transform: Function to apply to each example\n            indices: Optional list of indices to include (uses all if None)\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, \n                dataset: Dataset, \n                transform: Optional[Callable] = None,\n                indices: Optional[List[int]] = None):\n        \"\"\"\n        Initialize a transformed subset.\n        \n        Args:\n            dataset: The dataset to transform\n            transform: Function to apply to each example\n            indices: Optional list of indices to include (uses all if None)\n        \"\"\"\n        self.dataset = dataset\n        self.transform = transform\n        \n        # Use all indices if none provided\n        if indices is None:\n            if isinstance(dataset, Subset):\n                # If dataset is already a Subset, use its indices\n                self.indices = dataset.indices\n            else:\n                # Otherwise use all indices\n                self.indices = list(range(len(dataset)))\n        else:\n            self.indices = indices\n    \n    def __len__(self) -> int:\n        \"\"\"Get the number of examples in the transformed subset.\"\"\"\n        return len(self.indices)"
+        },
+        "__len__": {
+          "start_line": 415,
+          "end_line": 419,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "len",
+              "line": 417
+            }
+          ],
+          "docstring": "Get the number of examples in the transformed subset.",
+          "code_snippet": "            self.indices = indices\n    \n    def __len__(self) -> int:\n        \"\"\"Get the number of examples in the transformed subset.\"\"\"\n        return len(self.indices)\n    \n    def __getitem__(self, idx: int) -> Any:\n        \"\"\"\n        Get an example by index, applying the transform."
+        },
+        "__getitem__": {
+          "start_line": 419,
+          "end_line": 455,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "idx",
+              "type": "int"
+            }
+          ],
+          "return_type": "Any",
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 436
+            },
+            {
+              "name": "len",
+              "line": 429
+            },
+            {
+              "name": "IndexError",
+              "line": 430
+            },
+            {
+              "name": "isinstance",
+              "line": 444
+            },
+            {
+              "name": "self.transform",
+              "line": 447
+            },
+            {
+              "name": "self.transform",
+              "line": 451
+            },
+            {
+              "name": "len",
+              "line": 444
+            },
+            {
+              "name": "len",
+              "line": 430
+            }
+          ],
+          "docstring": "\n        Get an example by index, applying the transform.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Transformed example\n        ",
+          "code_snippet": "        return len(self.indices)\n    \n    def __getitem__(self, idx: int) -> Any:\n        \"\"\"\n        Get an example by index, applying the transform.\n        \n        Args:\n            idx: Index of the example\n            \n        Returns:\n            Transformed example\n        \"\"\"\n        if idx >= len(self.indices):\n            raise IndexError(f\"Index {idx} out of range for dataset of size {len(self)}\")\n            \n        # Get the original index\n        original_idx = self.indices[idx]\n        \n        # Get the original example\n        if isinstance(self.dataset, Subset):\n            # If dataset is a Subset, need to get its dataset and correct index\n            original_data = self.dataset.dataset[self.dataset.indices[original_idx]]\n        else:\n            original_data = self.dataset[original_idx]\n        \n        # Apply transform if provided\n        if self.transform is not None:\n            if isinstance(original_data, tuple) and len(original_data) == 2:\n                # Assume (data, label) format and transform only the data\n                data, label = original_data\n                transformed_data = self.transform(data)\n                return (transformed_data, label)\n            else:\n                # Transform everything\n                return self.transform(original_data)\n        else:\n            return original_data"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Dataset"
+      ],
+      "docstring": "\n    A subset of a dataset with a custom transform applied to each example.\n    \n    This class is similar to torch.utils.data.Subset but it applies a custom \n    transform to the examples after retrieving them from the original dataset.\n    It's used for efficient data augmentation without duplicating data in memory.\n    \n    Attributes:\n        dataset: The original dataset to transform\n        transform: Function to apply to each example\n        indices: Optional subset of indices to include\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

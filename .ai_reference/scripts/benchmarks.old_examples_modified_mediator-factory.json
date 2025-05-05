@@ -1,0 +1,298 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\modified\\mediator-factory.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 8
+    },
+    {
+      "name": "typing.Dict",
+      "line": 9
+    },
+    {
+      "name": "typing.Any",
+      "line": 9
+    },
+    {
+      "name": "typing.Optional",
+      "line": 9
+    },
+    {
+      "name": "typing.List",
+      "line": 9
+    },
+    {
+      "name": "typing.Union",
+      "line": 9
+    },
+    {
+      "name": "torch",
+      "line": 10
+    },
+    {
+      "name": "isekaizen.mediators.base.Mediator",
+      "line": 12
+    },
+    {
+      "name": "isekaizen.mediators.base.MediatorInitializationError",
+      "line": 12
+    },
+    {
+      "name": "isekaizen.mediators.pattern.data_mediator.PatternDataMediator",
+      "line": 31
+    },
+    {
+      "name": "isekaizen.mediators.augmentation.template_mediator.AugmentationMediator",
+      "line": 56
+    },
+    {
+      "name": "isekaizen.mediators.ratio.ratio_tracker.UnifiedRatioTracker",
+      "line": 88
+    },
+    {
+      "name": "isekaizen.mediators.ratio.equilibrium_mediator.PatternEquilibriumTracker",
+      "line": 112
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "create_pattern_mediator": {
+      "start_line": 16,
+      "end_line": 39,
+      "parameters": [
+        {
+          "name": "pattern_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "PatternDataMediator",
+          "line": 32
+        },
+        {
+          "name": "logger.info",
+          "line": 33
+        },
+        {
+          "name": "logger.error",
+          "line": 36
+        },
+        {
+          "name": "MediatorInitializationError",
+          "line": 37
+        },
+        {
+          "name": "hasattr",
+          "line": 33
+        },
+        {
+          "name": "len",
+          "line": 33
+        },
+        {
+          "name": "str",
+          "line": 36
+        },
+        {
+          "name": "str",
+          "line": 37
+        },
+        {
+          "name": "mediator.get_pattern_types",
+          "line": 33
+        }
+      ],
+      "docstring": "\n    Create and return a pattern data mediator instance.\n    \n    Args:\n        pattern_map: Pattern map containing pattern information\n        **kwargs: Additional arguments for the mediator\n        \n    Returns:\n        PatternDataMediator instance\n    \n    Raises:\n        MediatorInitializationError: If initialization fails\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef create_pattern_mediator(pattern_map=None, **kwargs):\n    \"\"\"\n    Create and return a pattern data mediator instance.\n    \n    Args:\n        pattern_map: Pattern map containing pattern information\n        **kwargs: Additional arguments for the mediator\n        \n    Returns:\n        PatternDataMediator instance\n    \n    Raises:\n        MediatorInitializationError: If initialization fails\n    \"\"\"\n    try:\n        from isekaizen.mediators.pattern.data_mediator import PatternDataMediator\n        mediator = PatternDataMediator(pattern_map=pattern_map, **kwargs)\n        logger.info(f\"Created PatternDataMediator with {len(mediator.get_pattern_types()) if hasattr(mediator, 'get_pattern_types') else 0} pattern types\")\n        return mediator\n    except Exception as e:\n        logger.error(f\"Failed to create PatternDataMediator: {str(e)}\")\n        raise MediatorInitializationError(f\"Failed to create PatternDataMediator: {str(e)}\") from e\n\ndef create_augmentation_mediator(dataset, pattern_map=None, device=None, **kwargs):\n    \"\"\"\n    Create and return an augmentation mediator instance."
+    },
+    "create_augmentation_mediator": {
+      "start_line": 39,
+      "end_line": 73,
+      "parameters": [
+        {
+          "name": "dataset"
+        },
+        {
+          "name": "pattern_map"
+        },
+        {
+          "name": "device"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "AugmentationMediator",
+          "line": 62
+        },
+        {
+          "name": "mediator.initialize",
+          "line": 65
+        },
+        {
+          "name": "logger.info",
+          "line": 67
+        },
+        {
+          "name": "torch.device",
+          "line": 60
+        },
+        {
+          "name": "logger.error",
+          "line": 70
+        },
+        {
+          "name": "MediatorInitializationError",
+          "line": 71
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 60
+        },
+        {
+          "name": "len",
+          "line": 67
+        },
+        {
+          "name": "str",
+          "line": 70
+        },
+        {
+          "name": "str",
+          "line": 71
+        }
+      ],
+      "docstring": "\n    Create and return an augmentation mediator instance.\n    \n    Args:\n        dataset: The dataset to augment\n        pattern_map: Pattern map containing pattern information\n        device: Computation device (CPU/GPU)\n        **kwargs: Additional arguments for the mediator\n        \n    Returns:\n        AugmentationMediator instance\n    \n    Raises:\n        MediatorInitializationError: If initialization fails\n    ",
+      "code_snippet": "        raise MediatorInitializationError(f\"Failed to create PatternDataMediator: {str(e)}\") from e\n\ndef create_augmentation_mediator(dataset, pattern_map=None, device=None, **kwargs):\n    \"\"\"\n    Create and return an augmentation mediator instance.\n    \n    Args:\n        dataset: The dataset to augment\n        pattern_map: Pattern map containing pattern information\n        device: Computation device (CPU/GPU)\n        **kwargs: Additional arguments for the mediator\n        \n    Returns:\n        AugmentationMediator instance\n    \n    Raises:\n        MediatorInitializationError: If initialization fails\n    \"\"\"\n    try:\n        from isekaizen.mediators.augmentation.template_mediator import AugmentationMediator\n        \n        # Set default device if not provided\n        if device is None:\n            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        mediator = AugmentationMediator(dataset=dataset, pattern_map=pattern_map, device=device, **kwargs)\n        \n        # Initialize the mediator\n        mediator.initialize()\n        \n        logger.info(f\"Created AugmentationMediator for dataset with {len(dataset)} examples\")\n        return mediator\n    except Exception as e:\n        logger.error(f\"Failed to create AugmentationMediator: {str(e)}\")\n        raise MediatorInitializationError(f\"Failed to create AugmentationMediator: {str(e)}\") from e\n\ndef create_ratio_tracker(pattern_map=None, **kwargs):\n    \"\"\"\n    Create and return a unified ratio tracker instance."
+    },
+    "create_ratio_tracker": {
+      "start_line": 73,
+      "end_line": 96,
+      "parameters": [
+        {
+          "name": "pattern_map"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "UnifiedRatioTracker",
+          "line": 89
+        },
+        {
+          "name": "logger.info",
+          "line": 90
+        },
+        {
+          "name": "logger.error",
+          "line": 93
+        },
+        {
+          "name": "MediatorInitializationError",
+          "line": 94
+        },
+        {
+          "name": "str",
+          "line": 93
+        },
+        {
+          "name": "str",
+          "line": 94
+        }
+      ],
+      "docstring": "\n    Create and return a unified ratio tracker instance.\n    \n    Args:\n        pattern_map: Pattern map containing pattern information\n        **kwargs: Additional arguments for the tracker\n        \n    Returns:\n        UnifiedRatioTracker instance\n    \n    Raises:\n        MediatorInitializationError: If initialization fails\n    ",
+      "code_snippet": "        raise MediatorInitializationError(f\"Failed to create AugmentationMediator: {str(e)}\") from e\n\ndef create_ratio_tracker(pattern_map=None, **kwargs):\n    \"\"\"\n    Create and return a unified ratio tracker instance.\n    \n    Args:\n        pattern_map: Pattern map containing pattern information\n        **kwargs: Additional arguments for the tracker\n        \n    Returns:\n        UnifiedRatioTracker instance\n    \n    Raises:\n        MediatorInitializationError: If initialization fails\n    \"\"\"\n    try:\n        from isekaizen.mediators.ratio.ratio_tracker import UnifiedRatioTracker\n        tracker = UnifiedRatioTracker(**kwargs)\n        logger.info(\"Created UnifiedRatioTracker\")\n        return tracker\n    except Exception as e:\n        logger.error(f\"Failed to create UnifiedRatioTracker: {str(e)}\")\n        raise MediatorInitializationError(f\"Failed to create UnifiedRatioTracker: {str(e)}\") from e\n\ndef create_equilibrium_tracker(pattern_complexities=None, pattern_distribution=None, **kwargs):\n    \"\"\"\n    Create and return a pattern equilibrium tracker instance."
+    },
+    "create_equilibrium_tracker": {
+      "start_line": 96,
+      "end_line": 133,
+      "parameters": [
+        {
+          "name": "pattern_complexities"
+        },
+        {
+          "name": "pattern_distribution"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "kwargs.pop",
+          "line": 115
+        },
+        {
+          "name": "PatternEquilibriumTracker",
+          "line": 121
+        },
+        {
+          "name": "logger.info",
+          "line": 127
+        },
+        {
+          "name": "pattern_map.get",
+          "line": 117
+        },
+        {
+          "name": "pattern_map.get",
+          "line": 119
+        },
+        {
+          "name": "logger.error",
+          "line": 130
+        },
+        {
+          "name": "MediatorInitializationError",
+          "line": 131
+        },
+        {
+          "name": "str",
+          "line": 130
+        },
+        {
+          "name": "str",
+          "line": 131
+        }
+      ],
+      "docstring": "\n    Create and return a pattern equilibrium tracker instance.\n    \n    Args:\n        pattern_complexities: Dictionary of pattern types to complexity scores\n        pattern_distribution: Dictionary of pattern types to distribution values\n        **kwargs: Additional arguments for the tracker\n        \n    Returns:\n        PatternEquilibriumTracker instance\n    \n    Raises:\n        MediatorInitializationError: If initialization fails\n    ",
+      "code_snippet": "        raise MediatorInitializationError(f\"Failed to create UnifiedRatioTracker: {str(e)}\") from e\n\ndef create_equilibrium_tracker(pattern_complexities=None, pattern_distribution=None, **kwargs):\n    \"\"\"\n    Create and return a pattern equilibrium tracker instance.\n    \n    Args:\n        pattern_complexities: Dictionary of pattern types to complexity scores\n        pattern_distribution: Dictionary of pattern types to distribution values\n        **kwargs: Additional arguments for the tracker\n        \n    Returns:\n        PatternEquilibriumTracker instance\n    \n    Raises:\n        MediatorInitializationError: If initialization fails\n    \"\"\"\n    try:\n        from isekaizen.mediators.ratio.equilibrium_mediator import PatternEquilibriumTracker\n        \n        # Extract from pattern map if provided\n        pattern_map = kwargs.pop('pattern_map', None)\n        if pattern_map and not pattern_complexities:\n            pattern_complexities = pattern_map.get('pattern_complexities', None)\n        if pattern_map and not pattern_distribution:\n            pattern_distribution = pattern_map.get('pattern_distribution', None)\n        \n        tracker = PatternEquilibriumTracker(\n            pattern_complexities=pattern_complexities,\n            pattern_distribution=pattern_distribution,\n            **kwargs\n        )\n        \n        logger.info(\"Created PatternEquilibriumTracker\")\n        return tracker\n    except Exception as e:\n        logger.error(f\"Failed to create PatternEquilibriumTracker: {str(e)}\")\n        raise MediatorInitializationError(f\"Failed to create PatternEquilibriumTracker: {str(e)}\") from e\n\ndef get_all_mediator_types() -> List[str]:\n    \"\"\"\n    Get a list of all available mediator types."
+    },
+    "get_all_mediator_types": {
+      "start_line": 133,
+      "end_line": 146,
+      "parameters": [],
+      "return_type": "complex_type",
+      "calls": [],
+      "docstring": "\n    Get a list of all available mediator types.\n    \n    Returns:\n        List of mediator type names\n    ",
+      "code_snippet": "        raise MediatorInitializationError(f\"Failed to create PatternEquilibriumTracker: {str(e)}\") from e\n\ndef get_all_mediator_types() -> List[str]:\n    \"\"\"\n    Get a list of all available mediator types.\n    \n    Returns:\n        List of mediator type names\n    \"\"\"\n    return [\n        \"pattern_mediator\",\n        \"augmentation_mediator\", \n        \"ratio_tracker\",\n        \"equilibrium_tracker\"\n    ]\n\ndef create_mediator(mediator_type: str, **kwargs) -> Mediator:\n    \"\"\""
+    },
+    "create_mediator": {
+      "start_line": 147,
+      "end_line": 174,
+      "parameters": [
+        {
+          "name": "mediator_type",
+          "type": "str"
+        }
+      ],
+      "return_type": "Mediator",
+      "calls": [
+        {
+          "name": "ValueError",
+          "line": 170
+        },
+        {
+          "name": "list",
+          "line": 170
+        },
+        {
+          "name": "mediator_factories.keys",
+          "line": 170
+        }
+      ],
+      "docstring": "\n    Create a mediator of the specified type.\n    \n    Args:\n        mediator_type: Type of mediator to create\n        **kwargs: Arguments for the mediator\n        \n    Returns:\n        Mediator instance\n    \n    Raises:\n        ValueError: If mediator_type is invalid\n        MediatorInitializationError: If mediator creation fails\n    ",
+      "code_snippet": "    ]\n\ndef create_mediator(mediator_type: str, **kwargs) -> Mediator:\n    \"\"\"\n    Create a mediator of the specified type.\n    \n    Args:\n        mediator_type: Type of mediator to create\n        **kwargs: Arguments for the mediator\n        \n    Returns:\n        Mediator instance\n    \n    Raises:\n        ValueError: If mediator_type is invalid\n        MediatorInitializationError: If mediator creation fails\n    \"\"\"\n    mediator_factories = {\n        \"pattern_mediator\": create_pattern_mediator,\n        \"augmentation_mediator\": create_augmentation_mediator,\n        \"ratio_tracker\": create_ratio_tracker,\n        \"equilibrium_tracker\": create_equilibrium_tracker\n    }\n    \n    if mediator_type not in mediator_factories:\n        raise ValueError(f\"Unknown mediator type: {mediator_type}. Available types: {list(mediator_factories.keys())}\")\n    \n    return mediator_factories[mediator_type](**kwargs)"
+    }
+  },
+  "constants": {}
+}

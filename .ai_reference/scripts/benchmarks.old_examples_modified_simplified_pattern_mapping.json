@@ -1,0 +1,1310 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\modified\\simplified_pattern_mapping.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 12
+    },
+    {
+      "name": "sys",
+      "line": 13
+    },
+    {
+      "name": "time",
+      "line": 14
+    },
+    {
+      "name": "json",
+      "line": 15
+    },
+    {
+      "name": "logging",
+      "line": 16
+    },
+    {
+      "name": "argparse",
+      "line": 17
+    },
+    {
+      "name": "random",
+      "line": 18
+    },
+    {
+      "name": "torch",
+      "line": 19
+    },
+    {
+      "name": "torchvision",
+      "line": 20
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 21
+    },
+    {
+      "name": "matplotlib.pyplot",
+      "line": 22
+    },
+    {
+      "name": "numpy",
+      "line": 23
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 24
+    },
+    {
+      "name": "typing.Dict",
+      "line": 25
+    },
+    {
+      "name": "typing.List",
+      "line": 25
+    },
+    {
+      "name": "typing.Any",
+      "line": 25
+    },
+    {
+      "name": "typing.Optional",
+      "line": 25
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 25
+    },
+    {
+      "name": "terminal_ui.TerminalUI",
+      "line": 36
+    }
+  ],
+  "classes": {
+    "SimplifiedPatternMapper": {
+      "start_line": 47,
+      "end_line": 633,
+      "methods": {
+        "__init__": {
+          "start_line": 50,
+          "end_line": 76,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "output_dir",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "os.makedirs",
+              "line": 58
+            },
+            {
+              "name": "torch.device",
+              "line": 66
+            },
+            {
+              "name": "logger.info",
+              "line": 67
+            },
+            {
+              "name": "....strftime",
+              "line": 70
+            },
+            {
+              "name": "os.path.join",
+              "line": 73
+            },
+            {
+              "name": "os.makedirs",
+              "line": 74
+            },
+            {
+              "name": "os.path.join",
+              "line": 57
+            },
+            {
+              "name": "TerminalUI",
+              "line": 63
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 66
+            },
+            {
+              "name": "datetime.now",
+              "line": 70
+            }
+          ],
+          "docstring": "\n        Initialize the pattern mapper\n        \n        Args:\n            output_dir: Directory for saving results\n        ",
+          "code_snippet": "    \"\"\"Simplified pattern mapping interface for dataset analysis\"\"\"\n    \n    def __init__(self, output_dir: str = None):\n        \"\"\"\n        Initialize the pattern mapper\n        \n        Args:\n            output_dir: Directory for saving results\n        \"\"\"\n        self.output_dir = output_dir or os.path.join(\"benchmarks\", \"semantic_maps\")\n        os.makedirs(self.output_dir, exist_ok=True)\n        \n        # Initialize UI if available\n        self.terminal_ui = None\n        if TERMINAL_UI_AVAILABLE:\n            self.terminal_ui = TerminalUI()\n        \n        # Initialize device\n        self.device = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\n        logger.info(f\"Using device: {self.device}\")\n        \n        # Set timestamp for output files\n        self.timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n        \n        # Create visualization directory\n        self.pattern_vis_dir = os.path.join(self.output_dir, f\"pattern_vis_{self.timestamp}\")\n        os.makedirs(self.pattern_vis_dir, exist_ok=True)\n    \n    def load_dataset(self, dataset_name: str = \"cifar10\") -> Tuple[Any, Any]:\n        \"\"\"\n        Load the specified dataset"
+        },
+        "load_dataset": {
+          "start_line": 76,
+          "end_line": 131,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset_name",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 86
+            },
+            {
+              "name": "logger.info",
+              "line": 128
+            },
+            {
+              "name": "dataset_name.lower",
+              "line": 88
+            },
+            {
+              "name": "transforms.Compose",
+              "line": 90
+            },
+            {
+              "name": "torchvision.datasets.CIFAR10",
+              "line": 95
+            },
+            {
+              "name": "torchvision.datasets.CIFAR10",
+              "line": 98
+            },
+            {
+              "name": "dataset_name.lower",
+              "line": 101
+            },
+            {
+              "name": "transforms.Compose",
+              "line": 102
+            },
+            {
+              "name": "torchvision.datasets.CIFAR100",
+              "line": 107
+            },
+            {
+              "name": "torchvision.datasets.CIFAR100",
+              "line": 110
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 91
+            },
+            {
+              "name": "transforms.Normalize",
+              "line": 92
+            },
+            {
+              "name": "dataset_name.lower",
+              "line": 113
+            },
+            {
+              "name": "transforms.Compose",
+              "line": 114
+            },
+            {
+              "name": "torchvision.datasets.MNIST",
+              "line": 119
+            },
+            {
+              "name": "torchvision.datasets.MNIST",
+              "line": 122
+            },
+            {
+              "name": "ValueError",
+              "line": 126
+            },
+            {
+              "name": "len",
+              "line": 128
+            },
+            {
+              "name": "len",
+              "line": 128
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 103
+            },
+            {
+              "name": "transforms.Normalize",
+              "line": 104
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 115
+            },
+            {
+              "name": "transforms.Normalize",
+              "line": 116
+            }
+          ],
+          "docstring": "\n        Load the specified dataset\n        \n        Args:\n            dataset_name: Name of the dataset to load\n            \n        Returns:\n            Tuple of (train_dataset, test_dataset)\n        ",
+          "code_snippet": "        os.makedirs(self.pattern_vis_dir, exist_ok=True)\n    \n    def load_dataset(self, dataset_name: str = \"cifar10\") -> Tuple[Any, Any]:\n        \"\"\"\n        Load the specified dataset\n        \n        Args:\n            dataset_name: Name of the dataset to load\n            \n        Returns:\n            Tuple of (train_dataset, test_dataset)\n        \"\"\"\n        logger.info(f\"Loading {dataset_name} dataset...\")\n        \n        if dataset_name.lower() == \"cifar10\":\n            # For mapping, we avoid augmentation\n            transform = transforms.Compose([\n                transforms.ToTensor(),\n                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),\n            ])\n            \n            trainset = torchvision.datasets.CIFAR10(\n                root='./data', train=True, download=True, transform=transform)\n            \n            testset = torchvision.datasets.CIFAR10(\n                root='./data', train=False, download=True, transform=transform)\n        \n        elif dataset_name.lower() == \"cifar100\":\n            transform = transforms.Compose([\n                transforms.ToTensor(),\n                transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),\n            ])\n            \n            trainset = torchvision.datasets.CIFAR100(\n                root='./data', train=True, download=True, transform=transform)\n            \n            testset = torchvision.datasets.CIFAR100(\n                root='./data', train=False, download=True, transform=transform)\n        \n        elif dataset_name.lower() == \"mnist\":\n            transform = transforms.Compose([\n                transforms.ToTensor(),\n                transforms.Normalize((0.1307,), (0.3081,))\n            ])\n            \n            trainset = torchvision.datasets.MNIST(\n                root='./data', train=True, download=True, transform=transform)\n            \n            testset = torchvision.datasets.MNIST(\n                root='./data', train=False, download=True, transform=transform)\n        \n        else:\n            raise ValueError(f\"Unsupported dataset: {dataset_name}\")\n        \n        logger.info(f\"Dataset loaded: {len(trainset)} training samples, {len(testset)} test samples\")\n        return trainset, testset\n    \n    def create_pattern_map(self, dataset, sample_limit: Optional[int] = None) -> Dict[str, Any]:\n        \"\"\"\n        Create a pattern map from the dataset"
+        },
+        "create_pattern_map": {
+          "start_line": 131,
+          "end_line": 145,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "sample_limit"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self._create_simplified_pattern_map",
+              "line": 143
+            }
+          ],
+          "docstring": "\n        Create a pattern map from the dataset\n        \n        Args:\n            dataset: PyTorch dataset\n            sample_limit: Maximum number of samples to analyze\n            \n        Returns:\n            Pattern map dictionary\n        ",
+          "code_snippet": "        return trainset, testset\n    \n    def create_pattern_map(self, dataset, sample_limit: Optional[int] = None) -> Dict[str, Any]:\n        \"\"\"\n        Create a pattern map from the dataset\n        \n        Args:\n            dataset: PyTorch dataset\n            sample_limit: Maximum number of samples to analyze\n            \n        Returns:\n            Pattern map dictionary\n        \"\"\"\n        # Always use simplified implementation\n        return self._create_simplified_pattern_map(dataset, sample_limit)\n    \n\n    \n"
+        },
+        "_create_simplified_pattern_map": {
+          "start_line": 149,
+          "end_line": 278,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "sample_limit"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 151
+            },
+            {
+              "name": "time.time",
+              "line": 154
+            },
+            {
+              "name": "range",
+              "line": 186
+            },
+            {
+              "name": "self._calculate_pattern_complexities",
+              "line": 258
+            },
+            {
+              "name": "self._order_patterns_by_complexity",
+              "line": 259
+            },
+            {
+              "name": "len",
+              "line": 161
+            },
+            {
+              "name": "logger.info",
+              "line": 162
+            },
+            {
+              "name": "len",
+              "line": 168
+            },
+            {
+              "name": "random.sample",
+              "line": 169
+            },
+            {
+              "name": "list",
+              "line": 171
+            },
+            {
+              "name": "self.terminal_ui.display_header",
+              "line": 183
+            },
+            {
+              "name": "print",
+              "line": 184
+            },
+            {
+              "name": "min",
+              "line": 188
+            },
+            {
+              "name": "print",
+              "line": 252
+            },
+            {
+              "name": "time.time",
+              "line": 255
+            },
+            {
+              "name": "len",
+              "line": 163
+            },
+            {
+              "name": "len",
+              "line": 164
+            },
+            {
+              "name": "logger.info",
+              "line": 165
+            },
+            {
+              "name": "range",
+              "line": 169
+            },
+            {
+              "name": "range",
+              "line": 171
+            },
+            {
+              "name": "len",
+              "line": 188
+            },
+            {
+              "name": "print",
+              "line": 195
+            },
+            {
+              "name": "logger.info",
+              "line": 197
+            },
+            {
+              "name": "isinstance",
+              "line": 204
+            },
+            {
+              "name": "self._extract_basic_features",
+              "line": 214
+            },
+            {
+              "name": "self._calculate_pattern_complexity",
+              "line": 229
+            },
+            {
+              "name": "....append",
+              "line": 243
+            },
+            {
+              "name": "....strftime",
+              "line": 269
+            },
+            {
+              "name": "len",
+              "line": 270
+            },
+            {
+              "name": "len",
+              "line": 169
+            },
+            {
+              "name": "len",
+              "line": 171
+            },
+            {
+              "name": "len",
+              "line": 180
+            },
+            {
+              "name": "str",
+              "line": 235
+            },
+            {
+              "name": "....numpy",
+              "line": 207
+            },
+            {
+              "name": "datetime.now",
+              "line": 269
+            },
+            {
+              "name": "image.dim",
+              "line": 206
+            },
+            {
+              "name": "image.size",
+              "line": 206
+            },
+            {
+              "name": "....numpy",
+              "line": 209
+            },
+            {
+              "name": "....numpy",
+              "line": 211
+            },
+            {
+              "name": "....cpu",
+              "line": 207
+            },
+            {
+              "name": "image.dim",
+              "line": 208
+            },
+            {
+              "name": "image.size",
+              "line": 208
+            },
+            {
+              "name": "....cpu",
+              "line": 209
+            },
+            {
+              "name": "image.cpu",
+              "line": 211
+            },
+            {
+              "name": "image.permute",
+              "line": 207
+            },
+            {
+              "name": "image.squeeze",
+              "line": 209
+            }
+          ],
+          "docstring": "Create a simplified pattern map when IsekaiZen components aren't available",
+          "code_snippet": "\n    \n    def _create_simplified_pattern_map(self, dataset, sample_limit: Optional[int] = None) -> Dict[str, Any]:\n        \"\"\"Create a simplified pattern map when IsekaiZen components aren't available\"\"\"\n        logger.info(\"Using simplified pattern mapping implementation\")\n        \n        # Start timing\n        start_time = time.time()\n        \n        # Simple pattern types for the simplified implementation\n        pattern_types = [\"structural\", \"statistical\", \"temporal\"]\n        \n        # Determine number of examples to process\n        if sample_limit is None:\n            sample_limit = len(dataset)\n            logger.info(f\"Using full dataset: {sample_limit} samples\")\n        elif sample_limit > len(dataset):\n            sample_limit = len(dataset)\n            logger.info(f\"Sample limit exceeds dataset size. Using full dataset: {sample_limit} samples\")\n        \n        # Get sample indices\n        if sample_limit < len(dataset):\n            samples = random.sample(range(len(dataset)), sample_limit)\n        else:\n            samples = list(range(len(dataset)))\n        \n        # Initialize structures\n        pattern_map = {}\n        patterns_by_type = {pt: [] for pt in pattern_types}\n        pattern_counts = {pt: 0 for pt in pattern_types}\n        \n        # Process in batches with progress display\n        batch_size = 500\n        total_batches = (len(samples) + batch_size - 1) // batch_size\n        \n        if self.terminal_ui:\n            self.terminal_ui.display_header(\"Pattern Mapping in Progress\")\n            print(\"\\nAnalyzing dataset patterns...\")\n        \n        for batch_idx in range(total_batches):\n            batch_start = batch_idx * batch_size\n            batch_end = min(batch_start + batch_size, len(samples))\n            batch_indices = samples[batch_start:batch_end]\n            \n            # Display progress\n            progress = (batch_idx + 1) / total_batches * 100\n            if self.terminal_ui:\n                # Clear line and show progress\n                print(f\"\\rProcessing batch {batch_idx+1}/{total_batches} [{progress:.1f}%]\", end=\"\")\n            else:\n                logger.info(f\"Processing batch {batch_idx+1}/{total_batches} ({progress:.1f}%)\")\n            \n            for idx in batch_indices:\n                # Get the image\n                image, label = dataset[idx]\n                \n                # Convert to numpy for basic analysis\n                if isinstance(image, torch.Tensor):\n                    # Denormalize and convert to numpy\n                    if image.dim() == 3 and image.size(0) == 3:  # RGB image\n                        image = image.permute(1, 2, 0).cpu().numpy()\n                    elif image.dim() == 3 and image.size(0) == 1:  # Grayscale image\n                        image = image.squeeze(0).cpu().numpy()\n                    else:\n                        image = image.cpu().numpy()\n                \n                # Simplified pattern extraction based on basic image statistics\n                features = self._extract_basic_features(image, idx)\n                \n                # Determine pattern type based on features\n                if 'edge_density' in features and features['edge_density'] > 0.3:\n                    pattern_type = \"structural\"  # Spatial organization and relationships\n                elif 'texture_variance' in features and features['texture_variance'] > 0.2:\n                    pattern_type = \"structural\"  # Spatial patterns\n                elif 'color_std' in features and features['color_std'] > 0.15:\n                    pattern_type = \"statistical\"  # Distribution patterns\n                elif 'shape_factor' in features and features['shape_factor'] > 0.5:\n                    pattern_type = \"structural\"  # Shape organization\n                else:\n                    pattern_type = \"statistical\"  # Default to statistical for variance patterns\n                \n                # Calculate complexity\n                complexity = self._calculate_pattern_complexity(features)\n                \n                # Update counts\n                pattern_counts[pattern_type] += 1\n                \n                # Store pattern information\n                pattern_map[str(idx)] = {\n                    'pattern_type': pattern_type,\n                    'features': features,\n                    'confidence': 0.8,  # Default confidence\n                    'complexity': complexity\n                }\n                \n                # Add to patterns by type\n                patterns_by_type[pattern_type].append({\n                    'idx': idx,\n                    'features': features,\n                    'confidence': 0.8,\n                    'complexity': complexity\n                })\n        \n        # Clear progress line\n        if self.terminal_ui:\n            print(\"\\rPattern extraction complete.                    \")\n        \n        # Calculate elapsed time\n        elapsed_time = time.time() - start_time\n        \n        # Calculate pattern complexities\n        pattern_complexities = self._calculate_pattern_complexities(patterns_by_type)\n        patterns_by_complexity = self._order_patterns_by_complexity(pattern_complexities)\n        \n        # Assemble final result\n        result = {\n            'pattern_map': pattern_map,\n            'patterns_by_type': patterns_by_type,\n            'pattern_distribution': pattern_counts,\n            'pattern_complexities': pattern_complexities,\n            'patterns_by_complexity': patterns_by_complexity,\n            'metadata': {\n                'timestamp': datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\"),\n                'samples_analyzed': len(samples),\n                'analysis_time': elapsed_time,\n                'version': '2.0-simplified'\n            }\n        }\n        \n        return result\n    \n    def _extract_basic_features(self, image, idx) -> Dict[str, float]:\n        \"\"\"Extract basic features from an image for simplified pattern analysis\"\"\"\n        features = {}"
+        },
+        "_extract_basic_features": {
+          "start_line": 278,
+          "end_line": 344,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "image"
+            },
+            {
+              "name": "idx"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "np.mean",
+              "line": 289
+            },
+            {
+              "name": "np.std",
+              "line": 290
+            },
+            {
+              "name": "float",
+              "line": 292
+            },
+            {
+              "name": "float",
+              "line": 293
+            },
+            {
+              "name": "float",
+              "line": 294
+            },
+            {
+              "name": "float",
+              "line": 295
+            },
+            {
+              "name": "np.mean",
+              "line": 298
+            },
+            {
+              "name": "float",
+              "line": 302
+            },
+            {
+              "name": "float",
+              "line": 303
+            },
+            {
+              "name": "np.diff",
+              "line": 308
+            },
+            {
+              "name": "np.diff",
+              "line": 309
+            },
+            {
+              "name": "np.sqrt",
+              "line": 312
+            },
+            {
+              "name": "np.percentile",
+              "line": 315
+            },
+            {
+              "name": "np.mean",
+              "line": 317
+            },
+            {
+              "name": "float",
+              "line": 318
+            },
+            {
+              "name": "np.var",
+              "line": 321
+            },
+            {
+              "name": "float",
+              "line": 322
+            },
+            {
+              "name": "logger.warning",
+              "line": 335
+            },
+            {
+              "name": "len",
+              "line": 284
+            },
+            {
+              "name": "np.mean",
+              "line": 295
+            },
+            {
+              "name": "np.mean",
+              "line": 302
+            },
+            {
+              "name": "np.std",
+              "line": 303
+            },
+            {
+              "name": "np.mean",
+              "line": 329
+            },
+            {
+              "name": "float",
+              "line": 330
+            },
+            {
+              "name": "np.max",
+              "line": 325
+            },
+            {
+              "name": "np.min",
+              "line": 325
+            },
+            {
+              "name": "np.min",
+              "line": 326
+            },
+            {
+              "name": "np.max",
+              "line": 326
+            },
+            {
+              "name": "np.min",
+              "line": 326
+            },
+            {
+              "name": "str",
+              "line": 335
+            }
+          ],
+          "docstring": "Extract basic features from an image for simplified pattern analysis",
+          "code_snippet": "        return result\n    \n    def _extract_basic_features(self, image, idx) -> Dict[str, float]:\n        \"\"\"Extract basic features from an image for simplified pattern analysis\"\"\"\n        features = {}\n        \n        try:\n            # Check if image is grayscale or color\n            is_color = len(image.shape) == 3 and image.shape[2] == 3\n            \n            # Basic statistics\n            if is_color:\n                # Color image\n                mean_color = np.mean(image, axis=(0, 1))\n                std_color = np.std(image, axis=(0, 1))\n                \n                features['color_mean_r'] = float(mean_color[0])\n                features['color_mean_g'] = float(mean_color[1])\n                features['color_mean_b'] = float(mean_color[2])\n                features['color_std'] = float(np.mean(std_color))\n                \n                # Convert to grayscale for texture analysis\n                gray = np.mean(image, axis=2)\n            else:\n                # Grayscale image\n                gray = image\n                features['intensity_mean'] = float(np.mean(gray))\n                features['intensity_std'] = float(np.std(gray))\n            \n            # Texture analysis (simplified)\n            if gray.size > 0:\n                # Calculate gradients for edge detection\n                gx = np.diff(gray, axis=1, prepend=gray[:, :1])\n                gy = np.diff(gray, axis=0, prepend=gray[:1, :])\n                \n                # Calculate gradient magnitude\n                gradient_mag = np.sqrt(gx**2 + gy**2)\n                \n                # Edge density (proportion of pixels that are edges)\n                edge_threshold = np.percentile(gradient_mag, 80)\n                edges = gradient_mag > edge_threshold\n                edge_density = np.mean(edges)\n                features['edge_density'] = float(edge_density)\n                \n                # Texture variance\n                texture_variance = np.var(gradient_mag)\n                features['texture_variance'] = float(texture_variance)\n                \n                # Simple shape factor (ratio of object to background)\n                if np.max(gray) - np.min(gray) > 1e-6:\n                    normalized = (gray - np.min(gray)) / (np.max(gray) - np.min(gray))\n                    threshold = 0.5\n                    binary = normalized > threshold\n                    shape_factor = np.mean(binary)\n                    features['shape_factor'] = float(shape_factor)\n                else:\n                    features['shape_factor'] = 0.5\n            \n        except Exception as e:\n            logger.warning(f\"Error extracting features for image {idx}: {str(e)}\")\n            # Provide default features\n            features = {\n                'default_feature': 0.5,\n                'error': 1.0\n            }\n        \n        return features\n    \n    def _calculate_pattern_complexity(self, features) -> float:\n        \"\"\"Calculate complexity score from pattern features\"\"\"\n        # Get numeric features"
+        },
+        "_calculate_pattern_complexity": {
+          "start_line": 344,
+          "end_line": 374,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "features"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "np.mean",
+              "line": 354
+            },
+            {
+              "name": "features.get",
+              "line": 358
+            },
+            {
+              "name": "features.get",
+              "line": 359
+            },
+            {
+              "name": "features.get",
+              "line": 360
+            },
+            {
+              "name": "min",
+              "line": 372
+            },
+            {
+              "name": "np.var",
+              "line": 355
+            },
+            {
+              "name": "max",
+              "line": 372
+            },
+            {
+              "name": "features.items",
+              "line": 347
+            },
+            {
+              "name": "len",
+              "line": 355
+            },
+            {
+              "name": "isinstance",
+              "line": 348
+            }
+          ],
+          "docstring": "Calculate complexity score from pattern features",
+          "code_snippet": "        return features\n    \n    def _calculate_pattern_complexity(self, features) -> float:\n        \"\"\"Calculate complexity score from pattern features\"\"\"\n        # Get numeric features\n        numeric_features = [v for k, v in features.items() \n                           if isinstance(v, (int, float)) and k != 'error']\n        \n        if not numeric_features:\n            return 2.5  # Default complexity\n        \n        # Calculate complexity based on feature values and their variance\n        mean_value = np.mean(numeric_features)\n        feature_variance = np.var(numeric_features) if len(numeric_features) > 1 else 0.5\n        \n        # Extract key complexity indicators if available\n        edge_density = features.get('edge_density', 0.5)\n        texture_variance = features.get('texture_variance', 0.5)\n        color_std = features.get('color_std', 0.5)\n        \n        # Calculate weighted complexity\n        complexity = (\n            mean_value * 0.3 +\n            feature_variance * 0.3 +\n            edge_density * 0.2 +\n            texture_variance * 0.1 +\n            color_std * 0.1\n        ) * 5.0  # Scale to 0-5 range\n        \n        # Ensure the range is between 0.1 and 4.9\n        return min(4.9, max(0.1, complexity))\n    \n    def _calculate_pattern_complexities(self, patterns_by_type) -> Dict[str, Dict[str, Any]]:\n        \"\"\"Calculate complexity metrics for each pattern type\"\"\"\n        complexities = {}"
+        },
+        "_calculate_pattern_complexities": {
+          "start_line": 374,
+          "end_line": 428,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "patterns_by_type"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "patterns_by_type.items",
+              "line": 378
+            },
+            {
+              "name": "complexity_values.append",
+              "line": 390
+            },
+            {
+              "name": "features.items",
+              "line": 392
+            },
+            {
+              "name": "min",
+              "line": 411
+            },
+            {
+              "name": "max",
+              "line": 412
+            },
+            {
+              "name": "len",
+              "line": 423
+            },
+            {
+              "name": "sum",
+              "line": 410
+            },
+            {
+              "name": "len",
+              "line": 410
+            }
+          ],
+          "docstring": "Calculate complexity metrics for each pattern type",
+          "code_snippet": "        return min(4.9, max(0.1, complexity))\n    \n    def _calculate_pattern_complexities(self, patterns_by_type) -> Dict[str, Dict[str, Any]]:\n        \"\"\"Calculate complexity metrics for each pattern type\"\"\"\n        complexities = {}\n        \n        for pattern_type, patterns in patterns_by_type.items():\n            if not patterns:\n                continue\n            \n            # Calculate average feature values\n            feature_sums = {}\n            feature_counts = {}\n            complexity_values = []\n            \n            for pattern in patterns:\n                features = pattern['features']\n                complexity = pattern['complexity']\n                complexity_values.append(complexity)\n                \n                for feature, value in features.items():\n                    if feature not in feature_sums:\n                        feature_sums[feature] = 0.0\n                        feature_counts[feature] = 0\n                    \n                    feature_sums[feature] += value\n                    feature_counts[feature] += 1\n            \n            # Calculate averages\n            feature_avgs = {}\n            for feature in feature_sums:\n                if feature_counts[feature] > 0:\n                    feature_avgs[feature] = feature_sums[feature] / feature_counts[feature]\n                else:\n                    feature_avgs[feature] = 0.1\n            \n            # Calculate complexity statistics\n            if complexity_values:\n                avg_complexity = sum(complexity_values) / len(complexity_values)\n                min_complexity = min(complexity_values)\n                max_complexity = max(complexity_values)\n            else:\n                avg_complexity = 2.5\n                min_complexity = 0.1\n                max_complexity = 4.9\n            \n            complexities[pattern_type] = {\n                'avg_features': feature_avgs,\n                'avg_complexity': avg_complexity,\n                'min_complexity': min_complexity,\n                'max_complexity': max_complexity,\n                'pattern_count': len(patterns)\n            }\n        \n        return complexities\n    \n    def _order_patterns_by_complexity(self, pattern_complexities) -> Dict[str, List[str]]:\n        \"\"\"Order patterns by complexity for risk-accuracy training\"\"\"\n        # Sort patterns by average complexity"
+        },
+        "_order_patterns_by_complexity": {
+          "start_line": 428,
+          "end_line": 452,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_complexities"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "sorted",
+              "line": 431
+            },
+            {
+              "name": "max",
+              "line": 440
+            },
+            {
+              "name": "len",
+              "line": 440
+            },
+            {
+              "name": "pattern_complexities.items",
+              "line": 432
+            }
+          ],
+          "docstring": "Order patterns by complexity for risk-accuracy training",
+          "code_snippet": "        return complexities\n    \n    def _order_patterns_by_complexity(self, pattern_complexities) -> Dict[str, List[str]]:\n        \"\"\"Order patterns by complexity for risk-accuracy training\"\"\"\n        # Sort patterns by average complexity\n        sorted_patterns = sorted(\n            [(p, data['avg_complexity']) for p, data in pattern_complexities.items()],\n            key=lambda x: x[1]\n        )\n        \n        # Get pattern types sorted by complexity\n        pattern_types = [p for p, _ in sorted_patterns]\n        \n        # Group patterns into low, medium, and high complexity\n        third = max(1, len(pattern_types) // 3)\n        \n        low_complexity = pattern_types[:third]\n        medium_complexity = pattern_types[third:2*third]\n        high_complexity = pattern_types[2*third:]\n        \n        return {\n            'ordered_by_complexity': pattern_types,\n            'low_complexity': low_complexity,\n            'medium_complexity': medium_complexity,\n            'high_complexity': high_complexity\n        }\n    \n    def visualize_pattern_map(self, pattern_map) -> None:\n        \"\"\"Create visualizations of the pattern map\"\"\""
+        },
+        "visualize_pattern_map": {
+          "start_line": 453,
+          "end_line": 564,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "os.path.join",
+              "line": 508
+            },
+            {
+              "name": "logger.info",
+              "line": 562
+            },
+            {
+              "name": "plt.figure",
+              "line": 457
+            },
+            {
+              "name": "list",
+              "line": 460
+            },
+            {
+              "name": "plt.bar",
+              "line": 463
+            },
+            {
+              "name": "plt.xlabel",
+              "line": 470
+            },
+            {
+              "name": "plt.ylabel",
+              "line": 471
+            },
+            {
+              "name": "plt.title",
+              "line": 472
+            },
+            {
+              "name": "plt.grid",
+              "line": 473
+            },
+            {
+              "name": "plt.xticks",
+              "line": 474
+            },
+            {
+              "name": "os.path.join",
+              "line": 476
+            },
+            {
+              "name": "plt.savefig",
+              "line": 477
+            },
+            {
+              "name": "plt.close",
+              "line": 478
+            },
+            {
+              "name": "logger.info",
+              "line": 479
+            },
+            {
+              "name": "plt.figure",
+              "line": 483
+            },
+            {
+              "name": "open",
+              "line": 509
+            },
+            {
+              "name": "f.write",
+              "line": 510
+            },
+            {
+              "name": "f.write",
+              "line": 511
+            },
+            {
+              "name": "f.write",
+              "line": 522
+            },
+            {
+              "name": "f.write",
+              "line": 523
+            },
+            {
+              "name": "f.write",
+              "line": 524
+            },
+            {
+              "name": "f.write",
+              "line": 525
+            },
+            {
+              "name": "f.write",
+              "line": 526
+            },
+            {
+              "name": "f.write",
+              "line": 527
+            },
+            {
+              "name": "distribution.keys",
+              "line": 460
+            },
+            {
+              "name": "bar.get_height",
+              "line": 466
+            },
+            {
+              "name": "plt.text",
+              "line": 467
+            },
+            {
+              "name": "list",
+              "line": 487
+            },
+            {
+              "name": "plt.barh",
+              "line": 490
+            },
+            {
+              "name": "plt.xlabel",
+              "line": 497
+            },
+            {
+              "name": "plt.ylabel",
+              "line": 498
+            },
+            {
+              "name": "plt.title",
+              "line": 499
+            },
+            {
+              "name": "plt.grid",
+              "line": 500
+            },
+            {
+              "name": "os.path.join",
+              "line": 502
+            },
+            {
+              "name": "plt.savefig",
+              "line": 503
+            },
+            {
+              "name": "plt.close",
+              "line": 504
+            },
+            {
+              "name": "logger.info",
+              "line": 505
+            },
+            {
+              "name": "f.write",
+              "line": 515
+            },
+            {
+              "name": "f.write",
+              "line": 516
+            },
+            {
+              "name": "....items",
+              "line": 517
+            },
+            {
+              "name": "f.write",
+              "line": 519
+            },
+            {
+              "name": "f.write",
+              "line": 531
+            },
+            {
+              "name": "f.write",
+              "line": 532
+            },
+            {
+              "name": "distribution.items",
+              "line": 536
+            },
+            {
+              "name": "f.write",
+              "line": 539
+            },
+            {
+              "name": "f.write",
+              "line": 543
+            },
+            {
+              "name": "f.write",
+              "line": 544
+            },
+            {
+              "name": "....items",
+              "line": 545
+            },
+            {
+              "name": "f.write",
+              "line": 554
+            },
+            {
+              "name": "f.write",
+              "line": 555
+            },
+            {
+              "name": "f.write",
+              "line": 558
+            },
+            {
+              "name": "f.write",
+              "line": 559
+            },
+            {
+              "name": "f.write",
+              "line": 560
+            },
+            {
+              "name": "complexities.keys",
+              "line": 487
+            },
+            {
+              "name": "bar.get_width",
+              "line": 493
+            },
+            {
+              "name": "plt.text",
+              "line": 494
+            },
+            {
+              "name": "f.write",
+              "line": 518
+            },
+            {
+              "name": "sum",
+              "line": 534
+            },
+            {
+              "name": "f.write",
+              "line": 538
+            },
+            {
+              "name": "f.write",
+              "line": 546
+            },
+            {
+              "name": "f.write",
+              "line": 547
+            },
+            {
+              "name": "f.write",
+              "line": 548
+            },
+            {
+              "name": "f.write",
+              "line": 549
+            },
+            {
+              "name": "f.write",
+              "line": 550
+            },
+            {
+              "name": "bar.get_x",
+              "line": 467
+            },
+            {
+              "name": "distribution.values",
+              "line": 534
+            },
+            {
+              "name": "bar.get_width",
+              "line": 467
+            },
+            {
+              "name": "int",
+              "line": 468
+            },
+            {
+              "name": "bar.get_y",
+              "line": 494
+            },
+            {
+              "name": "....join",
+              "line": 558
+            },
+            {
+              "name": "....join",
+              "line": 559
+            },
+            {
+              "name": "....join",
+              "line": 560
+            },
+            {
+              "name": "bar.get_height",
+              "line": 494
+            }
+          ],
+          "docstring": "Create visualizations of the pattern map",
+          "code_snippet": "        }\n    \n    def visualize_pattern_map(self, pattern_map) -> None:\n        \"\"\"Create visualizations of the pattern map\"\"\"\n        # Create pattern distribution visualization\n        if 'pattern_distribution' in pattern_map:\n            plt.figure(figsize=(10, 6))\n            \n            distribution = pattern_map['pattern_distribution']\n            pattern_types = list(distribution.keys())\n            counts = [distribution[pt] for pt in pattern_types]\n            \n            bars = plt.bar(pattern_types, counts, color='lightgreen')\n            \n            for bar in bars:\n                height = bar.get_height()\n                plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,\n                        f'{int(height)}', ha='center', va='bottom')\n            \n            plt.xlabel('Pattern Type')\n            plt.ylabel('Number of Examples')\n            plt.title('Pattern Distribution in Dataset')\n            plt.grid(axis='y', linestyle='--', alpha=0.7)\n            plt.xticks(rotation=30, ha='right')\n            \n            distribution_path = os.path.join(self.pattern_vis_dir, 'pattern_distribution.png')\n            plt.savefig(distribution_path)\n            plt.close()\n            logger.info(f\"Saved pattern distribution visualization to {distribution_path}\")\n        \n        # Create pattern complexity visualization if available\n        if 'pattern_complexities' in pattern_map:\n            plt.figure(figsize=(10, 6))\n            complexities = pattern_map['pattern_complexities']\n            \n            if complexities:\n                pattern_types = list(complexities.keys())\n                avg_complexities = [complexities[pt]['avg_complexity'] for pt in pattern_types]\n                \n                bars = plt.barh(pattern_types, avg_complexities, color='salmon')\n                \n                for bar in bars:\n                    width = bar.get_width()\n                    plt.text(width + 0.1, bar.get_y() + bar.get_height()/2.,\n                            f'{width:.2f}', va='center')\n                \n                plt.xlabel('Average Complexity')\n                plt.ylabel('Pattern Type')\n                plt.title('Average Pattern Complexity')\n                plt.grid(axis='x', linestyle='--', alpha=0.7)\n                \n                complexity_path = os.path.join(self.pattern_vis_dir, 'pattern_complexity.png')\n                plt.savefig(complexity_path)\n                plt.close()\n                logger.info(f\"Saved pattern complexity visualization to {complexity_path}\")\n        \n        # Create summary text file\n        summary_path = os.path.join(self.pattern_vis_dir, 'pattern_map_summary.txt')\n        with open(summary_path, 'w') as f:\n            f.write(\"PATTERN MAP SUMMARY\\n\")\n            f.write(\"==================\\n\\n\")\n            \n            # Metadata\n            if 'metadata' in pattern_map:\n                f.write(\"METADATA\\n\")\n                f.write(\"--------\\n\")\n                for key, value in pattern_map['metadata'].items():\n                    f.write(f\"{key}: {value}\\n\")\n                f.write(\"\\n\")\n            \n            # Taxonomy explanation\n            f.write(\"TAXONOMY EXPLANATION\\n\")\n            f.write(\"-------------------\\n\")\n            f.write(\"STRUCTURAL: Spatial organization and relationships\\n\")\n            f.write(\"STATISTICAL: Distribution and variance patterns\\n\")\n            f.write(\"TEMPORAL: Time-related patterns (simplified)\\n\")\n            f.write(\"\\n\")\n            \n            # Pattern distribution\n            if 'pattern_distribution' in pattern_map:\n                f.write(\"PATTERN DISTRIBUTION\\n\")\n                f.write(\"-------------------\\n\")\n                distribution = pattern_map['pattern_distribution']\n                total = sum(distribution.values()) or 1  # Avoid division by zero\n                \n                for pattern_type, count in distribution.items():\n                    percentage = (count / total) * 100\n                    f.write(f\"{pattern_type}: {count} examples ({percentage:.1f}%)\\n\")\n                f.write(\"\\n\")\n            \n            # Pattern complexity\n            if 'pattern_complexities' in pattern_map:\n                f.write(\"PATTERN COMPLEXITY\\n\")\n                f.write(\"----------------\\n\")\n                for pattern_type, stats in pattern_map['pattern_complexities'].items():\n                    f.write(f\"{pattern_type}:\\n\")\n                    f.write(f\"  Count: {stats['pattern_count']}\\n\")\n                    f.write(f\"  Average complexity: {stats['avg_complexity']:.2f}\\n\")\n                    f.write(f\"  Complexity range: {stats['min_complexity']:.2f} - {stats['max_complexity']:.2f}\\n\")\n                    f.write(\"\\n\")\n            \n            # Complexity grouping\n            if 'patterns_by_complexity' in pattern_map:\n                f.write(\"COMPLEXITY GROUPING\\n\")\n                f.write(\"-----------------\\n\")\n                groups = pattern_map['patterns_by_complexity']\n                \n                f.write(f\"Low complexity: {', '.join(groups['low_complexity'])}\\n\")\n                f.write(f\"Medium complexity: {', '.join(groups['medium_complexity'])}\\n\")\n                f.write(f\"High complexity: {', '.join(groups['high_complexity'])}\\n\")\n        \n        logger.info(f\"Saved pattern map summary to {summary_path}\")\n    \n    def save_pattern_map(self, pattern_map, dataset_name=\"dataset\") -> str:\n        \"\"\"Save pattern map to file and update latest path reference\"\"\"\n        # Create filename with timestamp and dataset name"
+        },
+        "save_pattern_map": {
+          "start_line": 564,
+          "end_line": 595,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "dataset_name"
+            }
+          ],
+          "return_type": "str",
+          "calls": [
+            {
+              "name": "os.path.join",
+              "line": 568
+            },
+            {
+              "name": "logger.info",
+              "line": 586
+            },
+            {
+              "name": "os.path.join",
+              "line": 589
+            },
+            {
+              "name": "isinstance",
+              "line": 572
+            },
+            {
+              "name": "TypeError",
+              "line": 580
+            },
+            {
+              "name": "open",
+              "line": 583
+            },
+            {
+              "name": "json.dump",
+              "line": 584
+            },
+            {
+              "name": "open",
+              "line": 590
+            },
+            {
+              "name": "f.write",
+              "line": 591
+            },
+            {
+              "name": "int",
+              "line": 573
+            },
+            {
+              "name": "isinstance",
+              "line": 574
+            },
+            {
+              "name": "float",
+              "line": 575
+            },
+            {
+              "name": "isinstance",
+              "line": 576
+            },
+            {
+              "name": "obj.tolist",
+              "line": 577
+            },
+            {
+              "name": "type",
+              "line": 580
+            },
+            {
+              "name": "hasattr",
+              "line": 578
+            },
+            {
+              "name": "np.issubdtype",
+              "line": 578
+            },
+            {
+              "name": "np.issubdtype",
+              "line": 579
+            },
+            {
+              "name": "float",
+              "line": 579
+            },
+            {
+              "name": "int",
+              "line": 579
+            }
+          ],
+          "docstring": "Save pattern map to file and update latest path reference",
+          "code_snippet": "        logger.info(f\"Saved pattern map summary to {summary_path}\")\n    \n    def save_pattern_map(self, pattern_map, dataset_name=\"dataset\") -> str:\n        \"\"\"Save pattern map to file and update latest path reference\"\"\"\n        # Create filename with timestamp and dataset name\n        filename = f\"{dataset_name}_simplified_pattern_map_{self.timestamp}.json\"\n        filepath = os.path.join(self.output_dir, filename)\n        \n        # Helper function to handle NumPy types in JSON serialization\n        def numpy_safe_encoder(obj):\n            if isinstance(obj, np.integer):\n                return int(obj)\n            elif isinstance(obj, np.floating):\n                return float(obj)\n            elif isinstance(obj, np.ndarray):\n                return obj.tolist()\n            elif hasattr(obj, 'dtype') and np.issubdtype(obj.dtype, np.number):\n                return float(obj) if np.issubdtype(obj.dtype, np.floating) else int(obj)\n            raise TypeError(f\"Object of type {type(obj)} is not JSON serializable\")\n        \n        # Save to file\n        with open(filepath, 'w') as f:\n            json.dump(pattern_map, f, indent=2, default=numpy_safe_encoder)\n        \n        logger.info(f\"Pattern map saved to {filepath}\")\n        \n        # Update latest path reference\n        latest_path = os.path.join(self.output_dir, \"latest_pattern_map_path.txt\")\n        with open(latest_path, 'w') as f:\n            f.write(filepath)\n        \n        return filepath\n    \n    def run_mapping(self, dataset_name: str = \"cifar10\", sample_limit: Optional[int] = None) -> Dict[str, Any]:\n        \"\"\"\n        Run the complete pattern mapping process"
+        },
+        "run_mapping": {
+          "start_line": 595,
+          "end_line": 633,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset_name",
+              "type": "str"
+            },
+            {
+              "name": "sample_limit"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.load_dataset",
+              "line": 612
+            },
+            {
+              "name": "self.create_pattern_map",
+              "line": 615
+            },
+            {
+              "name": "self.visualize_pattern_map",
+              "line": 618
+            },
+            {
+              "name": "self.save_pattern_map",
+              "line": 621
+            },
+            {
+              "name": "self.terminal_ui.display_welcome",
+              "line": 608
+            },
+            {
+              "name": "self.terminal_ui.display_header",
+              "line": 609
+            },
+            {
+              "name": "self.terminal_ui.display_header",
+              "line": 625
+            },
+            {
+              "name": "print",
+              "line": 626
+            },
+            {
+              "name": "print",
+              "line": 627
+            },
+            {
+              "name": "print",
+              "line": 628
+            },
+            {
+              "name": "input",
+              "line": 629
+            }
+          ],
+          "docstring": "\n        Run the complete pattern mapping process\n        \n        Args:\n            dataset_name: Name of the dataset to analyze\n            sample_limit: Maximum number of samples to analyze\n            \n        Returns:\n            Pattern map dictionary\n        ",
+          "code_snippet": "        return filepath\n    \n    def run_mapping(self, dataset_name: str = \"cifar10\", sample_limit: Optional[int] = None) -> Dict[str, Any]:\n        \"\"\"\n        Run the complete pattern mapping process\n        \n        Args:\n            dataset_name: Name of the dataset to analyze\n            sample_limit: Maximum number of samples to analyze\n            \n        Returns:\n            Pattern map dictionary\n        \"\"\"\n        # Display welcome screen if UI is available\n        if self.terminal_ui:\n            self.terminal_ui.display_welcome()\n            self.terminal_ui.display_header(f\"Pattern Mapping for {dataset_name}\")\n        \n        # Load dataset\n        trainset, _ = self.load_dataset(dataset_name)\n        \n        # Create pattern map\n        pattern_map = self.create_pattern_map(trainset, sample_limit)\n        \n        # Create visualizations\n        self.visualize_pattern_map(pattern_map)\n        \n        # Save pattern map\n        filepath = self.save_pattern_map(pattern_map, dataset_name)\n        \n        # Display completion screen if UI is available\n        if self.terminal_ui:\n            self.terminal_ui.display_header(\"Pattern Mapping Complete\")\n            print(f\"\\nPattern map saved to: {filepath}\")\n            print(f\"Visualizations saved to: {self.pattern_vis_dir}\")\n            print(\"\\nPress Enter to continue...\")\n            input()\n        \n        return pattern_map\n\n\ndef main():\n    \"\"\"Run the simplified pattern mapping script\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Simplified pattern mapping interface for dataset analysis"
+    }
+  },
+  "functions": {
+    "main": {
+      "start_line": 634,
+      "end_line": 665,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "argparse.ArgumentParser",
+          "line": 637
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 638
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 640
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 642
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 644
+        },
+        {
+          "name": "parser.parse_args",
+          "line": 646
+        },
+        {
+          "name": "time.time",
+          "line": 649
+        },
+        {
+          "name": "SimplifiedPatternMapper",
+          "line": 652
+        },
+        {
+          "name": "mapper.run_mapping",
+          "line": 655
+        },
+        {
+          "name": "logger.info",
+          "line": 662
+        },
+        {
+          "name": "logger.info",
+          "line": 663
+        },
+        {
+          "name": "time.time",
+          "line": 661
+        },
+        {
+          "name": "len",
+          "line": 663
+        }
+      ],
+      "docstring": "Run the simplified pattern mapping script",
+      "code_snippet": "\n\ndef main():\n    \"\"\"Run the simplified pattern mapping script\"\"\"\n    # Parse command-line arguments\n    parser = argparse.ArgumentParser(description=\"Create simplified pattern map for dataset\")\n    parser.add_argument(\"--dataset\", type=str, default=\"cifar10\",\n                      help=\"Dataset to analyze (cifar10, cifar100, mnist)\")\n    parser.add_argument(\"--sample-limit\", type=int, default=None,\n                      help=\"Maximum number of samples to analyze\")\n    parser.add_argument(\"--output-dir\", type=str, default=\"benchmarks/semantic_maps\",\n                      help=\"Directory to save pattern map and visualizations\")\n    parser.add_argument(\"--no-ui\", action=\"store_true\",\n                      help=\"Disable terminal UI and use simple console output\")\n    args = parser.parse_args()\n    \n    # Start timing\n    start_time = time.time()\n    \n    # Create pattern mapper\n    mapper = SimplifiedPatternMapper(output_dir=args.output_dir)\n    \n    # Run mapping process\n    pattern_map = mapper.run_mapping(\n        dataset_name=args.dataset,\n        sample_limit=args.sample_limit\n    )\n    \n    # Show execution time\n    elapsed_time = time.time() - start_time\n    logger.info(f\"Total execution time: {elapsed_time:.2f} seconds\")\n    logger.info(f\"Pattern map created with {len(pattern_map['pattern_map'])} examples\")\n\n\nif __name__ == \"__main__\":\n    main()"
+    }
+  },
+  "constants": {
+    "MAPPER_AVAILABLE": {
+      "line": 44
+    }
+  }
+}

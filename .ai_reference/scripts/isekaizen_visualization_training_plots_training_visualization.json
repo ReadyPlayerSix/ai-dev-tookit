@@ -1,0 +1,690 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\visualization\\training_plots\\training_visualization.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 11
+    },
+    {
+      "name": "matplotlib.pyplot",
+      "line": 12
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "visualize_training_results": {
+      "start_line": 17,
+      "end_line": 325,
+      "parameters": [
+        {
+          "name": "history"
+        },
+        {
+          "name": "output_path"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "plt.figure",
+          "line": 31
+        },
+        {
+          "name": "range",
+          "line": 34
+        },
+        {
+          "name": "plt.subplot",
+          "line": 42
+        },
+        {
+          "name": "plt.plot",
+          "line": 44
+        },
+        {
+          "name": "plt.title",
+          "line": 47
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 48
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 49
+        },
+        {
+          "name": "plt.legend",
+          "line": 50
+        },
+        {
+          "name": "plt.grid",
+          "line": 51
+        },
+        {
+          "name": "plt.subplot",
+          "line": 54
+        },
+        {
+          "name": "plt.plot",
+          "line": 56
+        },
+        {
+          "name": "plt.title",
+          "line": 59
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 60
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 61
+        },
+        {
+          "name": "plt.legend",
+          "line": 62
+        },
+        {
+          "name": "plt.grid",
+          "line": 63
+        },
+        {
+          "name": "plt.subplot",
+          "line": 66
+        },
+        {
+          "name": "plt.subplot",
+          "line": 83
+        },
+        {
+          "name": "plt.plot",
+          "line": 85
+        },
+        {
+          "name": "plt.title",
+          "line": 86
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 87
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 88
+        },
+        {
+          "name": "plt.grid",
+          "line": 89
+        },
+        {
+          "name": "plt.subplot",
+          "line": 92
+        },
+        {
+          "name": "plt.grid",
+          "line": 120
+        },
+        {
+          "name": "plt.subplot",
+          "line": 123
+        },
+        {
+          "name": "plt.grid",
+          "line": 151
+        },
+        {
+          "name": "plt.subplot",
+          "line": 154
+        },
+        {
+          "name": "plt.subplot",
+          "line": 189
+        },
+        {
+          "name": "plt.subplot",
+          "line": 205
+        },
+        {
+          "name": "plt.subplot",
+          "line": 237
+        },
+        {
+          "name": "plt.subplot",
+          "line": 287
+        },
+        {
+          "name": "plt.subplot",
+          "line": 302
+        },
+        {
+          "name": "plt.tight_layout",
+          "line": 316
+        },
+        {
+          "name": "plt.close",
+          "line": 323
+        },
+        {
+          "name": "plt.plot",
+          "line": 46
+        },
+        {
+          "name": "plt.plot",
+          "line": 58
+        },
+        {
+          "name": "plt.plot",
+          "line": 70
+        },
+        {
+          "name": "plt.axhline",
+          "line": 71
+        },
+        {
+          "name": "plt.title",
+          "line": 72
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 73
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 74
+        },
+        {
+          "name": "plt.legend",
+          "line": 75
+        },
+        {
+          "name": "plt.grid",
+          "line": 76
+        },
+        {
+          "name": "plt.text",
+          "line": 78
+        },
+        {
+          "name": "plt.title",
+          "line": 80
+        },
+        {
+          "name": "set",
+          "line": 96
+        },
+        {
+          "name": "plt.title",
+          "line": 110
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 111
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 112
+        },
+        {
+          "name": "plt.legend",
+          "line": 113
+        },
+        {
+          "name": "plt.text",
+          "line": 116
+        },
+        {
+          "name": "plt.title",
+          "line": 118
+        },
+        {
+          "name": "set",
+          "line": 127
+        },
+        {
+          "name": "plt.title",
+          "line": 141
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 142
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 143
+        },
+        {
+          "name": "plt.legend",
+          "line": 144
+        },
+        {
+          "name": "plt.text",
+          "line": 147
+        },
+        {
+          "name": "plt.title",
+          "line": 149
+        },
+        {
+          "name": "sorted",
+          "line": 158
+        },
+        {
+          "name": "set",
+          "line": 161
+        },
+        {
+          "name": "....values",
+          "line": 162
+        },
+        {
+          "name": "plt.title",
+          "line": 177
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 178
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 179
+        },
+        {
+          "name": "plt.axhline",
+          "line": 180
+        },
+        {
+          "name": "plt.legend",
+          "line": 181
+        },
+        {
+          "name": "plt.grid",
+          "line": 182
+        },
+        {
+          "name": "plt.text",
+          "line": 184
+        },
+        {
+          "name": "plt.title",
+          "line": 186
+        },
+        {
+          "name": "plt.plot",
+          "line": 192
+        },
+        {
+          "name": "plt.title",
+          "line": 193
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 194
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 195
+        },
+        {
+          "name": "plt.yscale",
+          "line": 196
+        },
+        {
+          "name": "plt.grid",
+          "line": 197
+        },
+        {
+          "name": "plt.legend",
+          "line": 198
+        },
+        {
+          "name": "plt.text",
+          "line": 200
+        },
+        {
+          "name": "plt.title",
+          "line": 202
+        },
+        {
+          "name": "set",
+          "line": 209
+        },
+        {
+          "name": "plt.title",
+          "line": 225
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 226
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 227
+        },
+        {
+          "name": "plt.axhline",
+          "line": 228
+        },
+        {
+          "name": "plt.legend",
+          "line": 229
+        },
+        {
+          "name": "plt.grid",
+          "line": 230
+        },
+        {
+          "name": "plt.text",
+          "line": 232
+        },
+        {
+          "name": "plt.title",
+          "line": 234
+        },
+        {
+          "name": "sorted",
+          "line": 241
+        },
+        {
+          "name": "set",
+          "line": 244
+        },
+        {
+          "name": "....values",
+          "line": 245
+        },
+        {
+          "name": "plt.yticks",
+          "line": 274
+        },
+        {
+          "name": "plt.title",
+          "line": 275
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 276
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 277
+        },
+        {
+          "name": "plt.grid",
+          "line": 278
+        },
+        {
+          "name": "plt.legend",
+          "line": 279
+        },
+        {
+          "name": "plt.text",
+          "line": 282
+        },
+        {
+          "name": "plt.title",
+          "line": 284
+        },
+        {
+          "name": "plt.plot",
+          "line": 290
+        },
+        {
+          "name": "plt.title",
+          "line": 291
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 292
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 293
+        },
+        {
+          "name": "plt.grid",
+          "line": 294
+        },
+        {
+          "name": "plt.legend",
+          "line": 295
+        },
+        {
+          "name": "plt.text",
+          "line": 297
+        },
+        {
+          "name": "plt.title",
+          "line": 299
+        },
+        {
+          "name": "plt.plot",
+          "line": 305
+        },
+        {
+          "name": "plt.title",
+          "line": 306
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 307
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 308
+        },
+        {
+          "name": "plt.grid",
+          "line": 309
+        },
+        {
+          "name": "plt.legend",
+          "line": 310
+        },
+        {
+          "name": "plt.text",
+          "line": 312
+        },
+        {
+          "name": "plt.title",
+          "line": 314
+        },
+        {
+          "name": "plt.savefig",
+          "line": 320
+        },
+        {
+          "name": "logger.info",
+          "line": 321
+        },
+        {
+          "name": "len",
+          "line": 34
+        },
+        {
+          "name": "pattern_types.update",
+          "line": 98
+        },
+        {
+          "name": "pattern_types.update",
+          "line": 129
+        },
+        {
+          "name": "....keys",
+          "line": 158
+        },
+        {
+          "name": "pattern_types.update",
+          "line": 163
+        },
+        {
+          "name": "pattern_types.update",
+          "line": 211
+        },
+        {
+          "name": "enumerate",
+          "line": 217
+        },
+        {
+          "name": "....keys",
+          "line": 241
+        },
+        {
+          "name": "pattern_types.update",
+          "line": 246
+        },
+        {
+          "name": "len",
+          "line": 289
+        },
+        {
+          "name": "range",
+          "line": 290
+        },
+        {
+          "name": "max",
+          "line": 69
+        },
+        {
+          "name": "zip",
+          "line": 69
+        },
+        {
+          "name": "rates.keys",
+          "line": 98
+        },
+        {
+          "name": "epoch_rates.get",
+          "line": 101
+        },
+        {
+          "name": "len",
+          "line": 103
+        },
+        {
+          "name": "len",
+          "line": 103
+        },
+        {
+          "name": "plt.plot",
+          "line": 104
+        },
+        {
+          "name": "plt.plot",
+          "line": 108
+        },
+        {
+          "name": "risks.keys",
+          "line": 129
+        },
+        {
+          "name": "epoch_risks.get",
+          "line": 132
+        },
+        {
+          "name": "len",
+          "line": 134
+        },
+        {
+          "name": "len",
+          "line": 134
+        },
+        {
+          "name": "plt.plot",
+          "line": 135
+        },
+        {
+          "name": "plt.plot",
+          "line": 139
+        },
+        {
+          "name": "ratios.keys",
+          "line": 163
+        },
+        {
+          "name": "plt.plot",
+          "line": 175
+        },
+        {
+          "name": "weights.keys",
+          "line": 211
+        },
+        {
+          "name": "plt.plot",
+          "line": 223
+        },
+        {
+          "name": "statuses.keys",
+          "line": 246
+        },
+        {
+          "name": "len",
+          "line": 290
+        },
+        {
+          "name": "ratios.append",
+          "line": 171
+        },
+        {
+          "name": "epochs_with_data.append",
+          "line": 172
+        },
+        {
+          "name": "weights.append",
+          "line": 219
+        },
+        {
+          "name": "epochs_with_data.append",
+          "line": 220
+        },
+        {
+          "name": "plt.scatter",
+          "line": 271
+        },
+        {
+          "name": "len",
+          "line": 104
+        },
+        {
+          "name": "len",
+          "line": 107
+        },
+        {
+          "name": "len",
+          "line": 107
+        },
+        {
+          "name": "len",
+          "line": 135
+        },
+        {
+          "name": "len",
+          "line": 138
+        },
+        {
+          "name": "len",
+          "line": 138
+        },
+        {
+          "name": "x_pts.append",
+          "line": 265
+        },
+        {
+          "name": "y_pts.append",
+          "line": 268
+        },
+        {
+          "name": "....index",
+          "line": 267
+        },
+        {
+          "name": "list",
+          "line": 267
+        }
+      ],
+      "docstring": "\n    Visualize training results with unified risk/accuracy ratio information.\n    \n    This function creates a comprehensive visualization of training metrics,\n    including loss, accuracy, batch sizes, pattern recognition rates, risks,\n    unified risk/accuracy ratios, learning rates, and more.\n    \n    Args:\n        history (dict): Training history dictionary containing metrics\n        output_path (str, optional): Path to save the visualization. If None,\n                                    the visualization is only displayed.\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef visualize_training_results(history, output_path=None):\n    \"\"\"\n    Visualize training results with unified risk/accuracy ratio information.\n    \n    This function creates a comprehensive visualization of training metrics,\n    including loss, accuracy, batch sizes, pattern recognition rates, risks,\n    unified risk/accuracy ratios, learning rates, and more.\n    \n    Args:\n        history (dict): Training history dictionary containing metrics\n        output_path (str, optional): Path to save the visualization. If None,\n                                    the visualization is only displayed.\n    \"\"\"\n    # Create figure with more subplots for EVE-specific metrics\n    plt.figure(figsize=(15, 28))  # Increased figure height for more plots\n    \n    # Create epochs range\n    epochs = range(1, len(history['train_loss']) + 1)\n    \n    # Plot arrangement\n    num_rows = 8  # Increased from 7 to 8 rows to accommodate the augmentation plot\n    num_cols = 2\n    plot_idx = 1\n    \n    # 1. Training metrics: Loss\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    plt.plot(epochs, history['train_loss'], 'b-', label='Training Loss')\n    if 'val_loss' in history and history['val_loss']:\n        plt.plot(epochs, history['val_loss'], 'r-', label='Validation Loss')\n    plt.title('Loss')\n    plt.xlabel('Epoch')\n    plt.ylabel('Loss')\n    plt.legend()\n    plt.grid(True)\n    \n    # 2. Training metrics: Accuracy\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    plt.plot(epochs, history['train_acc'], 'b-', label='Training Accuracy')\n    if 'val_acc' in history and history['val_acc']:\n        plt.plot(epochs, history['val_acc'], 'r-', label='Validation Accuracy')\n    plt.title('Accuracy')\n    plt.xlabel('Epoch')\n    plt.ylabel('Accuracy (%)')\n    plt.legend()\n    plt.grid(True)\n    \n    # 3. Train/Test Accuracy Ratio\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    if 'train_acc' in history and 'val_acc' in history:\n        ratios = [train/max(0.1, val) for train, val in zip(history['train_acc'], history['val_acc'])]\n        plt.plot(epochs, ratios, 'g-o', label='Train/Test Ratio')\n        plt.axhline(y=1.0, color='r', linestyle='--', label='Ideal Ratio (1.0)')\n        plt.title('Train/Test Accuracy Ratio')\n        plt.xlabel('Epoch')\n        plt.ylabel('Ratio')\n        plt.legend()\n        plt.grid(True)\n    else:\n        plt.text(0.5, 0.5, 'No accuracy data available',\n                horizontalalignment='center', verticalalignment='center')\n        plt.title('Train/Test Accuracy Ratio')\n    \n    # 4. Batch sizes\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    plt.plot(epochs, history['batch_sizes'], 'g-o', label='Batch Size')\n    plt.title('Batch Size')\n    plt.xlabel('Epoch')\n    plt.ylabel('Batch Size')\n    plt.grid(True)\n    \n    # 5. Pattern recognition rates\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    if 'pattern_recognition_rates' in history and history['pattern_recognition_rates']:\n        # Extract pattern types and create separate lines for each\n        pattern_types = set()\n        for rates in history['pattern_recognition_rates']:\n            pattern_types.update(rates.keys())\n        \n        for pattern_type in pattern_types:\n            rates = [epoch_rates.get(pattern_type, 0) for epoch_rates in history['pattern_recognition_rates']]\n            # Only plot if we have enough data points\n            if len(rates) >= len(epochs):\n                plt.plot(epochs[:len(rates)], rates, marker='o', alpha=0.7, label=pattern_type)\n            else:\n                # Pad with zeros if needed\n                padded_rates = [0] * (len(epochs) - len(rates)) + rates\n                plt.plot(epochs, padded_rates, marker='o', alpha=0.7, label=pattern_type)\n        \n        plt.title('Pattern Recognition Rates')\n        plt.xlabel('Epoch')\n        plt.ylabel('Recognition Rate')\n        plt.legend(loc='lower right')\n    else:\n        # Fallback\n        plt.text(0.5, 0.5, 'No pattern recognition data available', \n                horizontalalignment='center', verticalalignment='center')\n        plt.title('Pattern Recognition Rates')\n    \n    plt.grid(True)\n    \n    # 6. Pattern risks (derived from accuracy)\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    if 'pattern_risks' in history and history['pattern_risks']:\n        # Extract pattern types and create separate lines for each\n        pattern_types = set()\n        for risks in history['pattern_risks']:\n            pattern_types.update(risks.keys())\n        \n        for pattern_type in pattern_types:\n            risks = [epoch_risks.get(pattern_type, 0.5) for epoch_risks in history['pattern_risks']]\n            # Only plot if we have enough data points\n            if len(risks) >= len(epochs):\n                plt.plot(epochs[:len(risks)], risks, marker='o', alpha=0.7, label=pattern_type)\n            else:\n                # Pad with default value (0.5) if needed\n                padded_risks = [0.5] * (len(epochs) - len(risks)) + risks\n                plt.plot(epochs, padded_risks, marker='o', alpha=0.7, label=pattern_type)\n        \n        plt.title('Pattern Risk Levels (Derived from Accuracy)')\n        plt.xlabel('Epoch')\n        plt.ylabel('Risk Level')\n        plt.legend(loc='upper right')\n    else:\n        # Fallback\n        plt.text(0.5, 0.5, 'No pattern risk data available', \n                horizontalalignment='center', verticalalignment='center')\n        plt.title('Pattern Risk Levels')\n    \n    plt.grid(True)\n    \n    # 7. Unified Risk/Accuracy Ratios\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    if 'risk_accuracy_ratios' in history and history['risk_accuracy_ratios']:\n        # Sort epochs\n        epochs_list = sorted(history['risk_accuracy_ratios'].keys())\n        \n        # Extract pattern types\n        pattern_types = set()\n        for ratios in history['risk_accuracy_ratios'].values():\n            pattern_types.update(ratios.keys())\n        \n        for pattern_type in pattern_types:\n            ratios = []\n            epochs_with_data = []\n            \n            for epoch in epochs_list:\n                if pattern_type in history['risk_accuracy_ratios'][epoch]:\n                    ratios.append(history['risk_accuracy_ratios'][epoch][pattern_type])\n                    epochs_with_data.append(epoch + 1)  # 1-indexed epochs\n            \n            if ratios:\n                plt.plot(epochs_with_data, ratios, marker='o', alpha=0.7, label=pattern_type)\n        \n        plt.title('Unified Risk/Accuracy Ratios')\n        plt.xlabel('Epoch')\n        plt.ylabel('Risk/Accuracy Ratio')\n        plt.axhline(y=1.0, color='k', linestyle='--', alpha=0.5, label='Balanced (1.0)')\n        plt.legend(loc='upper right')\n        plt.grid(True)\n    else:\n        plt.text(0.5, 0.5, 'No unified ratio data available', \n                horizontalalignment='center', verticalalignment='center')\n        plt.title('Unified Risk/Accuracy Ratios')\n    \n    # 8. Learning Rate\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    if 'learning_rates' in history and history['learning_rates']:\n        plt.plot(epochs, history['learning_rates'], 'r-o', label='Learning Rate')\n        plt.title('Learning Rate Adaptation')\n        plt.xlabel('Epoch')\n        plt.ylabel('Learning Rate')\n        plt.yscale('log')  # Log scale often better for LR\n        plt.grid(True)\n        plt.legend()\n    else:\n        plt.text(0.5, 0.5, 'No learning rate data available', \n                horizontalalignment='center', verticalalignment='center')\n        plt.title('Learning Rate Adaptation')\n    \n    # 9. Weight Adjustments\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    if 'weight_adjustments' in history and history['weight_adjustments']:\n        # Extract pattern types for weight adjustments\n        pattern_types = set()\n        for weights in history['weight_adjustments']:\n            pattern_types.update(weights.keys())\n        \n        for pattern_type in pattern_types:\n            weights = []\n            epochs_with_data = []\n            \n            for i, weights_data in enumerate(history['weight_adjustments']):\n                if pattern_type in weights_data:\n                    weights.append(weights_data[pattern_type])\n                    epochs_with_data.append(i + 1)  # 1-indexed epochs\n            \n            if weights:\n                plt.plot(epochs_with_data, weights, marker='o', alpha=0.7, label=pattern_type)\n        \n        plt.title('EVE Weight Adjustments by Pattern')\n        plt.xlabel('Epoch')\n        plt.ylabel('Weight Adjustment Factor')\n        plt.axhline(y=1.0, color='k', linestyle='--', alpha=0.5, label='No Adjustment')\n        plt.legend(loc='upper right')\n        plt.grid(True)\n    else:\n        plt.text(0.5, 0.5, 'No weight adjustment data available', \n                horizontalalignment='center', verticalalignment='center')\n        plt.title('EVE Weight Adjustments by Pattern')\n    \n    # 10. Pattern Equilibrium Bounds Visualization\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    if 'equilibrium_bounds_history' in history and history['equilibrium_bounds_history']:\n        # Extract data for plotting\n        epochs_list = sorted(history['equilibrium_bounds_history'].keys())\n        \n        # Get all pattern types\n        pattern_types = set()\n        for statuses in history['equilibrium_bounds_history'].values():\n            pattern_types.update(statuses.keys())\n        \n        # Set up colors and markers\n        colors = {'min': 'red', 'max': 'blue'}\n        labels = {'min': 'Below Min', 'max': 'Above Max'}\n        \n        # Plot min and max bound violations separately\n        for bound_type in ['min', 'max']:\n            for pattern_type in pattern_types:\n                # Create lists to hold the data points\n                x_pts = []\n                y_pts = []\n                \n                for epoch in epochs_list:\n                    if pattern_type in history['equilibrium_bounds_history'][epoch]:\n                        status = history['equilibrium_bounds_history'][epoch][pattern_type]\n                        \n                        # If it violates the bound (value is False), add a point\n                        if bound_type in status and not status[bound_type]:\n                            x_pts.append(epoch + 1)  # 1-indexed for display\n                            # Offset points slightly based on pattern type for visibility\n                            y_offset = list(pattern_types).index(pattern_type) * 0.1\n                            y_pts.append(y_offset + (0 if bound_type == 'min' else 0.5))\n                \n                if x_pts:\n                    plt.scatter(x_pts, y_pts, label=f\"{pattern_type} {labels[bound_type]}\", \n                               color=colors[bound_type], alpha=0.7, marker='o')\n        \n        plt.yticks([0.1, 0.6], ['Min Bound', 'Max Bound'])\n        plt.title('Pattern Bound Violations')\n        plt.xlabel('Epoch')\n        plt.ylabel('Bound Type')\n        plt.grid(True, axis='x')\n        plt.legend(loc='best', fontsize='small')\n    else:\n        # Leave empty if not using bounds\n        plt.text(0.5, 0.5, 'No equilibrium bounds data available',\n                horizontalalignment='center', verticalalignment='center')\n        plt.title('Pattern Bound Violations')\n    \n    # 11. Dataset Size\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    if 'dataset_sizes' in history and len(history['dataset_sizes']) > 1:\n        plt.plot(range(len(history['dataset_sizes'])), history['dataset_sizes'], 'b-o', label='Dataset Size')\n        plt.title('Dataset Size')\n        plt.xlabel('Epoch')\n        plt.ylabel('Number of Examples')\n        plt.grid(True)\n        plt.legend()\n    else:\n        plt.text(0.5, 0.5, 'No dataset size data available',\n                horizontalalignment='center', verticalalignment='center')\n        plt.title('Dataset Size')\n    \n    # 12. Memory Usage\n    plt.subplot(num_rows, num_cols, plot_idx)\n    plot_idx += 1\n    if 'memory_usage' in history and history['memory_usage']:\n        plt.plot(epochs, history['memory_usage'], 'm-o', label='Memory Usage')\n        plt.title('GPU Memory Usage')\n        plt.xlabel('Epoch')\n        plt.ylabel('Memory (GB)')\n        plt.grid(True)\n        plt.legend()\n    else:\n        plt.text(0.5, 0.5, 'No memory usage data available',\n                horizontalalignment='center', verticalalignment='center')\n        plt.title('GPU Memory Usage')\n    \n    plt.tight_layout()\n    \n    # Save figure if output path provided\n    if output_path:\n        plt.savefig(output_path)\n        logger.info(f\"Training visualization saved to: {output_path}\")\n    \n    plt.close()"
+    }
+  },
+  "constants": {}
+}

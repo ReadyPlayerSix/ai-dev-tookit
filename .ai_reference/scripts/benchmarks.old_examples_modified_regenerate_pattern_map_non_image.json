@@ -1,0 +1,956 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\modified\\regenerate_pattern_map_non_image.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 9
+    },
+    {
+      "name": "sys",
+      "line": 10
+    },
+    {
+      "name": "time",
+      "line": 11
+    },
+    {
+      "name": "json",
+      "line": 12
+    },
+    {
+      "name": "logging",
+      "line": 13
+    },
+    {
+      "name": "argparse",
+      "line": 14
+    },
+    {
+      "name": "random",
+      "line": 15
+    },
+    {
+      "name": "torch",
+      "line": 16
+    },
+    {
+      "name": "pandas",
+      "line": 17
+    },
+    {
+      "name": "numpy",
+      "line": 18
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 19
+    },
+    {
+      "name": "typing.Dict",
+      "line": 20
+    },
+    {
+      "name": "typing.List",
+      "line": 20
+    },
+    {
+      "name": "typing.Any",
+      "line": 20
+    },
+    {
+      "name": "typing.Optional",
+      "line": 20
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 20
+    },
+    {
+      "name": "sklearn.datasets.fetch_20newsgroups",
+      "line": 21
+    },
+    {
+      "name": "sklearn.datasets.load_iris",
+      "line": 21
+    },
+    {
+      "name": "sklearn.datasets.load_wine",
+      "line": 21
+    },
+    {
+      "name": "sklearn.datasets.load_digits",
+      "line": 21
+    },
+    {
+      "name": "sklearn.feature_extraction.text.TfidfVectorizer",
+      "line": 22
+    },
+    {
+      "name": "sklearn.preprocessing.StandardScaler",
+      "line": 23
+    }
+  ],
+  "classes": {
+    "NonImagePatternMapper": {
+      "start_line": 33,
+      "end_line": 416,
+      "methods": {
+        "__init__": {
+          "start_line": 36,
+          "end_line": 57,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "output_dir",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "os.makedirs",
+              "line": 44
+            },
+            {
+              "name": "torch.device",
+              "line": 47
+            },
+            {
+              "name": "logger.info",
+              "line": 48
+            },
+            {
+              "name": "....strftime",
+              "line": 51
+            },
+            {
+              "name": "os.path.join",
+              "line": 54
+            },
+            {
+              "name": "os.makedirs",
+              "line": 55
+            },
+            {
+              "name": "os.path.join",
+              "line": 43
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 47
+            },
+            {
+              "name": "datetime.now",
+              "line": 51
+            }
+          ],
+          "docstring": "\n        Initialize the pattern mapper\n        \n        Args:\n            output_dir: Directory for saving results\n        ",
+          "code_snippet": "    \"\"\"Pattern mapping interface for non-image datasets\"\"\"\n    \n    def __init__(self, output_dir: str = None):\n        \"\"\"\n        Initialize the pattern mapper\n        \n        Args:\n            output_dir: Directory for saving results\n        \"\"\"\n        self.output_dir = output_dir or os.path.join(\"benchmarks\", \"semantic_maps\")\n        os.makedirs(self.output_dir, exist_ok=True)\n        \n        # Initialize device\n        self.device = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\n        logger.info(f\"Using device: {self.device}\")\n        \n        # Set timestamp for output files\n        self.timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n        \n        # Create visualization directory\n        self.pattern_vis_dir = os.path.join(self.output_dir, f\"pattern_vis_{self.timestamp}\")\n        os.makedirs(self.pattern_vis_dir, exist_ok=True)\n    \n    def load_dataset(self, dataset_name: str = \"20newsgroups\") -> Tuple[Any, Any]:\n        \"\"\"\n        Load the specified non-image dataset"
+        },
+        "load_dataset": {
+          "start_line": 57,
+          "end_line": 103,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset_name",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 67
+            },
+            {
+              "name": "fetch_20newsgroups",
+              "line": 71
+            },
+            {
+              "name": "load_iris",
+              "line": 76
+            },
+            {
+              "name": "load_wine",
+              "line": 81
+            },
+            {
+              "name": "load_digits",
+              "line": 86
+            },
+            {
+              "name": "dataset_name.endswith",
+              "line": 89
+            },
+            {
+              "name": "os.path.exists",
+              "line": 91
+            },
+            {
+              "name": "ValueError",
+              "line": 101
+            },
+            {
+              "name": "pd.read_csv",
+              "line": 92
+            },
+            {
+              "name": "FileNotFoundError",
+              "line": 98
+            }
+          ],
+          "docstring": "\n        Load the specified non-image dataset\n        \n        Args:\n            dataset_name: Name of the dataset to load\n            \n        Returns:\n            Tuple of (data, metadata)\n        ",
+          "code_snippet": "        os.makedirs(self.pattern_vis_dir, exist_ok=True)\n    \n    def load_dataset(self, dataset_name: str = \"20newsgroups\") -> Tuple[Any, Any]:\n        \"\"\"\n        Load the specified non-image dataset\n        \n        Args:\n            dataset_name: Name of the dataset to load\n            \n        Returns:\n            Tuple of (data, metadata)\n        \"\"\"\n        logger.info(f\"Loading {dataset_name} dataset...\")\n        \n        if dataset_name == \"20newsgroups\":\n            # Load text dataset (20 newsgroups)\n            newsgroups = fetch_20newsgroups(subset='all', remove=('headers', 'footers', 'quotes'))\n            return newsgroups.data, newsgroups.target\n        \n        elif dataset_name == \"iris\":\n            # Load tabular dataset (Iris)\n            iris = load_iris()\n            return iris.data, iris.target\n        \n        elif dataset_name == \"wine\":\n            # Load tabular dataset (Wine)\n            wine = load_wine()\n            return wine.data, wine.target\n        \n        elif dataset_name == \"digits\":\n            # Load digit dataset (flattened images treated as tabular)\n            digits = load_digits()\n            return digits.data, digits.target\n        \n        elif dataset_name.endswith('.csv'):\n            # Load custom CSV file\n            if os.path.exists(dataset_name):\n                df = pd.read_csv(dataset_name)\n                # Assume last column is target\n                X = df.iloc[:, :-1].values\n                y = df.iloc[:, -1].values\n                return X, y\n            else:\n                raise FileNotFoundError(f\"CSV file not found: {dataset_name}\")\n        \n        else:\n            raise ValueError(f\"Unsupported dataset: {dataset_name}\")\n    \n    def extract_features_text(self, text_data: List[str]) -> Dict[str, float]:\n        \"\"\"Extract features from text data\"\"\"\n        features = {}"
+        },
+        "extract_features_text": {
+          "start_line": 103,
+          "end_line": 130,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "text_data"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "np.mean",
+              "line": 109
+            },
+            {
+              "name": "np.std",
+              "line": 110
+            },
+            {
+              "name": "max",
+              "line": 111
+            },
+            {
+              "name": "min",
+              "line": 112
+            },
+            {
+              "name": "np.mean",
+              "line": 116
+            },
+            {
+              "name": "np.std",
+              "line": 117
+            },
+            {
+              "name": "....split",
+              "line": 120
+            },
+            {
+              "name": "set",
+              "line": 121
+            },
+            {
+              "name": "np.mean",
+              "line": 126
+            },
+            {
+              "name": "len",
+              "line": 108
+            },
+            {
+              "name": "len",
+              "line": 115
+            },
+            {
+              "name": "text.split",
+              "line": 115
+            },
+            {
+              "name": "....join",
+              "line": 120
+            },
+            {
+              "name": "len",
+              "line": 122
+            },
+            {
+              "name": "len",
+              "line": 122
+            },
+            {
+              "name": "text.count",
+              "line": 125
+            },
+            {
+              "name": "text.count",
+              "line": 125
+            },
+            {
+              "name": "text.count",
+              "line": 125
+            }
+          ],
+          "docstring": "Extract features from text data",
+          "code_snippet": "            raise ValueError(f\"Unsupported dataset: {dataset_name}\")\n    \n    def extract_features_text(self, text_data: List[str]) -> Dict[str, float]:\n        \"\"\"Extract features from text data\"\"\"\n        features = {}\n        \n        # Basic text statistics\n        lengths = [len(text) for text in text_data]\n        features['avg_length'] = np.mean(lengths)\n        features['std_length'] = np.std(lengths)\n        features['max_length'] = max(lengths)\n        features['min_length'] = min(lengths)\n        \n        # Word count statistics\n        word_counts = [len(text.split()) for text in text_data]\n        features['avg_words'] = np.mean(word_counts)\n        features['std_words'] = np.std(word_counts)\n        \n        # Vocabulary diversity (unique words / total words)\n        all_words = ' '.join(text_data).split()\n        unique_words = set(all_words)\n        features['vocabulary_diversity'] = len(unique_words) / len(all_words) if all_words else 0\n        \n        # Sentence structure (avg sentences per document)\n        sent_counts = [text.count('.') + text.count('!') + text.count('?') for text in text_data]\n        features['avg_sentences'] = np.mean(sent_counts)\n        \n        return features\n    \n    def extract_features_tabular(self, data: np.ndarray) -> Dict[str, float]:\n        \"\"\"Extract features from tabular data\"\"\"\n        features = {}"
+        },
+        "extract_features_tabular": {
+          "start_line": 130,
+          "end_line": 154,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "data"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "np.mean",
+              "line": 139
+            },
+            {
+              "name": "np.std",
+              "line": 140
+            },
+            {
+              "name": "np.mean",
+              "line": 142
+            },
+            {
+              "name": "np.mean",
+              "line": 143
+            },
+            {
+              "name": "np.mean",
+              "line": 144
+            },
+            {
+              "name": "np.mean",
+              "line": 147
+            },
+            {
+              "name": "np.mean",
+              "line": 149
+            },
+            {
+              "name": "np.abs",
+              "line": 144
+            },
+            {
+              "name": "np.corrcoef",
+              "line": 144
+            },
+            {
+              "name": "np.abs",
+              "line": 147
+            },
+            {
+              "name": "np.mean",
+              "line": 147
+            },
+            {
+              "name": "np.mean",
+              "line": 149
+            },
+            {
+              "name": "np.std",
+              "line": 147
+            },
+            {
+              "name": "np.std",
+              "line": 149
+            },
+            {
+              "name": "np.mean",
+              "line": 147
+            },
+            {
+              "name": "np.mean",
+              "line": 149
+            }
+          ],
+          "docstring": "Extract features from tabular data",
+          "code_snippet": "        return features\n    \n    def extract_features_tabular(self, data: np.ndarray) -> Dict[str, float]:\n        \"\"\"Extract features from tabular data\"\"\"\n        features = {}\n        \n        # Basic statistics\n        features['num_features'] = data.shape[1]\n        features['num_samples'] = data.shape[0]\n        \n        # Feature statistics\n        means = np.mean(data, axis=0)\n        stds = np.std(data, axis=0)\n        \n        features['avg_feature_mean'] = np.mean(means)\n        features['avg_feature_std'] = np.mean(stds)\n        features['feature_correlation'] = np.mean(np.abs(np.corrcoef(data.T)))\n        \n        # Distribution properties\n        features['skewness'] = np.mean([np.abs(np.mean((col - np.mean(col))**3) / (np.std(col)**3)) \n                                      for col in data.T])\n        features['kurtosis'] = np.mean([(np.mean((col - np.mean(col))**4) / (np.std(col)**4)) - 3 \n                                      for col in data.T])\n        \n        return features\n    \n    def determine_pattern_type(self, features: Dict[str, float], data_type: str) -> str:\n        \"\"\"\n        Determine pattern type based on features and data type"
+        },
+        "determine_pattern_type": {
+          "start_line": 154,
+          "end_line": 190,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "features"
+            },
+            {
+              "name": "data_type",
+              "type": "str"
+            }
+          ],
+          "return_type": "str",
+          "calls": [
+            {
+              "name": "features.get",
+              "line": 167
+            },
+            {
+              "name": "features.get",
+              "line": 167
+            },
+            {
+              "name": "features.get",
+              "line": 169
+            },
+            {
+              "name": "features.get",
+              "line": 176
+            },
+            {
+              "name": "features.get",
+              "line": 178
+            },
+            {
+              "name": "features.get",
+              "line": 178
+            }
+          ],
+          "docstring": "\n        Determine pattern type based on features and data type\n        \n        Args:\n            features: Extracted features\n            data_type: Type of data ('text', 'tabular', 'time_series')\n            \n        Returns:\n            Pattern type ('structural', 'statistical', 'temporal')\n        ",
+          "code_snippet": "        return features\n    \n    def determine_pattern_type(self, features: Dict[str, float], data_type: str) -> str:\n        \"\"\"\n        Determine pattern type based on features and data type\n        \n        Args:\n            features: Extracted features\n            data_type: Type of data ('text', 'tabular', 'time_series')\n            \n        Returns:\n            Pattern type ('structural', 'statistical', 'temporal')\n        \"\"\"\n        if data_type == 'text':\n            # Text patterns\n            if features.get('avg_sentences', 0) > 5 or features.get('avg_length', 0) > 500:\n                return 'structural'  # Well-structured documents\n            elif features.get('vocabulary_diversity', 0) > 0.3:\n                return 'statistical'  # High vocabulary diversity\n            else:\n                return 'temporal'  # Sequential nature of text\n        \n        elif data_type == 'tabular':\n            # Tabular patterns\n            if features.get('feature_correlation', 0) > 0.7:\n                return 'structural'  # Highly correlated features\n            elif features.get('skewness', 0) > 1.0 or features.get('kurtosis', 0) > 1.0:\n                return 'statistical'  # Non-normal distributions\n            else:\n                return 'temporal'  # Could have temporal aspects in sequential data\n        \n        elif data_type == 'time_series':\n            # Time series patterns (always temporal for now)\n            return 'temporal'\n        \n        else:\n            return 'statistical'  # Default\n    \n    def create_pattern_map(self, data, targets=None, data_type: str = 'auto', sample_limit: Optional[int] = None) -> Dict[str, Any]:\n        \"\"\"\n        Create a pattern map from the dataset"
+        },
+        "create_pattern_map": {
+          "start_line": 190,
+          "end_line": 301,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "data"
+            },
+            {
+              "name": "targets"
+            },
+            {
+              "name": "data_type",
+              "type": "str"
+            },
+            {
+              "name": "sample_limit"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 203
+            },
+            {
+              "name": "len",
+              "line": 241
+            },
+            {
+              "name": "range",
+              "line": 243
+            },
+            {
+              "name": "self._calculate_pattern_complexities",
+              "line": 281
+            },
+            {
+              "name": "self._order_patterns_by_complexity",
+              "line": 282
+            },
+            {
+              "name": "logger.info",
+              "line": 213
+            },
+            {
+              "name": "random.sample",
+              "line": 217
+            },
+            {
+              "name": "logger.info",
+              "line": 224
+            },
+            {
+              "name": "self.extract_features_text",
+              "line": 233
+            },
+            {
+              "name": "min",
+              "line": 244
+            },
+            {
+              "name": "enumerate",
+              "line": 254
+            },
+            {
+              "name": "isinstance",
+              "line": 207
+            },
+            {
+              "name": "all",
+              "line": 207
+            },
+            {
+              "name": "len",
+              "line": 216
+            },
+            {
+              "name": "range",
+              "line": 217
+            },
+            {
+              "name": "self.extract_features_tabular",
+              "line": 235
+            },
+            {
+              "name": "self.determine_pattern_type",
+              "line": 256
+            },
+            {
+              "name": "self._calculate_pattern_complexity",
+              "line": 259
+            },
+            {
+              "name": "....append",
+              "line": 273
+            },
+            {
+              "name": "....strftime",
+              "line": 292
+            },
+            {
+              "name": "isinstance",
+              "line": 209
+            },
+            {
+              "name": "len",
+              "line": 217
+            },
+            {
+              "name": "self.extract_features_text",
+              "line": 248
+            },
+            {
+              "name": "self.extract_features_tabular",
+              "line": 251
+            },
+            {
+              "name": "str",
+              "line": 265
+            },
+            {
+              "name": "isinstance",
+              "line": 207
+            },
+            {
+              "name": "len",
+              "line": 209
+            },
+            {
+              "name": "row.reshape",
+              "line": 251
+            },
+            {
+              "name": "datetime.now",
+              "line": 292
+            }
+          ],
+          "docstring": "\n        Create a pattern map from the dataset\n        \n        Args:\n            data: The dataset\n            targets: Optional target values\n            data_type: Type of data ('text', 'tabular', 'time_series', 'auto')\n            sample_limit: Maximum number of samples to analyze\n            \n        Returns:\n            Pattern map dictionary\n        ",
+          "code_snippet": "            return 'statistical'  # Default\n    \n    def create_pattern_map(self, data, targets=None, data_type: str = 'auto', sample_limit: Optional[int] = None) -> Dict[str, Any]:\n        \"\"\"\n        Create a pattern map from the dataset\n        \n        Args:\n            data: The dataset\n            targets: Optional target values\n            data_type: Type of data ('text', 'tabular', 'time_series', 'auto')\n            sample_limit: Maximum number of samples to analyze\n            \n        Returns:\n            Pattern map dictionary\n        \"\"\"\n        logger.info(\"Starting pattern mapping...\")\n        \n        # Detect data type if auto\n        if data_type == 'auto':\n            if isinstance(data, list) and all(isinstance(x, str) for x in data[:10]):\n                data_type = 'text'\n            elif isinstance(data, np.ndarray) and len(data.shape) == 2:\n                data_type = 'tabular'\n            else:\n                data_type = 'tabular'  # Default\n            logger.info(f\"Detected data type: {data_type}\")\n        \n        # Limit samples if needed\n        if sample_limit and len(data) > sample_limit:\n            indices = random.sample(range(len(data)), sample_limit)\n            if data_type == 'text':\n                data = [data[i] for i in indices]\n            else:\n                data = data[indices]\n            if targets is not None:\n                targets = targets[indices]\n            logger.info(f\"Limited dataset to {sample_limit} samples\")\n        \n        # Initialize structures\n        pattern_map = {}\n        patterns_by_type = {'structural': [], 'statistical': [], 'temporal': []}\n        pattern_counts = {'structural': 0, 'statistical': 0, 'temporal': 0}\n        \n        # Extract features based on data type\n        if data_type == 'text':\n            features = self.extract_features_text(data)\n        elif data_type == 'tabular':\n            features = self.extract_features_tabular(data)\n        else:\n            features = {}\n        \n        # Process data in batches\n        batch_size = 100\n        num_samples = len(data)\n        \n        for i in range(0, num_samples, batch_size):\n            batch_end = min(i + batch_size, num_samples)\n            \n            if data_type == 'text':\n                batch_data = data[i:batch_end]\n                batch_features = [self.extract_features_text([text]) for text in batch_data]\n            else:\n                batch_data = data[i:batch_end]\n                batch_features = [self.extract_features_tabular(row.reshape(1, -1)) for row in batch_data]\n            \n            # Determine pattern types for batch\n            for j, sample_features in enumerate(batch_features):\n                idx = i + j\n                pattern_type = self.determine_pattern_type(sample_features, data_type)\n                \n                # Calculate complexity (simplified for non-image data)\n                complexity = self._calculate_pattern_complexity(sample_features)\n                \n                # Update counts\n                pattern_counts[pattern_type] += 1\n                \n                # Store pattern information\n                pattern_map[str(idx)] = {\n                    'pattern_type': pattern_type,\n                    'features': sample_features,\n                    'confidence': 0.8,  # Default confidence\n                    'complexity': complexity\n                }\n                \n                # Add to patterns by type\n                patterns_by_type[pattern_type].append({\n                    'idx': idx,\n                    'features': sample_features,\n                    'confidence': 0.8,\n                    'complexity': complexity\n                })\n        \n        # Calculate pattern complexities\n        pattern_complexities = self._calculate_pattern_complexities(patterns_by_type)\n        patterns_by_complexity = self._order_patterns_by_complexity(pattern_complexities)\n        \n        # Assemble final result\n        result = {\n            'pattern_map': pattern_map,\n            'patterns_by_type': patterns_by_type,\n            'pattern_distribution': pattern_counts,\n            'pattern_complexities': pattern_complexities,\n            'patterns_by_complexity': patterns_by_complexity,\n            'metadata': {\n                'timestamp': datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\"),\n                'samples_analyzed': num_samples,\n                'data_type': data_type,\n                'version': '2.0-non-image'\n            }\n        }\n        \n        return result\n    \n    def _calculate_pattern_complexity(self, features: Dict[str, float]) -> float:\n        \"\"\"Calculate complexity score from pattern features\"\"\"\n        # Get numeric features"
+        },
+        "_calculate_pattern_complexity": {
+          "start_line": 301,
+          "end_line": 320,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "features"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "np.mean",
+              "line": 311
+            },
+            {
+              "name": "min",
+              "line": 318
+            },
+            {
+              "name": "np.var",
+              "line": 312
+            },
+            {
+              "name": "max",
+              "line": 318
+            },
+            {
+              "name": "features.items",
+              "line": 304
+            },
+            {
+              "name": "len",
+              "line": 312
+            },
+            {
+              "name": "isinstance",
+              "line": 305
+            }
+          ],
+          "docstring": "Calculate complexity score from pattern features",
+          "code_snippet": "        return result\n    \n    def _calculate_pattern_complexity(self, features: Dict[str, float]) -> float:\n        \"\"\"Calculate complexity score from pattern features\"\"\"\n        # Get numeric features\n        numeric_features = [v for k, v in features.items() \n                           if isinstance(v, (int, float)) and v != 0]\n        \n        if not numeric_features:\n            return 2.5  # Default complexity\n        \n        # Calculate complexity based on feature values and their variance\n        mean_value = np.mean(numeric_features)\n        feature_variance = np.var(numeric_features) if len(numeric_features) > 1 else 0.5\n        \n        # Calculate weighted complexity (simplified)\n        complexity = (mean_value * 0.5 + feature_variance * 0.5) * 5.0\n        \n        # Ensure the range is between 0.1 and 4.9\n        return min(4.9, max(0.1, complexity))\n    \n    def _calculate_pattern_complexities(self, patterns_by_type) -> Dict[str, Dict[str, Any]]:\n        \"\"\"Calculate complexity metrics for each pattern type\"\"\"\n        complexities = {}"
+        },
+        "_calculate_pattern_complexities": {
+          "start_line": 320,
+          "end_line": 348,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "patterns_by_type"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "patterns_by_type.items",
+              "line": 324
+            },
+            {
+              "name": "min",
+              "line": 332
+            },
+            {
+              "name": "max",
+              "line": 333
+            },
+            {
+              "name": "len",
+              "line": 343
+            },
+            {
+              "name": "sum",
+              "line": 331
+            },
+            {
+              "name": "len",
+              "line": 331
+            }
+          ],
+          "docstring": "Calculate complexity metrics for each pattern type",
+          "code_snippet": "        return min(4.9, max(0.1, complexity))\n    \n    def _calculate_pattern_complexities(self, patterns_by_type) -> Dict[str, Dict[str, Any]]:\n        \"\"\"Calculate complexity metrics for each pattern type\"\"\"\n        complexities = {}\n        \n        for pattern_type, patterns in patterns_by_type.items():\n            if not patterns:\n                continue\n            \n            complexity_values = [p['complexity'] for p in patterns]\n            \n            if complexity_values:\n                avg_complexity = sum(complexity_values) / len(complexity_values)\n                min_complexity = min(complexity_values)\n                max_complexity = max(complexity_values)\n            else:\n                avg_complexity = 2.5\n                min_complexity = 0.1\n                max_complexity = 4.9\n            \n            complexities[pattern_type] = {\n                'avg_complexity': avg_complexity,\n                'min_complexity': min_complexity,\n                'max_complexity': max_complexity,\n                'pattern_count': len(patterns)\n            }\n        \n        return complexities\n    \n    def _order_patterns_by_complexity(self, pattern_complexities) -> Dict[str, List[str]]:\n        \"\"\"Order patterns by complexity for risk-accuracy training\"\"\"\n        # Sort patterns by average complexity"
+        },
+        "_order_patterns_by_complexity": {
+          "start_line": 348,
+          "end_line": 372,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_complexities"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "sorted",
+              "line": 351
+            },
+            {
+              "name": "max",
+              "line": 360
+            },
+            {
+              "name": "len",
+              "line": 360
+            },
+            {
+              "name": "pattern_complexities.items",
+              "line": 352
+            }
+          ],
+          "docstring": "Order patterns by complexity for risk-accuracy training",
+          "code_snippet": "        return complexities\n    \n    def _order_patterns_by_complexity(self, pattern_complexities) -> Dict[str, List[str]]:\n        \"\"\"Order patterns by complexity for risk-accuracy training\"\"\"\n        # Sort patterns by average complexity\n        sorted_patterns = sorted(\n            [(p, data['avg_complexity']) for p, data in pattern_complexities.items()],\n            key=lambda x: x[1]\n        )\n        \n        # Get pattern types sorted by complexity\n        pattern_types = [p for p, _ in sorted_patterns]\n        \n        # Group patterns into low, medium, and high complexity\n        third = max(1, len(pattern_types) // 3)\n        \n        low_complexity = pattern_types[:third]\n        medium_complexity = pattern_types[third:2*third]\n        high_complexity = pattern_types[2*third:]\n        \n        return {\n            'ordered_by_complexity': pattern_types,\n            'low_complexity': low_complexity,\n            'medium_complexity': medium_complexity,\n            'high_complexity': high_complexity\n        }\n    \n    def save_pattern_map(self, pattern_map, dataset_name: str) -> str:\n        \"\"\"Save pattern map to file and update latest path reference\"\"\""
+        },
+        "save_pattern_map": {
+          "start_line": 373,
+          "end_line": 393,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "dataset_name",
+              "type": "str"
+            }
+          ],
+          "return_type": "str",
+          "calls": [
+            {
+              "name": "....replace",
+              "line": 376
+            },
+            {
+              "name": "os.path.join",
+              "line": 378
+            },
+            {
+              "name": "logger.info",
+              "line": 384
+            },
+            {
+              "name": "os.path.join",
+              "line": 387
+            },
+            {
+              "name": "open",
+              "line": 381
+            },
+            {
+              "name": "json.dump",
+              "line": 382
+            },
+            {
+              "name": "open",
+              "line": 388
+            },
+            {
+              "name": "f.write",
+              "line": 389
+            },
+            {
+              "name": "dataset_name.replace",
+              "line": 376
+            }
+          ],
+          "docstring": "Save pattern map to file and update latest path reference",
+          "code_snippet": "        }\n    \n    def save_pattern_map(self, pattern_map, dataset_name: str) -> str:\n        \"\"\"Save pattern map to file and update latest path reference\"\"\"\n        # Create filename with timestamp and dataset name\n        safe_dataset_name = dataset_name.replace('/', '_').replace('.', '_')\n        filename = f\"{safe_dataset_name}_pattern_map_{self.timestamp}.json\"\n        filepath = os.path.join(self.output_dir, filename)\n        \n        # Save to file\n        with open(filepath, 'w') as f:\n            json.dump(pattern_map, f, indent=2)\n        \n        logger.info(f\"Pattern map saved to {filepath}\")\n        \n        # Update latest path reference\n        latest_path = os.path.join(self.output_dir, \"latest_pattern_map_path.txt\")\n        with open(latest_path, 'w') as f:\n            f.write(filepath)\n        \n        return filepath\n    \n    def run_mapping(self, dataset_name: str = \"20newsgroups\", \n                   sample_limit: Optional[int] = None) -> Dict[str, Any]:\n        \"\"\""
+        },
+        "run_mapping": {
+          "start_line": 393,
+          "end_line": 416,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset_name",
+              "type": "str"
+            },
+            {
+              "name": "sample_limit"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.load_dataset",
+              "line": 406
+            },
+            {
+              "name": "self.create_pattern_map",
+              "line": 409
+            },
+            {
+              "name": "self.save_pattern_map",
+              "line": 412
+            }
+          ],
+          "docstring": "\n        Run the complete pattern mapping process\n        \n        Args:\n            dataset_name: Name of the dataset to analyze\n            sample_limit: Maximum number of samples to analyze\n            \n        Returns:\n            Pattern map dictionary\n        ",
+          "code_snippet": "        return filepath\n    \n    def run_mapping(self, dataset_name: str = \"20newsgroups\", \n                   sample_limit: Optional[int] = None) -> Dict[str, Any]:\n        \"\"\"\n        Run the complete pattern mapping process\n        \n        Args:\n            dataset_name: Name of the dataset to analyze\n            sample_limit: Maximum number of samples to analyze\n            \n        Returns:\n            Pattern map dictionary\n        \"\"\"\n        # Load dataset\n        data, targets = self.load_dataset(dataset_name)\n        \n        # Create pattern map\n        pattern_map = self.create_pattern_map(data, targets, sample_limit=sample_limit)\n        \n        # Save pattern map\n        filepath = self.save_pattern_map(pattern_map, dataset_name)\n        \n        return pattern_map\n\n\ndef main():\n    \"\"\"Run the non-image pattern mapping script\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Pattern mapping interface for non-image datasets"
+    }
+  },
+  "functions": {
+    "main": {
+      "start_line": 417,
+      "end_line": 502,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "argparse.ArgumentParser",
+          "line": 420
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 421
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 423
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 425
+        },
+        {
+          "name": "parser.parse_args",
+          "line": 427
+        },
+        {
+          "name": "NonImagePatternMapper",
+          "line": 444
+        },
+        {
+          "name": "min",
+          "line": 447
+        },
+        {
+          "name": "print",
+          "line": 448
+        },
+        {
+          "name": "print",
+          "line": 486
+        },
+        {
+          "name": "mapper.run_mapping",
+          "line": 487
+        },
+        {
+          "name": "print",
+          "line": 498
+        },
+        {
+          "name": "print",
+          "line": 499
+        },
+        {
+          "name": "print",
+          "line": 500
+        },
+        {
+          "name": "mapper.run_mapping",
+          "line": 451
+        },
+        {
+          "name": "set",
+          "line": 462
+        },
+        {
+          "name": "set",
+          "line": 463
+        },
+        {
+          "name": "print",
+          "line": 468
+        },
+        {
+          "name": "print",
+          "line": 469
+        },
+        {
+          "name": "....items",
+          "line": 470
+        },
+        {
+          "name": "print",
+          "line": 472
+        },
+        {
+          "name": "input",
+          "line": 475
+        },
+        {
+          "name": "print",
+          "line": 494
+        },
+        {
+          "name": "....items",
+          "line": 495
+        },
+        {
+          "name": "print",
+          "line": 458
+        },
+        {
+          "name": "sys.exit",
+          "line": 459
+        },
+        {
+          "name": "....keys",
+          "line": 463
+        },
+        {
+          "name": "expected_types.issubset",
+          "line": 464
+        },
+        {
+          "name": "print",
+          "line": 465
+        },
+        {
+          "name": "print",
+          "line": 471
+        },
+        {
+          "name": "response.lower",
+          "line": 476
+        },
+        {
+          "name": "print",
+          "line": 477
+        },
+        {
+          "name": "sys.exit",
+          "line": 478
+        },
+        {
+          "name": "print",
+          "line": 481
+        },
+        {
+          "name": "print",
+          "line": 482
+        },
+        {
+          "name": "sys.exit",
+          "line": 483
+        },
+        {
+          "name": "print",
+          "line": 496
+        },
+        {
+          "name": "len",
+          "line": 498
+        },
+        {
+          "name": "....get",
+          "line": 500
+        },
+        {
+          "name": "....get",
+          "line": 472
+        },
+        {
+          "name": "str",
+          "line": 481
+        }
+      ],
+      "docstring": "Run the non-image pattern mapping script",
+      "code_snippet": "\n\ndef main():\n    \"\"\"Run the non-image pattern mapping script\"\"\"\n    # Parse command-line arguments\n    parser = argparse.ArgumentParser(description=\"Create pattern map for non-image datasets\")\n    parser.add_argument(\"--dataset\", type=str, default=\"20newsgroups\",\n                      help=\"Dataset to analyze (20newsgroups, iris, wine, digits, or path to CSV)\")\n    parser.add_argument(\"--sample-limit\", type=int, default=None,\n                      help=\"Maximum number of samples to analyze (default: full dataset)\")\n    parser.add_argument(\"--output-dir\", type=str, default=\"benchmarks/semantic_maps\",\n                      help=\"Directory to save pattern map\")\n    args = parser.parse_args()\n    \n    # If no sample limit is provided, use a reasonable default\n    if args.sample_limit is None:\n        # Determine default based on dataset\n        if args.dataset == \"20newsgroups\":\n            args.sample_limit = 18846  # Full 20 newsgroups dataset\n        elif args.dataset == \"iris\":\n            args.sample_limit = 150  # Full Iris dataset\n        elif args.dataset == \"wine\":\n            args.sample_limit = 178  # Full Wine dataset\n        elif args.dataset == \"digits\":\n            args.sample_limit = 1797  # Full digits dataset\n        else:\n            args.sample_limit = 50000  # Default for unknown datasets\n    \n    # Create pattern mapper\n    mapper = NonImagePatternMapper(output_dir=args.output_dir)\n    \n    # First run a test on a small portion of the dataset\n    test_sample_size = min(100, args.sample_limit // 10)  # Use 100 samples or 10% of limit\n    print(f\"\\n=== Running validation test on {test_sample_size} samples ===\")\n    \n    try:\n        test_pattern_map = mapper.run_mapping(\n            dataset_name=args.dataset,\n            sample_limit=test_sample_size\n        )\n        \n        # Validate the test results\n        if 'pattern_distribution' not in test_pattern_map or not test_pattern_map['pattern_distribution']:\n            print(\"\\nERROR: Test mapping failed - no patterns detected\")\n            sys.exit(1)\n            \n        # Validate all pattern types are present\n        expected_types = set(['structural', 'statistical', 'temporal'])\n        detected_types = set(test_pattern_map['pattern_distribution'].keys())\n        if not expected_types.issubset(detected_types):\n            print(f\"\\nWARNING: Not all pattern types detected in test. Expected: {expected_types}, Got: {detected_types}\")\n        \n        # Show test results\n        print(\"\\nTest validation successful!\")\n        print(\"Test pattern distribution:\")\n        for pattern_type, count in test_pattern_map['pattern_distribution'].items():\n            print(f\"  {pattern_type}: {count}\")\n        print(f\"Data type detected: {test_pattern_map['metadata'].get('data_type', 'unknown')}\")\n            \n        # Ask user to proceed\n        response = input(f\"\\nProceed with full dataset mapping ({args.sample_limit} samples)? [Y/n]: \")\n        if response.lower() == 'n':\n            print(\"\\nMapping cancelled by user.\")\n            sys.exit(0)\n    \n    except Exception as e:\n        print(f\"\\nERROR during test validation: {str(e)}\")\n        print(\"Please fix the issue before proceeding.\")\n        sys.exit(1)\n    \n    # Run the full mapping process\n    print(f\"\\n=== Running full pattern mapping on {args.sample_limit} samples ===\")\n    pattern_map = mapper.run_mapping(\n        dataset_name=args.dataset,\n        sample_limit=args.sample_limit\n    )\n    \n    # Print summary\n    if 'pattern_distribution' in pattern_map:\n        print(\"\\nPattern distribution summary:\")\n        for pattern_type, count in pattern_map['pattern_distribution'].items():\n            print(f\"  {pattern_type}: {count}\")\n    \n    print(f\"\\nPattern map created with {len(pattern_map['pattern_map'])} examples\")\n    print(f\"Dataset: {args.dataset}\")\n    print(f\"Data type: {pattern_map['metadata'].get('data_type', 'unknown')}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+    }
+  },
+  "constants": {}
+}

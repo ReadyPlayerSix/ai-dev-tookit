@@ -1,0 +1,912 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\training\\trainer.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 11
+    },
+    {
+      "name": "torch",
+      "line": 12
+    },
+    {
+      "name": "torch.utils.data",
+      "line": 13
+    },
+    {
+      "name": "time",
+      "line": 14
+    },
+    {
+      "name": "os",
+      "line": 15
+    },
+    {
+      "name": "typing.Dict",
+      "line": 16
+    },
+    {
+      "name": "typing.Any",
+      "line": 16
+    },
+    {
+      "name": "typing.Optional",
+      "line": 16
+    },
+    {
+      "name": "typing.List",
+      "line": 16
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 16
+    },
+    {
+      "name": "typing.Union",
+      "line": 16
+    },
+    {
+      "name": "typing.Callable",
+      "line": 16
+    },
+    {
+      "name": "collections.defaultdict",
+      "line": 17
+    },
+    {
+      "name": "isekaizen.core.optimization.batch_sizing.BatchSizeOptimizer",
+      "line": 19
+    },
+    {
+      "name": "isekaizen.optimizers.EVEUnifiedRatio",
+      "line": 20
+    }
+  ],
+  "classes": {
+    "UnifiedRatioTrainer": {
+      "start_line": 24,
+      "end_line": 591,
+      "methods": {
+        "__init__": {
+          "start_line": 41,
+          "end_line": 134,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "criterion"
+            },
+            {
+              "name": "optimizer"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "batch_optimizer"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.to",
+              "line": 73
+            },
+            {
+              "name": "kwargs.get",
+              "line": 120
+            },
+            {
+              "name": "kwargs.get",
+              "line": 121
+            },
+            {
+              "name": "kwargs.get",
+              "line": 122
+            },
+            {
+              "name": "kwargs.get",
+              "line": 124
+            },
+            {
+              "name": "kwargs.get",
+              "line": 125
+            },
+            {
+              "name": "logger.info",
+              "line": 131
+            },
+            {
+              "name": "logger.info",
+              "line": 132
+            },
+            {
+              "name": "torch.device",
+              "line": 68
+            },
+            {
+              "name": "EVEUnifiedRatio",
+              "line": 88
+            },
+            {
+              "name": "logger.info",
+              "line": 89
+            },
+            {
+              "name": "logger.info",
+              "line": 92
+            },
+            {
+              "name": "BatchSizeOptimizer",
+              "line": 108
+            },
+            {
+              "name": "logger.info",
+              "line": 109
+            },
+            {
+              "name": "logger.info",
+              "line": 112
+            },
+            {
+              "name": "float",
+              "line": 123
+            },
+            {
+              "name": "float",
+              "line": 123
+            },
+            {
+              "name": "os.makedirs",
+              "line": 129
+            },
+            {
+              "name": "kwargs.get",
+              "line": 79
+            },
+            {
+              "name": "kwargs.get",
+              "line": 80
+            },
+            {
+              "name": "kwargs.get",
+              "line": 82
+            },
+            {
+              "name": "kwargs.get",
+              "line": 83
+            },
+            {
+              "name": "kwargs.get",
+              "line": 84
+            },
+            {
+              "name": "kwargs.get",
+              "line": 85
+            },
+            {
+              "name": "model.parameters",
+              "line": 88
+            },
+            {
+              "name": "kwargs.get",
+              "line": 123
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 68
+            },
+            {
+              "name": "type",
+              "line": 131
+            },
+            {
+              "name": "type",
+              "line": 92
+            }
+          ],
+          "docstring": "\n        Initialize the unified ratio trainer.\n        \n        Args:\n            model: Neural network model\n            criterion: Loss function\n            optimizer: Optional pre-initialized optimizer instance\n            device: Optional device for training\n            pattern_map: Optional pattern map for pattern-aware training\n            batch_optimizer: Optional batch size optimizer\n            **kwargs: Additional keyword arguments\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self,\n        model,\n        criterion,\n        optimizer=None,\n        device=None,\n        pattern_map=None,\n        batch_optimizer=None,\n        **kwargs\n    ):\n        \"\"\"\n        Initialize the unified ratio trainer.\n        \n        Args:\n            model: Neural network model\n            criterion: Loss function\n            optimizer: Optional pre-initialized optimizer instance\n            device: Optional device for training\n            pattern_map: Optional pattern map for pattern-aware training\n            batch_optimizer: Optional batch size optimizer\n            **kwargs: Additional keyword arguments\n        \"\"\"\n        self.model = model\n        self.criterion = criterion\n        \n        # Set device for training\n        if device is None:\n            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        else:\n            self.device = device\n        \n        # Move model to device\n        self.model.to(self.device)\n        \n        # Initialize optimizer if not provided\n        if optimizer is None:\n            # Default to EVEUnifiedRatio optimizer\n            optimizer_kwargs = {\n                'lr': kwargs.get('lr', 0.01),\n                'weight_decay': kwargs.get('weight_decay', 5e-4),\n                'pattern_map': pattern_map,\n                'weight_adjustment_range': kwargs.get('weight_adjustment_range', 'default'),\n                'weight_range_iris': kwargs.get('weight_range_iris', False),\n                'fibonacci_intervals': kwargs.get('fibonacci_intervals', None),\n                'warmup_epochs': kwargs.get('warmup_epochs', 1)\n            }\n            \n            self.optimizer = EVEUnifiedRatio(model.parameters(), **optimizer_kwargs)\n            logger.info(\"Initialized EVEUnifiedRatio optimizer\")\n        else:\n            self.optimizer = optimizer\n            logger.info(f\"Using provided optimizer: {type(optimizer).__name__}\")\n        \n        # Initialize batch optimizer if not provided\n        if batch_optimizer is None:\n            # Only pass explicitly specified parameters and pattern map to enable dynamic determination\n            batch_optimizer_kwargs = {'pattern_map': pattern_map}\n            \n            # Add total epochs if specified\n            if 'epochs' in kwargs:\n                batch_optimizer_kwargs['total_epochs'] = kwargs['epochs']\n                \n            # Only use these params if explicitly specified\n            for param in ['min_batch_size', 'max_batch_size', 'initial_batch_size']:\n                if param in kwargs:\n                    batch_optimizer_kwargs[param] = kwargs[param]\n                    \n            self.batch_optimizer = BatchSizeOptimizer(**batch_optimizer_kwargs)\n            logger.info(\"Initialized BatchSizeOptimizer for hardware-aware dynamic batch sizing\")\n        else:\n            self.batch_optimizer = batch_optimizer\n            logger.info(\"Using provided batch optimizer\")\n        \n        # Initialize training state\n        self.current_epoch = 0\n        self.pattern_map = pattern_map\n        self.history = {}\n        \n        # Configure checkpointing\n        self.checkpoint_dir = kwargs.get('checkpoint_dir', './checkpoints')\n        self.save_best = kwargs.get('save_best', True)\n        self.save_last = kwargs.get('save_last', True)\n        self.best_metric = float('inf') if kwargs.get('monitor', 'val_loss') == 'val_loss' else float('-inf')\n        self.monitor = kwargs.get('monitor', 'val_loss')\n        self.monitor_mode = kwargs.get('monitor_mode', 'min')\n        \n        # Make sure checkpoint directory exists\n        if self.save_best or self.save_last:\n            os.makedirs(self.checkpoint_dir, exist_ok=True)\n        \n        logger.info(f\"UnifiedRatioTrainer initialized with model: {type(model).__name__}\")\n        logger.info(f\"Using device: {self.device}\")\n    \n    def train(self, \n             train_dataset, \n             val_dataset=None, "
+        },
+        "train": {
+          "start_line": 134,
+          "end_line": 326,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_dataset"
+            },
+            {
+              "name": "val_dataset"
+            },
+            {
+              "name": "epochs"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "callbacks"
+            },
+            {
+              "name": "adaptive_batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 180
+            },
+            {
+              "name": "logger.info",
+              "line": 181
+            },
+            {
+              "name": "logger.info",
+              "line": 182
+            },
+            {
+              "name": "range",
+              "line": 185
+            },
+            {
+              "name": "logger.info",
+              "line": 319
+            },
+            {
+              "name": "time.time",
+              "line": 187
+            },
+            {
+              "name": "self._train_epoch",
+              "line": 190
+            },
+            {
+              "name": "....append",
+              "line": 199
+            },
+            {
+              "name": "....append",
+              "line": 200
+            },
+            {
+              "name": "....append",
+              "line": 201
+            },
+            {
+              "name": "....append",
+              "line": 202
+            },
+            {
+              "name": "....append",
+              "line": 203
+            },
+            {
+              "name": "....append",
+              "line": 244
+            },
+            {
+              "name": "logger.info",
+              "line": 256
+            },
+            {
+              "name": "hasattr",
+              "line": 259
+            },
+            {
+              "name": "time.time",
+              "line": 310
+            },
+            {
+              "name": "logger.info",
+              "line": 317
+            },
+            {
+              "name": "self._validate",
+              "line": 194
+            },
+            {
+              "name": "kwargs.get",
+              "line": 206
+            },
+            {
+              "name": "logger.info",
+              "line": 209
+            },
+            {
+              "name": "time.time",
+              "line": 247
+            },
+            {
+              "name": "self.optimizer.update_accuracy_metrics_with_epoch",
+              "line": 260
+            },
+            {
+              "name": "hasattr",
+              "line": 262
+            },
+            {
+              "name": "self._get_pattern_metrics",
+              "line": 268
+            },
+            {
+              "name": "self.batch_optimizer.update_batch_size",
+              "line": 278
+            },
+            {
+              "name": "self._save_checkpoint_if_best",
+              "line": 286
+            },
+            {
+              "name": "self._save_checkpoint",
+              "line": 289
+            },
+            {
+              "name": "callback",
+              "line": 294
+            },
+            {
+              "name": "float",
+              "line": 196
+            },
+            {
+              "name": "float",
+              "line": 196
+            },
+            {
+              "name": "hasattr",
+              "line": 212
+            },
+            {
+              "name": "hasattr",
+              "line": 212
+            },
+            {
+              "name": "self.optimizer.should_adapt_patterns",
+              "line": 214
+            },
+            {
+              "name": "self.optimizer.update_accuracy_metrics",
+              "line": 263
+            },
+            {
+              "name": "kwargs.get",
+              "line": 279
+            },
+            {
+              "name": "logger.info",
+              "line": 282
+            },
+            {
+              "name": "logger.info",
+              "line": 295
+            },
+            {
+              "name": "logger.info",
+              "line": 303
+            },
+            {
+              "name": "len",
+              "line": 316
+            },
+            {
+              "name": "logger.info",
+              "line": 215
+            },
+            {
+              "name": "self.optimizer.adapt_dataset",
+              "line": 217
+            },
+            {
+              "name": "adaptation_metrics.get",
+              "line": 220
+            },
+            {
+              "name": "logger.info",
+              "line": 222
+            },
+            {
+              "name": "logger.warning",
+              "line": 229
+            },
+            {
+              "name": "....append",
+              "line": 240
+            },
+            {
+              "name": "....append",
+              "line": 227
+            },
+            {
+              "name": "....append",
+              "line": 234
+            },
+            {
+              "name": "len",
+              "line": 240
+            },
+            {
+              "name": "len",
+              "line": 227
+            },
+            {
+              "name": "len",
+              "line": 234
+            },
+            {
+              "name": "len",
+              "line": 238
+            },
+            {
+              "name": "adaptation_metrics.get",
+              "line": 222
+            },
+            {
+              "name": "adaptation_metrics.get",
+              "line": 222
+            },
+            {
+              "name": "len",
+              "line": 225
+            },
+            {
+              "name": "adaptation_metrics.get",
+              "line": 229
+            },
+            {
+              "name": "len",
+              "line": 232
+            },
+            {
+              "name": "len",
+              "line": 222
+            }
+          ],
+          "docstring": "\n        Train the model using the unified risk/accuracy ratio approach.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Optional validation dataset\n            epochs: Number of epochs to train\n            batch_size: Initial batch size (if None, uses batch_optimizer's initial_batch_size)\n            callbacks: Optional list of callback functions\n            adaptive_batch_size: Whether to use adaptive batch sizing\n            **kwargs: Additional keyword arguments\n            \n        Returns:\n            dict: Training history\n        ",
+          "code_snippet": "        logger.info(f\"Using device: {self.device}\")\n    \n    def train(self, \n             train_dataset, \n             val_dataset=None, \n             epochs=100, \n             batch_size=None,\n             callbacks=None, \n             adaptive_batch_size=True,\n             **kwargs):\n        \"\"\"\n        Train the model using the unified risk/accuracy ratio approach.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Optional validation dataset\n            epochs: Number of epochs to train\n            batch_size: Initial batch size (if None, uses batch_optimizer's initial_batch_size)\n            callbacks: Optional list of callback functions\n            adaptive_batch_size: Whether to use adaptive batch sizing\n            **kwargs: Additional keyword arguments\n            \n        Returns:\n            dict: Training history\n        \"\"\"\n        # Initialize history dictionary\n        history = {\n            'train_loss': [],\n            'train_acc': [],\n            'val_loss': [],\n            'val_acc': [],\n            'batch_sizes': [],\n            'learning_rates': []\n        }\n        \n        # Get initial batch size\n        if batch_size is None:\n            current_batch_size = self.batch_optimizer.current_batch_size\n        else:\n            current_batch_size = batch_size\n            # Update batch optimizer's current batch size\n            self.batch_optimizer.current_batch_size = batch_size\n        \n        # Initialize callbacks\n        if callbacks is None:\n            callbacks = []\n        \n        # Start timing\n        start_time = time.time()\n        logger.info(f\"Starting training for {epochs} epochs\")\n        logger.info(f\"Initial batch size: {current_batch_size}\")\n        \n        # Train for specified number of epochs\n        for epoch in range(epochs):\n            self.current_epoch = epoch\n            epoch_start_time = time.time()\n            \n            # Train for one epoch\n            train_loss, train_acc = self._train_epoch(train_dataset, current_batch_size)\n            \n            # Validate if validation dataset is provided\n            if val_dataset is not None:\n                val_loss, val_acc = self._validate(val_dataset, current_batch_size)\n            else:\n                val_loss, val_acc = float('nan'), float('nan')\n            \n            # Store metrics in history\n            history['train_loss'].append(train_loss)\n            history['train_acc'].append(train_acc)\n            history['val_loss'].append(val_loss)\n            history['val_acc'].append(val_acc)\n            history['batch_sizes'].append(current_batch_size)\n            \n            # Check for dataset augmentation if enabled\n            if kwargs.get('use_augmentation', True) and val_dataset is not None:\n                # Calculate train-test gap\n                train_test_gap = train_acc - val_acc\n                logger.info(f\"Current train-test gap: {train_test_gap:.2f}%\")\n                \n                # Check if we have the optimizer's augmentation methods\n                if hasattr(self.optimizer, 'should_adapt_patterns') and hasattr(self.optimizer, 'adapt_dataset'):\n                    # Check if augmentation is needed\n                    if self.optimizer.should_adapt_patterns():\n                        logger.info(f\"Dataset augmentation triggered at epoch {epoch+1} with train-test gap: {train_test_gap:.2f}%\")\n                        # Adapt the dataset\n                        adapted_dataset, adaptation_metrics = self.optimizer.adapt_dataset(train_dataset)\n                        \n                        # Check if adaptation was successful\n                        if adaptation_metrics.get('adapted', False):\n                            train_dataset = adapted_dataset\n                            logger.info(f\"Dataset augmented: original size={adaptation_metrics.get('original_size', 0)}, new size={adaptation_metrics.get('total_size', len(train_dataset))}\")\n                            # Add dataset size to history\n                            if 'dataset_sizes' not in history:\n                                history['dataset_sizes'] = [len(train_dataset)] * (epoch+1)  # Fill previous epochs\n                            else:\n                                history['dataset_sizes'].append(len(train_dataset))\n                        else:\n                            logger.warning(f\"Dataset augmentation failed: {adaptation_metrics.get('reason', 'unknown reason')}\")\n                            # Add current dataset size to history\n                            if 'dataset_sizes' not in history:\n                                history['dataset_sizes'] = [len(train_dataset)] * (epoch+1)  # Fill previous epochs\n                            else:\n                                history['dataset_sizes'].append(len(train_dataset))\n                    else:\n                        # Add current dataset size to history\n                        if 'dataset_sizes' not in history:\n                            history['dataset_sizes'] = [len(train_dataset)] * (epoch+1)  # Fill previous epochs\n                        else:\n                            history['dataset_sizes'].append(len(train_dataset))\n            \n            # Store current learning rate\n            current_lr = self.optimizer.param_groups[0]['lr']\n            history['learning_rates'].append(current_lr)\n            \n            # Calculate epoch time\n            epoch_time = time.time() - epoch_start_time\n            \n            # Log progress\n            log_message = (f\"Epoch {epoch+1}/{epochs} - {epoch_time:.2f}s - \"\n                         f\"Loss: {train_loss:.4f} - Acc: {train_acc:.2f}%\")\n            \n            if val_dataset is not None:\n                log_message += f\" - Val Loss: {val_loss:.4f} - Val Acc: {val_acc:.2f}%\"\n                \n            logger.info(log_message)\n            \n            # Update optimizer's accuracy metrics\n            if hasattr(self.optimizer, 'update_accuracy_metrics_with_epoch'):\n                self.optimizer.update_accuracy_metrics_with_epoch(\n                    train_acc, val_acc, epoch, epochs)\n            elif hasattr(self.optimizer, 'update_accuracy_metrics'):\n                self.optimizer.update_accuracy_metrics(train_acc, val_acc)\n            \n            # Adjust batch size if enabled\n            if adaptive_batch_size:\n                # Prepare pattern metrics for batch sizing\n                pattern_metrics = self._get_pattern_metrics()\n                \n                # Add train and val accuracy to pattern metrics for batch sizing\n                if 'train_acc' not in pattern_metrics:\n                    pattern_metrics['train_acc'] = train_acc\n                if 'val_acc' not in pattern_metrics:\n                    pattern_metrics['val_acc'] = val_acc\n                \n                # Update batch size\n                prev_batch_size = current_batch_size\n                current_batch_size = self.batch_optimizer.update_batch_size(\n                    train_loss, val_loss, pattern_metrics, kwargs.get('verbose', False))\n                \n                if current_batch_size != prev_batch_size:\n                    logger.info(f\"Updated batch size: {prev_batch_size} -> {current_batch_size}\")\n            \n            # Save checkpoints if needed\n            if self.save_best:\n                self._save_checkpoint_if_best(history)\n            \n            if self.save_last:\n                self._save_checkpoint('last')\n            \n            # Execute callbacks\n            stop_training = False\n            for callback in callbacks:\n                if callback(epoch, history, self.model, self.optimizer):\n                    logger.info(\"Early stopping triggered by callback\")\n                    stop_training = True\n                    break\n            \n            # Check target accuracy if specified in kwargs\n            if 'target_accuracy' in kwargs and kwargs['target_accuracy'] is not None and val_dataset is not None:\n                target_acc = kwargs['target_accuracy']\n                if val_acc >= target_acc:\n                    logger.info(f\"Target accuracy {target_acc:.2f}% reached ({val_acc:.2f}%). Stopping training.\")\n                    stop_training = True\n            \n            if stop_training:\n                break\n        \n        # Calculate total training time\n        total_time = time.time() - start_time\n        history['total_time'] = total_time\n        \n        # Log final dataset size if available\n        if 'dataset_sizes' in history and history['dataset_sizes']:\n            final_size = history['dataset_sizes'][-1]\n            initial_size = history['dataset_sizes'][0] if len(history['dataset_sizes']) > 1 else final_size\n            logger.info(f\"Training completed with final dataset size: {final_size} (initial: {initial_size}, change: {final_size - initial_size})\")\n        \n        logger.info(f\"Training completed in {total_time:.2f}s\")\n        \n        # Store history for later reference\n        self.history = history\n        \n        return history\n    \n    def _train_epoch(self, dataset, batch_size):\n        \"\"\"\n        Train for one epoch."
+        },
+        "_train_epoch": {
+          "start_line": 326,
+          "end_line": 395,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.train",
+              "line": 337
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 343
+            },
+            {
+              "name": "enumerate",
+              "line": 353
+            },
+            {
+              "name": "list",
+              "line": 358
+            },
+            {
+              "name": "self.optimizer.zero_grad",
+              "line": 361
+            },
+            {
+              "name": "self.model",
+              "line": 364
+            },
+            {
+              "name": "self.criterion",
+              "line": 365
+            },
+            {
+              "name": "outputs.max",
+              "line": 368
+            },
+            {
+              "name": "predicted.eq",
+              "line": 369
+            },
+            {
+              "name": "hasattr",
+              "line": 372
+            },
+            {
+              "name": "hasattr",
+              "line": 376
+            },
+            {
+              "name": "loss.item",
+              "line": 381
+            },
+            {
+              "name": "....item",
+              "line": 382
+            },
+            {
+              "name": "targets.size",
+              "line": 383
+            },
+            {
+              "name": "loss.backward",
+              "line": 386
+            },
+            {
+              "name": "self.optimizer.step",
+              "line": 387
+            },
+            {
+              "name": "len",
+              "line": 390
+            },
+            {
+              "name": "min",
+              "line": 345
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 346
+            },
+            {
+              "name": "inputs.to",
+              "line": 354
+            },
+            {
+              "name": "targets.to",
+              "line": 354
+            },
+            {
+              "name": "range",
+              "line": 358
+            },
+            {
+              "name": "all_batch_indices.extend",
+              "line": 374
+            },
+            {
+              "name": "all_correct_mask.extend",
+              "line": 378
+            },
+            {
+              "name": "min",
+              "line": 358
+            },
+            {
+              "name": "correct_mask.tolist",
+              "line": 378
+            },
+            {
+              "name": "correct_mask.sum",
+              "line": 382
+            },
+            {
+              "name": "os.cpu_count",
+              "line": 345
+            },
+            {
+              "name": "len",
+              "line": 358
+            }
+          ],
+          "docstring": "\n        Train for one epoch.\n        \n        Args:\n            dataset: Training dataset\n            batch_size: Batch size\n            \n        Returns:\n            tuple: (epoch_loss, epoch_accuracy)\n        ",
+          "code_snippet": "        return history\n    \n    def _train_epoch(self, dataset, batch_size):\n        \"\"\"\n        Train for one epoch.\n        \n        Args:\n            dataset: Training dataset\n            batch_size: Batch size\n            \n        Returns:\n            tuple: (epoch_loss, epoch_accuracy)\n        \"\"\"\n        self.model.train()\n        running_loss = 0.0\n        correct = 0\n        total = 0\n        \n        # Create DataLoader\n        dataloader = torch.utils.data.DataLoader(\n            dataset, batch_size=batch_size, shuffle=True,\n            num_workers=min(4, os.cpu_count() or 1),\n            pin_memory=torch.cuda.is_available()\n        )\n        \n        # Track batch indices for pattern tracking\n        all_batch_indices = []\n        all_correct_mask = []\n        \n        for i, (inputs, targets) in enumerate(dataloader):\n            inputs, targets = inputs.to(self.device), targets.to(self.device)\n            \n            # Get batch indices for pattern tracking\n            batch_start = i * batch_size\n            batch_indices = list(range(batch_start, min(batch_start + batch_size, len(dataset))))\n            \n            # Zero the parameter gradients\n            self.optimizer.zero_grad()\n            \n            # Forward pass\n            outputs = self.model(inputs)\n            loss = self.criterion(outputs, targets)\n            \n            # Calculate per-example correctness for pattern tracking\n            _, predicted = outputs.max(1)\n            correct_mask = predicted.eq(targets)\n            \n            # Store batch indices and correct mask for pattern tracking in optimizer\n            if hasattr(self.optimizer, 'last_batch_indices'):\n                self.optimizer.last_batch_indices = batch_indices\n                all_batch_indices.extend(batch_indices)\n            \n            if hasattr(self.optimizer, 'last_correct_mask'):\n                self.optimizer.last_correct_mask = correct_mask\n                all_correct_mask.extend(correct_mask.tolist())\n            \n            # Update metrics\n            running_loss += loss.item()\n            correct += correct_mask.sum().item()\n            total += targets.size(0)\n            \n            # Backward pass and optimize\n            loss.backward()\n            self.optimizer.step()\n        \n        # Calculate epoch metrics\n        epoch_loss = running_loss / len(dataloader)\n        epoch_acc = 100. * correct / total\n        \n        return epoch_loss, epoch_acc\n    \n    def _validate(self, dataset, batch_size):\n        \"\"\"\n        Validate the model."
+        },
+        "_validate": {
+          "start_line": 395,
+          "end_line": 439,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.eval",
+              "line": 406
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 412
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 419
+            },
+            {
+              "name": "len",
+              "line": 434
+            },
+            {
+              "name": "min",
+              "line": 414
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 415
+            },
+            {
+              "name": "self.model",
+              "line": 424
+            },
+            {
+              "name": "self.criterion",
+              "line": 425
+            },
+            {
+              "name": "loss.item",
+              "line": 428
+            },
+            {
+              "name": "outputs.max",
+              "line": 429
+            },
+            {
+              "name": "....item",
+              "line": 430
+            },
+            {
+              "name": "targets.size",
+              "line": 431
+            },
+            {
+              "name": "inputs.to",
+              "line": 421
+            },
+            {
+              "name": "targets.to",
+              "line": 421
+            },
+            {
+              "name": "os.cpu_count",
+              "line": 414
+            },
+            {
+              "name": "....sum",
+              "line": 430
+            },
+            {
+              "name": "predicted.eq",
+              "line": 430
+            }
+          ],
+          "docstring": "\n        Validate the model.\n        \n        Args:\n            dataset: Validation dataset\n            batch_size: Batch size\n            \n        Returns:\n            tuple: (val_loss, val_accuracy)\n        ",
+          "code_snippet": "        return epoch_loss, epoch_acc\n    \n    def _validate(self, dataset, batch_size):\n        \"\"\"\n        Validate the model.\n        \n        Args:\n            dataset: Validation dataset\n            batch_size: Batch size\n            \n        Returns:\n            tuple: (val_loss, val_accuracy)\n        \"\"\"\n        self.model.eval()\n        running_loss = 0.0\n        correct = 0\n        total = 0\n        \n        # Create DataLoader\n        dataloader = torch.utils.data.DataLoader(\n            dataset, batch_size=batch_size, shuffle=False,\n            num_workers=min(4, os.cpu_count() or 1),\n            pin_memory=torch.cuda.is_available()\n        )\n        \n        # Disable gradient calculation for validation\n        with torch.no_grad():\n            for inputs, targets in dataloader:\n                inputs, targets = inputs.to(self.device), targets.to(self.device)\n                \n                # Forward pass\n                outputs = self.model(inputs)\n                loss = self.criterion(outputs, targets)\n                \n                # Update metrics\n                running_loss += loss.item()\n                _, predicted = outputs.max(1)\n                correct += predicted.eq(targets).sum().item()\n                total += targets.size(0)\n        \n        # Calculate validation metrics\n        val_loss = running_loss / len(dataloader)\n        val_acc = 100. * correct / total\n        \n        return val_loss, val_acc\n    \n    def _get_pattern_metrics(self):\n        \"\"\"\n        Get pattern metrics for batch size optimization."
+        },
+        "_get_pattern_metrics": {
+          "start_line": 439,
+          "end_line": 460,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "hasattr",
+              "line": 449
+            },
+            {
+              "name": "hasattr",
+              "line": 454
+            },
+            {
+              "name": "self.optimizer.equilibrium_tracker.get_patterns_below_min",
+              "line": 450
+            },
+            {
+              "name": "self.optimizer.equilibrium_tracker.get_patterns_above_max",
+              "line": 451
+            },
+            {
+              "name": "self.optimizer.ratio_tracker.risk_accuracy_ratios.get",
+              "line": 455
+            }
+          ],
+          "docstring": "\n        Get pattern metrics for batch size optimization.\n        \n        Returns:\n            dict: Pattern metrics for batch sizing\n        ",
+          "code_snippet": "        return val_loss, val_acc\n    \n    def _get_pattern_metrics(self):\n        \"\"\"\n        Get pattern metrics for batch size optimization.\n        \n        Returns:\n            dict: Pattern metrics for batch sizing\n        \"\"\"\n        pattern_metrics = {}\n        \n        # Get patterns outside equilibrium bounds if available\n        if hasattr(self.optimizer, 'equilibrium_tracker'):\n            pattern_metrics['patterns_below_min'] = self.optimizer.equilibrium_tracker.get_patterns_below_min()\n            pattern_metrics['patterns_above_max'] = self.optimizer.equilibrium_tracker.get_patterns_above_max()\n        \n        # Get risk/accuracy ratios if available\n        if hasattr(self.optimizer, 'ratio_tracker'):\n            pattern_metrics['risk_accuracy_ratios'] = self.optimizer.ratio_tracker.risk_accuracy_ratios.get(\n                self.current_epoch, {})\n        \n        return pattern_metrics\n    \n    def _save_checkpoint_if_best(self, history):\n        \"\"\"\n        Save checkpoint if current model is the best so far."
+        },
+        "_save_checkpoint_if_best": {
+          "start_line": 460,
+          "end_line": 486,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "history"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._save_checkpoint",
+              "line": 483
+            },
+            {
+              "name": "logger.info",
+              "line": 484
+            }
+          ],
+          "docstring": "\n        Save checkpoint if current model is the best so far.\n        \n        Args:\n            history: Training history\n        ",
+          "code_snippet": "        return pattern_metrics\n    \n    def _save_checkpoint_if_best(self, history):\n        \"\"\"\n        Save checkpoint if current model is the best so far.\n        \n        Args:\n            history: Training history\n        \"\"\"\n        if not history[self.monitor]:\n            return\n        \n        current_metric = history[self.monitor][-1]\n        \n        is_best = False\n        if self.monitor_mode == 'min':\n            if current_metric < self.best_metric:\n                is_best = True\n                self.best_metric = current_metric\n        else:\n            if current_metric > self.best_metric:\n                is_best = True\n                self.best_metric = current_metric\n        \n        if is_best:\n            self._save_checkpoint('best')\n            logger.info(f\"Saved best model with {self.monitor}={current_metric:.4f}\")\n    \n    def _save_checkpoint(self, checkpoint_type):\n        \"\"\"\n        Save model checkpoint."
+        },
+        "_save_checkpoint": {
+          "start_line": 486,
+          "end_line": 505,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "checkpoint_type"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "os.path.join",
+              "line": 493
+            },
+            {
+              "name": "torch.save",
+              "line": 503
+            },
+            {
+              "name": "self.model.state_dict",
+              "line": 497
+            },
+            {
+              "name": "self.optimizer.state_dict",
+              "line": 498
+            }
+          ],
+          "docstring": "\n        Save model checkpoint.\n        \n        Args:\n            checkpoint_type: Type of checkpoint ('best' or 'last')\n        ",
+          "code_snippet": "            logger.info(f\"Saved best model with {self.monitor}={current_metric:.4f}\")\n    \n    def _save_checkpoint(self, checkpoint_type):\n        \"\"\"\n        Save model checkpoint.\n        \n        Args:\n            checkpoint_type: Type of checkpoint ('best' or 'last')\n        \"\"\"\n        checkpoint_path = os.path.join(self.checkpoint_dir, f\"{checkpoint_type}_model.pth\")\n        \n        checkpoint = {\n            'epoch': self.current_epoch,\n            'model_state_dict': self.model.state_dict(),\n            'optimizer_state_dict': self.optimizer.state_dict(),\n            'history': self.history,\n            'best_metric': self.best_metric\n        }\n        \n        torch.save(checkpoint, checkpoint_path)\n    \n    def evaluate(self, dataset, batch_size=None):\n        \"\"\"\n        Evaluate the model on a dataset."
+        },
+        "evaluate": {
+          "start_line": 505,
+          "end_line": 527,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._validate",
+              "line": 520
+            }
+          ],
+          "docstring": "\n        Evaluate the model on a dataset.\n        \n        Args:\n            dataset: Dataset to evaluate on\n            batch_size: Optional batch size (defaults to current batch size)\n            \n        Returns:\n            dict: Evaluation metrics\n        ",
+          "code_snippet": "        torch.save(checkpoint, checkpoint_path)\n    \n    def evaluate(self, dataset, batch_size=None):\n        \"\"\"\n        Evaluate the model on a dataset.\n        \n        Args:\n            dataset: Dataset to evaluate on\n            batch_size: Optional batch size (defaults to current batch size)\n            \n        Returns:\n            dict: Evaluation metrics\n        \"\"\"\n        if batch_size is None:\n            batch_size = self.batch_optimizer.current_batch_size\n        \n        # Evaluate model\n        test_loss, test_acc = self._validate(dataset, batch_size)\n        \n        # Return metrics\n        return {\n            'loss': test_loss,\n            'accuracy': test_acc\n        }\n    \n    def save_model(self, model_path):\n        \"\"\""
+        },
+        "save_model": {
+          "start_line": 528,
+          "end_line": 551,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model_path"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "os.makedirs",
+              "line": 536
+            },
+            {
+              "name": "torch.save",
+              "line": 548
+            },
+            {
+              "name": "logger.info",
+              "line": 549
+            },
+            {
+              "name": "os.path.dirname",
+              "line": 536
+            },
+            {
+              "name": "self.model.state_dict",
+              "line": 541
+            },
+            {
+              "name": "self.optimizer.state_dict",
+              "line": 542
+            }
+          ],
+          "docstring": "\n        Save model to the specified path.\n        \n        Args:\n            model_path: Path to save the model\n        ",
+          "code_snippet": "        }\n    \n    def save_model(self, model_path):\n        \"\"\"\n        Save model to the specified path.\n        \n        Args:\n            model_path: Path to save the model\n        \"\"\"\n        # Create directory if needed\n        os.makedirs(os.path.dirname(model_path), exist_ok=True)\n        \n        # Create checkpoint with model state and metadata\n        checkpoint = {\n            'epoch': self.current_epoch,\n            'model_state_dict': self.model.state_dict(),\n            'optimizer_state_dict': self.optimizer.state_dict(),\n            'history': self.history,\n            'best_metric': self.best_metric\n        }\n        \n        # Save the model\n        torch.save(checkpoint, model_path)\n        logger.info(f\"Model saved to {model_path}\")\n    \n    def load_checkpoint(self, checkpoint_path):\n        \"\"\"\n        Load model checkpoint."
+        },
+        "load_checkpoint": {
+          "start_line": 551,
+          "end_line": 591,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "checkpoint_path"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.load",
+              "line": 565
+            },
+            {
+              "name": "self.model.load_state_dict",
+              "line": 568
+            },
+            {
+              "name": "self.optimizer.load_state_dict",
+              "line": 571
+            },
+            {
+              "name": "logger.info",
+              "line": 585
+            },
+            {
+              "name": "os.path.exists",
+              "line": 561
+            },
+            {
+              "name": "FileNotFoundError",
+              "line": 562
+            },
+            {
+              "name": "logger.info",
+              "line": 587
+            }
+          ],
+          "docstring": "\n        Load model checkpoint.\n        \n        Args:\n            checkpoint_path: Path to checkpoint file\n            \n        Returns:\n            dict: Loaded checkpoint data\n        ",
+          "code_snippet": "        logger.info(f\"Model saved to {model_path}\")\n    \n    def load_checkpoint(self, checkpoint_path):\n        \"\"\"\n        Load model checkpoint.\n        \n        Args:\n            checkpoint_path: Path to checkpoint file\n            \n        Returns:\n            dict: Loaded checkpoint data\n        \"\"\"\n        if not os.path.exists(checkpoint_path):\n            raise FileNotFoundError(f\"Checkpoint file not found: {checkpoint_path}\")\n        \n        # Load checkpoint\n        checkpoint = torch.load(checkpoint_path, map_location=self.device)\n        \n        # Load model state\n        self.model.load_state_dict(checkpoint['model_state_dict'])\n        \n        # Load optimizer state\n        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])\n        \n        # Load training history\n        if 'history' in checkpoint:\n            self.history = checkpoint['history']\n        \n        # Load best metric\n        if 'best_metric' in checkpoint:\n            self.best_metric = checkpoint['best_metric']\n        \n        # Load current epoch\n        if 'epoch' in checkpoint:\n            self.current_epoch = checkpoint['epoch'] + 1  # Increment for next epoch\n        \n        logger.info(f\"Loaded checkpoint from {checkpoint_path}\")\n        if 'epoch' in checkpoint:\n            logger.info(f\"  Checkpoint was saved after epoch {checkpoint['epoch']}\")\n        \n        return checkpoint"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Trainer with unified risk/accuracy ratio tracking and batch size optimization.\n    \n    This class implements the training loop with unified risk/accuracy ratio\n    tracking, which treats risk and accuracy as complementary measures.\n    \n    Attributes:\n        model: Neural network model\n        criterion: Loss function\n        optimizer: Optimizer instance\n        device: Device for training (CPU or GPU)\n        batch_optimizer: Batch size optimizer\n        current_epoch: Current training epoch\n        history: Training history\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

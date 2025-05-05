@@ -1,0 +1,217 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\types.py",
+  "imports": [
+    {
+      "name": "enum.Enum",
+      "line": 5
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 6
+    },
+    {
+      "name": "typing.Dict",
+      "line": 7
+    },
+    {
+      "name": "typing.List",
+      "line": 7
+    },
+    {
+      "name": "typing.Any",
+      "line": 7
+    },
+    {
+      "name": "typing.Optional",
+      "line": 7
+    },
+    {
+      "name": "numpy",
+      "line": 8
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 9
+    }
+  ],
+  "classes": {
+    "DomainType": {
+      "start_line": 11,
+      "end_line": 17,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "VISUAL",
+          "line": 13
+        },
+        {
+          "name": "LINGUISTIC",
+          "line": 14
+        },
+        {
+          "name": "EMOTIONAL",
+          "line": 15
+        }
+      ],
+      "bases": [
+        "Enum"
+      ],
+      "docstring": "Domain types for different specialists"
+    },
+    "PatternType": {
+      "start_line": 17,
+      "end_line": 22,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "OPPORTUNITY",
+          "line": 19
+        },
+        {
+          "name": "RISK",
+          "line": 20
+        }
+      ],
+      "bases": [
+        "Enum"
+      ],
+      "docstring": "Pattern types for risk assessment"
+    },
+    "ProcessingStage": {
+      "start_line": 22,
+      "end_line": 29,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "INPUT",
+          "line": 24
+        },
+        {
+          "name": "SEMANTIC",
+          "line": 25
+        },
+        {
+          "name": "PATTERN",
+          "line": 26
+        },
+        {
+          "name": "OUTPUT",
+          "line": 27
+        }
+      ],
+      "bases": [
+        "Enum"
+      ],
+      "docstring": "Processing stages in the cortex flow"
+    },
+    "Pattern": {
+      "start_line": 30,
+      "end_line": 42,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Universal pattern type for cross-domain communication"
+    },
+    "CortexFlowMetadata": {
+      "start_line": 43,
+      "end_line": 58,
+      "methods": {
+        "update_flow_stage": {
+          "start_line": 51,
+          "end_line": 58,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "new_stage",
+              "type": "ProcessingStage"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.processing_history.append",
+              "line": 54
+            },
+            {
+              "name": "....isoformat",
+              "line": 56
+            },
+            {
+              "name": "datetime.now",
+              "line": 56
+            }
+          ],
+          "docstring": "Update the flow stage and record in history",
+          "code_snippet": "    processing_history: List[Dict[str, Any]]\n    \n    def update_flow_stage(self, new_stage: ProcessingStage):\n        \"\"\"Update the flow stage and record in history\"\"\"\n        self.current_stage = new_stage\n        self.processing_history.append({\n            \"stage\": new_stage.value,\n            \"timestamp\": datetime.now().isoformat()\n        })\n        \n@dataclass\nclass ResourceAllocation:"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Metadata for tracking patterns through the cortex"
+    },
+    "ResourceAllocation": {
+      "start_line": 60,
+      "end_line": 71,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Resource allocation record"
+    },
+    "BatchMetadata": {
+      "start_line": 72,
+      "end_line": 82,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Metadata for batch processing"
+    },
+    "ResourceError": {
+      "start_line": 82,
+      "end_line": 91,
+      "methods": {
+        "__init__": {
+          "start_line": 84,
+          "end_line": 91,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "message"
+            },
+            {
+              "name": "resource_type"
+            },
+            {
+              "name": "requested"
+            },
+            {
+              "name": "available"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 89
+            },
+            {
+              "name": "super",
+              "line": 89
+            }
+          ],
+          "code_snippet": "class ResourceError(Exception):\n    \"\"\"Error raised when resource allocation fails\"\"\"\n    def __init__(self, message, resource_type, requested, available):\n        self.message = message\n        self.resource_type = resource_type\n        self.requested = requested\n        self.available = available\n        super().__init__(f\"{message} ({resource_type}: requested {requested}, available {available})\")"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Exception"
+      ],
+      "docstring": "Error raised when resource allocation fails"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

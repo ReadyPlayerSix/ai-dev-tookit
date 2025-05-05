@@ -1,0 +1,123 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\configs\\paths.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 11
+    },
+    {
+      "name": "sys",
+      "line": 12
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "get_project_root": {
+      "start_line": 14,
+      "end_line": 36,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "os.path.dirname",
+          "line": 25
+        },
+        {
+          "name": "os.path.abspath",
+          "line": 25
+        },
+        {
+          "name": "os.path.basename",
+          "line": 28
+        },
+        {
+          "name": "os.path.dirname",
+          "line": 29
+        },
+        {
+          "name": "RuntimeError",
+          "line": 31
+        }
+      ],
+      "docstring": "\n    Get the absolute path to the project root directory.\n    \n    This function determines the project root by navigating up from the current\n    file until it finds the isekaizen directory.\n    \n    Returns:\n        str: Absolute path to the project root\n    ",
+      "code_snippet": "import sys\n\ndef get_project_root():\n    \"\"\"\n    Get the absolute path to the project root directory.\n    \n    This function determines the project root by navigating up from the current\n    file until it finds the isekaizen directory.\n    \n    Returns:\n        str: Absolute path to the project root\n    \"\"\"\n    # Start from this file's directory\n    current_dir = os.path.dirname(os.path.abspath(__file__))\n    \n    # Navigate up until we find the project root (where isekaizen directory exists)\n    while os.path.basename(current_dir) != 'machine-learning-optimizer':\n        parent_dir = os.path.dirname(current_dir)\n        if parent_dir == current_dir:  # Reached the file system root\n            raise RuntimeError(\"Could not find project root directory\")\n        current_dir = parent_dir\n    \n    return current_dir\n\n# Define project root\nPROJECT_ROOT = get_project_root()\n"
+    },
+    "ensure_directories_exist": {
+      "start_line": 62,
+      "end_line": 76,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "os.makedirs",
+          "line": 74
+        }
+      ],
+      "docstring": "Create standard directories if they don't exist.",
+      "code_snippet": "\n# Ensure directories exist\ndef ensure_directories_exist():\n    \"\"\"Create standard directories if they don't exist.\"\"\"\n    for directory in [\n        RAW_DATA_DIR,\n        PROCESSED_DATA_DIR,\n        PATTERN_MAPS_DIR,\n        MODELS_DIR,\n        RESULTS_DIR,\n        METRICS_DIR,\n        VISUALIZATIONS_DIR,\n        CONFIGS_DIR\n    ]:\n        os.makedirs(directory, exist_ok=True)\n\n# Define a function to handle legacy directory access\ndef get_directory(dir_path):\n    \"\"\""
+    },
+    "get_directory": {
+      "start_line": 77,
+      "end_line": 98,
+      "parameters": [
+        {
+          "name": "dir_path"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "dir_path.replace",
+          "line": 91
+        },
+        {
+          "name": "DeprecationWarning",
+          "line": 92
+        }
+      ],
+      "docstring": "\n    Check if the directory is a legacy directory and raise a warning.\n    \n    Args:\n        dir_path: Directory path to check\n        \n    Returns:\n        str: Original path if not legacy, otherwise raises a warning\n        \n    Raises:\n        DeprecationWarning: If the directory is a legacy directory\n    ",
+      "code_snippet": "\n# Define a function to handle legacy directory access\ndef get_directory(dir_path):\n    \"\"\"\n    Check if the directory is a legacy directory and raise a warning.\n    \n    Args:\n        dir_path: Directory path to check\n        \n    Returns:\n        str: Original path if not legacy, otherwise raises a warning\n        \n    Raises:\n        DeprecationWarning: If the directory is a legacy directory\n    \"\"\"\n    if '.old' in dir_path:\n        new_path = dir_path.replace('.old', '')\n        raise DeprecationWarning(\n            f\"Accessing deprecated directory: {dir_path}\\n\"\n            f\"Please use the new standardized path: {new_path}\"\n        )\n    return dir_path"
+    }
+  },
+  "constants": {
+    "PROJECT_ROOT": {
+      "line": 37
+    },
+    "DATA_DIR": {
+      "line": 40
+    },
+    "RAW_DATA_DIR": {
+      "line": 41
+    },
+    "PROCESSED_DATA_DIR": {
+      "line": 42
+    },
+    "PATTERN_MAPS_DIR": {
+      "line": 43
+    },
+    "MODELS_DIR": {
+      "line": 46
+    },
+    "RESULTS_DIR": {
+      "line": 49
+    },
+    "METRICS_DIR": {
+      "line": 50
+    },
+    "VISUALIZATIONS_DIR": {
+      "line": 51
+    },
+    "CONFIGS_DIR": {
+      "line": 54
+    },
+    "BENCHMARKS_DIR_OLD": {
+      "line": 57
+    },
+    "SEMANTIC_MAPS_DIR_OLD": {
+      "line": 58
+    },
+    "OUTPUTS_DIR_OLD": {
+      "line": 59
+    }
+  }
+}

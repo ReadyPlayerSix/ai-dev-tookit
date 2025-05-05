@@ -1,0 +1,157 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\cortex\\resource_manager.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 5
+    },
+    {
+      "name": "typing.Dict",
+      "line": 6
+    },
+    {
+      "name": "typing.Any",
+      "line": 6
+    },
+    {
+      "name": "typing.Optional",
+      "line": 6
+    },
+    {
+      "name": "time",
+      "line": 7
+    },
+    {
+      "name": "threading",
+      "line": 8
+    }
+  ],
+  "classes": {
+    "ResourceManager": {
+      "start_line": 12,
+      "end_line": 111,
+      "methods": {
+        "__init__": {
+          "start_line": 17,
+          "end_line": 31,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "total_memory"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "threading.Lock",
+              "line": 27
+            },
+            {
+              "name": "logger.info",
+              "line": 29
+            }
+          ],
+          "docstring": "\n        Initialize the resource manager.\n        \n        Args:\n            total_memory: Total memory available in MB (None = auto-detect)\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, total_memory: Optional[int] = None):\n        \"\"\"\n        Initialize the resource manager.\n        \n        Args:\n            total_memory: Total memory available in MB (None = auto-detect)\n        \"\"\"\n        self.available_memory = total_memory or 1024  # Default to 1GB if not specified\n        self.allocated_memory = 0\n        self.allocations = {}\n        self.resource_lock = threading.Lock()\n        \n        logger.info(f\"Resource manager initialized with {self.available_memory}MB memory\")\n    \n    def allocate_resources(self, component_id: str, memory_mb: int) -> bool:\n        \"\"\"\n        Allocate resources for a component."
+        },
+        "allocate_resources": {
+          "start_line": 31,
+          "end_line": 55,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "component_id",
+              "type": "str"
+            },
+            {
+              "name": "memory_mb",
+              "type": "int"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [
+            {
+              "name": "logger.debug",
+              "line": 52
+            },
+            {
+              "name": "logger.warning",
+              "line": 45
+            }
+          ],
+          "docstring": "\n        Allocate resources for a component.\n        \n        Args:\n            component_id: Unique ID of the component\n            memory_mb: Amount of memory to allocate in MB\n            \n        Returns:\n            True if allocation successful, False otherwise\n        ",
+          "code_snippet": "        logger.info(f\"Resource manager initialized with {self.available_memory}MB memory\")\n    \n    def allocate_resources(self, component_id: str, memory_mb: int) -> bool:\n        \"\"\"\n        Allocate resources for a component.\n        \n        Args:\n            component_id: Unique ID of the component\n            memory_mb: Amount of memory to allocate in MB\n            \n        Returns:\n            True if allocation successful, False otherwise\n        \"\"\"\n        with self.resource_lock:\n            # Check if enough memory is available\n            if self.allocated_memory + memory_mb > self.available_memory:\n                logger.warning(f\"Not enough memory to allocate {memory_mb}MB for {component_id}\")\n                return False\n            \n            # Allocate memory\n            self.allocated_memory += memory_mb\n            self.allocations[component_id] = memory_mb\n            \n            logger.debug(f\"Allocated {memory_mb}MB for {component_id}\")\n            return True\n    \n    def release_resources(self, component_id: str, memory_mb: Optional[int] = None) -> bool:\n        \"\"\"\n        Release resources for a component."
+        },
+        "release_resources": {
+          "start_line": 55,
+          "end_line": 87,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "component_id",
+              "type": "str"
+            },
+            {
+              "name": "memory_mb"
+            }
+          ],
+          "return_type": "bool",
+          "calls": [
+            {
+              "name": "logger.debug",
+              "line": 84
+            },
+            {
+              "name": "logger.warning",
+              "line": 69
+            }
+          ],
+          "docstring": "\n        Release resources for a component.\n        \n        Args:\n            component_id: Unique ID of the component\n            memory_mb: Amount of memory to release in MB (None = all)\n            \n        Returns:\n            True if release successful, False otherwise\n        ",
+          "code_snippet": "            return True\n    \n    def release_resources(self, component_id: str, memory_mb: Optional[int] = None) -> bool:\n        \"\"\"\n        Release resources for a component.\n        \n        Args:\n            component_id: Unique ID of the component\n            memory_mb: Amount of memory to release in MB (None = all)\n            \n        Returns:\n            True if release successful, False otherwise\n        \"\"\"\n        with self.resource_lock:\n            # Check if component has an allocation\n            if component_id not in self.allocations:\n                logger.warning(f\"No allocation found for {component_id}\")\n                return False\n            \n            # Determine how much memory to release\n            release_amount = memory_mb or self.allocations[component_id]\n            \n            # Update allocated memory\n            self.allocated_memory -= release_amount\n            \n            # Update or remove allocation\n            if memory_mb is None or memory_mb >= self.allocations[component_id]:\n                del self.allocations[component_id]\n            else:\n                self.allocations[component_id] -= memory_mb\n            \n            logger.debug(f\"Released {release_amount}MB for {component_id}\")\n            return True\n    \n    def get_available_memory(self) -> int:\n        \"\"\"\n        Get available memory."
+        },
+        "get_available_memory": {
+          "start_line": 87,
+          "end_line": 97,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "int",
+          "calls": [],
+          "docstring": "\n        Get available memory.\n        \n        Returns:\n            Available memory in MB\n        ",
+          "code_snippet": "            return True\n    \n    def get_available_memory(self) -> int:\n        \"\"\"\n        Get available memory.\n        \n        Returns:\n            Available memory in MB\n        \"\"\"\n        with self.resource_lock:\n            return self.available_memory - self.allocated_memory\n    \n    def get_allocation_status(self) -> Dict[str, Any]:\n        \"\"\"\n        Get allocation status."
+        },
+        "get_allocation_status": {
+          "start_line": 97,
+          "end_line": 111,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "dict",
+              "line": 109
+            }
+          ],
+          "docstring": "\n        Get allocation status.\n        \n        Returns:\n            Dictionary with allocation status\n        ",
+          "code_snippet": "            return self.available_memory - self.allocated_memory\n    \n    def get_allocation_status(self) -> Dict[str, Any]:\n        \"\"\"\n        Get allocation status.\n        \n        Returns:\n            Dictionary with allocation status\n        \"\"\"\n        with self.resource_lock:\n            return {\n                \"total_memory\": self.available_memory,\n                \"allocated_memory\": self.allocated_memory,\n                \"available_memory\": self.available_memory - self.allocated_memory,\n                \"allocations\": dict(self.allocations)\n            }"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Manages resource allocation for specialist components.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

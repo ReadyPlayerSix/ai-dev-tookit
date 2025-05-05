@@ -1,0 +1,457 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\optimizer\\unified_ratio\\equilibrium_bounds.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 8
+    },
+    {
+      "name": "typing.Dict",
+      "line": 9
+    },
+    {
+      "name": "typing.Any",
+      "line": 9
+    },
+    {
+      "name": "typing.Optional",
+      "line": 9
+    },
+    {
+      "name": "typing.List",
+      "line": 9
+    },
+    {
+      "name": "typing.Set",
+      "line": 9
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 9
+    }
+  ],
+  "classes": {
+    "PatternEquilibriumTracker": {
+      "start_line": 13,
+      "end_line": 288,
+      "methods": {
+        "__init__": {
+          "start_line": 21,
+          "end_line": 66,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_complexities"
+            },
+            {
+              "name": "pattern_distribution"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "set",
+              "line": 46
+            },
+            {
+              "name": "set",
+              "line": 47
+            },
+            {
+              "name": "self.min_bounds.copy",
+              "line": 53
+            },
+            {
+              "name": "self.max_bounds.copy",
+              "line": 54
+            },
+            {
+              "name": "logger.info",
+              "line": 60
+            },
+            {
+              "name": "logger.info",
+              "line": 61
+            },
+            {
+              "name": "logger.info",
+              "line": 63
+            },
+            {
+              "name": "self._calculate_equilibrium_bounds",
+              "line": 43
+            },
+            {
+              "name": "....join",
+              "line": 62
+            },
+            {
+              "name": "....join",
+              "line": 64
+            },
+            {
+              "name": "self.min_bounds.items",
+              "line": 62
+            },
+            {
+              "name": "self.max_bounds.items",
+              "line": 64
+            }
+          ],
+          "docstring": "\n        Initialize the tracker with pattern data and calculate equilibrium bounds.\n        \n        Args:\n            pattern_complexities: Dictionary of pattern types to complexity scores\n            pattern_distribution: Dictionary of pattern types to their prevalence in the dataset\n        ",
+          "code_snippet": "    The bounds are dynamically adjusted based on train/test accuracy ratios to prevent overfitting.\n    \"\"\"\n    def __init__(self, pattern_complexities=None, pattern_distribution=None):\n        \"\"\"\n        Initialize the tracker with pattern data and calculate equilibrium bounds.\n        \n        Args:\n            pattern_complexities: Dictionary of pattern types to complexity scores\n            pattern_distribution: Dictionary of pattern types to their prevalence in the dataset\n        \"\"\"\n        # Default pattern types\n        self.default_patterns = ['structural', 'statistical', 'temporal']\n        \n        # Initialize bounds containers\n        self.min_bounds = {}  # Minimum acceptable accuracy\n        self.max_bounds = {}  # Maximum expected accuracy (potential overfitting beyond this)\n        \n        # Initialize with default values\n        for pattern in self.default_patterns:\n            self.min_bounds[pattern] = 0.5  # Default minimum\n            self.max_bounds[pattern] = 0.9  # Default maximum\n        \n        # Calculate equilibrium bounds if data is available\n        if pattern_complexities and pattern_distribution:\n            self._calculate_equilibrium_bounds(pattern_complexities, pattern_distribution)\n            \n        # Track patterns outside of bounds\n        self.below_min_bound = set()\n        self.above_max_bound = set()\n        \n        # History tracking\n        self.bound_status_history = {}  # {epoch: {pattern: {'min': bool, 'max': bool}}}\n        \n        # Track original bounds for reference\n        self.original_min_bounds = self.min_bounds.copy()\n        self.original_max_bounds = self.max_bounds.copy()\n        \n        # Add adjustment factor tracking\n        self.bound_adjustment_factors = {}\n        self.last_train_test_ratio = 1.0  # Initialize with balanced ratio\n        \n        logger.info(\"Pattern Equilibrium Tracker initialized\")\n        logger.info(\"Minimum bounds (underfitting threshold): \" + \n                    \", \".join([f\"{p}: {v:.2f}\" for p, v in self.min_bounds.items()]))\n        logger.info(\"Maximum bounds (overfitting threshold): \" + \n                    \", \".join([f\"{p}: {v:.2f}\" for p, v in self.max_bounds.items()]))\n    \n    def _calculate_equilibrium_bounds(self, complexities, distribution):\n        \"\"\"\n        Calculate equilibrium bounds based on pattern complexity and prevalence."
+        },
+        "_calculate_equilibrium_bounds": {
+          "start_line": 66,
+          "end_line": 114,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "complexities"
+            },
+            {
+              "name": "distribution"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "max",
+              "line": 88
+            },
+            {
+              "name": "max",
+              "line": 96
+            },
+            {
+              "name": "max",
+              "line": 102
+            },
+            {
+              "name": "min",
+              "line": 108
+            },
+            {
+              "name": "min",
+              "line": 88
+            },
+            {
+              "name": "len",
+              "line": 91
+            },
+            {
+              "name": "min",
+              "line": 96
+            },
+            {
+              "name": "min",
+              "line": 102
+            },
+            {
+              "name": "max",
+              "line": 108
+            },
+            {
+              "name": "isinstance",
+              "line": 82
+            },
+            {
+              "name": "max",
+              "line": 100
+            },
+            {
+              "name": "isinstance",
+              "line": 85
+            }
+          ],
+          "docstring": "\n        Calculate equilibrium bounds based on pattern complexity and prevalence.\n        \n        Args:\n            complexities: Dictionary of pattern types to complexity scores\n            distribution: Dictionary of pattern types to their prevalence\n        ",
+          "code_snippet": "                    \", \".join([f\"{p}: {v:.2f}\" for p, v in self.max_bounds.items()]))\n    \n    def _calculate_equilibrium_bounds(self, complexities, distribution):\n        \"\"\"\n        Calculate equilibrium bounds based on pattern complexity and prevalence.\n        \n        Args:\n            complexities: Dictionary of pattern types to complexity scores\n            distribution: Dictionary of pattern types to their prevalence\n        \"\"\"\n        # Base parameters\n        base_min_rate = 0.4  # Base minimum accuracy\n        \n        # Process each pattern\n        for pattern in self.default_patterns:\n            # Extract complexity value\n            complexity = 0.1  # Default low complexity\n            if pattern in complexities:\n                if isinstance(complexities[pattern], dict) and 'avg_complexity' in complexities[pattern]:\n                    complexity = complexities[pattern]['avg_complexity']\n                else:\n                    complexity = complexities[pattern] if isinstance(complexities[pattern], (int, float)) else 0.1\n            \n            # Ensure complexity is in reasonable range (0.05-0.95)\n            complexity = max(0.05, min(0.95, complexity))\n            \n            # Extract prevalence value\n            prevalence = 1.0 / len(self.default_patterns)  # Default equal distribution\n            if pattern in distribution:\n                prevalence = distribution[pattern]\n            \n            # Ensure prevalence is in reasonable range (0.05-0.95)\n            prevalence = max(0.05, min(0.95, prevalence))\n            \n            # Calculate minimum acceptable accuracy\n            # Higher prevalence and lower complexity patterns should have higher minimum accuracy\n            min_accuracy = base_min_rate + (prevalence / max(complexity * 2, 0.1))\n            # Cap at reasonable value\n            min_accuracy = max(0.4, min(0.75, min_accuracy))\n            \n            # Calculate maximum expected accuracy beyond which is likely overfitting\n            # Lower prevalence and higher complexity should have lower maximum accuracy\n            max_accuracy = 1.0 - ((1.0 - prevalence) * complexity)\n            # Ensure reasonable range with safety margin\n            max_accuracy = min(0.98, max(min_accuracy + 0.1, max_accuracy))\n            \n            # Store the calculated bounds\n            self.min_bounds[pattern] = min_accuracy\n            self.max_bounds[pattern] = max_accuracy\n    \n    def update_pattern_statuses(self, epoch: int, pattern_accuracies: Dict[str, float], train_acc: float = None, test_acc: float = None) -> Dict[str, Dict[str, bool]]:\n        \"\"\"\n        Update pattern statuses based on current accuracies against bounds."
+        },
+        "update_pattern_statuses": {
+          "start_line": 114,
+          "end_line": 174,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch",
+              "type": "int"
+            },
+            {
+              "name": "pattern_accuracies"
+            },
+            {
+              "name": "train_acc",
+              "type": "float"
+            },
+            {
+              "name": "test_acc",
+              "type": "float"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.below_min_bound.clear",
+              "line": 130
+            },
+            {
+              "name": "self.above_max_bound.clear",
+              "line": 131
+            },
+            {
+              "name": "self.min_bounds.keys",
+              "line": 139
+            },
+            {
+              "name": "status_map.items",
+              "line": 162
+            },
+            {
+              "name": "self.adjust_bounds_for_train_test_ratio",
+              "line": 135
+            },
+            {
+              "name": "self.below_min_bound.add",
+              "line": 154
+            },
+            {
+              "name": "self.above_max_bound.add",
+              "line": 156
+            },
+            {
+              "name": "logger.info",
+              "line": 168
+            },
+            {
+              "name": "logger.info",
+              "line": 170
+            }
+          ],
+          "docstring": "\n        Update pattern statuses based on current accuracies against bounds.\n        If train_acc and test_acc are provided, dynamically adjusts bounds based on train/test ratio.\n        \n        Args:\n            epoch: Current epoch number\n            pattern_accuracies: Dictionary of pattern types to their accuracies (0.0-1.0)\n            train_acc: Optional overall training accuracy (0-100 scale)\n            test_acc: Optional overall test/validation accuracy (0-100 scale)\n            \n        Returns:\n            Dictionary of pattern types to status indicators {'min': bool, 'max': bool}\n            where 'min': True means above min bound, 'max': True means below max bound\n        ",
+          "code_snippet": "            self.max_bounds[pattern] = max_accuracy\n    \n    def update_pattern_statuses(self, epoch: int, pattern_accuracies: Dict[str, float], train_acc: float = None, test_acc: float = None) -> Dict[str, Dict[str, bool]]:\n        \"\"\"\n        Update pattern statuses based on current accuracies against bounds.\n        If train_acc and test_acc are provided, dynamically adjusts bounds based on train/test ratio.\n        \n        Args:\n            epoch: Current epoch number\n            pattern_accuracies: Dictionary of pattern types to their accuracies (0.0-1.0)\n            train_acc: Optional overall training accuracy (0-100 scale)\n            test_acc: Optional overall test/validation accuracy (0-100 scale)\n            \n        Returns:\n            Dictionary of pattern types to status indicators {'min': bool, 'max': bool}\n            where 'min': True means above min bound, 'max': True means below max bound\n        \"\"\"\n        # Clear current sets\n        self.below_min_bound.clear()\n        self.above_max_bound.clear()\n        \n        # Adjust bounds based on train/test ratio if provided\n        if train_acc is not None and test_acc is not None:\n            self.adjust_bounds_for_train_test_ratio(epoch, train_acc, test_acc)\n        \n        # Determine current status\n        status_map = {}\n        for pattern in self.min_bounds.keys():\n            if pattern in pattern_accuracies:\n                accuracy = pattern_accuracies[pattern]\n                \n                # Check bounds\n                above_min = accuracy >= self.min_bounds[pattern]\n                below_max = accuracy <= self.max_bounds[pattern]\n                \n                status_map[pattern] = {\n                    'min': above_min,\n                    'max': below_max\n                }\n                \n                # Track patterns outside of bounds\n                if not above_min:\n                    self.below_min_bound.add(pattern)\n                if not below_max:\n                    self.above_max_bound.add(pattern)\n        \n        # Store in history\n        self.bound_status_history[epoch] = status_map\n        \n        # Log only when patterns cross bounds\n        for pattern, status in status_map.items():\n            if pattern in pattern_accuracies:\n                accuracy = pattern_accuracies[pattern]\n                \n                # Check for bound crossings\n                if not status['min']:\n                    logger.info(f\"Pattern {pattern} below minimum bound: {accuracy:.2f} < {self.min_bounds[pattern]:.2f}\")\n                if not status['max']:\n                    logger.info(f\"Pattern {pattern} above maximum bound: {accuracy:.2f} > {self.max_bounds[pattern]:.2f}\")\n        \n        return status_map\n    \n    def get_patterns_below_min(self) -> Set[str]:\n        \"\"\"Get the set of patterns currently below minimum bounds (underfitting).\"\"\"\n        return self.below_min_bound"
+        },
+        "get_patterns_below_min": {
+          "start_line": 174,
+          "end_line": 178,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "Get the set of patterns currently below minimum bounds (underfitting).",
+          "code_snippet": "        return status_map\n    \n    def get_patterns_below_min(self) -> Set[str]:\n        \"\"\"Get the set of patterns currently below minimum bounds (underfitting).\"\"\"\n        return self.below_min_bound\n    \n    def get_patterns_above_max(self) -> Set[str]:\n        \"\"\"Get the set of patterns currently above maximum bounds (potential overfitting).\"\"\"\n        return self.above_max_bound"
+        },
+        "get_patterns_above_max": {
+          "start_line": 178,
+          "end_line": 182,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "Get the set of patterns currently above maximum bounds (potential overfitting).",
+          "code_snippet": "        return self.below_min_bound\n    \n    def get_patterns_above_max(self) -> Set[str]:\n        \"\"\"Get the set of patterns currently above maximum bounds (potential overfitting).\"\"\"\n        return self.above_max_bound\n    \n    def get_bounds_for_pattern(self, pattern_type: str) -> Tuple[float, float]:\n        \"\"\"Get the min and max bounds for a specific pattern.\"\"\"\n        min_bound = self.min_bounds.get(pattern_type, 0.5)"
+        },
+        "get_bounds_for_pattern": {
+          "start_line": 182,
+          "end_line": 188,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.min_bounds.get",
+              "line": 184
+            },
+            {
+              "name": "self.max_bounds.get",
+              "line": 185
+            }
+          ],
+          "docstring": "Get the min and max bounds for a specific pattern.",
+          "code_snippet": "        return self.above_max_bound\n    \n    def get_bounds_for_pattern(self, pattern_type: str) -> Tuple[float, float]:\n        \"\"\"Get the min and max bounds for a specific pattern.\"\"\"\n        min_bound = self.min_bounds.get(pattern_type, 0.5)\n        max_bound = self.max_bounds.get(pattern_type, 0.9)\n        return (min_bound, max_bound)\n    \n    def get_bounds_status_history(self) -> Dict[int, Dict[str, Dict[str, bool]]]:\n        \"\"\"Get the history of bounds statuses for visualization.\"\"\"\n        return self.bound_status_history"
+        },
+        "get_bounds_status_history": {
+          "start_line": 188,
+          "end_line": 192,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "Get the history of bounds statuses for visualization.",
+          "code_snippet": "        return (min_bound, max_bound)\n    \n    def get_bounds_status_history(self) -> Dict[int, Dict[str, Dict[str, bool]]]:\n        \"\"\"Get the history of bounds statuses for visualization.\"\"\"\n        return self.bound_status_history\n        \n    def get_bounds_adjustment_history(self) -> Dict[int, float]:\n        \"\"\"Get the history of bound adjustment factors (train/test ratios).\"\"\"\n        return self.bound_adjustment_factors"
+        },
+        "get_bounds_adjustment_history": {
+          "start_line": 192,
+          "end_line": 196,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "Get the history of bound adjustment factors (train/test ratios).",
+          "code_snippet": "        return self.bound_status_history\n        \n    def get_bounds_adjustment_history(self) -> Dict[int, float]:\n        \"\"\"Get the history of bound adjustment factors (train/test ratios).\"\"\"\n        return self.bound_adjustment_factors\n        \n    def get_current_bounds(self) -> Dict[str, Dict[str, float]]:\n        \"\"\"Get the current bounds for all patterns with their adjustment status.\"\"\"\n        result = {}"
+        },
+        "get_current_bounds": {
+          "start_line": 196,
+          "end_line": 220,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.min_bounds.keys",
+              "line": 199
+            },
+            {
+              "name": "self.min_bounds.get",
+              "line": 201
+            },
+            {
+              "name": "self.max_bounds.get",
+              "line": 202
+            },
+            {
+              "name": "self.original_min_bounds.get",
+              "line": 203
+            },
+            {
+              "name": "self.original_max_bounds.get",
+              "line": 204
+            },
+            {
+              "name": "max",
+              "line": 207
+            },
+            {
+              "name": "max",
+              "line": 208
+            }
+          ],
+          "docstring": "Get the current bounds for all patterns with their adjustment status.",
+          "code_snippet": "        return self.bound_adjustment_factors\n        \n    def get_current_bounds(self) -> Dict[str, Dict[str, float]]:\n        \"\"\"Get the current bounds for all patterns with their adjustment status.\"\"\"\n        result = {}\n        for pattern in self.min_bounds.keys():\n            # Get current and original bounds\n            current_min = self.min_bounds.get(pattern, 0.5)\n            current_max = self.max_bounds.get(pattern, 0.9)\n            original_min = self.original_min_bounds.get(pattern, 0.5)\n            original_max = self.original_max_bounds.get(pattern, 0.9)\n            \n            # Calculate adjustment percentages\n            min_adjustment = (current_min - original_min) / max(0.01, original_min) * 100\n            max_adjustment = (current_max - original_max) / max(0.01, original_max) * 100\n            \n            result[pattern] = {\n                'min': current_min,\n                'max': current_max,\n                'original_min': original_min,\n                'original_max': original_max,\n                'min_adjustment_pct': min_adjustment,\n                'max_adjustment_pct': max_adjustment\n            }\n        return result\n        \n    def adjust_bounds_for_train_test_ratio(self, epoch: int, train_acc: float, test_acc: float) -> None:\n        \"\"\"\n        Dynamically adjust equilibrium bounds based on train/test accuracy ratio."
+        },
+        "adjust_bounds_for_train_test_ratio": {
+          "start_line": 220,
+          "end_line": 288,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch",
+              "type": "int"
+            },
+            {
+              "name": "train_acc",
+              "type": "float"
+            },
+            {
+              "name": "test_acc",
+              "type": "float"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "max",
+              "line": 243
+            },
+            {
+              "name": "self.max_bounds.keys",
+              "line": 253
+            },
+            {
+              "name": "logger.info",
+              "line": 268
+            },
+            {
+              "name": "logger.info",
+              "line": 269
+            },
+            {
+              "name": "logger.info",
+              "line": 270
+            },
+            {
+              "name": "min",
+              "line": 243
+            },
+            {
+              "name": "self.original_max_bounds.get",
+              "line": 255
+            },
+            {
+              "name": "self.min_bounds.get",
+              "line": 261
+            },
+            {
+              "name": "max",
+              "line": 262
+            },
+            {
+              "name": "self.max_bounds.keys",
+              "line": 275
+            },
+            {
+              "name": "logger.info",
+              "line": 286
+            },
+            {
+              "name": "....join",
+              "line": 271
+            },
+            {
+              "name": "self.original_max_bounds.get",
+              "line": 277
+            },
+            {
+              "name": "self.max_bounds.get",
+              "line": 278
+            },
+            {
+              "name": "min",
+              "line": 284
+            },
+            {
+              "name": "self.max_bounds.items",
+              "line": 271
+            }
+          ],
+          "docstring": "\n        Dynamically adjust equilibrium bounds based on train/test accuracy ratio.\n        When train accuracy exceeds test accuracy, tighten the bounds to prevent overfitting.\n        \n        Args:\n            epoch: Current epoch number\n            train_acc: Current training accuracy (0-100 scale)\n            test_acc: Current test/validation accuracy (0-100 scale)\n        ",
+          "code_snippet": "        return result\n        \n    def adjust_bounds_for_train_test_ratio(self, epoch: int, train_acc: float, test_acc: float) -> None:\n        \"\"\"\n        Dynamically adjust equilibrium bounds based on train/test accuracy ratio.\n        When train accuracy exceeds test accuracy, tighten the bounds to prevent overfitting.\n        \n        Args:\n            epoch: Current epoch number\n            train_acc: Current training accuracy (0-100 scale)\n            test_acc: Current test/validation accuracy (0-100 scale)\n        \"\"\"\n        # Calculate train/test ratio (ensuring we don't divide by zero)\n        if test_acc < 0.1:\n            test_acc = 0.1  # Floor to prevent division issues\n        \n        train_test_ratio = train_acc / test_acc\n        self.last_train_test_ratio = train_test_ratio\n        \n        # Store adjustment factor for this epoch\n        self.bound_adjustment_factors[epoch] = train_test_ratio\n        \n        # Only tighten bounds when train accuracy exceeds test accuracy\n        if train_test_ratio > 1.0:\n            # Calculate adjustment factor - more aggressive as gap widens\n            adjustment_factor = max(0.0, min(0.3, (train_test_ratio - 1.0) * 1.5))\n            \n            # Apply more aggressive adjustment when the gap is growing\n            if epoch > 0 and epoch-1 in self.bound_adjustment_factors:\n                previous_ratio = self.bound_adjustment_factors[epoch-1]\n                if train_test_ratio > previous_ratio:\n                    # Gap is growing - intensify adjustment\n                    adjustment_factor *= 1.5\n            \n            # Apply adjustment to max bounds (tighten)\n            for pattern in self.max_bounds.keys():\n                # Start from original bounds for stability\n                original_max = self.original_max_bounds.get(pattern, 0.9)\n                \n                # Calculate new max bound - tighter when ratio is higher\n                new_max_bound = original_max - (original_max * adjustment_factor)\n                \n                # Ensure bound doesn't go too low\n                min_bound = self.min_bounds.get(pattern, 0.5)\n                new_max_bound = max(min_bound + 0.05, new_max_bound)  # Ensure at least 5% gap\n                \n                # Update the bound\n                self.max_bounds[pattern] = new_max_bound\n            \n            # Log the adjustment\n            logger.info(f\"Adjusted equilibrium bounds for train/test ratio {train_test_ratio:.3f}\")\n            logger.info(f\"  Applied adjustment factor: {adjustment_factor:.3f}\")\n            logger.info(\"  New maximum bounds: \" + \n                       \", \".join([f\"{p}: {v:.2f}\" for p, v in self.max_bounds.items()]))\n        elif train_test_ratio < 0.8:  # Allow slight relaxation when test significantly exceeds train\n            # When test accuracy is higher than train, we can relax bounds slightly\n            # This promotes more exploration without the risk of overfitting\n            for pattern in self.max_bounds.keys():\n                # Relax bound slightly toward original\n                original_max = self.original_max_bounds.get(pattern, 0.9)\n                current_max = self.max_bounds.get(pattern, original_max)\n                \n                # Move 10% back toward original bound\n                self.max_bounds[pattern] = current_max + (original_max - current_max) * 0.1\n                \n                # Cap at original bound\n                self.max_bounds[pattern] = min(self.max_bounds[pattern], original_max)\n            \n            logger.info(f\"Slightly relaxed bounds for good train/test ratio {train_test_ratio:.3f}\")\n"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Tracks pattern learning against calculated equilibrium bounds.\n    \n    This class calculates min/max accuracy bounds for each pattern based on\n    complexity and prevalence, then monitors pattern learning against these bounds.\n    The bounds are dynamically adjusted based on train/test accuracy ratios to prevent overfitting.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

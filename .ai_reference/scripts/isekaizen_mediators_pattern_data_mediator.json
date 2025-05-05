@@ -1,0 +1,522 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\mediators\\pattern\\data_mediator.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "time",
+      "line": 10
+    },
+    {
+      "name": "typing.Dict",
+      "line": 11
+    },
+    {
+      "name": "typing.List",
+      "line": 11
+    },
+    {
+      "name": "typing.Any",
+      "line": 11
+    },
+    {
+      "name": "typing.Optional",
+      "line": 11
+    },
+    {
+      "name": "typing.Set",
+      "line": 11
+    },
+    {
+      "name": "isekaizen.mediators.base.Mediator",
+      "line": 13
+    },
+    {
+      "name": "sys",
+      "line": 275
+    }
+  ],
+  "classes": {
+    "PatternDataMediator": {
+      "start_line": 17,
+      "end_line": 288,
+      "methods": {
+        "__init__": {
+          "start_line": 23,
+          "end_line": 55,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "pattern_service"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 31
+            },
+            {
+              "name": "super",
+              "line": 31
+            }
+          ],
+          "docstring": "\n        Initialize the pattern data mediator.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            pattern_service: Optional pattern service reference\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, pattern_map=None, pattern_service=None):\n        \"\"\"\n        Initialize the pattern data mediator.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            pattern_service: Optional pattern service reference\n        \"\"\"\n        super().__init__()\n        \n        # Pattern related data\n        self.pattern_map = pattern_map\n        self.pattern_service = pattern_service\n        \n        # Raw data storage - organized by epoch for better management\n        self.batch_data_by_epoch = {}  # {epoch: [(batch_indices, correct_mask), ...]}\n        \n        # Processed metrics cache - also organized by epoch\n        self.metrics_by_epoch = {}  # {epoch: {'accuracies': {}, 'risks': {}}}\n        \n        # Current state\n        self.current_epoch = 0\n        \n        # Metrics tracking\n        self.metrics = {\n            \"processed_batches\": 0,\n            \"processed_epochs\": 0,\n            \"active_epochs\": 0,\n            \"pattern_accuracy_counts\": {},\n            \"memory_usage\": 0,\n            \"processing_times\": []\n        }\n    \n    def initialize(self):\n        \"\"\"Initialize the mediator with required data.\"\"\""
+        },
+        "initialize": {
+          "start_line": 56,
+          "end_line": 66,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._extract_pattern_types",
+              "line": 60
+            },
+            {
+              "name": "logger.info",
+              "line": 61
+            },
+            {
+              "name": "logger.info",
+              "line": 64
+            },
+            {
+              "name": "len",
+              "line": 61
+            }
+          ],
+          "docstring": "Initialize the mediator with required data.",
+          "code_snippet": "        }\n    \n    def initialize(self):\n        \"\"\"Initialize the mediator with required data.\"\"\"\n        # Extract pattern types from pattern map if available\n        if self.pattern_map:\n            self.pattern_types = self._extract_pattern_types()\n            logger.info(f\"Initialized PatternDataMediator with {len(self.pattern_types)} pattern types\")\n        else:\n            self.pattern_types = []\n            logger.info(\"Initialized PatternDataMediator without pattern map\")\n    \n    def _extract_pattern_types(self) -> List[str]:\n        \"\"\"Extract pattern types from pattern map.\"\"\"\n        if not self.pattern_map:"
+        },
+        "_extract_pattern_types": {
+          "start_line": 66,
+          "end_line": 81,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "list",
+              "line": 73
+            },
+            {
+              "name": "....keys",
+              "line": 73
+            }
+          ],
+          "docstring": "Extract pattern types from pattern map.",
+          "code_snippet": "            logger.info(\"Initialized PatternDataMediator without pattern map\")\n    \n    def _extract_pattern_types(self) -> List[str]:\n        \"\"\"Extract pattern types from pattern map.\"\"\"\n        if not self.pattern_map:\n            return []\n            \n        # First check standardized format\n        if 'pattern_distribution' in self.pattern_map:\n            return list(self.pattern_map['pattern_distribution'].keys())\n        \n        # Try alternative formats\n        if 'pattern_types' in self.pattern_map:\n            return self.pattern_map['pattern_types']\n        \n        return []\n        \n    def get_pattern_types(self) -> List[str]:\n        \"\"\"Get the list of pattern types tracked by this mediator.\"\"\"\n        return self.pattern_types"
+        },
+        "get_pattern_types": {
+          "start_line": 81,
+          "end_line": 85,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "Get the list of pattern types tracked by this mediator.",
+          "code_snippet": "        return []\n        \n    def get_pattern_types(self) -> List[str]:\n        \"\"\"Get the list of pattern types tracked by this mediator.\"\"\"\n        return self.pattern_types\n    \n    def set_pattern_service(self, pattern_service):\n        \"\"\"Set the pattern service reference for mapping indices to pattern types.\"\"\"\n        self.pattern_service = pattern_service"
+        },
+        "set_pattern_service": {
+          "start_line": 85,
+          "end_line": 89,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_service"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "Set the pattern service reference for mapping indices to pattern types.",
+          "code_snippet": "        return self.pattern_types\n    \n    def set_pattern_service(self, pattern_service):\n        \"\"\"Set the pattern service reference for mapping indices to pattern types.\"\"\"\n        self.pattern_service = pattern_service\n    \n    def update_with_batch_recognition(self, batch_indices, correct_mask, epoch):\n        \"\"\"Store raw batch recognition data with epoch tracking.\"\"\"\n        # Update current epoch"
+        },
+        "update_with_batch_recognition": {
+          "start_line": 89,
+          "end_line": 110,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_indices"
+            },
+            {
+              "name": "correct_mask"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....append",
+              "line": 100
+            },
+            {
+              "name": "logger.debug",
+              "line": 105
+            },
+            {
+              "name": "self._cleanup_old_epochs",
+              "line": 108
+            },
+            {
+              "name": "logger.debug",
+              "line": 97
+            },
+            {
+              "name": "len",
+              "line": 105
+            }
+          ],
+          "docstring": "Store raw batch recognition data with epoch tracking.",
+          "code_snippet": "        self.pattern_service = pattern_service\n    \n    def update_with_batch_recognition(self, batch_indices, correct_mask, epoch):\n        \"\"\"Store raw batch recognition data with epoch tracking.\"\"\"\n        # Update current epoch\n        self.current_epoch = epoch\n        \n        # Initialize epoch data if needed\n        if epoch not in self.batch_data_by_epoch:\n            self.batch_data_by_epoch[epoch] = []\n            logger.debug(f\"PatternDataMediator: Initialized data storage for epoch {epoch}\")\n        \n        # Store the batch data\n        self.batch_data_by_epoch[epoch].append((batch_indices, correct_mask))\n        \n        # Update metrics\n        self.metrics[\"processed_batches\"] += 1\n        \n        logger.debug(f\"PatternDataMediator: Added batch with {len(batch_indices)} examples for epoch {epoch}\")\n        \n        # Clean up old epochs - keep only current and previous\n        self._cleanup_old_epochs()\n    \n    def _process_epoch_data(self, epoch):\n        \"\"\"Process data for a specific epoch.\"\"\"\n        if not self.pattern_service or epoch not in self.batch_data_by_epoch:"
+        },
+        "_process_epoch_data": {
+          "start_line": 110,
+          "end_line": 174,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 116
+            },
+            {
+              "name": "time.time",
+              "line": 119
+            },
+            {
+              "name": "pattern_total.items",
+              "line": 145
+            },
+            {
+              "name": "....append",
+              "line": 162
+            },
+            {
+              "name": "logger.info",
+              "line": 165
+            },
+            {
+              "name": "accuracies.items",
+              "line": 166
+            },
+            {
+              "name": "logger.warning",
+              "line": 113
+            },
+            {
+              "name": "enumerate",
+              "line": 128
+            },
+            {
+              "name": "time.time",
+              "line": 161
+            },
+            {
+              "name": "logger.info",
+              "line": 167
+            },
+            {
+              "name": "self.pattern_service.get_pattern_type",
+              "line": 129
+            },
+            {
+              "name": "max",
+              "line": 149
+            },
+            {
+              "name": "min",
+              "line": 149
+            },
+            {
+              "name": "risks.get",
+              "line": 167
+            },
+            {
+              "name": "pattern_total.get",
+              "line": 167
+            },
+            {
+              "name": "len",
+              "line": 139
+            }
+          ],
+          "docstring": "Process data for a specific epoch.",
+          "code_snippet": "        self._cleanup_old_epochs()\n    \n    def _process_epoch_data(self, epoch):\n        \"\"\"Process data for a specific epoch.\"\"\"\n        if not self.pattern_service or epoch not in self.batch_data_by_epoch:\n            logger.warning(f\"PatternDataMediator: Cannot process epoch {epoch} - pattern service not available or no data\")\n            return False\n            \n        logger.info(f\"PatternDataMediator: Processing data for epoch {epoch}\")\n        \n        # Track processing time\n        start_time = time.time()\n        \n        # Initialize counters\n        pattern_correct = {}\n        pattern_total = {}\n        \n        # Process all batch data for this epoch\n        for batch_indices, correct_mask in self.batch_data_by_epoch[epoch]:\n            # Map batch indices to pattern types\n            for i, idx in enumerate(batch_indices):\n                pattern_type = self.pattern_service.get_pattern_type(idx)\n                \n                if pattern_type:\n                    # Initialize counters if needed\n                    if pattern_type not in pattern_total:\n                        pattern_total[pattern_type] = 0\n                        pattern_correct[pattern_type] = 0\n                    \n                    # Update counters\n                    pattern_total[pattern_type] += 1\n                    if i < len(correct_mask) and correct_mask[i]:\n                        pattern_correct[pattern_type] += 1\n        \n        # Calculate accuracies and risks\n        accuracies = {}\n        risks = {}\n        for pattern_type, total in pattern_total.items():\n            if total > 0:\n                accuracy = pattern_correct[pattern_type] / total\n                accuracies[pattern_type] = accuracy\n                risks[pattern_type] = max(0.1, min(0.9, 1.0 - accuracy))\n        \n        # Store the processed metrics\n        self.metrics_by_epoch[epoch] = {\n            'accuracies': accuracies,\n            'risks': risks,\n            'processed': True\n        }\n        \n        # Update metrics tracking\n        self.metrics[\"processed_epochs\"] += 1\n        self.metrics[\"pattern_accuracy_counts\"] = pattern_total\n        processing_time = time.time() - start_time\n        self.metrics[\"processing_times\"].append(processing_time)\n        \n        # Log the results\n        logger.info(f\"PatternDataMediator: Processed epoch {epoch} data in {processing_time:.2f}s:\")\n        for pattern_type, accuracy in accuracies.items():\n            logger.info(f\"  Pattern '{pattern_type}': accuracy={accuracy:.4f}, risk={risks.get(pattern_type, 0):.4f}, count={pattern_total.get(pattern_type, 0)}\")\n        \n        # Clear the raw data to save memory\n        self.batch_data_by_epoch[epoch] = [('processed', True)]\n        \n        return True\n    \n    def _cleanup_old_epochs(self):\n        \"\"\"Remove data from epochs except current and previous.\"\"\"\n        # Keep only current and previous epoch"
+        },
+        "_cleanup_old_epochs": {
+          "start_line": 174,
+          "end_line": 205,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "set",
+              "line": 177
+            },
+            {
+              "name": "epochs_to_keep.add",
+              "line": 180
+            },
+            {
+              "name": "list",
+              "line": 187
+            },
+            {
+              "name": "self.metrics_by_epoch.keys",
+              "line": 195
+            },
+            {
+              "name": "len",
+              "line": 203
+            },
+            {
+              "name": "epochs_to_keep.add",
+              "line": 184
+            },
+            {
+              "name": "self.batch_data_by_epoch.keys",
+              "line": 187
+            },
+            {
+              "name": "epochs_to_remove.append",
+              "line": 197
+            }
+          ],
+          "docstring": "Remove data from epochs except current and previous.",
+          "code_snippet": "        return True\n    \n    def _cleanup_old_epochs(self):\n        \"\"\"Remove data from epochs except current and previous.\"\"\"\n        # Keep only current and previous epoch\n        epochs_to_keep = set()\n        \n        # Always keep current epoch\n        epochs_to_keep.add(self.current_epoch)\n        \n        # Keep previous epoch if it exists\n        if self.current_epoch > 0:\n            epochs_to_keep.add(self.current_epoch - 1)\n        \n        # Remove older epochs from batch data\n        for epoch in list(self.batch_data_by_epoch.keys()):\n            if epoch not in epochs_to_keep:\n                del self.batch_data_by_epoch[epoch]\n        \n        # Also clean up metrics but keep more history\n        metrics_epochs_to_keep = 5  # Keep more epochs of metrics data\n        epochs_to_remove = []\n        \n        for epoch in self.metrics_by_epoch.keys():\n            if epoch < self.current_epoch - metrics_epochs_to_keep:\n                epochs_to_remove.append(epoch)\n        \n        for epoch in epochs_to_remove:\n            del self.metrics_by_epoch[epoch]\n        \n        # Update active epochs count\n        self.metrics[\"active_epochs\"] = len(self.batch_data_by_epoch)\n    \n    def get_pattern_accuracies(self, epoch=None, force_recalculate=False):\n        \"\"\"Get pattern accuracies for the specified epoch (defaults to current).\"\"\"\n        epoch = self.current_epoch if epoch is None else epoch"
+        },
+        "get_pattern_accuracies": {
+          "start_line": 205,
+          "end_line": 219,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            },
+            {
+              "name": "force_recalculate"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._process_epoch_data",
+              "line": 212
+            }
+          ],
+          "docstring": "Get pattern accuracies for the specified epoch (defaults to current).",
+          "code_snippet": "        self.metrics[\"active_epochs\"] = len(self.batch_data_by_epoch)\n    \n    def get_pattern_accuracies(self, epoch=None, force_recalculate=False):\n        \"\"\"Get pattern accuracies for the specified epoch (defaults to current).\"\"\"\n        epoch = self.current_epoch if epoch is None else epoch\n        \n        # Check if we need to process the data\n        if force_recalculate or epoch not in self.metrics_by_epoch:\n            # We need to process this epoch\n            self._process_epoch_data(epoch)\n        \n        # Return the metrics (empty dict if not available)\n        if epoch in self.metrics_by_epoch:\n            return self.metrics_by_epoch[epoch]['accuracies']\n        return {}\n    \n    def get_pattern_risks(self, epoch=None, force_recalculate=False):\n        \"\"\"Get pattern risks for the specified epoch.\"\"\"\n        epoch = self.current_epoch if epoch is None else epoch"
+        },
+        "get_pattern_risks": {
+          "start_line": 219,
+          "end_line": 231,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            },
+            {
+              "name": "force_recalculate"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.get_pattern_accuracies",
+              "line": 224
+            }
+          ],
+          "docstring": "Get pattern risks for the specified epoch.",
+          "code_snippet": "        return {}\n    \n    def get_pattern_risks(self, epoch=None, force_recalculate=False):\n        \"\"\"Get pattern risks for the specified epoch.\"\"\"\n        epoch = self.current_epoch if epoch is None else epoch\n        \n        # Ensure metrics are calculated\n        self.get_pattern_accuracies(epoch, force_recalculate)\n        \n        # Return the risks\n        if epoch in self.metrics_by_epoch:\n            return self.metrics_by_epoch[epoch]['risks']\n        return {}\n    \n    def end_epoch(self, epoch):\n        \"\"\"Signal the end of an epoch to ensure all data is processed.\"\"\"\n        logger.info(f\"PatternDataMediator: End of epoch {epoch} signaled, processing remaining data\")"
+        },
+        "end_epoch": {
+          "start_line": 231,
+          "end_line": 244,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 233
+            },
+            {
+              "name": "self._process_epoch_data",
+              "line": 236
+            },
+            {
+              "name": "self._cleanup_old_epochs",
+              "line": 242
+            }
+          ],
+          "docstring": "Signal the end of an epoch to ensure all data is processed.",
+          "code_snippet": "        return {}\n    \n    def end_epoch(self, epoch):\n        \"\"\"Signal the end of an epoch to ensure all data is processed.\"\"\"\n        logger.info(f\"PatternDataMediator: End of epoch {epoch} signaled, processing remaining data\")\n        \n        # Process any remaining data for this epoch\n        self._process_epoch_data(epoch)\n        \n        # Move to the next epoch\n        self.current_epoch = epoch + 1\n        \n        # Clean up old epochs\n        self._cleanup_old_epochs()\n    \n    def clear_cache(self):\n        \"\"\"Clear cached data to free memory.\"\"\"\n        # Keep only the current epoch"
+        },
+        "clear_cache": {
+          "start_line": 244,
+          "end_line": 258,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "list",
+              "line": 247
+            },
+            {
+              "name": "list",
+              "line": 252
+            },
+            {
+              "name": "logger.info",
+              "line": 256
+            },
+            {
+              "name": "self.batch_data_by_epoch.keys",
+              "line": 247
+            },
+            {
+              "name": "self.metrics_by_epoch.keys",
+              "line": 252
+            }
+          ],
+          "docstring": "Clear cached data to free memory.",
+          "code_snippet": "        self._cleanup_old_epochs()\n    \n    def clear_cache(self):\n        \"\"\"Clear cached data to free memory.\"\"\"\n        # Keep only the current epoch\n        for epoch in list(self.batch_data_by_epoch.keys()):\n            if epoch != self.current_epoch:\n                del self.batch_data_by_epoch[epoch]\n        \n        # Clear processed metrics for old epochs\n        for epoch in list(self.metrics_by_epoch.keys()):\n            if epoch < self.current_epoch - 1:\n                del self.metrics_by_epoch[epoch]\n        \n        logger.info(\"PatternDataMediator: Cache cleared\")\n    \n    def get_metrics(self) -> Dict[str, Any]:\n        \"\"\"Get current metrics from the mediator.\"\"\"\n        # Update memory usage estimate"
+        },
+        "get_metrics": {
+          "start_line": 258,
+          "end_line": 273,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self._estimate_memory_usage",
+              "line": 261
+            },
+            {
+              "name": "dict",
+              "line": 264
+            },
+            {
+              "name": "len",
+              "line": 265
+            },
+            {
+              "name": "sum",
+              "line": 269
+            },
+            {
+              "name": "len",
+              "line": 269
+            }
+          ],
+          "docstring": "Get current metrics from the mediator.",
+          "code_snippet": "        logger.info(\"PatternDataMediator: Cache cleared\")\n    \n    def get_metrics(self) -> Dict[str, Any]:\n        \"\"\"Get current metrics from the mediator.\"\"\"\n        # Update memory usage estimate\n        self.metrics[\"memory_usage\"] = self._estimate_memory_usage()\n        \n        # Add derived metrics\n        metrics = dict(self.metrics)\n        metrics[\"tracked_epochs\"] = len(self.metrics_by_epoch)\n        \n        # Add average processing time if available\n        if self.metrics[\"processing_times\"]:\n            metrics[\"avg_processing_time\"] = sum(self.metrics[\"processing_times\"]) / len(self.metrics[\"processing_times\"])\n        \n        return metrics\n    \n    def _estimate_memory_usage(self) -> int:\n        \"\"\"Estimate memory usage of stored data.\"\"\"\n        import sys"
+        },
+        "_estimate_memory_usage": {
+          "start_line": 273,
+          "end_line": 288,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "sum",
+              "line": 278
+            },
+            {
+              "name": "sys.getsizeof",
+              "line": 284
+            },
+            {
+              "name": "sys.getsizeof",
+              "line": 279
+            },
+            {
+              "name": "sum",
+              "line": 279
+            },
+            {
+              "name": "self.batch_data_by_epoch.values",
+              "line": 280
+            },
+            {
+              "name": "sys.getsizeof",
+              "line": 279
+            }
+          ],
+          "docstring": "Estimate memory usage of stored data.",
+          "code_snippet": "        return metrics\n    \n    def _estimate_memory_usage(self) -> int:\n        \"\"\"Estimate memory usage of stored data.\"\"\"\n        import sys\n        \n        # Estimate batch data\n        batch_data_size = sum(\n            sys.getsizeof(epoch_data) + sum(sys.getsizeof(batch) for batch in epoch_data)\n            for epoch_data in self.batch_data_by_epoch.values()\n        )\n        \n        # Estimate metrics data\n        metrics_size = sys.getsizeof(self.metrics_by_epoch)\n        \n        return batch_data_size + metrics_size"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Mediator"
+      ],
+      "docstring": "\n    Mediator component that handles data transfer between isekaiZen pattern tracking \n    and optimizer components, with efficient caching and calculation management.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

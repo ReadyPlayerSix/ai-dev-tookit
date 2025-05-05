@@ -1,0 +1,255 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\training\\ratio_tracker.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 11
+    },
+    {
+      "name": "typing.Dict",
+      "line": 12
+    },
+    {
+      "name": "typing.List",
+      "line": 12
+    },
+    {
+      "name": "typing.Any",
+      "line": 12
+    },
+    {
+      "name": "typing.Optional",
+      "line": 12
+    }
+  ],
+  "classes": {
+    "UnifiedRatioTracker": {
+      "start_line": 16,
+      "end_line": 158,
+      "methods": {
+        "__init__": {
+          "start_line": 29,
+          "end_line": 38,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "Initialize the unified ratio tracker.",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self):\n        \"\"\"Initialize the unified ratio tracker.\"\"\"\n        # Store history of risk/accuracy ratios by epoch and pattern\n        self.risk_accuracy_ratios = {}  # {epoch: {pattern_type: ratio}}\n        # Store pattern-specific training accuracy\n        self.pattern_accuracies = {}  # {pattern_type: accuracy}\n        # Store pattern-specific derived risk\n        self.pattern_risks = {}  # {pattern_type: risk}\n    \n    def calculate_unified_risk_accuracy_ratio(self, pattern_type: str, pattern_accuracy: float) -> float:\n        \"\"\"\n        Calculate a unified risk/accuracy ratio that directly maps between "
+        },
+        "calculate_unified_risk_accuracy_ratio": {
+          "start_line": 38,
+          "end_line": 65,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            },
+            {
+              "name": "pattern_accuracy",
+              "type": "float"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "max",
+              "line": 52
+            },
+            {
+              "name": "max",
+              "line": 61
+            },
+            {
+              "name": "min",
+              "line": 52
+            },
+            {
+              "name": "max",
+              "line": 58
+            },
+            {
+              "name": "min",
+              "line": 61
+            }
+          ],
+          "docstring": "\n        Calculate a unified risk/accuracy ratio that directly maps between \n        training accuracy and risk.\n        \n        Args:\n            pattern_type: Type of pattern\n            pattern_accuracy: Accuracy for this pattern (0.0-1.0)\n            \n        Returns:\n            Unified risk/accuracy ratio (normalized to 0.5-2.0 range)\n        ",
+          "code_snippet": "        self.pattern_risks = {}  # {pattern_type: risk}\n    \n    def calculate_unified_risk_accuracy_ratio(self, pattern_type: str, pattern_accuracy: float) -> float:\n        \"\"\"\n        Calculate a unified risk/accuracy ratio that directly maps between \n        training accuracy and risk.\n        \n        Args:\n            pattern_type: Type of pattern\n            pattern_accuracy: Accuracy for this pattern (0.0-1.0)\n            \n        Returns:\n            Unified risk/accuracy ratio (normalized to 0.5-2.0 range)\n        \"\"\"\n        # Derive risk directly as inverse of accuracy (with adjustment to avoid extremes)\n        # This ensures risk and accuracy are fundamentally linked\n        pattern_risk = max(0.1, min(0.9, 1.0 - pattern_accuracy))\n        \n        # Store the derived risk for reference\n        self.pattern_risks[pattern_type] = pattern_risk\n        \n        # Calculate risk/accuracy ratio - higher ratio means higher risk relative to accuracy\n        ratio = pattern_risk / max(pattern_accuracy, 0.1)  # Prevent division by zero\n        \n        # Normalize ratio to typical range (0.5-2.0)\n        normalized_ratio = max(0.5, min(2.0, ratio * 1.5))\n        \n        return normalized_ratio\n    \n    def store_risk_accuracy_ratios(self, epoch: int, ratios: Dict[str, float]):\n        \"\"\"\n        Store risk/accuracy ratios for the current epoch."
+        },
+        "store_risk_accuracy_ratios": {
+          "start_line": 65,
+          "end_line": 80,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch",
+              "type": "int"
+            },
+            {
+              "name": "ratios"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....join",
+              "line": 76
+            },
+            {
+              "name": "logger.info",
+              "line": 78
+            },
+            {
+              "name": "sum",
+              "line": 77
+            },
+            {
+              "name": "max",
+              "line": 77
+            },
+            {
+              "name": "ratios.values",
+              "line": 77
+            },
+            {
+              "name": "len",
+              "line": 77
+            },
+            {
+              "name": "ratios.items",
+              "line": 76
+            }
+          ],
+          "docstring": "\n        Store risk/accuracy ratios for the current epoch.\n        \n        Args:\n            epoch: Current epoch number\n            ratios: Dictionary mapping pattern types to their risk/accuracy ratios\n        ",
+          "code_snippet": "        return normalized_ratio\n    \n    def store_risk_accuracy_ratios(self, epoch: int, ratios: Dict[str, float]):\n        \"\"\"\n        Store risk/accuracy ratios for the current epoch.\n        \n        Args:\n            epoch: Current epoch number\n            ratios: Dictionary mapping pattern types to their risk/accuracy ratios\n        \"\"\"\n        self.risk_accuracy_ratios[epoch] = ratios\n        \n        # Log the ratios for monitoring\n        ratio_str = \", \".join([f\"{k}: {v:.2f}\" for k, v in ratios.items()])\n        avg_ratio = sum(ratios.values()) / max(1, len(ratios))\n        logger.info(f\"Epoch {epoch} Risk/Accuracy ratios - Avg: {avg_ratio:.2f}, Pattern-specific: {ratio_str}\")\n    \n    def update_pattern_accuracies(self, pattern_accuracies: Dict[str, float]):\n        \"\"\"\n        Update the stored pattern accuracies."
+        },
+        "update_pattern_accuracies": {
+          "start_line": 80,
+          "end_line": 89,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_accuracies"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_accuracies.update",
+              "line": 87
+            }
+          ],
+          "docstring": "\n        Update the stored pattern accuracies.\n        \n        Args:\n            pattern_accuracies: Dictionary mapping pattern types to their accuracies (0.0-1.0)\n        ",
+          "code_snippet": "        logger.info(f\"Epoch {epoch} Risk/Accuracy ratios - Avg: {avg_ratio:.2f}, Pattern-specific: {ratio_str}\")\n    \n    def update_pattern_accuracies(self, pattern_accuracies: Dict[str, float]):\n        \"\"\"\n        Update the stored pattern accuracies.\n        \n        Args:\n            pattern_accuracies: Dictionary mapping pattern types to their accuracies (0.0-1.0)\n        \"\"\"\n        self.pattern_accuracies.update(pattern_accuracies)\n    \n    def get_average_ratio(self, epoch: Optional[int] = None) -> float:\n        \"\"\"\n        Get the average risk/accuracy ratio across all patterns."
+        },
+        "get_average_ratio": {
+          "start_line": 89,
+          "end_line": 114,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "max",
+              "line": 104
+            },
+            {
+              "name": "self.risk_accuracy_ratios.keys",
+              "line": 104
+            },
+            {
+              "name": "sum",
+              "line": 110
+            },
+            {
+              "name": "len",
+              "line": 110
+            },
+            {
+              "name": "ratios.values",
+              "line": 110
+            }
+          ],
+          "docstring": "\n        Get the average risk/accuracy ratio across all patterns.\n        \n        Args:\n            epoch: Optional epoch to get ratios for (defaults to most recent)\n            \n        Returns:\n            Average risk/accuracy ratio (or 1.0 if no data available)\n        ",
+          "code_snippet": "        self.pattern_accuracies.update(pattern_accuracies)\n    \n    def get_average_ratio(self, epoch: Optional[int] = None) -> float:\n        \"\"\"\n        Get the average risk/accuracy ratio across all patterns.\n        \n        Args:\n            epoch: Optional epoch to get ratios for (defaults to most recent)\n            \n        Returns:\n            Average risk/accuracy ratio (or 1.0 if no data available)\n        \"\"\"\n        if not self.risk_accuracy_ratios:\n            return 1.0  # Default balanced ratio\n        \n        # If epoch not specified, use most recent\n        if epoch is None:\n            epoch = max(self.risk_accuracy_ratios.keys())\n        \n        # Get ratios for the specified epoch\n        if epoch in self.risk_accuracy_ratios:\n            ratios = self.risk_accuracy_ratios[epoch]\n            if ratios:\n                return sum(ratios.values()) / len(ratios)\n        \n        return 1.0  # Default balanced ratio\n    \n    def get_pattern_ratio(self, pattern_type: str, epoch: Optional[int] = None) -> float:\n        \"\"\"\n        Get the risk/accuracy ratio for a specific pattern."
+        },
+        "get_pattern_ratio": {
+          "start_line": 114,
+          "end_line": 140,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "max",
+              "line": 130
+            },
+            {
+              "name": "self.risk_accuracy_ratios.keys",
+              "line": 130
+            }
+          ],
+          "docstring": "\n        Get the risk/accuracy ratio for a specific pattern.\n        \n        Args:\n            pattern_type: Type of pattern\n            epoch: Optional epoch to get ratio for (defaults to most recent)\n            \n        Returns:\n            Risk/accuracy ratio for the pattern (or 1.0 if no data available)\n        ",
+          "code_snippet": "        return 1.0  # Default balanced ratio\n    \n    def get_pattern_ratio(self, pattern_type: str, epoch: Optional[int] = None) -> float:\n        \"\"\"\n        Get the risk/accuracy ratio for a specific pattern.\n        \n        Args:\n            pattern_type: Type of pattern\n            epoch: Optional epoch to get ratio for (defaults to most recent)\n            \n        Returns:\n            Risk/accuracy ratio for the pattern (or 1.0 if no data available)\n        \"\"\"\n        if not self.risk_accuracy_ratios:\n            return 1.0  # Default balanced ratio\n        \n        # If epoch not specified, use most recent\n        if epoch is None:\n            epoch = max(self.risk_accuracy_ratios.keys())\n        \n        # Get ratios for the specified epoch\n        if epoch in self.risk_accuracy_ratios:\n            ratios = self.risk_accuracy_ratios[epoch]\n            if pattern_type in ratios:\n                return ratios[pattern_type]\n        \n        return 1.0  # Default balanced ratio\n    \n    def get_pattern_risks(self) -> Dict[str, float]:\n        \"\"\"\n        Get the current derived risks for all patterns."
+        },
+        "get_pattern_risks": {
+          "start_line": 140,
+          "end_line": 149,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "\n        Get the current derived risks for all patterns.\n        \n        Returns:\n            Dictionary mapping pattern types to their derived risks\n        ",
+          "code_snippet": "        return 1.0  # Default balanced ratio\n    \n    def get_pattern_risks(self) -> Dict[str, float]:\n        \"\"\"\n        Get the current derived risks for all patterns.\n        \n        Returns:\n            Dictionary mapping pattern types to their derived risks\n        \"\"\"\n        return self.pattern_risks\n    \n    def get_pattern_accuracies(self) -> Dict[str, float]:\n        \"\"\"\n        Get the current accuracies for all patterns."
+        },
+        "get_pattern_accuracies": {
+          "start_line": 149,
+          "end_line": 158,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "\n        Get the current accuracies for all patterns.\n        \n        Returns:\n            Dictionary mapping pattern types to their accuracies\n        ",
+          "code_snippet": "        return self.pattern_risks\n    \n    def get_pattern_accuracies(self) -> Dict[str, float]:\n        \"\"\"\n        Get the current accuracies for all patterns.\n        \n        Returns:\n            Dictionary mapping pattern types to their accuracies\n        \"\"\"\n        return self.pattern_accuracies"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Tracks the unified risk/accuracy ratio at both epoch and pattern levels.\n    \n    The key insight is that risk and accuracy are complementary measures of the\n    same underlying phenomenon, not independent variables that need reconciliation.\n    \n    Attributes:\n        risk_accuracy_ratios: Dictionary mapping epochs to pattern-specific ratios\n        pattern_accuracies: Dictionary mapping pattern types to their accuracies\n        pattern_risks: Dictionary mapping pattern types to their derived risks\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

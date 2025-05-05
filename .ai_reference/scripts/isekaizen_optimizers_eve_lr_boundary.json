@@ -1,0 +1,450 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\optimizers\\eve\\lr_boundary.py",
+  "imports": [
+    {
+      "name": "math",
+      "line": 12
+    },
+    {
+      "name": "logging",
+      "line": 13
+    },
+    {
+      "name": "typing.Dict",
+      "line": 14
+    },
+    {
+      "name": "typing.Any",
+      "line": 14
+    },
+    {
+      "name": "typing.Optional",
+      "line": 14
+    },
+    {
+      "name": "typing.List",
+      "line": 14
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 14
+    }
+  ],
+  "classes": {
+    "LRBoundaryCalculator": {
+      "start_line": 18,
+      "end_line": 316,
+      "methods": {
+        "__init__": {
+          "start_line": 34,
+          "end_line": 64,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "initial_lr"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._initialize_pattern_factors",
+              "line": 51
+            },
+            {
+              "name": "logger.info",
+              "line": 59
+            },
+            {
+              "name": "logger.info",
+              "line": 60
+            },
+            {
+              "name": "logger.warning",
+              "line": 62
+            }
+          ],
+          "docstring": "\n        Initialize the learning rate boundary calculator.\n        \n        Args:\n            initial_lr: Initial learning rate\n            pattern_map: Optional pattern map containing pattern information\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, initial_lr=0.01, pattern_map=None):\n        \"\"\"\n        Initialize the learning rate boundary calculator.\n        \n        Args:\n            initial_lr: Initial learning rate\n            pattern_map: Optional pattern map containing pattern information\n        \"\"\"\n        # Core parameters\n        self.initial_lr = initial_lr\n        self.pattern_map = pattern_map\n        \n        # Learning rate bounds\n        self.global_min_lr = 0.0001\n        self.global_max_lr = 0.1\n        \n        # Pattern-specific boundaries - initialize even without pattern map\n        self.pattern_lr_factors = self._initialize_pattern_factors()\n        \n        # Training history\n        self.train_acc_history = []\n        self.val_acc_history = []\n        self.lr_history = []\n        self.gap_history = []  # Kept for tracking, though no longer used for calculations\n        \n        logger.info(f\"LRBoundaryCalculator initialized with initial LR: {initial_lr}\")\n        logger.info(f\"Global LR bounds: [{self.global_min_lr}, {self.global_max_lr}]\")\n        if not pattern_map:\n            logger.warning(\"No pattern map provided - using default pattern LR factors\")\n    \n    def _initialize_pattern_factors(self):\n        \"\"\"\n        Initialize pattern-specific LR adjustment factors for simplified taxonomy."
+        },
+        "_initialize_pattern_factors": {
+          "start_line": 64,
+          "end_line": 137,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 81
+            },
+            {
+              "name": "logger.info",
+              "line": 86
+            },
+            {
+              "name": "....items",
+              "line": 97
+            },
+            {
+              "name": "default_factors.copy",
+              "line": 127
+            },
+            {
+              "name": "merged_factors.update",
+              "line": 128
+            },
+            {
+              "name": "logger.info",
+              "line": 130
+            },
+            {
+              "name": "logger.info",
+              "line": 133
+            },
+            {
+              "name": "logger.info",
+              "line": 88
+            },
+            {
+              "name": "logger.warning",
+              "line": 90
+            },
+            {
+              "name": "logger.warning",
+              "line": 92
+            },
+            {
+              "name": "logger.debug",
+              "line": 120
+            },
+            {
+              "name": "len",
+              "line": 86
+            },
+            {
+              "name": "logger.warning",
+              "line": 101
+            },
+            {
+              "name": "isinstance",
+              "line": 104
+            },
+            {
+              "name": "logger.debug",
+              "line": 106
+            },
+            {
+              "name": "logger.debug",
+              "line": 109
+            },
+            {
+              "name": "logger.warning",
+              "line": 122
+            },
+            {
+              "name": "default_factors.get",
+              "line": 124
+            },
+            {
+              "name": "self.pattern_map.keys",
+              "line": 86
+            },
+            {
+              "name": "len",
+              "line": 88
+            },
+            {
+              "name": "str",
+              "line": 92
+            },
+            {
+              "name": "isinstance",
+              "line": 108
+            },
+            {
+              "name": "str",
+              "line": 122
+            }
+          ],
+          "docstring": "\n        Initialize pattern-specific LR adjustment factors for simplified taxonomy.\n        \n        Returns:\n            Dictionary mapping pattern types to learning rate adjustment factors\n        ",
+          "code_snippet": "            logger.warning(\"No pattern map provided - using default pattern LR factors\")\n    \n    def _initialize_pattern_factors(self):\n        \"\"\"\n        Initialize pattern-specific LR adjustment factors for simplified taxonomy.\n        \n        Returns:\n            Dictionary mapping pattern types to learning rate adjustment factors\n        \"\"\"\n        # Only use simplified taxonomy patterns\n        default_factors = {\n            'structural': 1.0,   # Spatial organization and relationships\n            'statistical': 1.05, # Distribution and variance patterns\n            'temporal': 0.8,     # Time-related patterns\n            'default': 1.0\n        }\n        \n        # Check if pattern map is available\n        if self.pattern_map is None:\n            logger.info(f\"Using default pattern LR factors: {default_factors}\")\n            return default_factors\n            \n        # Log pattern map contents for debugging\n        try:\n            logger.info(f\"Pattern map has {len(self.pattern_map.keys())} top-level keys\")\n            if 'pattern_complexities' in self.pattern_map:\n                logger.info(f\"Found pattern_complexities with {len(self.pattern_map['pattern_complexities'])} pattern types\")\n            else:\n                logger.warning(\"No pattern_complexities found in pattern map\")\n        except Exception as e:\n            logger.warning(f\"Error examining pattern map: {str(e)}\")\n        \n        # If pattern map available, initialize from complexity information\n        if self.pattern_map and 'pattern_complexities' in self.pattern_map:\n            factors = {}\n            for pattern_type, complexity_data in self.pattern_map['pattern_complexities'].items():\n                try:\n                    # Only process patterns from the simplified taxonomy\n                    if pattern_type not in default_factors:\n                        logger.warning(f\"Skipping pattern type '{pattern_type}' that is not in simplified taxonomy\")\n                        continue\n                        \n                    if isinstance(complexity_data, dict) and 'avg_complexity' in complexity_data:\n                        complexity = complexity_data['avg_complexity']\n                        logger.debug(f\"Found complexity data for {pattern_type}: {complexity:.2f} (from avg_complexity)\")\n                    else:\n                        complexity = complexity_data if isinstance(complexity_data, (int, float)) else 0.5\n                        logger.debug(f\"Found complexity data for {pattern_type}: {complexity:.2f} (direct value)\")\n                    \n                    # Map complexity to factor - higher complexity = lower LR\n                    if complexity > 0.8:\n                        factors[pattern_type] = 0.8  # Complex patterns need lower LR\n                    elif complexity < 0.3:\n                        factors[pattern_type] = 1.2  # Simple patterns can use higher LR\n                    else:\n                        # Linear mapping from complexity to factor\n                        factors[pattern_type] = 1.2 - (0.5 * complexity)\n                        \n                    logger.debug(f\"Mapped complexity {complexity:.2f} to factor {factors[pattern_type]:.2f} for {pattern_type}\")\n                except Exception as e:\n                    logger.warning(f\"Error processing complexity data for {pattern_type}: {str(e)}\")\n                    # Use default factor\n                    factors[pattern_type] = default_factors.get(pattern_type, 1.0)\n            \n            # Merge with defaults for any missing patterns\n            merged_factors = default_factors.copy()\n            merged_factors.update(factors)\n            \n            logger.info(f\"Pattern LR factors initialized from pattern map: {factors}\")\n            return merged_factors\n        else:\n            logger.info(f\"Using default pattern LR factors: {default_factors}\")\n        \n        return default_factors\n    \n    def calculate_optimal_lr(self, current_lr, train_acc, val_acc, epoch, total_epochs, pattern_states):\n        \"\"\"\n        Calculate optimal learning rate based on train/test ratio."
+        },
+        "calculate_optimal_lr": {
+          "start_line": 137,
+          "end_line": 191,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "current_lr"
+            },
+            {
+              "name": "train_acc"
+            },
+            {
+              "name": "val_acc"
+            },
+            {
+              "name": "epoch"
+            },
+            {
+              "name": "total_epochs"
+            },
+            {
+              "name": "pattern_states"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.gap_history.append",
+              "line": 159
+            },
+            {
+              "name": "self.train_acc_history.append",
+              "line": 162
+            },
+            {
+              "name": "self.val_acc_history.append",
+              "line": 163
+            },
+            {
+              "name": "self.lr_history.append",
+              "line": 164
+            },
+            {
+              "name": "self._calculate_lr_adjustment_from_ratio",
+              "line": 174
+            },
+            {
+              "name": "max",
+              "line": 180
+            },
+            {
+              "name": "logger.debug",
+              "line": 183
+            },
+            {
+              "name": "logger.debug",
+              "line": 184
+            },
+            {
+              "name": "logger.debug",
+              "line": 185
+            },
+            {
+              "name": "logger.debug",
+              "line": 186
+            },
+            {
+              "name": "logger.debug",
+              "line": 187
+            },
+            {
+              "name": "max",
+              "line": 156
+            },
+            {
+              "name": "min",
+              "line": 180
+            }
+          ],
+          "docstring": "\n        Calculate optimal learning rate based on train/test ratio.\n        \n        Args:\n            current_lr: Current learning rate\n            train_acc: Current training accuracy (0-100 scale)\n            val_acc: Current validation accuracy (0-100 scale)\n            epoch: Current epoch number\n            total_epochs: Total number of epochs\n            pattern_states: Optional pattern states for pattern-aware optimization\n            \n        Returns:\n            float: Calculated optimal learning rate\n        ",
+          "code_snippet": "        return default_factors\n    \n    def calculate_optimal_lr(self, current_lr, train_acc, val_acc, epoch, total_epochs, pattern_states):\n        \"\"\"\n        Calculate optimal learning rate based on train/test ratio.\n        \n        Args:\n            current_lr: Current learning rate\n            train_acc: Current training accuracy (0-100 scale)\n            val_acc: Current validation accuracy (0-100 scale)\n            epoch: Current epoch number\n            total_epochs: Total number of epochs\n            pattern_states: Optional pattern states for pattern-aware optimization\n            \n        Returns:\n            float: Calculated optimal learning rate\n        \"\"\"\n        # Calculate training progress (0-1)\n        progress = epoch / total_epochs\n        \n        # Calculate train-test ratio and gap\n        ratio = train_acc / max(0.1, val_acc)  # Safe division\n        gap = train_acc - val_acc  # Still used for history tracking\n        \n        self.gap_history.append(gap)\n        \n        # Store history\n        self.train_acc_history.append(train_acc)\n        self.val_acc_history.append(val_acc)\n        self.lr_history.append(current_lr)\n        \n        # For logging purposes, categorize the situation\n        situation_desc = \"normal\"\n        if ratio > 1.1:  # Train accuracy is significantly higher\n            situation_desc = \"potential overfitting\"\n        elif ratio < 0.95:  # Val accuracy higher than train\n            situation_desc = \"underfitting\"\n        \n        # Calculate learning rate adjustment factor based on ratio\n        adjustment_factor = self._calculate_lr_adjustment_from_ratio(ratio, progress, pattern_states)\n        \n        # Apply adjustment to current learning rate\n        new_lr = current_lr * adjustment_factor\n        \n        # Apply global bounds\n        bounded_lr = max(self.global_min_lr, min(self.global_max_lr, new_lr))\n        \n        # Log the calculation at debug level to reduce verbosity\n        logger.debug(f\"LR adjustment calculation:\")\n        logger.debug(f\"  Current LR: {current_lr:.6f}\")\n        logger.debug(f\"  Train/test ratio: {ratio:.2f} ({situation_desc})\")\n        logger.debug(f\"  Adjustment factor: {adjustment_factor:.2f}\")\n        logger.debug(f\"  New LR: {bounded_lr:.6f}\")\n        \n        return bounded_lr\n    \n    def _calculate_lr_adjustment_from_ratio(self, ratio, progress, pattern_states):\n        \"\"\"\n        Calculate learning rate adjustment factor based on train/test ratio with increased sensitivity."
+        },
+        "_calculate_lr_adjustment_from_ratio": {
+          "start_line": 191,
+          "end_line": 225,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "ratio"
+            },
+            {
+              "name": "progress"
+            },
+            {
+              "name": "pattern_states"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "max",
+              "line": 208
+            },
+            {
+              "name": "logger.debug",
+              "line": 209
+            },
+            {
+              "name": "logger.debug",
+              "line": 213
+            },
+            {
+              "name": "self._calculate_pattern_adjustment",
+              "line": 217
+            },
+            {
+              "name": "logger.debug",
+              "line": 221
+            }
+          ],
+          "docstring": "\n        Calculate learning rate adjustment factor based on train/test ratio with increased sensitivity.\n        \n        Args:\n            ratio: Train/test accuracy ratio\n            progress: Training progress (0-1)\n            pattern_states: Optional pattern states for pattern-aware adjustment\n            \n        Returns:\n            float: Learning rate adjustment factor\n        ",
+          "code_snippet": "        return bounded_lr\n    \n    def _calculate_lr_adjustment_from_ratio(self, ratio, progress, pattern_states):\n        \"\"\"\n        Calculate learning rate adjustment factor based on train/test ratio with increased sensitivity.\n        \n        Args:\n            ratio: Train/test accuracy ratio\n            progress: Training progress (0-1)\n            pattern_states: Optional pattern states for pattern-aware adjustment\n            \n        Returns:\n            float: Learning rate adjustment factor\n        \"\"\"\n        # Only reduce learning rate when ratio indicates overfitting\n        if ratio > 1.00:  # Reduced threshold for overfitting detection (was 1.05)\n            # More aggressive reduction formula\n            # ratio 1.05 -> 0.98 adjustment\n            # ratio 1.2 -> 0.94 adjustment\n            adjustment = max(0.8, 1.0 - (ratio - 1.0) * 0.4)  # Increased factor (was 0.3)\n            logger.debug(f\"High train/test ratio detected ({ratio:.2f}), reducing LR by factor {adjustment:.2f}\")\n        else:\n            # Good ratio = maintain learning rate\n            adjustment = 1.0\n            logger.debug(f\"Good train/test ratio ({ratio:.2f}), maintaining LR\")\n        \n        # Apply pattern-specific adjustments when ratio indicates complex patterns\n        if adjustment < 1.0 and pattern_states:\n            pattern_adjustment = self._calculate_pattern_adjustment(pattern_states)\n            # Only allow pattern adjustments to further reduce LR, not increase it\n            if pattern_adjustment < 1.0:\n                adjustment *= pattern_adjustment\n                logger.debug(f\"Applied pattern adjustment: {pattern_adjustment:.2f}\")\n        \n        return adjustment\n    \n    def _calculate_pattern_adjustment(self, pattern_states):\n        \"\"\"\n        Calculate pattern-specific adjustment factor."
+        },
+        "_calculate_pattern_adjustment": {
+          "start_line": 225,
+          "end_line": 249,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_states"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "sum",
+              "line": 236
+            },
+            {
+              "name": "pattern_states.items",
+              "line": 241
+            },
+            {
+              "name": "info.get",
+              "line": 242
+            },
+            {
+              "name": "self.pattern_lr_factors.get",
+              "line": 243
+            },
+            {
+              "name": "info.get",
+              "line": 236
+            },
+            {
+              "name": "pattern_states.values",
+              "line": 236
+            }
+          ],
+          "docstring": "\n        Calculate pattern-specific adjustment factor.\n        \n        Args:\n            pattern_states: Dictionary mapping pattern types to state information\n            \n        Returns:\n            float: Pattern-specific adjustment factor\n        ",
+          "code_snippet": "        return adjustment\n    \n    def _calculate_pattern_adjustment(self, pattern_states):\n        \"\"\"\n        Calculate pattern-specific adjustment factor.\n        \n        Args:\n            pattern_states: Dictionary mapping pattern types to state information\n            \n        Returns:\n            float: Pattern-specific adjustment factor\n        \"\"\"\n        # Weight adjustment by pattern importance\n        total_importance = sum(info.get('importance', 0) for info in pattern_states.values())\n        if total_importance < 1e-5:\n            return 1.0  # No adjustment if no important patterns\n            \n        weighted_adjustment = 0.0\n        for pattern_type, info in pattern_states.items():\n            importance = info.get('importance', 0)\n            pattern_factor = self.pattern_lr_factors.get(pattern_type, \n                                                        self.pattern_lr_factors['default'])\n            weighted_adjustment += (importance / total_importance) * pattern_factor\n        \n        return weighted_adjustment\n    \n    def get_current_bounds(self, pattern_states=None):\n        \"\"\"\n        Get current learning rate bounds based on train/test ratio history."
+        },
+        "get_current_bounds": {
+          "start_line": 249,
+          "end_line": 289,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_states"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._calculate_pattern_bounds",
+              "line": 282
+            },
+            {
+              "name": "len",
+              "line": 264
+            },
+            {
+              "name": "len",
+              "line": 264
+            },
+            {
+              "name": "sum",
+              "line": 270
+            },
+            {
+              "name": "len",
+              "line": 270
+            },
+            {
+              "name": "max",
+              "line": 284
+            },
+            {
+              "name": "min",
+              "line": 285
+            },
+            {
+              "name": "max",
+              "line": 269
+            },
+            {
+              "name": "zip",
+              "line": 269
+            },
+            {
+              "name": "len",
+              "line": 277
+            }
+          ],
+          "docstring": "\n        Get current learning rate bounds based on train/test ratio history.\n        \n        Args:\n            pattern_states: Optional pattern states for pattern-aware bounds\n            \n        Returns:\n            dict: Dictionary with min and max learning rate bounds\n        ",
+          "code_snippet": "        return weighted_adjustment\n    \n    def get_current_bounds(self, pattern_states=None):\n        \"\"\"\n        Get current learning rate bounds based on train/test ratio history.\n        \n        Args:\n            pattern_states: Optional pattern states for pattern-aware bounds\n            \n        Returns:\n            dict: Dictionary with min and max learning rate bounds\n        \"\"\"\n        # Base bounds\n        min_bound = self.global_min_lr\n        max_bound = self.global_max_lr\n        \n        # Adjust based on train/test ratio history if available\n        if len(self.train_acc_history) >= 2 and len(self.val_acc_history) >= 2:\n            recent_train = self.train_acc_history[-3:]\n            recent_val = self.val_acc_history[-3:]\n            \n            # Calculate recent ratios\n            recent_ratios = [t / max(0.1, v) for t, v in zip(recent_train, recent_val)]\n            avg_ratio = sum(recent_ratios) / len(recent_ratios)\n            \n            # If ratio is consistently high, lower the upper bound\n            if avg_ratio > 1.1:  # Above threshold\n                max_bound = max_bound * (2.0 - avg_ratio)  # Reduce max bound proportionally\n            \n            # If ratio is trending upward, lower the upper bound further\n            if len(recent_ratios) >= 2 and recent_ratios[-1] > recent_ratios[0]:\n                max_bound *= 0.9\n        \n        # Adjust based on pattern states if available\n        if pattern_states:\n            pattern_bounds = self._calculate_pattern_bounds(pattern_states)\n            if pattern_bounds:\n                min_bound = max(min_bound, pattern_bounds['min'])\n                max_bound = min(max_bound, pattern_bounds['max'])\n        \n        return {'min': min_bound, 'max': max_bound}\n    \n    def _calculate_pattern_bounds(self, pattern_states):\n        \"\"\"\n        Calculate bounds based on pattern states."
+        },
+        "_calculate_pattern_bounds": {
+          "start_line": 289,
+          "end_line": 316,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_states"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "list",
+              "line": 300
+            },
+            {
+              "name": "min",
+              "line": 307
+            },
+            {
+              "name": "max",
+              "line": 308
+            },
+            {
+              "name": "pattern_states.keys",
+              "line": 300
+            },
+            {
+              "name": "self.pattern_lr_factors.get",
+              "line": 303
+            }
+          ],
+          "docstring": "\n        Calculate bounds based on pattern states.\n        \n        Args:\n            pattern_states: Dictionary mapping pattern types to state information\n            \n        Returns:\n            dict: Dictionary with min and max learning rate bounds\n        ",
+          "code_snippet": "        return {'min': min_bound, 'max': max_bound}\n    \n    def _calculate_pattern_bounds(self, pattern_states):\n        \"\"\"\n        Calculate bounds based on pattern states.\n        \n        Args:\n            pattern_states: Dictionary mapping pattern types to state information\n            \n        Returns:\n            dict: Dictionary with min and max learning rate bounds\n        \"\"\"\n        # Extract pattern types from states\n        pattern_types = list(pattern_states.keys())\n        \n        # Get adjustment factors for these patterns\n        factors = [self.pattern_lr_factors.get(pt, self.pattern_lr_factors['default']) \n                  for pt in pattern_types]\n        \n        # Find min and max adjustment factors\n        min_factor = min(factors)\n        max_factor = max(factors)\n        \n        # Calculate bounds from factors\n        min_bound = self.global_min_lr * max_factor  # Higher factor raises min bound\n        max_bound = self.global_max_lr * min_factor  # Lower factor reduces max bound\n        \n        return {'min': min_bound, 'max': max_bound}"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Calculate optimal learning rate boundaries based on train/test accuracy ratios.\n    \n    This class focuses on adjusting the learning rate when there are signs of overfitting\n    (train/test ratio > 1.1) while maintaining the current rate during normal training.\n    Pattern-specific adjustments are applied only when the ratio indicates a need for adjustment.\n    \n    Attributes:\n        initial_lr: Initial learning rate\n        pattern_map: Pattern map containing pattern information\n        global_min_lr: Global minimum learning rate\n        global_max_lr: Global maximum learning rate\n        pattern_lr_factors: Dictionary mapping pattern types to learning rate adjustment factors\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

@@ -1,0 +1,275 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\mediators\\base.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 8
+    },
+    {
+      "name": "sys",
+      "line": 9
+    },
+    {
+      "name": "abc.ABC",
+      "line": 10
+    },
+    {
+      "name": "abc.abstractmethod",
+      "line": 10
+    },
+    {
+      "name": "typing.Any",
+      "line": 11
+    },
+    {
+      "name": "typing.Dict",
+      "line": 11
+    },
+    {
+      "name": "typing.Optional",
+      "line": 11
+    },
+    {
+      "name": "typing.List",
+      "line": 11
+    }
+  ],
+  "classes": {
+    "Mediator": {
+      "start_line": 15,
+      "end_line": 62,
+      "methods": {
+        "__init__": {
+          "start_line": 23,
+          "end_line": 27,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "Initialize the mediator with optional keyword arguments.",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, **kwargs):\n        \"\"\"Initialize the mediator with optional keyword arguments.\"\"\"\n        pass\n    \n    @abstractmethod\n    def initialize(self):\n        \"\"\""
+        },
+        "initialize": {
+          "start_line": 28,
+          "end_line": 37,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Initialize the mediator with required data.\n        \n        This method should be called after construction to prepare \n        the mediator for use, potentially loading or generating data.\n        ",
+          "code_snippet": "    \n    @abstractmethod\n    def initialize(self):\n        \"\"\"\n        Initialize the mediator with required data.\n        \n        This method should be called after construction to prepare \n        the mediator for use, potentially loading or generating data.\n        \"\"\"\n        pass\n        \n    @abstractmethod\n    def get_metrics(self) -> Dict[str, Any]:\n        \"\"\""
+        },
+        "get_metrics": {
+          "start_line": 38,
+          "end_line": 47,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "\n        Get current metrics tracked by this mediator.\n        \n        Returns:\n            Dictionary of metrics\n        ",
+          "code_snippet": "        \n    @abstractmethod\n    def get_metrics(self) -> Dict[str, Any]:\n        \"\"\"\n        Get current metrics tracked by this mediator.\n        \n        Returns:\n            Dictionary of metrics\n        \"\"\"\n        return {}\n    \n    @abstractmethod\n    def clear_cache(self):\n        \"\"\""
+        },
+        "clear_cache": {
+          "start_line": 48,
+          "end_line": 57,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Clear any cached data to free memory.\n        \n        This should reset the mediator to a clean state without \n        requiring full reinitialization.\n        ",
+          "code_snippet": "    \n    @abstractmethod\n    def clear_cache(self):\n        \"\"\"\n        Clear any cached data to free memory.\n        \n        This should reset the mediator to a clean state without \n        requiring full reinitialization.\n        \"\"\"\n        pass\n    \n    def __str__(self) -> str:\n        \"\"\"String representation of the mediator.\"\"\"\n        metrics = self.get_metrics()"
+        },
+        "__str__": {
+          "start_line": 57,
+          "end_line": 62,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "str",
+          "calls": [
+            {
+              "name": "self.get_metrics",
+              "line": 59
+            }
+          ],
+          "docstring": "String representation of the mediator.",
+          "code_snippet": "        pass\n    \n    def __str__(self) -> str:\n        \"\"\"String representation of the mediator.\"\"\"\n        metrics = self.get_metrics()\n        return f\"{self.__class__.__name__} - {metrics}\"\n\n\nclass MediatorError(Exception):\n    \"\"\"Base exception for mediator-related errors.\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "ABC"
+      ],
+      "docstring": "\n    Base mediator interface that all specific mediators should implement.\n    \n    Mediators facilitate communication between components without requiring\n    them to be directly aware of each other, reducing coupling in the system.\n    "
+    },
+    "MediatorError": {
+      "start_line": 63,
+      "end_line": 67,
+      "methods": {},
+      "class_variables": [],
+      "bases": [
+        "Exception"
+      ],
+      "docstring": "Base exception for mediator-related errors."
+    },
+    "MediatorInitializationError": {
+      "start_line": 68,
+      "end_line": 72,
+      "methods": {},
+      "class_variables": [],
+      "bases": [
+        "MediatorError"
+      ],
+      "docstring": "Exception raised when mediator initialization fails."
+    },
+    "MediatorDataError": {
+      "start_line": 73,
+      "end_line": 77,
+      "methods": {},
+      "class_variables": [],
+      "bases": [
+        "MediatorError"
+      ],
+      "docstring": "Exception raised when mediator encounters data issues."
+    }
+  },
+  "functions": {
+    "log_mediator_status": {
+      "start_line": 80,
+      "end_line": 92,
+      "parameters": [
+        {
+          "name": "mediator",
+          "type": "Mediator"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "mediator.get_metrics",
+          "line": 87
+        },
+        {
+          "name": "logger.info",
+          "line": 88
+        },
+        {
+          "name": "metrics.items",
+          "line": 89
+        },
+        {
+          "name": "logger.info",
+          "line": 90
+        }
+      ],
+      "docstring": "\n    Log mediator status for debugging.\n    \n    Args:\n        mediator: Mediator instance to log status for\n    ",
+      "code_snippet": "# Utility functions for mediators\n\ndef log_mediator_status(mediator: Mediator):\n    \"\"\"\n    Log mediator status for debugging.\n    \n    Args:\n        mediator: Mediator instance to log status for\n    \"\"\"\n    metrics = mediator.get_metrics()\n    logger.info(f\"Mediator status - {mediator.__class__.__name__}:\")\n    for key, value in metrics.items():\n        logger.info(f\"  {key}: {value}\")\n\n\ndef estimate_memory_usage(obj: Any) -> int:\n    \"\"\""
+    },
+    "estimate_memory_usage": {
+      "start_line": 93,
+      "end_line": 134,
+      "parameters": [
+        {
+          "name": "obj",
+          "type": "Any"
+        }
+      ],
+      "return_type": "int",
+      "calls": [
+        {
+          "name": "isinstance",
+          "line": 112
+        },
+        {
+          "name": "isinstance",
+          "line": 106
+        },
+        {
+          "name": "isinstance",
+          "line": 114
+        },
+        {
+          "name": "hasattr",
+          "line": 121
+        },
+        {
+          "name": "hasattr",
+          "line": 121
+        },
+        {
+          "name": "sys.getsizeof",
+          "line": 130
+        },
+        {
+          "name": "sys.getsizeof",
+          "line": 107
+        },
+        {
+          "name": "isinstance",
+          "line": 108
+        },
+        {
+          "name": "sys.getsizeof",
+          "line": 113
+        },
+        {
+          "name": "sum",
+          "line": 113
+        },
+        {
+          "name": "sys.getsizeof",
+          "line": 109
+        },
+        {
+          "name": "sys.getsizeof",
+          "line": 115
+        },
+        {
+          "name": "sum",
+          "line": 115
+        },
+        {
+          "name": "obj.element_size",
+          "line": 124
+        },
+        {
+          "name": "obj.nelement",
+          "line": 124
+        },
+        {
+          "name": "estimate_memory_usage",
+          "line": 113
+        },
+        {
+          "name": "estimate_memory_usage",
+          "line": 116
+        },
+        {
+          "name": "estimate_memory_usage",
+          "line": 116
+        },
+        {
+          "name": "obj.items",
+          "line": 117
+        }
+      ],
+      "docstring": "\n    Estimate memory usage of a Python object.\n    \n    Args:\n        obj: Object to estimate size of\n        \n    Returns:\n        Estimated size in bytes\n    ",
+      "code_snippet": "\n\ndef estimate_memory_usage(obj: Any) -> int:\n    \"\"\"\n    Estimate memory usage of a Python object.\n    \n    Args:\n        obj: Object to estimate size of\n        \n    Returns:\n        Estimated size in bytes\n    \"\"\"\n    # Handle basic types directly\n    if obj is None:\n        return 0\n    elif isinstance(obj, (int, float, bool)):\n        return sys.getsizeof(obj)\n    elif isinstance(obj, str):\n        return sys.getsizeof(obj)\n    \n    # Handle common collections\n    if isinstance(obj, (list, tuple, set)):\n        return sys.getsizeof(obj) + sum(estimate_memory_usage(x) for x in obj)\n    elif isinstance(obj, dict):\n        return sys.getsizeof(obj) + sum(\n            estimate_memory_usage(k) + estimate_memory_usage(v) \n            for k, v in obj.items()\n        )\n    \n    # Handle torch tensors specially\n    if hasattr(obj, 'element_size') and hasattr(obj, 'nelement'):\n        # This is likely a torch tensor\n        try:\n            return obj.element_size() * obj.nelement()\n        except:\n            pass\n    \n    # Default to sys.getsizeof for other types\n    try:\n        return sys.getsizeof(obj)\n    except:\n        return 0"
+    }
+  },
+  "constants": {}
+}

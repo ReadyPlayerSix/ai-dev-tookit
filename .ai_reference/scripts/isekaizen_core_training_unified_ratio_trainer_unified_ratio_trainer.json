@@ -1,0 +1,919 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\training\\unified_ratio_trainer\\unified_ratio_trainer.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 11
+    },
+    {
+      "name": "torch",
+      "line": 12
+    },
+    {
+      "name": "torch.utils.data",
+      "line": 13
+    },
+    {
+      "name": "time",
+      "line": 14
+    },
+    {
+      "name": "collections.defaultdict",
+      "line": 15
+    },
+    {
+      "name": "inspect",
+      "line": 16
+    },
+    {
+      "name": "isekaizen.trainer.adaptive_trainer.AdaptiveTrainer",
+      "line": 19
+    },
+    {
+      "name": "isekaizen.pattern.detection.PatternRecognitionService",
+      "line": 163
+    },
+    {
+      "name": "isekaizen.pattern.detection.PatternRecognitionService",
+      "line": 149
+    }
+  ],
+  "classes": {
+    "UnifiedRatioTrainer": {
+      "start_line": 25,
+      "end_line": 657,
+      "methods": {
+        "__init__": {
+          "start_line": 45,
+          "end_line": 183,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "criterion"
+            },
+            {
+              "name": "optimizer_class"
+            },
+            {
+              "name": "optimizer"
+            },
+            {
+              "name": "optimizer_kwargs"
+            },
+            {
+              "name": "scheduler_class"
+            },
+            {
+              "name": "scheduler_kwargs"
+            },
+            {
+              "name": "scheduler"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "batch_optimizer_class"
+            },
+            {
+              "name": "batch_optimizer_kwargs"
+            },
+            {
+              "name": "batch_optimizer"
+            },
+            {
+              "name": "val_dataset"
+            },
+            {
+              "name": "pattern_mediator"
+            },
+            {
+              "name": "pattern_service"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.to",
+              "line": 93
+            },
+            {
+              "name": "logger.info",
+              "line": 140
+            },
+            {
+              "name": "hasattr",
+              "line": 143
+            },
+            {
+              "name": "float",
+              "line": 181
+            },
+            {
+              "name": "torch.device",
+              "line": 90
+            },
+            {
+              "name": "logger.info",
+              "line": 99
+            },
+            {
+              "name": "logger.info",
+              "line": 123
+            },
+            {
+              "name": "logger.debug",
+              "line": 145
+            },
+            {
+              "name": "logger.warning",
+              "line": 158
+            },
+            {
+              "name": "PatternRecognitionService",
+              "line": 164
+            },
+            {
+              "name": "logger.debug",
+              "line": 165
+            },
+            {
+              "name": "hasattr",
+              "line": 168
+            },
+            {
+              "name": "optimizer_class",
+              "line": 102
+            },
+            {
+              "name": "logger.info",
+              "line": 103
+            },
+            {
+              "name": "logger.warning",
+              "line": 106
+            },
+            {
+              "name": "torch.optim.Adam",
+              "line": 107
+            },
+            {
+              "name": "scheduler_class",
+              "line": 114
+            },
+            {
+              "name": "batch_optimizer_class",
+              "line": 126
+            },
+            {
+              "name": "logger.info",
+              "line": 132
+            },
+            {
+              "name": "logger.info",
+              "line": 136
+            },
+            {
+              "name": "hasattr",
+              "line": 148
+            },
+            {
+              "name": "PatternRecognitionService",
+              "line": 150
+            },
+            {
+              "name": "hasattr",
+              "line": 151
+            },
+            {
+              "name": "logger.debug",
+              "line": 156
+            },
+            {
+              "name": "logger.debug",
+              "line": 170
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 90
+            },
+            {
+              "name": "self.model.parameters",
+              "line": 102
+            },
+            {
+              "name": "self.model.parameters",
+              "line": 107
+            },
+            {
+              "name": "self.pattern_mediator.set_pattern_service",
+              "line": 152
+            },
+            {
+              "name": "type",
+              "line": 99
+            },
+            {
+              "name": "type",
+              "line": 123
+            }
+          ],
+          "docstring": "\n        Initialize the trainer with unified ratio tracking.\n        \n        Args:\n            model: The neural network model to train\n            criterion: Loss function for training\n            optimizer_class: Class of optimizer to use\n            optimizer: Pre-initialized optimizer instance\n            optimizer_kwargs: Keyword arguments for optimizer initialization\n            scheduler_class: Class of learning rate scheduler to use\n            scheduler_kwargs: Keyword arguments for scheduler initialization\n            scheduler: Pre-initialized scheduler instance\n            device: Device to use for training (CPU or GPU)\n            pattern_map: Pattern map for pattern-responsive training\n            batch_optimizer_class: Class for batch size optimization\n            batch_optimizer_kwargs: Configuration for batch size optimization\n            batch_optimizer: Pre-initialized batch optimizer instance\n            val_dataset: Validation dataset reference for mini-validation\n            pattern_mediator: Pre-initialized pattern mediator\n            pattern_service: Pre-initialized pattern recognition service\n            **kwargs: Additional keyword arguments\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self,\n        model,\n        criterion,\n        optimizer_class=None,\n        optimizer=None,\n        optimizer_kwargs=None,\n        scheduler_class=None,\n        scheduler_kwargs=None,\n        scheduler=None,\n        device=None,\n        pattern_map=None,\n        batch_optimizer_class=None,\n        batch_optimizer_kwargs=None,\n        batch_optimizer=None,  # Added parameter for pre-initialized batch optimizer\n        val_dataset=None,\n        pattern_mediator=None,  # Accept pre-initialized mediator\n        pattern_service=None,   # Accept pre-initialized service\n        **kwargs\n    ):\n        \"\"\"\n        Initialize the trainer with unified ratio tracking.\n        \n        Args:\n            model: The neural network model to train\n            criterion: Loss function for training\n            optimizer_class: Class of optimizer to use\n            optimizer: Pre-initialized optimizer instance\n            optimizer_kwargs: Keyword arguments for optimizer initialization\n            scheduler_class: Class of learning rate scheduler to use\n            scheduler_kwargs: Keyword arguments for scheduler initialization\n            scheduler: Pre-initialized scheduler instance\n            device: Device to use for training (CPU or GPU)\n            pattern_map: Pattern map for pattern-responsive training\n            batch_optimizer_class: Class for batch size optimization\n            batch_optimizer_kwargs: Configuration for batch size optimization\n            batch_optimizer: Pre-initialized batch optimizer instance\n            val_dataset: Validation dataset reference for mini-validation\n            pattern_mediator: Pre-initialized pattern mediator\n            pattern_service: Pre-initialized pattern recognition service\n            **kwargs: Additional keyword arguments\n        \"\"\"\n        # Clean implementation that avoids duplicate optimizer or tracker creation\n        self.model = model\n        self.criterion = criterion\n        self.device = device or torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\n        \n        # Move model to device\n        self.model = self.model.to(self.device)\n        \n        # Initialize optimizer with the provided optimizer (preferred approach)\n        self.optimizer_kwargs = optimizer_kwargs or {}\n        if optimizer is not None:\n            self.optimizer = optimizer\n            logger.info(f\"Using pre-initialized optimizer of type: {type(optimizer).__name__}\")\n        elif optimizer_class is not None:\n            # Create only if not provided directly\n            self.optimizer = optimizer_class(self.model.parameters(), **self.optimizer_kwargs)\n            logger.info(f\"Created new optimizer of type: {optimizer_class.__name__}\")\n        else:\n            # Default optimizer only as last resort\n            logger.warning(\"No optimizer or optimizer_class provided - defaulting to Adam\")\n            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)\n            \n        # Initialize scheduler\n        self.scheduler_kwargs = scheduler_kwargs or {}\n        if scheduler is not None:\n            self.scheduler = scheduler\n        elif scheduler_class is not None:\n            self.scheduler = scheduler_class(self.optimizer, **self.scheduler_kwargs)\n        else:\n            self.scheduler = None\n            \n        # Use provided batch optimizer directly - avoid creating a new instance\n        # which could lead to duplicate pattern tracking\n        self.batch_optimizer_kwargs = batch_optimizer_kwargs or {}\n        if batch_optimizer is not None:\n            self.batch_optimizer = batch_optimizer\n            logger.info(f\"Using pre-initialized batch optimizer: {type(batch_optimizer).__name__}\")\n        elif batch_optimizer_class is not None:\n            # Create batch optimizer if class is provided, but log it clearly\n            self.batch_optimizer = batch_optimizer_class(\n                model=model,\n                device=device,\n                pattern_map=pattern_map,\n                **self.batch_optimizer_kwargs\n            )\n            logger.info(f\"Created new batch optimizer of type: {batch_optimizer_class.__name__}\")\n        else:\n            # No batch optimizer\n            self.batch_optimizer = None\n            logger.info(\"No batch optimizer provided or created\")\n        \n        # Model swapping completely removed - not needed for this trainer\n        self.enable_model_swapping = False\n        logger.info(\"Model swapping is not supported in this version of the trainer\")\n        \n        # Connect to the optimizer's internal pattern mediator\n        if hasattr(self.optimizer, 'pattern_mediator'):\n            self.pattern_mediator = self.optimizer.pattern_mediator\n            logger.debug(\"Connected to optimizer's internal pattern mediator\")\n            \n            # If we have a pattern map, ensure the mediator has a pattern service\n            if pattern_map and hasattr(self.pattern_mediator, 'pattern_service') and self.pattern_mediator.pattern_service is None:\n                from isekaizen.pattern.detection import PatternRecognitionService\n                pattern_service = PatternRecognitionService(pattern_map)\n                if hasattr(self.pattern_mediator, 'set_pattern_service'):\n                    self.pattern_mediator.set_pattern_service(pattern_service)\n                else:\n                    # Direct assignment if no setter method\n                    self.pattern_mediator.pattern_service = pattern_service\n                logger.debug(\"Set pattern service on optimizer's mediator\")\n        else:\n            logger.warning(\"Optimizer does not have a pattern mediator\")\n            self.pattern_mediator = pattern_mediator\n        \n        # Initialize pattern service if needed\n        if pattern_map and pattern_service is None:\n            from isekaizen.pattern.detection import PatternRecognitionService\n            self.pattern_service = PatternRecognitionService(pattern_map)\n            logger.debug(\"PatternRecognitionService initialized for trainer\")\n            \n            # Connect pattern service to optimizer's mediator\n            if hasattr(self.optimizer, 'pattern_service'):\n                self.optimizer.pattern_service = self.pattern_service\n                logger.debug(\"Connected pattern service to optimizer\")\n        else:\n            self.pattern_service = pattern_service\n        \n        # Store validation dataset reference for mini-validation  \n        self.val_dataset = val_dataset\n        \n        # Current epoch tracking\n        self.current_epoch = 0\n        self.last_val_acc = 0  # Initialize last validation accuracy\n        self.last_train_acc = 0  # Initialize last training accuracy\n        self.last_val_loss = float('inf')  # Initialize last validation loss\n        \n    # Lazy augmentation initialization method has been removed\n    \n    # _create_standard_dataloader method has been removed - using standard DataLoader directly"
+        },
+        "train": {
+          "start_line": 187,
+          "end_line": 438,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_dataset"
+            },
+            {
+              "name": "val_dataset"
+            },
+            {
+              "name": "epochs"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "callbacks"
+            },
+            {
+              "name": "adaptive_batch_size"
+            },
+            {
+              "name": "mini_val_interval"
+            },
+            {
+              "name": "verbose"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 256
+            },
+            {
+              "name": "range",
+              "line": 273
+            },
+            {
+              "name": "logger.info",
+              "line": 433
+            },
+            {
+              "name": "logger.info",
+              "line": 434
+            },
+            {
+              "name": "hasattr",
+              "line": 233
+            },
+            {
+              "name": "hasattr",
+              "line": 236
+            },
+            {
+              "name": "train_dataset.get_augmentation_info",
+              "line": 237
+            },
+            {
+              "name": "logger.info",
+              "line": 241
+            },
+            {
+              "name": "logger.info",
+              "line": 242
+            },
+            {
+              "name": "logger.info",
+              "line": 250
+            },
+            {
+              "name": "hasattr",
+              "line": 259
+            },
+            {
+              "name": "self.batch_optimizer.get_optimal_batch_size",
+              "line": 261
+            },
+            {
+              "name": "logger.info",
+              "line": 262
+            },
+            {
+              "name": "logger.info",
+              "line": 266
+            },
+            {
+              "name": "time.time",
+              "line": 275
+            },
+            {
+              "name": "logger.info",
+              "line": 277
+            },
+            {
+              "name": "self._train_epoch",
+              "line": 280
+            },
+            {
+              "name": "self._validate",
+              "line": 287
+            },
+            {
+              "name": "....append",
+              "line": 290
+            },
+            {
+              "name": "....append",
+              "line": 291
+            },
+            {
+              "name": "....append",
+              "line": 292
+            },
+            {
+              "name": "....append",
+              "line": 293
+            },
+            {
+              "name": "....append",
+              "line": 294
+            },
+            {
+              "name": "getattr",
+              "line": 308
+            },
+            {
+              "name": "getattr",
+              "line": 310
+            },
+            {
+              "name": "logger.info",
+              "line": 407
+            },
+            {
+              "name": "time.time",
+              "line": 430
+            },
+            {
+              "name": "len",
+              "line": 220
+            },
+            {
+              "name": "len",
+              "line": 234
+            },
+            {
+              "name": "....join",
+              "line": 247
+            },
+            {
+              "name": "logger.info",
+              "line": 248
+            },
+            {
+              "name": "getattr",
+              "line": 309
+            },
+            {
+              "name": "getattr",
+              "line": 311
+            },
+            {
+              "name": "logger.info",
+              "line": 315
+            },
+            {
+              "name": "hasattr",
+              "line": 354
+            },
+            {
+              "name": "self.scheduler.step",
+              "line": 355
+            },
+            {
+              "name": "hasattr",
+              "line": 357
+            },
+            {
+              "name": "hasattr",
+              "line": 361
+            },
+            {
+              "name": "time.time",
+              "line": 404
+            },
+            {
+              "name": "callback",
+              "line": 414
+            },
+            {
+              "name": "hasattr",
+              "line": 318
+            },
+            {
+              "name": "hasattr",
+              "line": 319
+            },
+            {
+              "name": "hasattr",
+              "line": 321
+            },
+            {
+              "name": "hasattr",
+              "line": 327
+            },
+            {
+              "name": "logger.info",
+              "line": 331
+            },
+            {
+              "name": "max",
+              "line": 333
+            },
+            {
+              "name": "self.scheduler.step",
+              "line": 358
+            },
+            {
+              "name": "hasattr",
+              "line": 368
+            },
+            {
+              "name": "hasattr",
+              "line": 370
+            },
+            {
+              "name": "self.batch_optimizer.update_batch_size",
+              "line": 378
+            },
+            {
+              "name": "logger.info",
+              "line": 401
+            },
+            {
+              "name": "logger.info",
+              "line": 415
+            },
+            {
+              "name": "max",
+              "line": 434
+            },
+            {
+              "name": "int",
+              "line": 335
+            },
+            {
+              "name": "logger.info",
+              "line": 338
+            },
+            {
+              "name": "hasattr",
+              "line": 341
+            },
+            {
+              "name": "hasattr",
+              "line": 341
+            },
+            {
+              "name": "logger.info",
+              "line": 344
+            },
+            {
+              "name": "min",
+              "line": 346
+            },
+            {
+              "name": "hasattr",
+              "line": 374
+            },
+            {
+              "name": "logger.info",
+              "line": 382
+            },
+            {
+              "name": "logger.warning",
+              "line": 397
+            },
+            {
+              "name": "pattern_counts.items",
+              "line": 247
+            },
+            {
+              "name": "min",
+              "line": 330
+            },
+            {
+              "name": "int",
+              "line": 348
+            },
+            {
+              "name": "logger.info",
+              "line": 351
+            },
+            {
+              "name": "hasattr",
+              "line": 386
+            },
+            {
+              "name": "logger.info",
+              "line": 390
+            },
+            {
+              "name": "str",
+              "line": 397
+            }
+          ],
+          "docstring": "\n        Train the model using the unified risk/accuracy ratio approach.\n        \n        This method implements the main training loop with unified risk/accuracy\n        ratio tracking, adaptive batch size, model swapping, and augmentation.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Validation dataset\n            epochs (int, optional): Number of epochs to train. Defaults to 10.\n            batch_size (int, optional): Initial batch size. Defaults to None (auto-determined).\n            callbacks (list, optional): List of callback functions. Defaults to None.\n            adaptive_batch_size (bool, optional): Whether to use adaptive batch size.\n                                               Defaults to True.\n            # Model swapping parameters removed\n            mini_val_interval (int, optional): Interval for mini-validation during training.\n                                            Defaults to 50.\n            verbose (bool, optional): Whether to print verbose output. Defaults to False.\n            **kwargs: Additional arguments\n            \n        Returns:\n            dict: Training history with metrics\n        ",
+          "code_snippet": "    # _create_standard_dataloader method has been removed - using standard DataLoader directly\n    \n    def train(self, train_dataset, val_dataset, epochs=10, batch_size=None, \n            callbacks=None, adaptive_batch_size=True,\n            mini_val_interval=50, verbose=False, **kwargs):\n        \"\"\"\n        Train the model using the unified risk/accuracy ratio approach.\n        \n        This method implements the main training loop with unified risk/accuracy\n        ratio tracking, adaptive batch size, model swapping, and augmentation.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Validation dataset\n            epochs (int, optional): Number of epochs to train. Defaults to 10.\n            batch_size (int, optional): Initial batch size. Defaults to None (auto-determined).\n            callbacks (list, optional): List of callback functions. Defaults to None.\n            adaptive_batch_size (bool, optional): Whether to use adaptive batch size.\n                                               Defaults to True.\n            # Model swapping parameters removed\n            mini_val_interval (int, optional): Interval for mini-validation during training.\n                                            Defaults to 50.\n            verbose (bool, optional): Whether to print verbose output. Defaults to False.\n            **kwargs: Additional arguments\n            \n        Returns:\n            dict: Training history with metrics\n        \"\"\"\n        # Initialize history dictionary\n        history = {\n            'train_loss': [],\n            'train_acc': [],\n            'val_loss': [],\n            'val_acc': [],\n            'batch_sizes': [],\n            'dataset_sizes': [len(train_dataset)]\n        }\n        \n        # Model swapping removed from this implementation\n        \n        # Initialize callbacks\n        if callbacks is None:\n            callbacks = []\n        \n        # Store validation dataset for mini-validation\n        self.val_dataset = val_dataset\n        \n        # Print dataset information\n        is_pre_augmented = hasattr(train_dataset, 'is_pre_augmented') and train_dataset.is_pre_augmented\n        dataset_info = f\"Training with dataset of size: {len(train_dataset)}\"\n        \n        if is_pre_augmented and hasattr(train_dataset, 'get_augmentation_info'):\n            aug_info = train_dataset.get_augmentation_info()\n            original_count = aug_info['original_count']\n            augmented_count = aug_info['augmented_count']\n            dataset_info += f\" ({original_count} original + {augmented_count} augmented)\"\n            logger.info(dataset_info)\n            logger.info(f\"Using pre-augmented dataset with {augmented_count} additional examples\")\n            \n            # Log pattern type distribution if available\n            if 'metadata' in aug_info and 'count_by_pattern' in aug_info['metadata']:\n                pattern_counts = aug_info['metadata']['count_by_pattern']\n                pattern_info = \", \".join([f\"{pt}: {count}\" for pt, count in pattern_counts.items()])\n                logger.info(f\"Augmentation by pattern type: {pattern_info}\")\n        else:\n            logger.info(dataset_info)\n        \n        # Initialize epoch counter\n        self.current_epoch = 0\n        \n        # Start timing\n        start_time = time.time()\n        \n        # Current batch size (may be adjusted adaptively)\n        if batch_size is None and hasattr(self, 'batch_optimizer') and self.batch_optimizer is not None:\n            # Let batch optimizer determine initial size\n            current_batch_size = self.batch_optimizer.get_optimal_batch_size()\n            logger.info(f\"Using batch optimizer's suggested initial batch size: {current_batch_size}\")\n        else:\n            # Use provided batch size or default\n            current_batch_size = batch_size or 128\n            logger.info(f\"Using initial batch size: {current_batch_size}\")\n        \n        # Track progress per epoch\n        self.consecutive_no_improvement = 0\n        self.best_val_acc = 0\n        \n        # Train for the specified number of epochs\n        for epoch in range(epochs):\n            self.current_epoch = epoch\n            epoch_start = time.time()\n            \n            logger.info(f\"Epoch {epoch+1}/{epochs}\")\n            \n            # Train for one epoch\n            epoch_loss, epoch_acc = self._train_epoch(\n                train_dataset, \n                current_batch_size,\n                mini_val_interval=mini_val_interval\n            )\n            \n            # Validate the model\n            val_loss, val_acc = self._validate(val_dataset, current_batch_size)\n            \n            # Store metrics in history\n            history['train_loss'].append(epoch_loss)\n            history['train_acc'].append(epoch_acc)\n            history['val_loss'].append(val_loss)\n            history['val_acc'].append(val_acc)\n            history['batch_sizes'].append(current_batch_size)\n            \n            # Check for validation improvement\n            val_improved = False\n            if val_acc > self.best_val_acc:\n                self.best_val_acc = val_acc\n                self.consecutive_no_improvement = 0\n                val_improved = True\n            else:\n                self.consecutive_no_improvement += 1\n            \n            # Explicit train-test gap detection for adjusting batch size\n            train_test_gap = epoch_acc - val_acc\n            # Get batch size bounds directly from the optimizer to avoid duplication\n            min_batch_size = getattr(self.batch_optimizer, 'min_batch_size', \n                                    getattr(self.batch_optimizer, 'min_batch', 16))\n            max_batch_size = getattr(self.batch_optimizer, 'max_batch_size', \n                                    getattr(self.batch_optimizer, 'max_batch', 256))\n            \n            # Handle underfitting (val_acc > train_acc by ANY margin)\n            if train_test_gap < 0:  # Changed from -1.0 threshold to ANY negative value\n                logger.info(f\"Underfitting detected - Val acc exceeds Train acc by {-train_test_gap:.2f}%\")\n                \n                # Store this value so batch optimizer won't decrease batch size\n                if hasattr(self, 'batch_optimizer') and self.batch_optimizer is not None:\n                    if hasattr(self.batch_optimizer, 'train_test_gap'):\n                        self.batch_optimizer.train_test_gap = train_test_gap\n                    if hasattr(self.batch_optimizer, 'prevent_batch_size_decrease'):\n                        self.batch_optimizer.prevent_batch_size_decrease = True\n            \n            # Only decrease batch size for genuine overfitting (train_acc > val_acc by a clear margin)\n            elif train_test_gap > 1.0 and current_batch_size > min_batch_size:\n                # Disable any lingering protection\n                if hasattr(self.batch_optimizer, 'prevent_batch_size_decrease'):\n                    self.batch_optimizer.prevent_batch_size_decrease = False\n                    \n                gap_factor = 0.9 - 0.1 * min(3, train_test_gap)  # Calculate reduction factor based on gap size\n                logger.info(f\"Detected overfitting gap of {train_test_gap:.2f}% - adjusting batch size with factor {gap_factor:.2f}\")\n                prev_batch_size = current_batch_size\n                current_batch_size = max(\n                    min_batch_size,\n                    int(current_batch_size * gap_factor)\n                )\n                if current_batch_size != prev_batch_size:\n                    logger.info(f\"Explicit gap-based adjustment: {prev_batch_size} -> {current_batch_size}\")\n            \n            # If validation has stagnated, increase batch size to find better optima\n            elif self.consecutive_no_improvement >= 3 and epoch > 3 and hasattr(self, 'batch_optimizer') and hasattr(self.batch_optimizer, 'max_batch_size'):\n                # Validation hasn't improved for 3 consecutive epochs - try increasing batch size\n                increase_factor = 1.25  # 25% increase (more aggressive than previous 15%)\n                logger.info(f\"Validation stagnated for {self.consecutive_no_improvement} epochs - applying more aggressive batch size increase of 25%\")\n                prev_batch_size = current_batch_size\n                current_batch_size = min(\n                    max_batch_size,\n                    int(current_batch_size * increase_factor)\n                )\n                if current_batch_size != prev_batch_size:\n                    logger.info(f\"Stagnation-based batch size increase: {prev_batch_size} -> {current_batch_size}\")\n            \n            # Apply learning rate scheduler if available\n            if hasattr(self, 'scheduler') and self.scheduler:\n                self.scheduler.step()\n                # If the scheduler is ReduceLROnPlateau\n                if hasattr(self.scheduler, 'is_better'):\n                    self.scheduler.step(val_loss)\n            \n            # Adjust batch size if enabled - apply batch optimizer after explicit gap handling\n            if adaptive_batch_size and hasattr(self, 'batch_optimizer') and self.batch_optimizer:\n                prev_batch_size = current_batch_size\n                # Pass additional metrics to the batch optimizer\n                pattern_metrics = {'train_acc': epoch_acc, 'val_acc': val_acc}\n                \n                try:\n                    # Update batch optimizer with accuracy metrics for train-test gap calculation\n                    if hasattr(self.batch_optimizer, 'train_acc'):\n                        self.batch_optimizer.train_acc = epoch_acc\n                    if hasattr(self.batch_optimizer, 'val_acc'):\n                        self.batch_optimizer.val_acc = val_acc\n                        \n                    # Calculate train-test gap for underfitting detection if not already done\n                    if hasattr(self.batch_optimizer, 'train_test_gap') and self.batch_optimizer.train_test_gap is None:\n                        self.batch_optimizer.train_test_gap = train_test_gap\n                    \n                    # Get batch optimizer's suggestion\n                    suggested_batch_size = self.batch_optimizer.update_batch_size(epoch_loss, val_loss, pattern_metrics=pattern_metrics, verbose=verbose)\n                    \n                    # When in underfitting, never decrease batch size\n                    if train_test_gap < 0 and suggested_batch_size < current_batch_size:\n                        logger.info(f\"Prevented batch size reduction during underfitting (gap: {train_test_gap:.2f}%)\")\n                        # Keep current batch size for underfitting\n                        pass\n                    # When batch optimizer has stored underfitting info, also prevent decrease\n                    elif hasattr(self.batch_optimizer, 'train_test_gap') and \\\n                         self.batch_optimizer.train_test_gap is not None and \\\n                         self.batch_optimizer.train_test_gap < 0 and \\\n                         suggested_batch_size < current_batch_size:\n                        logger.info(f\"Prevented batch size reduction due to underfitting in optimizer (gap: {self.batch_optimizer.train_test_gap:.2f}%)\")\n                        # Keep current batch size for underfitting\n                        pass\n                    # Otherwise apply the suggested batch size\n                    else:\n                        current_batch_size = suggested_batch_size\n                except Exception as e:\n                    logger.warning(f\"Error adjusting batch size: {str(e)}\")\n                    # Continue with current batch size\n                \n                if current_batch_size != prev_batch_size:\n                    logger.info(f\"Batch optimizer adjustment: {prev_batch_size} -> {current_batch_size}\")\n            \n            # Calculate epoch time\n            epoch_time = time.time() - epoch_start\n            \n            # Report metrics\n            logger.info(f\"Epoch {epoch+1}/{epochs} - {epoch_time:.2f}s - \"\n                      f\"Loss: {epoch_loss:.4f} - Acc: {epoch_acc:.2f}% - \"\n                      f\"Val Loss: {val_loss:.4f} - Val Acc: {val_acc:.2f}%\")\n            \n            # Execute callbacks\n            stop_training = False\n            for callback in callbacks:\n                if callback(epoch, history, self.model, self.optimizer):\n                    logger.info(\"Early stopping triggered by callback\")\n                    stop_training = True\n                    break\n            \n            if stop_training:\n                break\n            \n            # No model swapping in this implementation\n            \n            # Update validation metrics for next epoch comparison\n            self.last_val_loss = val_loss\n            self.last_val_acc = val_acc\n            self.last_train_acc = epoch_acc\n        \n        # Calculate total training time\n        total_time = time.time() - start_time\n        history['total_time'] = total_time\n        \n        logger.info(f\"Training completed in {total_time:.2f}s\")\n        logger.info(f\"Best validation accuracy: {max(history['val_acc']):.2f}%\")\n        \n        return history\n        \n    def _train_epoch(self, dataset, batch_size, mini_val_interval=50):\n        \"\"\"\n        Train for one epoch with mini-validation for continuous feedback."
+        },
+        "_train_epoch": {
+          "start_line": 438,
+          "end_line": 595,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "mini_val_interval"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.train",
+              "line": 450
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 456
+            },
+            {
+              "name": "enumerate",
+              "line": 471
+            },
+            {
+              "name": "list",
+              "line": 477
+            },
+            {
+              "name": "all_batch_indices.extend",
+              "line": 478
+            },
+            {
+              "name": "self.optimizer.zero_grad",
+              "line": 481
+            },
+            {
+              "name": "self.model",
+              "line": 484
+            },
+            {
+              "name": "self.criterion",
+              "line": 485
+            },
+            {
+              "name": "outputs.max",
+              "line": 488
+            },
+            {
+              "name": "predicted.eq",
+              "line": 489
+            },
+            {
+              "name": "hasattr",
+              "line": 493
+            },
+            {
+              "name": "hasattr",
+              "line": 495
+            },
+            {
+              "name": "loss.item",
+              "line": 528
+            },
+            {
+              "name": "....item",
+              "line": 529
+            },
+            {
+              "name": "targets.size",
+              "line": 531
+            },
+            {
+              "name": "loss.backward",
+              "line": 534
+            },
+            {
+              "name": "len",
+              "line": 585
+            },
+            {
+              "name": "hasattr",
+              "line": 590
+            },
+            {
+              "name": "hasattr",
+              "line": 590
+            },
+            {
+              "name": "self.pattern_mediator.end_epoch",
+              "line": 591
+            },
+            {
+              "name": "inputs.to",
+              "line": 473
+            },
+            {
+              "name": "targets.to",
+              "line": 473
+            },
+            {
+              "name": "range",
+              "line": 477
+            },
+            {
+              "name": "hasattr",
+              "line": 499
+            },
+            {
+              "name": "hasattr",
+              "line": 500
+            },
+            {
+              "name": "hasattr",
+              "line": 516
+            },
+            {
+              "name": "hasattr",
+              "line": 537
+            },
+            {
+              "name": "hasattr",
+              "line": 537
+            },
+            {
+              "name": "self.pattern_service.get_batch_pattern_states",
+              "line": 539
+            },
+            {
+              "name": "self.optimizer.step",
+              "line": 540
+            },
+            {
+              "name": "self.optimizer.step",
+              "line": 543
+            },
+            {
+              "name": "hasattr",
+              "line": 546
+            },
+            {
+              "name": "torch.utils.data.Subset",
+              "line": 548
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 555
+            },
+            {
+              "name": "self.model.eval",
+              "line": 563
+            },
+            {
+              "name": "hasattr",
+              "line": 579
+            },
+            {
+              "name": "self.model.train",
+              "line": 582
+            },
+            {
+              "name": "min",
+              "line": 477
+            },
+            {
+              "name": "self.pattern_mediator.update_from_batch",
+              "line": 502
+            },
+            {
+              "name": "hasattr",
+              "line": 507
+            },
+            {
+              "name": "self.optimizer.update_accuracy_metrics_with_epoch",
+              "line": 520
+            },
+            {
+              "name": "correct_mask.sum",
+              "line": 529
+            },
+            {
+              "name": "list",
+              "line": 550
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 567
+            },
+            {
+              "name": "self.optimizer.update_accuracy_metrics",
+              "line": 580
+            },
+            {
+              "name": "len",
+              "line": 477
+            },
+            {
+              "name": "self.pattern_mediator.update_with_batch_recognition",
+              "line": 509
+            },
+            {
+              "name": "getattr",
+              "line": 522
+            },
+            {
+              "name": "self.batch_optimizer_kwargs.get",
+              "line": 524
+            },
+            {
+              "name": "inspect.signature",
+              "line": 537
+            },
+            {
+              "name": "range",
+              "line": 550
+            },
+            {
+              "name": "self.model",
+              "line": 570
+            },
+            {
+              "name": "val_outputs.max",
+              "line": 571
+            },
+            {
+              "name": "....item",
+              "line": 572
+            },
+            {
+              "name": "val_targets.size",
+              "line": 573
+            },
+            {
+              "name": "min",
+              "line": 550
+            },
+            {
+              "name": "val_inputs.to",
+              "line": 569
+            },
+            {
+              "name": "val_targets.to",
+              "line": 569
+            },
+            {
+              "name": "len",
+              "line": 550
+            },
+            {
+              "name": "....sum",
+              "line": 572
+            },
+            {
+              "name": "val_predicted.eq",
+              "line": 572
+            }
+          ],
+          "docstring": "\n        Train for one epoch with mini-validation for continuous feedback.\n        \n        Args:\n            dataset: Dataset to train on\n            batch_size: Batch size\n            mini_val_interval: Interval for mini-validation during training\n            \n        Returns:\n            tuple: (epoch_loss, epoch_accuracy)\n        ",
+          "code_snippet": "        return history\n        \n    def _train_epoch(self, dataset, batch_size, mini_val_interval=50):\n        \"\"\"\n        Train for one epoch with mini-validation for continuous feedback.\n        \n        Args:\n            dataset: Dataset to train on\n            batch_size: Batch size\n            mini_val_interval: Interval for mini-validation during training\n            \n        Returns:\n            tuple: (epoch_loss, epoch_accuracy)\n        \"\"\"\n        self.model.train()\n        running_loss = 0.0\n        correct = 0\n        total = 0\n        \n        # Create standard DataLoader\n        dataloader = torch.utils.data.DataLoader(\n            dataset, \n            batch_size=batch_size, \n            shuffle=True, \n            num_workers=0,  # Use single-process mode for stability\n            pin_memory=False,  # Disable pin_memory for stability\n            drop_last=True  # Prevent batch size < 2 for BatchNorm\n        )\n        \n        # For batch-level risk assessment\n        all_batch_indices = []\n        \n        # Track batch numbers for mini-validation\n        batch_count = 0\n        \n        for i, (inputs, targets) in enumerate(dataloader):\n            batch_count += 1\n            inputs, targets = inputs.to(self.device), targets.to(self.device)\n            \n            # Get batch indices for pattern tracking\n            batch_start = i * batch_size\n            batch_indices = list(range(batch_start, min(batch_start + batch_size, len(dataset))))\n            all_batch_indices.extend(batch_indices)\n            \n            # Zero the parameter gradients\n            self.optimizer.zero_grad()\n            \n            # Forward pass\n            outputs = self.model(inputs)\n            loss = self.criterion(outputs, targets)\n            \n            # Calculate per-example correctness for pattern recognition\n            _, predicted = outputs.max(1)\n            correct_mask = predicted.eq(targets)\n            \n            # Store batch indices and correct mask in optimizer for pattern tracking\n            # This is specifically for EVE optimizers that use this information\n            if hasattr(self.optimizer, 'last_batch_indices'):\n                self.optimizer.last_batch_indices = batch_indices\n            if hasattr(self.optimizer, 'last_correct_mask'):\n                self.optimizer.last_correct_mask = correct_mask\n            \n            # Update pattern mediator with batch recognition data if available\n            if hasattr(self, 'pattern_mediator') and self.pattern_mediator:\n                if hasattr(self.pattern_mediator, 'update_from_batch'):\n                    # Direct update from batch for internal mediator\n                    self.pattern_mediator.update_from_batch(\n                        batch_indices, \n                        correct_mask, \n                        self.current_epoch\n                    )\n                elif hasattr(self.pattern_mediator, 'update_with_batch_recognition'):\n                    # Alternative method name\n                    self.pattern_mediator.update_with_batch_recognition(\n                        batch_indices, \n                        correct_mask, \n                        self.current_epoch\n                    )\n                \n                # Update the optimizer with epoch accuracy info if needed\n                if hasattr(self.optimizer, 'update_accuracy_metrics_with_epoch'):\n                    # Calculate training accuracy safely - avoid division by zero\n                    train_accuracy = 0.0 if total == 0 else (correct / total * 100)\n                    \n                    self.optimizer.update_accuracy_metrics_with_epoch(\n                        train_accuracy,  # Current train accuracy as percentage\n                        getattr(self, 'last_val_acc', 0),  # Last validation accuracy if available\n                        self.current_epoch,\n                        self.batch_optimizer_kwargs.get('total_epochs', 100)\n                    )\n            \n            # Update metrics\n            running_loss += loss.item()\n            batch_correct = correct_mask.sum().item()\n            correct += batch_correct\n            total += targets.size(0)\n            \n            # Backward pass and optimize\n            loss.backward()\n            \n            # Special handling for pattern-aware optimizers\n            if hasattr(self, 'pattern_service') and hasattr(self.optimizer, 'step') and 'pattern_states' in inspect.signature(self.optimizer.step).parameters:\n                # Get pattern states for this batch\n                pattern_states = self.pattern_service.get_batch_pattern_states(batch_indices)\n                self.optimizer.step(pattern_states=pattern_states)\n            else:\n                # Normal optimization step\n                self.optimizer.step()\n            \n            # Perform mini-validation to get more frequent feedback\n            if batch_count % mini_val_interval == 0 and hasattr(self, 'val_dataset') and self.val_dataset is not None:\n                # Do quick validation on subset of validation data\n                validation_subset = torch.utils.data.Subset(\n                    self.val_dataset, \n                    list(range(min(1000, len(self.val_dataset))))\n                )\n                \n                # Create a simple dataloader directly for quick validation\n                # Avoid using class methods to prevent recursion/serialization issues\n                quick_val_loader = torch.utils.data.DataLoader(\n                    validation_subset,\n                    batch_size=batch_size, \n                    shuffle=False, \n                    num_workers=0,  # Always use single-process mode for validation\n                    pin_memory=False  # Disable pin_memory for stability\n                )\n                \n                self.model.eval()\n                val_correct = 0\n                val_total = 0\n                \n                with torch.no_grad():\n                    for val_inputs, val_targets in quick_val_loader:\n                        val_inputs, val_targets = val_inputs.to(self.device), val_targets.to(self.device)\n                        val_outputs = self.model(val_inputs)\n                        _, val_predicted = val_outputs.max(1)\n                        val_correct += val_predicted.eq(val_targets).sum().item()\n                        val_total += val_targets.size(0)\n                \n                quick_val_acc = 100. * val_correct / val_total\n                current_train_acc = 100. * correct / total\n                \n                # Update optimizer with more frequent feedback\n                if hasattr(self.optimizer, 'update_accuracy_metrics'):\n                    self.optimizer.update_accuracy_metrics(current_train_acc, quick_val_acc)\n                \n                self.model.train()\n        \n        # Calculate epoch metrics\n        epoch_loss = running_loss / len(dataloader)\n        epoch_acc = 100. * correct / total\n        self.last_train_acc = epoch_acc  # Store training accuracy for reference\n        \n        # Signal end of epoch to pattern mediator\n        if hasattr(self, 'pattern_mediator') and self.pattern_mediator and hasattr(self.pattern_mediator, 'end_epoch'):\n            self.pattern_mediator.end_epoch(self.current_epoch)\n        \n        return epoch_loss, epoch_acc\n    \n    def _validate(self, dataset, batch_size=128):\n        \"\"\"\n        Validate the model on a dataset."
+        },
+        "_validate": {
+          "start_line": 595,
+          "end_line": 657,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.eval",
+              "line": 606
+            },
+            {
+              "name": "hasattr",
+              "line": 612
+            },
+            {
+              "name": "hasattr",
+              "line": 614
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 618
+            },
+            {
+              "name": "hasattr",
+              "line": 646
+            },
+            {
+              "name": "hasattr",
+              "line": 648
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 627
+            },
+            {
+              "name": "len",
+              "line": 642
+            },
+            {
+              "name": "getattr",
+              "line": 649
+            },
+            {
+              "name": "self.model",
+              "line": 632
+            },
+            {
+              "name": "self.criterion",
+              "line": 633
+            },
+            {
+              "name": "loss.item",
+              "line": 636
+            },
+            {
+              "name": "outputs.max",
+              "line": 637
+            },
+            {
+              "name": "....item",
+              "line": 638
+            },
+            {
+              "name": "targets.size",
+              "line": 639
+            },
+            {
+              "name": "inputs.to",
+              "line": 629
+            },
+            {
+              "name": "targets.to",
+              "line": 629
+            },
+            {
+              "name": "....sum",
+              "line": 638
+            },
+            {
+              "name": "predicted.eq",
+              "line": 638
+            }
+          ],
+          "docstring": "\n        Validate the model on a dataset.\n        \n        Args:\n            dataset: Validation dataset\n            batch_size: Batch size\n            \n        Returns:\n            tuple: (validation_loss, validation_accuracy)\n        ",
+          "code_snippet": "        return epoch_loss, epoch_acc\n    \n    def _validate(self, dataset, batch_size=128):\n        \"\"\"\n        Validate the model on a dataset.\n        \n        Args:\n            dataset: Validation dataset\n            batch_size: Batch size\n            \n        Returns:\n            tuple: (validation_loss, validation_accuracy)\n        \"\"\"\n        self.model.eval()\n        running_loss = 0.0\n        correct = 0\n        total = 0\n        \n        # Store previous validation metrics for comparison\n        if hasattr(self, 'last_val_loss'):\n            self.prev_val_loss = self.last_val_loss\n        if hasattr(self, 'last_val_acc'):\n            self.prev_val_acc = self.last_val_acc\n        \n        # Create a simple dataloader directly with no serialization issues\n        dataloader = torch.utils.data.DataLoader(\n            dataset, \n            batch_size=batch_size, \n            shuffle=False, \n            num_workers=0,  # Always use single-process mode for validation\n            pin_memory=False  # Disable pin_memory for stability\n        )\n        \n        # Disable gradient calculation for validation\n        with torch.no_grad():\n            for inputs, targets in dataloader:\n                inputs, targets = inputs.to(self.device), targets.to(self.device)\n                \n                # Forward pass\n                outputs = self.model(inputs)\n                loss = self.criterion(outputs, targets)\n                \n                # Update metrics\n                running_loss += loss.item()\n                _, predicted = outputs.max(1)\n                correct += predicted.eq(targets).sum().item()\n                total += targets.size(0)\n        \n        # Calculate metrics\n        val_loss = running_loss / len(dataloader)\n        val_acc = 100. * correct / total\n        \n        # Update optimizer with validation info if supported\n        if hasattr(self.optimizer, 'test_acc'):\n            self.optimizer.test_acc = val_acc\n        if hasattr(self.optimizer, 'train_acc'):\n            self.optimizer.train_acc = getattr(self, 'last_train_acc', 0)\n            \n        # Store current metrics for next epoch comparison\n        self.last_val_acc = val_acc\n        self.last_val_loss = val_loss\n        \n        return val_loss, val_acc"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "AdaptiveTrainer"
+      ],
+      "docstring": "\n    Enhanced adaptive trainer that uses the unified risk/accuracy ratio approach\n    for batch size adaptation and learning rate adjustments with model swapping.\n    \n    This trainer extends AdaptiveTrainer with:\n    1. Unified risk/accuracy ratio tracking for optimization decisions\n    2. Dynamic model architecture swapping based on performance\n    3. Enhanced pattern-responsive training with pre-augmented datasets\n    4. Mini-validation for continuous feedback during training\n    \n    Attributes:\n        model_swap_manager: Manager for dynamic model architecture swapping\n        current_epoch: Current training epoch\n        history: Training history dictionary\n        batch_optimizer_kwargs: Configuration for batch size optimization\n        model_config: Configuration for model creation\n        using_lazy_augmentation: Flag indicating if lazy augmentation is used\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

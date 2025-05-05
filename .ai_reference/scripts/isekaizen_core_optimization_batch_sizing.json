@@ -1,0 +1,641 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\optimization\\batch_sizing.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 11
+    },
+    {
+      "name": "math",
+      "line": 12
+    },
+    {
+      "name": "logging",
+      "line": 13
+    },
+    {
+      "name": "torch",
+      "line": 14
+    },
+    {
+      "name": "typing.Dict",
+      "line": 15
+    },
+    {
+      "name": "typing.Optional",
+      "line": 15
+    },
+    {
+      "name": "typing.Any",
+      "line": 15
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 15
+    },
+    {
+      "name": "isekaizen.hardware.analyzer.HardwareAnalyzer",
+      "line": 18
+    },
+    {
+      "name": "isekaizen.core.mathematical_foundation.cognitive_efficiency.calculate_cognitive_efficiency",
+      "line": 19
+    },
+    {
+      "name": "isekaizen.core.mathematical_foundation.batch_optimization.calculate_optimal_batch_size",
+      "line": 20
+    }
+  ],
+  "classes": {
+    "BatchSizeOptimizer": {
+      "start_line": 24,
+      "end_line": 606,
+      "methods": {
+        "__init__": {
+          "start_line": 41,
+          "end_line": 111,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "min_batch_size"
+            },
+            {
+              "name": "max_batch_size"
+            },
+            {
+              "name": "initial_batch_size"
+            },
+            {
+              "name": "total_epochs",
+              "type": "int"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "HardwareAnalyzer",
+              "line": 62
+            },
+            {
+              "name": "self.analyzer.analyze_memory",
+              "line": 63
+            },
+            {
+              "name": "self.analyzer.get_memory_safety_factor",
+              "line": 65
+            },
+            {
+              "name": "max",
+              "line": 92
+            },
+            {
+              "name": "float",
+              "line": 100
+            },
+            {
+              "name": "logger.info",
+              "line": 108
+            },
+            {
+              "name": "logger.info",
+              "line": 109
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 69
+            },
+            {
+              "name": "torch.cuda.device_count",
+              "line": 70
+            },
+            {
+              "name": "logger.info",
+              "line": 77
+            },
+            {
+              "name": "self.get_hardware_batch_limits",
+              "line": 79
+            },
+            {
+              "name": "min",
+              "line": 92
+            },
+            {
+              "name": "logger.info",
+              "line": 72
+            },
+            {
+              "name": "logger.info",
+              "line": 73
+            }
+          ],
+          "docstring": "\n        Initialize the batch size optimizer.\n        \n        Args:\n            min_batch_size: Minimum allowable batch size (None for auto-detect)\n            max_batch_size: Maximum allowable batch size (None for auto-detect)\n            initial_batch_size: Initial batch size (None for auto-detect)\n            total_epochs: Total number of epochs for the training\n            pattern_map: Optional pattern map for pattern-aware optimization\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, \n                min_batch_size: Optional[int] = None, \n                max_batch_size: Optional[int] = None, \n                initial_batch_size: Optional[int] = None,\n                total_epochs: int = 100,\n                pattern_map: Optional[Dict[str, Any]] = None):\n        \"\"\"\n        Initialize the batch size optimizer.\n        \n        Args:\n            min_batch_size: Minimum allowable batch size (None for auto-detect)\n            max_batch_size: Maximum allowable batch size (None for auto-detect)\n            initial_batch_size: Initial batch size (None for auto-detect)\n            total_epochs: Total number of epochs for the training\n            pattern_map: Optional pattern map for pattern-aware optimization\n        \"\"\"\n        # Initialize training state\n        self.total_epochs = total_epochs\n        self.pattern_map = pattern_map\n        \n        # Get memory information first (reduce redundant calls)\n        self.analyzer = HardwareAnalyzer()\n        memory_stats = self.analyzer.analyze_memory()\n        self.is_gpu = self.analyzer.is_gpu\n        safety_factor = self.analyzer.get_memory_safety_factor()\n        self._available_memory = memory_stats['free_memory'] * safety_factor\n        \n        # Log GPU count information for multi-GPU setups\n        if self.is_gpu and torch.cuda.is_available():\n            gpu_count = torch.cuda.device_count()\n            if gpu_count > 1:\n                logger.info(f\"Multi-GPU environment detected: {gpu_count} GPUs\")\n                logger.info(f\"Batch size boundaries will be scaled accordingly\")\n        \n        # Calculate hardware-aware batch size boundaries if needed\n        if min_batch_size is None or max_batch_size is None or initial_batch_size is None:\n            logger.info(\"Determining hardware-aware batch size boundaries...\")\n            # Use a completely different method name to avoid any issues\n            hw_min, hw_max, hw_initial = self.get_hardware_batch_limits(self._available_memory, pattern_map)\n            \n            # Use provided values or hardware-determined defaults\n            self.min_batch_size = min_batch_size if min_batch_size is not None else hw_min\n            self.max_batch_size = max_batch_size if max_batch_size is not None else hw_max\n            self.initial_batch_size = initial_batch_size if initial_batch_size is not None else hw_initial\n        else:\n            # Use provided values directly\n            self.min_batch_size = min_batch_size\n            self.max_batch_size = max_batch_size\n            self.initial_batch_size = initial_batch_size\n        \n        # Ensure current batch size is within bounds\n        self.current_batch_size = max(self.min_batch_size, min(self.initial_batch_size, self.max_batch_size))\n        \n        # Initialize history tracking and counters\n        self.batch_size_history = [self.current_batch_size]\n        self.loss_history = []\n        self.val_loss_history = []\n        self.epochs_since_change = 0\n        self.epoch_counter = 0\n        self.previous_loss = float('inf')\n        self.stagnation_counter = 0\n        self.convergence_threshold = 0.001  # Convergence detection threshold\n        \n        # Store total epochs for K(t) calculation\n        self.total_epochs = total_epochs\n        \n        # Log batch size configuration\n        logger.info(f\"BatchSizeOptimizer configured with batch size range: [{self.min_batch_size}, {self.max_batch_size}]\")\n        logger.info(f\"Initial batch size: {self.current_batch_size}\")\n    \n    def get_hardware_batch_limits(self, available_memory: float, pattern_map: Optional[Dict[str, Any]] = None) -> Tuple[int, int, int]:\n        \"\"\"\n        Determine appropriate batch size boundaries based on hardware capabilities."
+        },
+        "get_hardware_batch_limits": {
+          "start_line": 111,
+          "end_line": 346,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "available_memory",
+              "type": "float"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 126
+            },
+            {
+              "name": "get_load",
+              "line": 265
+            },
+            {
+              "name": "cognitive_efficiency",
+              "line": 266
+            },
+            {
+              "name": "logger.info",
+              "line": 267
+            },
+            {
+              "name": "logger.debug",
+              "line": 269
+            },
+            {
+              "name": "max",
+              "line": 314
+            },
+            {
+              "name": "int",
+              "line": 323
+            },
+            {
+              "name": "logger.info",
+              "line": 333
+            },
+            {
+              "name": "logger.info",
+              "line": 334
+            },
+            {
+              "name": "logger.info",
+              "line": 335
+            },
+            {
+              "name": "logger.info",
+              "line": 336
+            },
+            {
+              "name": "logger.error",
+              "line": 134
+            },
+            {
+              "name": "RuntimeError",
+              "line": 135
+            },
+            {
+              "name": "math.sqrt",
+              "line": 175
+            },
+            {
+              "name": "logger.info",
+              "line": 184
+            },
+            {
+              "name": "int",
+              "line": 205
+            },
+            {
+              "name": "math.sqrt",
+              "line": 227
+            },
+            {
+              "name": "max",
+              "line": 230
+            },
+            {
+              "name": "int",
+              "line": 237
+            },
+            {
+              "name": "get_load",
+              "line": 253
+            },
+            {
+              "name": "cognitive_efficiency",
+              "line": 254
+            },
+            {
+              "name": "isinstance",
+              "line": 273
+            },
+            {
+              "name": "logger.info",
+              "line": 319
+            },
+            {
+              "name": "logger.error",
+              "line": 341
+            },
+            {
+              "name": "logger.error",
+              "line": 342
+            },
+            {
+              "name": "logger.error",
+              "line": 343
+            },
+            {
+              "name": "RuntimeError",
+              "line": 344
+            },
+            {
+              "name": "isinstance",
+              "line": 132
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 150
+            },
+            {
+              "name": "torch.cuda.device_count",
+              "line": 150
+            },
+            {
+              "name": "math.exp",
+              "line": 179
+            },
+            {
+              "name": "math.sqrt",
+              "line": 189
+            },
+            {
+              "name": "os.cpu_count",
+              "line": 210
+            },
+            {
+              "name": "isinstance",
+              "line": 275
+            },
+            {
+              "name": "math.exp",
+              "line": 145
+            },
+            {
+              "name": "len",
+              "line": 275
+            },
+            {
+              "name": "float",
+              "line": 277
+            },
+            {
+              "name": "logger.info",
+              "line": 311
+            },
+            {
+              "name": "str",
+              "line": 340
+            },
+            {
+              "name": "complexities.values",
+              "line": 277
+            },
+            {
+              "name": "isinstance",
+              "line": 277
+            },
+            {
+              "name": "sum",
+              "line": 279
+            },
+            {
+              "name": "len",
+              "line": 279
+            },
+            {
+              "name": "max",
+              "line": 286
+            },
+            {
+              "name": "get_adjusted_load",
+              "line": 298
+            },
+            {
+              "name": "cognitive_efficiency",
+              "line": 299
+            }
+          ],
+          "docstring": "\n        Determine appropriate batch size boundaries based on hardware capabilities.\n        \n        Args:\n            available_memory: Available memory in bytes (with safety factor applied)\n            pattern_map: Optional pattern map for pattern complexity-aware sizing\n            \n        Returns:\n            Tuple of (min_batch_size, max_batch_size, initial_batch_size)\n            \n        Raises:\n            RuntimeError: If hardware detection fails or memory information is invalid\n        ",
+          "code_snippet": "        logger.info(f\"Initial batch size: {self.current_batch_size}\")\n    \n    def get_hardware_batch_limits(self, available_memory: float, pattern_map: Optional[Dict[str, Any]] = None) -> Tuple[int, int, int]:\n        \"\"\"\n        Determine appropriate batch size boundaries based on hardware capabilities.\n        \n        Args:\n            available_memory: Available memory in bytes (with safety factor applied)\n            pattern_map: Optional pattern map for pattern complexity-aware sizing\n            \n        Returns:\n            Tuple of (min_batch_size, max_batch_size, initial_batch_size)\n            \n        Raises:\n            RuntimeError: If hardware detection fails or memory information is invalid\n        \"\"\"\n        try:\n            logger.info(\"Calculating batch size boundaries based on hardware capabilities...\")\n            \n            # Use the pre-calculated available memory with safety factor already applied\n            free_memory = available_memory\n            \n            # Ensure we have a valid memory value\n            if not isinstance(free_memory, (int, float)) or free_memory <= 0:\n                error_msg = f\"Invalid free memory detected: {free_memory}. Cannot safely determine batch size boundaries.\"\n                logger.error(error_msg)\n                raise RuntimeError(error_msg)\n            \n            # Critical cognitive threshold (empirically validated from Section 5.3)\n            critical_threshold_lc = 8.0\n            \n            # Transition sharpness parameter (validated across 465 testing runs)\n            sigma = 0.8\n            \n            # The cognitive efficiency function as defined in Section 6.2\n            def cognitive_efficiency(load):\n                return 1.0 / (1.0 + math.exp((load - critical_threshold_lc) / sigma))\n            \n            # Set parameters based on hardware type\n            if self.is_gpu:\n                # Check if we have multiple GPUs\n                gpu_count = torch.cuda.device_count() if torch.cuda.is_available() else 1\n                \n                # GPU memory in GB for more intuitive scaling\n                gpu_memory_gb = free_memory / (1024**3)\n                \n                # Base relationship between batch size and cognitive load\n                # This is derived from the mathematical foundation document\n                # Cognitive load increases with batch size, following the relationship:\n                # L(batch_size) = L_base + \u03b1 * (batch_size / scaling_factor)\n                alpha = 0.15  # Load increase per normalized batch size unit\n                \n                # Base load factor - accounts for system complexity independent of batch size\n                # Higher for more complex systems/models\n                l_base = 2.0\n                \n                # Calculate scaling factor based on continuous vRAM function\n                # This is a more agnostic approach that works across all GPU types\n                # Base scaling that exists regardless of memory size\n                base_factor = 2.0\n                \n                # Critical threshold from mathematical foundation document\n                critical_threshold_lc = 8.0\n                \n                # Memory efficiency factor (diminishing returns)\n                # Using square root to represent sub-linear scaling\n                memory_factor = math.sqrt(gpu_memory_gb)\n                \n                # Memory utilization efficiency (decreases with size due to fragmentation)\n                # This exponential decay represents how larger memory becomes harder to fully utilize\n                memory_efficiency = 1.0 - math.exp(-gpu_memory_gb/32.0)\n                \n                # Calculate scaling factor that combines these elements\n                scaling_factor = base_factor + (critical_threshold_lc - l_base) * memory_factor * memory_efficiency\n                \n                logger.info(f\"Continuous vRAM-based scaling: Using {gpu_memory_gb:.1f}GB memory, calculated scaling factor: {scaling_factor:.2f}\")\n                    \n                # Multi-GPU scaling - additional resources reduce the cognitive load per batch\n                if gpu_count > 1:\n                    # Scale with diminishing returns as we add GPUs\n                    scaling_factor *= math.sqrt(gpu_count)\n                    \n                # Determine minimum viable batch size for GPU utilization\n                # This is the minimum that efficiently utilizes GPU resources\n                min_batch_size = 8\n                if gpu_memory_gb > 8:\n                    min_batch_size = 16\n                if gpu_count > 1:\n                    min_batch_size *= gpu_count  # Scale with available GPUs\n                    \n                # Function to calculate cognitive load for a given batch size\n                def get_load(batch_size):\n                    return l_base + alpha * (batch_size / scaling_factor)\n                \n                # Start with a conservative estimate based on memory\n                # This uses 6MB per sample as a baseline memory requirement\n                memory_max_batch = int(free_memory * 0.75 / (6 * 1024 * 1024))\n                \n            else:  # CPU calculation\n                # CPU parameters differ from GPU - different relationship between\n                # batch size and cognitive load due to architecture differences\n                cpu_count = os.cpu_count() or 2\n                cpu_memory_gb = free_memory / (1024**3)\n                \n                l_base = 3.0  # Higher base load on CPU due to shared resources\n                alpha = 0.25  # CPU cognitive load increases faster with batch size\n                \n                # CPU scaling factor - based on memory and core count\n                if cpu_memory_gb > 16:\n                    scaling_factor = 8.0\n                elif cpu_memory_gb > 8:\n                    scaling_factor = 6.0\n                elif cpu_memory_gb > 4:\n                    scaling_factor = 4.0\n                else:\n                    scaling_factor = 2.0\n                    \n                # Apply core count adjustment - more cores can handle larger batches\n                scaling_factor *= math.sqrt(cpu_count / 4)  # Normalized to 4 cores\n                \n                # Minimum batch size for CPU - based on ensuring enough parallelism\n                min_batch_size = max(4, cpu_count // 2)\n                \n                # Function to calculate cognitive load for a given batch size\n                def get_load(batch_size):\n                    return l_base + alpha * (batch_size / scaling_factor)\n                \n                # Memory-based upper limit\n                memory_max_batch = int(free_memory * 0.6 / (4 * 1024 * 1024))  # 4MB per sample\n            \n            # Calculate maximum batch size by finding the point where cognitive efficiency\n            # drops below a critical threshold on the sigmoidal curve from the paper\n            # This is based on the paper's cognitive efficiency function \u03c6(L) = 1/(1 + e^((L-L_c)/\u03c3))\n            # With critical_threshold_lc \u2248 8.0 and \u03c3 \u2248 0.8\n            critical_efficiency = 0.6  # Operating below the critical threshold for stability\n            \n                # Binary search to find the largest batch size where efficiency is above threshold\n            # Start with range from minimum to memory-limited maximum\n            # Using the sigmoidal efficiency curve from the paper\n            low, high = min_batch_size, memory_max_batch\n            max_batch_size = low\n            \n            while low <= high:\n                mid = (low + high) // 2\n                load = get_load(mid)\n                efficiency = cognitive_efficiency(load)\n                \n                if efficiency >= critical_efficiency:\n                    # This batch size is still efficient, try larger\n                    max_batch_size = mid\n                    low = mid + 1\n                else:\n                    # Too inefficient, try smaller\n                    high = mid - 1\n                    \n            # Log the transition point details for transparency\n            load_at_max = get_load(max_batch_size)\n            efficiency_at_max = cognitive_efficiency(load_at_max)\n            logger.info(f\"Maximum batch size determined at cognitive load {load_at_max:.2f} with efficiency {efficiency_at_max:.2f}\")\n            \n            logger.debug(f\"Memory-based batch sizing: {min_batch_size}-{max_batch_size} (free mem: {free_memory/(1024**3):.2f} GB)\")\n            \n            # Pattern complexity affects cognitive load - apply adjustment if pattern map is available\n            # (As described in Section 4.4 of the mathematical foundation)\n            if pattern_map and isinstance(pattern_map, dict) and 'pattern_complexities' in pattern_map:\n                complexities = pattern_map['pattern_complexities']\n                if complexities and isinstance(complexities, dict) and len(complexities) > 0:\n                    # Calculate average pattern complexity\n                    numeric_values = [float(v) for v in complexities.values() if isinstance(v, (int, float))]\n                    if numeric_values:\n                        avg_complexity = sum(numeric_values) / len(numeric_values)\n                        \n                        # Pattern complexity directly affects the cognitive load formula parameters\n                        # This follows the principle that more complex patterns increase cognitive load\n                        \n                        # Adjust the base load factor based on pattern complexity\n                        complexity_adjustment = (avg_complexity - 0.5) * 2.0  # Normalized adjustment\n                        adjusted_l_base = l_base + max(0.0, complexity_adjustment)\n                        \n                        # Function to calculate adjusted cognitive load\n                        def get_adjusted_load(batch_size):\n                            return adjusted_l_base + alpha * (batch_size / scaling_factor)\n                        \n                        # Recalculate maximum with adjusted load function\n                        low, high = min_batch_size, max_batch_size\n                        adjusted_max = low\n                        \n                        while low <= high:\n                            mid = (low + high) // 2\n                            load = get_adjusted_load(mid)\n                            efficiency = cognitive_efficiency(load)\n                            \n                            if efficiency >= critical_efficiency:\n                                adjusted_max = mid\n                                low = mid + 1\n                            else:\n                                high = mid - 1\n                        \n                        # Update max batch size with adjusted value\n                        reduction_factor = adjusted_max / max_batch_size\n                        max_batch_size = adjusted_max\n                        \n                        logger.info(f\"Adjusted batch size based on pattern complexity: new max={max_batch_size}, reduction factor={reduction_factor:.2f}\")\n            \n            # Ensure minimum batch size is at least 4 for stability and BatchNorm compatibility\n            min_batch_size = max(4, min_batch_size)\n            \n            # Ensure maximum batch size is at least twice the minimum\n            if max_batch_size < min_batch_size * 2:\n                max_batch_size = min_batch_size * 2\n                logger.info(f\"Adjusted maximum batch size to ensure sufficient range: min={min_batch_size}, max={max_batch_size}\")\n            \n            # Calculate initial batch size - start at 30% of max batch size\n            # Based on knowledge function K(t) allowing for dynamic growth during training\n            initial_batch_size = int(max_batch_size * 0.3)\n            \n            # For GPU, round to multiple of 8 for memory alignment efficiency\n            if self.is_gpu:\n                initial_batch_size = ((initial_batch_size + 7) // 8) * 8\n                if initial_batch_size > max_batch_size:\n                    initial_batch_size = (max_batch_size // 8) * 8\n                if initial_batch_size < min_batch_size:\n                    initial_batch_size = ((min_batch_size + 7) // 8) * 8\n                    \n            logger.info(f\"Hardware-determined batch size boundaries:\")\n            logger.info(f\"  Min batch size: {min_batch_size}\")\n            logger.info(f\"  Max batch size: {max_batch_size}\")\n            logger.info(f\"  Suggested initial: {initial_batch_size}\")\n            \n            return (min_batch_size, max_batch_size, initial_batch_size)\n        except Exception as e:\n            error_msg = f\"Failed to calculate hardware-aware batch size limits: {str(e)}\"\n            logger.error(error_msg)\n            logger.error(\"isekaiZen cannot continue without proper hardware detection.\")\n            logger.error(\"Please check your hardware configuration and try again.\")\n            raise RuntimeError(error_msg)\n        \n    def get_available_memory(self) -> float:\n        \"\"\"\n        Get available GPU or system memory."
+        },
+        "get_available_memory": {
+          "start_line": 346,
+          "end_line": 355,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "float",
+          "calls": [],
+          "docstring": "\n        Get available GPU or system memory.\n        \n        Returns:\n            float: Available memory in bytes (with safety margin applied)\n        ",
+          "code_snippet": "            raise RuntimeError(error_msg)\n        \n    def get_available_memory(self) -> float:\n        \"\"\"\n        Get available GPU or system memory.\n        \n        Returns:\n            float: Available memory in bytes (with safety margin applied)\n        \"\"\"\n        return self._available_memory\n    \n    def update_batch_size(self, train_loss: float, val_loss: float, \n                          pattern_metrics: Optional[Dict[str, Any]] = None,\n                          verbose: bool = False) -> int:"
+        },
+        "update_batch_size": {
+          "start_line": 355,
+          "end_line": 509,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_loss",
+              "type": "float"
+            },
+            {
+              "name": "val_loss",
+              "type": "float"
+            },
+            {
+              "name": "pattern_metrics"
+            },
+            {
+              "name": "verbose",
+              "type": "bool"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "self.loss_history.append",
+              "line": 371
+            },
+            {
+              "name": "self.val_loss_history.append",
+              "line": 372
+            },
+            {
+              "name": "int",
+              "line": 473
+            },
+            {
+              "name": "self._calculate_memory_limited_batch_size",
+              "line": 488
+            },
+            {
+              "name": "min",
+              "line": 489
+            },
+            {
+              "name": "max",
+              "line": 492
+            },
+            {
+              "name": "max",
+              "line": 493
+            },
+            {
+              "name": "self.batch_size_history.append",
+              "line": 505
+            },
+            {
+              "name": "pattern_metrics.get",
+              "line": 379
+            },
+            {
+              "name": "pattern_metrics.get",
+              "line": 380
+            },
+            {
+              "name": "abs",
+              "line": 390
+            },
+            {
+              "name": "max",
+              "line": 390
+            },
+            {
+              "name": "isinstance",
+              "line": 427
+            },
+            {
+              "name": "self._calculate_pattern_adjustment",
+              "line": 428
+            },
+            {
+              "name": "min",
+              "line": 493
+            },
+            {
+              "name": "logger.info",
+              "line": 387
+            },
+            {
+              "name": "logger.debug",
+              "line": 407
+            },
+            {
+              "name": "logger.info",
+              "line": 470
+            },
+            {
+              "name": "abs",
+              "line": 496
+            },
+            {
+              "name": "logger.info",
+              "line": 498
+            },
+            {
+              "name": "logger.debug",
+              "line": 414
+            },
+            {
+              "name": "logger.debug",
+              "line": 424
+            },
+            {
+              "name": "hasattr",
+              "line": 455
+            },
+            {
+              "name": "min",
+              "line": 457
+            },
+            {
+              "name": "logger.info",
+              "line": 483
+            },
+            {
+              "name": "logger.debug",
+              "line": 418
+            },
+            {
+              "name": "logger.info",
+              "line": 437
+            },
+            {
+              "name": "logger.info",
+              "line": 461
+            },
+            {
+              "name": "logger.info",
+              "line": 441
+            },
+            {
+              "name": "logger.info",
+              "line": 445
+            },
+            {
+              "name": "logger.info",
+              "line": 449
+            }
+          ],
+          "docstring": "\n        Update batch size based on training metrics and pattern performance.\n        \n        Args:\n            train_loss: Current training loss\n            val_loss: Current validation loss\n            pattern_metrics: Optional pattern performance metrics\n            verbose: Whether to print detailed information\n            \n        Returns:\n            Updated batch size\n        ",
+          "code_snippet": "        return self._available_memory\n    \n    def update_batch_size(self, train_loss: float, val_loss: float, \n                          pattern_metrics: Optional[Dict[str, Any]] = None,\n                          verbose: bool = False) -> int:\n        \"\"\"\n        Update batch size based on training metrics and pattern performance.\n        \n        Args:\n            train_loss: Current training loss\n            val_loss: Current validation loss\n            pattern_metrics: Optional pattern performance metrics\n            verbose: Whether to print detailed information\n            \n        Returns:\n            Updated batch size\n        \"\"\"\n        # Store history\n        self.loss_history.append(train_loss)\n        self.val_loss_history.append(val_loss)\n        self.epoch_counter += 1\n        \n        # Calculate the gap between train and validation loss\n        loss_gap = val_loss - train_loss\n        \n        # Check for train and validation accuracy in pattern_metrics\n        train_acc = pattern_metrics.get('train_acc', None) if pattern_metrics else None\n        val_acc = pattern_metrics.get('val_acc', None) if pattern_metrics else None\n        \n        # Calculate train-test accuracy gap if available\n        train_test_gap = None\n        if train_acc is not None and val_acc is not None:\n            train_test_gap = train_acc - val_acc\n            if verbose:\n                logger.info(f\"Train-test accuracy gap: {train_test_gap:.2f}%\")\n        \n        # Check for convergence (small changes in loss)\n        loss_change = abs(train_loss - self.previous_loss) / max(0.001, self.previous_loss)\n        self.previous_loss = train_loss\n        \n        if loss_change < self.convergence_threshold:\n            self.stagnation_counter += 1\n        else:\n            self.stagnation_counter = 0\n        \n        # Initialize adjustment factor and protection flag\n        adjustment_factor = 1.0\n        prevent_batch_decrease = False\n        \n        # Early training phase - increase batch size gradually\n        if self.epoch_counter < 0.2 * self.total_epochs:\n            if loss_gap < 0.1 and self.epochs_since_change > 2:\n                # Training is stable, gradually increase batch size\n                adjustment_factor = 1.2\n                logger.debug(f\"Early phase - stable training, increasing batch size: {adjustment_factor}x\")\n        \n        # Middle training phase - optimize based on gap and convergence\n        elif self.epoch_counter < 0.7 * self.total_epochs:\n            if loss_gap > 0.3:  # Large gap indicates potential overfitting\n                # Reduce batch size to improve generalization\n                adjustment_factor = 0.8\n                logger.debug(f\"Middle phase - large gap, reducing batch size: {adjustment_factor}x\")\n            elif self.stagnation_counter > 2:  # Training has stagnated\n                # Increase batch size to escape local minima (more aggressive)\n                adjustment_factor = 1.25  # Changed from 1.3 to 1.25 for consistency\n                logger.debug(f\"Middle phase - stagnation detected, increasing batch size more aggressively: {adjustment_factor}x\")\n        \n        # Late training phase - fine-tuning adjustments\n        else:\n            if loss_gap > 0.2:  # Focus on reducing generalization gap\n                adjustment_factor = 0.9\n                logger.debug(f\"Late phase - reducing batch size for better generalization: {adjustment_factor}x\")\n        \n        # Modify adjustment based on pattern metrics if available\n        if pattern_metrics and isinstance(pattern_metrics, dict):\n            pattern_factor = self._calculate_pattern_adjustment(pattern_metrics)\n            adjustment_factor *= pattern_factor\n            \n            # Additional adjustment based on train-test accuracy gap\n            if train_test_gap is not None:\n                # Apply progressively stronger adjustments based on gap direction and magnitude\n                if train_test_gap > 3.0:  # Very large gap (severe overfitting)\n                    gap_factor = 0.6  # More aggressive reduction\n                    if verbose:\n                        logger.info(f\"Large train-test gap ({train_test_gap:.2f}%) detected - applying strong batch reduction: {gap_factor:.2f}x\")\n                elif train_test_gap > 2.0:  # Significant gap\n                    gap_factor = 0.7  # More aggressive than before\n                    if verbose:\n                        logger.info(f\"Significant train-test gap ({train_test_gap:.2f}%) detected - reducing batch size: {gap_factor:.2f}x\")\n                elif train_test_gap > 1.0:  # Moderate gap\n                    gap_factor = 0.85  # Same as before\n                    if verbose:\n                        logger.info(f\"Moderate train-test gap ({train_test_gap:.2f}%) detected - slightly reducing batch size: {gap_factor:.2f}x\")\n                elif train_test_gap < -1.0:  # Underfitting (validation acc > training acc)\n                    gap_factor = 1.15  # Increase batch size during underfitting\n                    if verbose:\n                        logger.info(f\"Underfitting detected ({train_test_gap:.2f}%) - increasing batch size: {gap_factor:.2f}x\")\n                else:  # Small gap, no additional adjustment\n                    gap_factor = 1.0\n                    \n                # Add knowledge-based factor (simulate K(t) from the framework)\n                # As training progresses, gradually reduce batch size\n                if self.epoch_counter > 0 and hasattr(self, 'total_epochs') and self.total_epochs > 0:\n                    progress = self.epoch_counter / self.total_epochs\n                    k_t = min(0.95, progress * 1.5)  # Approximate K(t) based on progress\n                    knowledge_factor = 1.0 - 0.2 * (k_t / (1.0 + k_t))\n                    \n                    if verbose and progress > 0.2:  # Only log once we have meaningful progress\n                        logger.info(f\"Training progress: {progress:.2f}, K(t)\u2248{k_t:.2f}, knowledge factor: {knowledge_factor:.2f}x\")\n                        \n                    # Blend the gap factor with knowledge factor\n                    gap_factor = gap_factor * (0.8 + 0.2 * knowledge_factor)  # 80% gap-based, 20% knowledge-based\n                \n                # Apply the gap-based adjustment\n                adjustment_factor *= gap_factor\n            \n            if verbose:\n                logger.info(f\"Applied pattern-based adjustment: {pattern_factor:.2f}x\")\n        \n        # Calculate new batch size\n        new_batch_size = int(self.current_batch_size * adjustment_factor)\n        \n        # Simple underfitting check - if val_acc > train_acc, prevent batch size decrease\n        if pattern_metrics and 'train_acc' in pattern_metrics and 'val_acc' in pattern_metrics:\n            train_acc = pattern_metrics['train_acc']\n            val_acc = pattern_metrics['val_acc']\n            \n            # Clear case of underfitting - NEVER decrease batch size\n            if val_acc > train_acc and new_batch_size < self.current_batch_size:\n                if verbose:\n                    logger.info(f\"Underfitting detected (train: {train_acc:.2f}%, val: {val_acc:.2f}%) - preventing batch size decrease\")\n                # Keep current batch size instead of decreasing\n                new_batch_size = self.current_batch_size\n        \n        # Apply hardware constraints (use existing memory info)\n        max_memory_batch_size = self._calculate_memory_limited_batch_size(self._available_memory)\n        new_batch_size = min(new_batch_size, max_memory_batch_size)\n        \n        # Apply min/max constraints - ensure at least 2 samples for BatchNorm\n        min_batch = max(self.min_batch_size, 2)  # Minimum of 2 to prevent BatchNorm errors\n        new_batch_size = max(min_batch, min(self.max_batch_size, new_batch_size))\n        \n        # Only change if there's a significant difference (>10%)\n        if (abs(new_batch_size - self.current_batch_size) / self.current_batch_size) > 0.1:\n            if verbose:\n                logger.info(f\"Updating batch size: {self.current_batch_size} -> {new_batch_size}\")\n            self.current_batch_size = new_batch_size\n            self.epochs_since_change = 0\n        else:\n            self.epochs_since_change += 1\n        \n        # Store in history\n        self.batch_size_history.append(self.current_batch_size)\n        \n        return self.current_batch_size\n    \n    def _calculate_pattern_adjustment(self, pattern_metrics: Dict[str, Any]) -> float:\n        \"\"\"\n        Calculate batch size adjustment factor based on pattern metrics."
+        },
+        "_calculate_pattern_adjustment": {
+          "start_line": 509,
+          "end_line": 546,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_metrics"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "logger.debug",
+              "line": 530
+            },
+            {
+              "name": "len",
+              "line": 528
+            },
+            {
+              "name": "sum",
+              "line": 529
+            },
+            {
+              "name": "len",
+              "line": 529
+            },
+            {
+              "name": "len",
+              "line": 537
+            },
+            {
+              "name": "ratios.values",
+              "line": 529
+            },
+            {
+              "name": "len",
+              "line": 540
+            }
+          ],
+          "docstring": "\n        Calculate batch size adjustment factor based on pattern metrics.\n        NOTE: Risk/accuracy ratios are tracked but no longer influence batch sizing.\n        \n        Args:\n            pattern_metrics: Dictionary of pattern metrics\n            \n        Returns:\n            float: Adjustment factor for batch size\n        ",
+          "code_snippet": "        return self.current_batch_size\n    \n    def _calculate_pattern_adjustment(self, pattern_metrics: Dict[str, Any]) -> float:\n        \"\"\"\n        Calculate batch size adjustment factor based on pattern metrics.\n        NOTE: Risk/accuracy ratios are tracked but no longer influence batch sizing.\n        \n        Args:\n            pattern_metrics: Dictionary of pattern metrics\n            \n        Returns:\n            float: Adjustment factor for batch size\n        \"\"\"\n        # Default to no adjustment\n        adjustment = 1.0\n        \n        # Log risk/accuracy ratios for tracking purposes only\n        if 'risk_accuracy_ratios' in pattern_metrics:\n            ratios = pattern_metrics['risk_accuracy_ratios']\n            \n            # Calculate average ratio across patterns (for logging only)\n            if ratios and len(ratios) > 0:\n                avg_ratio = sum(ratios.values()) / len(ratios)\n                logger.debug(f\"Average risk/accuracy ratio: {avg_ratio:.3f} (no longer affects batch sizing)\")\n        \n        # Check for patterns outside equilibrium bounds\n        if 'patterns_below_min' in pattern_metrics and 'patterns_above_max' in pattern_metrics:\n            below_min = pattern_metrics['patterns_below_min']\n            above_max = pattern_metrics['patterns_above_max']\n            \n            if below_min and len(below_min) > 0:\n                # Patterns below min bound - decrease batch size to focus learning\n                adjustment = 0.9\n            elif above_max and len(above_max) > 0:\n                # Patterns above max bound - potential overfitting, increase batch size\n                adjustment = 1.1\n        \n        return adjustment\n    \n    def _calculate_memory_limited_batch_size(self, available_memory: float) -> int:\n        \"\"\"\n        Calculate the maximum batch size based on available memory."
+        },
+        "_calculate_memory_limited_batch_size": {
+          "start_line": 546,
+          "end_line": 583,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "available_memory",
+              "type": "float"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "int",
+              "line": 575
+            },
+            {
+              "name": "min",
+              "line": 578
+            },
+            {
+              "name": "logger.debug",
+              "line": 580
+            },
+            {
+              "name": "logger.error",
+              "line": 562
+            },
+            {
+              "name": "RuntimeError",
+              "line": 563
+            },
+            {
+              "name": "isinstance",
+              "line": 560
+            }
+          ],
+          "docstring": "\n        Calculate the maximum batch size based on available memory.\n        \n        Args:\n            available_memory: Available memory in bytes (with safety factor applied)\n            \n        Returns:\n            int: Maximum batch size allowed by memory constraints\n            \n        Raises:\n            RuntimeError: If memory calculation fails\n        ",
+          "code_snippet": "        return adjustment\n    \n    def _calculate_memory_limited_batch_size(self, available_memory: float) -> int:\n        \"\"\"\n        Calculate the maximum batch size based on available memory.\n        \n        Args:\n            available_memory: Available memory in bytes (with safety factor applied)\n            \n        Returns:\n            int: Maximum batch size allowed by memory constraints\n            \n        Raises:\n            RuntimeError: If memory calculation fails\n        \"\"\"\n        # Estimate based on available memory with safety margin\n        if not isinstance(available_memory, (int, float)) or available_memory <= 0:\n            error_msg = f\"Invalid memory value for batch size calculation: {available_memory}\"\n            logger.error(error_msg)\n            raise RuntimeError(error_msg)\n        \n        # Use mathematical model based on device type\n        if self.is_gpu:\n            # For GPU, account for memory fragmentation and CUDA overhead\n            # These values are derived from empirical testing and memory profiling\n            bytes_per_sample = 5e6  # Memory footprint per sample including forward/backward passes\n        else:\n            # For CPU, memory utilization is more linear but still needs headroom\n            bytes_per_sample = 1e6  # Lower for CPU operation due to different memory management\n        \n        max_samples = available_memory / bytes_per_sample\n        memory_limited_batch_size = int(max_samples)\n        \n        # Cap at configured maximum from hardware detection\n        memory_limited_batch_size = min(memory_limited_batch_size, self.max_batch_size)\n        \n        logger.debug(f\"Memory-limited maximum batch size: {memory_limited_batch_size}\")\n        return memory_limited_batch_size\n    \n    def get_batch_size_history(self) -> list:\n        \"\"\"\n        Get the history of batch sizes used during training."
+        },
+        "get_batch_size_history": {
+          "start_line": 583,
+          "end_line": 592,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "list",
+          "calls": [],
+          "docstring": "\n        Get the history of batch sizes used during training.\n        \n        Returns:\n            list: Batch size history\n        ",
+          "code_snippet": "        return memory_limited_batch_size\n    \n    def get_batch_size_history(self) -> list:\n        \"\"\"\n        Get the history of batch sizes used during training.\n        \n        Returns:\n            list: Batch size history\n        \"\"\"\n        return self.batch_size_history\n    \n    def reset(self) -> None:\n        \"\"\"\n        Reset the optimizer state to initial values."
+        },
+        "reset": {
+          "start_line": 592,
+          "end_line": 606,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "float",
+              "line": 602
+            },
+            {
+              "name": "logger.info",
+              "line": 604
+            }
+          ],
+          "docstring": "\n        Reset the optimizer state to initial values.\n        ",
+          "code_snippet": "        return self.batch_size_history\n    \n    def reset(self) -> None:\n        \"\"\"\n        Reset the optimizer state to initial values.\n        \"\"\"\n        self.current_batch_size = self.initial_batch_size\n        self.batch_size_history = [self.initial_batch_size]\n        self.loss_history = []\n        self.val_loss_history = []\n        self.epochs_since_change = 0\n        self.epoch_counter = 0\n        self.previous_loss = float('inf')\n        self.stagnation_counter = 0\n        logger.info(f\"BatchSizeOptimizer reset to initial state (batch size: {self.initial_batch_size})\")"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Optimizes batch size based on pattern performance metrics,\n    hardware constraints, and cognitive efficiency principles.\n    \n    This class implements the batch size optimization algorithm described in\n    the isekaiZen mathematical foundation document, adjusting batch sizes\n    dynamically during training to maximize training efficiency.\n    \n    Attributes:\n        min_batch_size: Minimum allowable batch size\n        max_batch_size: Maximum allowable batch size\n        current_batch_size: Current batch size\n        initial_batch_size: Initial batch size\n        total_epochs: Total number of epochs for the training\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

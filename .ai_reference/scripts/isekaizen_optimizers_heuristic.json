@@ -1,0 +1,245 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\optimizers\\heuristic.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 7
+    },
+    {
+      "name": "random",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "typing.Union",
+      "line": 10
+    },
+    {
+      "name": "typing.Optional",
+      "line": 10
+    },
+    {
+      "name": "typing.Dict",
+      "line": 10
+    },
+    {
+      "name": "typing.List",
+      "line": 10
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 10
+    },
+    {
+      "name": "typing.Any",
+      "line": 10
+    },
+    {
+      "name": "core.optimizers.BatchSizeSelector",
+      "line": 11
+    }
+  ],
+  "classes": {
+    "HeuristicBatchSelector": {
+      "start_line": 15,
+      "end_line": 171,
+      "methods": {
+        "__init__": {
+          "start_line": 24,
+          "end_line": 64,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "min_batch",
+              "type": "int"
+            },
+            {
+              "name": "max_batch",
+              "type": "int"
+            },
+            {
+              "name": "method",
+              "type": "str"
+            },
+            {
+              "name": "initial_batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 44
+            },
+            {
+              "name": "float",
+              "line": 56
+            },
+            {
+              "name": "logger.info",
+              "line": 62
+            },
+            {
+              "name": "logger.warning",
+              "line": 51
+            },
+            {
+              "name": "super",
+              "line": 44
+            }
+          ],
+          "docstring": "\n        Initialize the heuristic batch optimizer.\n        \n        Args:\n            model: PyTorch model\n            device: Target device\n            min_batch: Minimum batch size\n            max_batch: Maximum batch size\n            method: Heuristic method to use\n            initial_batch_size: Initial batch size (default: min_batch * 2)\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self, \n        model: torch.nn.Module, \n        device: Optional[torch.device] = None,\n        min_batch: int = 4,\n        max_batch: int = 512,\n        method: str = \"gradient-based\",\n        initial_batch_size: Optional[int] = None\n    ):\n        \"\"\"\n        Initialize the heuristic batch optimizer.\n        \n        Args:\n            model: PyTorch model\n            device: Target device\n            min_batch: Minimum batch size\n            max_batch: Maximum batch size\n            method: Heuristic method to use\n            initial_batch_size: Initial batch size (default: min_batch * 2)\n        \"\"\"\n        super().__init__(model, device, min_batch, max_batch)\n        \n        self.method = method\n        \n        # Validate method\n        valid_methods = [\"gradient-based\", \"loss-based\", \"memory-based\"]\n        if method not in valid_methods:\n            logger.warning(f\"Unknown method '{method}'. Using 'gradient-based' instead.\")\n            self.method = \"gradient-based\"\n        \n        # Training state tracking\n        self.last_gradient_norm = 0.0\n        self.last_loss = float('inf')\n        self.loss_history = []\n        self.batch_size_history = []\n        \n        # Initial batch size (start conservative)\n        self.current_batch_size = initial_batch_size or min_batch * 2\n        logger.info(f\"Initialized heuristic batch optimizer ({method}) with initial batch size: {self.current_batch_size}\")\n    \n    def update_training_state(self, loss: float, gradient_norm: float):\n        \"\"\"\n        Update internal state based on current training metrics."
+        },
+        "update_training_state": {
+          "start_line": 64,
+          "end_line": 80,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "loss",
+              "type": "float"
+            },
+            {
+              "name": "gradient_norm",
+              "type": "float"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.loss_history.append",
+              "line": 72
+            },
+            {
+              "name": "len",
+              "line": 73
+            },
+            {
+              "name": "self.loss_history.pop",
+              "line": 74
+            }
+          ],
+          "docstring": "\n        Update internal state based on current training metrics.\n        \n        Args:\n            loss: Current loss value\n            gradient_norm: Norm of current gradients\n        ",
+          "code_snippet": "        logger.info(f\"Initialized heuristic batch optimizer ({method}) with initial batch size: {self.current_batch_size}\")\n    \n    def update_training_state(self, loss: float, gradient_norm: float):\n        \"\"\"\n        Update internal state based on current training metrics.\n        \n        Args:\n            loss: Current loss value\n            gradient_norm: Norm of current gradients\n        \"\"\"\n        self.loss_history.append(loss)\n        if len(self.loss_history) > 10:\n            self.loss_history.pop(0)\n            \n        self.last_gradient_norm = gradient_norm\n        self.last_loss = loss\n        self.iteration += 1\n    \n    def get_optimal_batch_size(self) -> int:\n        \"\"\"\n        Calculate the current optimal batch size based on heuristics."
+        },
+        "get_optimal_batch_size": {
+          "start_line": 80,
+          "end_line": 166,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "max",
+              "line": 158
+            },
+            {
+              "name": "self.batch_size_history.append",
+              "line": 162
+            },
+            {
+              "name": "min",
+              "line": 158
+            },
+            {
+              "name": "int",
+              "line": 98
+            },
+            {
+              "name": "int",
+              "line": 101
+            },
+            {
+              "name": "len",
+              "line": 110
+            },
+            {
+              "name": "int",
+              "line": 118
+            },
+            {
+              "name": "int",
+              "line": 121
+            },
+            {
+              "name": "int",
+              "line": 147
+            },
+            {
+              "name": "random.choice",
+              "line": 152
+            },
+            {
+              "name": "int",
+              "line": 153
+            },
+            {
+              "name": "torch.cuda.memory_allocated",
+              "line": 131
+            },
+            {
+              "name": "int",
+              "line": 138
+            },
+            {
+              "name": "torch.cuda.get_device_properties",
+              "line": 132
+            },
+            {
+              "name": "int",
+              "line": 141
+            }
+          ],
+          "docstring": "\n        Calculate the current optimal batch size based on heuristics.\n        \n        Returns:\n            Current optimal batch size\n        ",
+          "code_snippet": "        self.iteration += 1\n    \n    def get_optimal_batch_size(self) -> int:\n        \"\"\"\n        Calculate the current optimal batch size based on heuristics.\n        \n        Returns:\n            Current optimal batch size\n        \"\"\"\n        # Different heuristic methods for batch size adjustment\n        if self.method == \"gradient-based\":\n            # Common approach: adjust based on gradient norm\n            # If gradients are too small, increase batch size\n            # If gradients are too large, decrease batch size\n            if self.iteration < 5:\n                # Not enough data, stick with current\n                return self.current_batch_size\n            \n            if self.last_gradient_norm < 0.1:\n                # Gradients too small, increase batch size\n                new_size = int(self.current_batch_size * 1.2)\n            elif self.last_gradient_norm > 10.0:\n                # Gradients too large, decrease batch size\n                new_size = int(self.current_batch_size * 0.8)\n            else:\n                # Keep current size\n                new_size = self.current_batch_size\n                \n        elif self.method == \"loss-based\":\n            # Adjust based on changes in loss\n            # If loss is decreasing, try larger batches\n            # If loss stagnates or increases, try smaller batches\n            if len(self.loss_history) < 5:\n                # Not enough data, stick with current\n                return self.current_batch_size\n                \n            # Calculate average trend\n            recent_losses = self.loss_history[-5:]\n            if recent_losses[0] > recent_losses[-1] * 1.01:\n                # Loss decreasing, try larger batches\n                new_size = int(self.current_batch_size * 1.1)\n            elif recent_losses[0] * 1.01 < recent_losses[-1]:\n                # Loss increasing, try smaller batches\n                new_size = int(self.current_batch_size * 0.9)\n            else:\n                # Loss stable, keep size\n                new_size = self.current_batch_size\n                \n        elif self.method == \"memory-based\":\n            # Simple memory-based approach\n            # Try to use as much memory as possible without OOM errors\n            if self.device.type == \"cuda\":\n                # Check current memory usage\n                used_memory = torch.cuda.memory_allocated(self.device) / (1024**3)  # GB\n                total_memory = torch.cuda.get_device_properties(self.device).total_memory / (1024**3)  # GB\n                \n                memory_utilization = used_memory / total_memory\n                \n                if memory_utilization < 0.5:\n                    # Memory utilization low, increase batch size\n                    new_size = int(self.current_batch_size * 1.3)\n                elif memory_utilization > 0.85:\n                    # Memory utilization high, decrease batch size\n                    new_size = int(self.current_batch_size * 0.7)\n                else:\n                    # Memory utilization acceptable, keep size\n                    new_size = self.current_batch_size\n            else:\n                # For CPU, gradually increase\n                new_size = int(self.current_batch_size * 1.05)\n        else:\n            # Default: simple periodic adjustment\n            if self.iteration % 10 == 0:\n                # Every 10 iterations, try a new batch size\n                adjustment = random.choice([0.9, 1.0, 1.1])\n                new_size = int(self.current_batch_size * adjustment)\n            else:\n                new_size = self.current_batch_size\n        \n        # Enforce min/max bounds\n        new_size = max(self.min_batch, min(self.max_batch, new_size))\n        \n        # Update current size\n        self.current_batch_size = new_size\n        self.batch_size_history.append(new_size)\n        \n        return new_size\n        \n    def increment_epoch(self):\n        \"\"\"Increment the epoch counter\"\"\"\n        super().increment_epoch()"
+        },
+        "increment_epoch": {
+          "start_line": 166,
+          "end_line": 171,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....increment_epoch",
+              "line": 168
+            },
+            {
+              "name": "super",
+              "line": 168
+            }
+          ],
+          "docstring": "Increment the epoch counter",
+          "code_snippet": "        return new_size\n        \n    def increment_epoch(self):\n        \"\"\"Increment the epoch counter\"\"\"\n        super().increment_epoch()\n        self.iteration = 0  # Reset iteration counter for the new epoch"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "BatchSizeSelector"
+      ],
+      "docstring": "\n    Implements common heuristic approaches to dynamic batch sizing.\n    \n    This represents industry standard approaches to batch size selection\n    based on various metrics like gradient norms, loss values, or memory usage.\n    Not using the IsekaiZen optimization framework.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

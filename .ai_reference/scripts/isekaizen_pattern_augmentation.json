@@ -1,0 +1,876 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\pattern\\augmentation.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "numpy",
+      "line": 9
+    },
+    {
+      "name": "logging",
+      "line": 10
+    },
+    {
+      "name": "random",
+      "line": 11
+    },
+    {
+      "name": "typing.Dict",
+      "line": 12
+    },
+    {
+      "name": "typing.List",
+      "line": 12
+    },
+    {
+      "name": "typing.Any",
+      "line": 12
+    },
+    {
+      "name": "typing.Optional",
+      "line": 12
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 12
+    },
+    {
+      "name": "typing.Set",
+      "line": 12
+    },
+    {
+      "name": "isekaizen.core.cortex.semantic_core.SemanticType",
+      "line": 14
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 15
+    },
+    {
+      "name": "PIL.Image",
+      "line": 16
+    },
+    {
+      "name": "time",
+      "line": 121
+    },
+    {
+      "name": "time",
+      "line": 420
+    },
+    {
+      "name": "random",
+      "line": 445
+    },
+    {
+      "name": "isekaizen.utils.pattern_map_utils.translate_pattern_map_to_standard_format",
+      "line": 40
+    },
+    {
+      "name": "PIL.ImageFilter",
+      "line": 374
+    }
+  ],
+  "classes": {
+    "PatternResponsiveAugmenter": {
+      "start_line": 20,
+      "end_line": 493,
+      "methods": {
+        "__init__": {
+          "start_line": 29,
+          "end_line": 69,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "device"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "set",
+              "line": 52
+            },
+            {
+              "name": "self._extract_pattern_types",
+              "line": 53
+            },
+            {
+              "name": "torch.device",
+              "line": 49
+            },
+            {
+              "name": "translate_pattern_map_to_standard_format",
+              "line": 41
+            },
+            {
+              "name": "logger.info",
+              "line": 42
+            },
+            {
+              "name": "logger.error",
+              "line": 44
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 49
+            },
+            {
+              "name": "str",
+              "line": 44
+            }
+          ],
+          "docstring": "\n        Initialize the pattern-responsive augmenter.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            device: Computation device\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, pattern_map=None, device=None):\n        \"\"\"\n        Initialize the pattern-responsive augmenter.\n        \n        Args:\n            pattern_map: Pattern map containing pattern information\n            device: Computation device\n        \"\"\"\n        # Check if pattern map needs conversion to standardized format\n        if pattern_map and 'format_version' not in pattern_map:\n            try:\n                from isekaizen.utils.pattern_map_utils import translate_pattern_map_to_standard_format\n                self.pattern_map = translate_pattern_map_to_standard_format(pattern_map)\n                logger.info(\"Pattern map converted to standardized format for augmentation\")\n            except Exception as e:\n                logger.error(f\"Failed to convert pattern map: {str(e)}, using original\")\n                self.pattern_map = pattern_map or {}\n        else:\n            self.pattern_map = pattern_map or {}\n            \n        self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Track pattern types from map\n        self.pattern_types = set()\n        self._extract_pattern_types()\n        \n        # Initialize augmentation strategies\n        self.augmentation_strategies = {\n            'structural': self._augment_structural_pattern,\n            'statistical': self._augment_statistical_pattern,\n            'temporal': self._augment_temporal_pattern\n        }\n        \n        # Metrics tracking\n        self.metrics = {\n            \"total_augmentations\": 0,\n            \"augmentations_by_pattern\": {},\n            \"time_spent_augmenting\": 0.0,\n            \"using_standardized_map\": 'format_version' in self.pattern_map\n        }\n    \n    def _extract_pattern_types(self):\n        \"\"\"Extract pattern types from pattern map\"\"\""
+        },
+        "_extract_pattern_types": {
+          "start_line": 70,
+          "end_line": 104,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 102
+            },
+            {
+              "name": "set",
+              "line": 93
+            },
+            {
+              "name": "set",
+              "line": 81
+            },
+            {
+              "name": "logger.info",
+              "line": 82
+            },
+            {
+              "name": "distribution.keys",
+              "line": 93
+            },
+            {
+              "name": "set",
+              "line": 97
+            },
+            {
+              "name": "....keys",
+              "line": 81
+            },
+            {
+              "name": "set",
+              "line": 85
+            },
+            {
+              "name": "logger.info",
+              "line": 86
+            },
+            {
+              "name": "distribution.keys",
+              "line": 97
+            },
+            {
+              "name": "....keys",
+              "line": 85
+            }
+          ],
+          "docstring": "Extract pattern types from pattern map",
+          "code_snippet": "        }\n    \n    def _extract_pattern_types(self):\n        \"\"\"Extract pattern types from pattern map\"\"\"\n        if not self.pattern_map:\n            # Default pattern types\n            self.pattern_types = {\"structural\", \"statistical\", \"temporal\"}\n            return\n            \n        # Check if we have a standardized pattern map\n        if 'format_version' in self.pattern_map:\n            # Use standardized format fields\n            if 'pattern_distribution' in self.pattern_map:\n                self.pattern_types = set(self.pattern_map['pattern_distribution'].keys())\n                logger.info(f\"Extracted pattern types from standardized map: {self.pattern_types}\")\n                return\n            elif 'pattern_risks' in self.pattern_map:\n                self.pattern_types = set(self.pattern_map['pattern_risks'].keys())\n                logger.info(f\"Extracted pattern types from standardized risks: {self.pattern_types}\")\n                return\n        \n        # Try legacy pattern map formats\n        if 'pattern_distribution' in self.pattern_map:\n            # Format 1: Direct pattern_distribution at root level\n            distribution = self.pattern_map['pattern_distribution']\n            self.pattern_types = set(distribution.keys())\n        elif 'pattern_map' in self.pattern_map and 'pattern_distribution' in self.pattern_map['pattern_map']:\n            # Format 2: Nested pattern_distribution\n            distribution = self.pattern_map['pattern_map']['pattern_distribution']\n            self.pattern_types = set(distribution.keys())\n        else:\n            # Default pattern types if no structure found\n            self.pattern_types = {\"structural\", \"statistical\", \"temporal\"}\n            \n        logger.info(f\"Extracted pattern types: {self.pattern_types}\")\n    \n    def augment_dataset(self, \n                       dataset, \n                       responsive_patterns: Set[str], "
+        },
+        "augment_dataset": {
+          "start_line": 104,
+          "end_line": 181,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "responsive_patterns"
+            },
+            {
+              "name": "count_per_pattern",
+              "type": "int"
+            },
+            {
+              "name": "max_total"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 122
+            },
+            {
+              "name": "self._find_pattern_examples",
+              "line": 125
+            },
+            {
+              "name": "time.time",
+              "line": 175
+            },
+            {
+              "name": "logger.info",
+              "line": 178
+            },
+            {
+              "name": "min",
+              "line": 141
+            },
+            {
+              "name": "logger.info",
+              "line": 144
+            },
+            {
+              "name": "logger.info",
+              "line": 168
+            },
+            {
+              "name": "random.sample",
+              "line": 172
+            },
+            {
+              "name": "len",
+              "line": 141
+            },
+            {
+              "name": "len",
+              "line": 171
+            },
+            {
+              "name": "int",
+              "line": 153
+            },
+            {
+              "name": "len",
+              "line": 178
+            },
+            {
+              "name": "len",
+              "line": 144
+            },
+            {
+              "name": "augmented_examples.append",
+              "line": 159
+            }
+          ],
+          "docstring": "\n        Augment dataset based on responsive patterns.\n        \n        Args:\n            dataset: PyTorch dataset to augment\n            responsive_patterns: Set of pattern types the model responds well to\n            count_per_pattern: Number of augmentations per pattern type\n            max_total: Maximum total augmentations to add\n            \n        Returns:\n            List of augmented examples (features, labels)\n        ",
+          "code_snippet": "        logger.info(f\"Extracted pattern types: {self.pattern_types}\")\n    \n    def augment_dataset(self, \n                       dataset, \n                       responsive_patterns: Set[str], \n                       count_per_pattern: int = 50,\n                       max_total: Optional[int] = None) -> List[Tuple]:\n        \"\"\"\n        Augment dataset based on responsive patterns.\n        \n        Args:\n            dataset: PyTorch dataset to augment\n            responsive_patterns: Set of pattern types the model responds well to\n            count_per_pattern: Number of augmentations per pattern type\n            max_total: Maximum total augmentations to add\n            \n        Returns:\n            List of augmented examples (features, labels)\n        \"\"\"\n        import time\n        start_time = time.time()\n        \n        # Find examples for each pattern type\n        pattern_examples = self._find_pattern_examples(responsive_patterns)\n        \n        # Initialize augmented examples list\n        augmented_examples = []\n        \n        # Counts for limiting per pattern\n        augmentation_counts = {pattern: 0 for pattern in responsive_patterns}\n        \n        # Process each pattern type\n        for pattern_type in responsive_patterns:\n            if pattern_type not in pattern_examples:\n                continue\n                \n            examples = pattern_examples[pattern_type]\n            \n            # Limit examples to process\n            max_to_process = min(len(examples), count_per_pattern * 2)  # Process more to account for failures\n            examples_to_process = examples[:max_to_process]\n            \n            logger.info(f\"Augmenting {len(examples_to_process)} examples for pattern: {pattern_type}\")\n            \n            # Process each example\n            for example_idx in examples_to_process:\n                # Stop if we've reached our limit for this pattern\n                if augmentation_counts[pattern_type] >= count_per_pattern:\n                    break\n                    \n                # Get the example\n                example, label = dataset[int(example_idx)]\n                \n                # Apply pattern-specific augmentation\n                if pattern_type in self.augmentation_strategies:\n                    augmented = self.augmentation_strategies[pattern_type](example, label)\n                    if augmented:\n                        augmented_examples.append(augmented)\n                        augmentation_counts[pattern_type] += 1\n                        \n                        # Update metrics\n                        self.metrics[\"total_augmentations\"] += 1\n                        if pattern_type not in self.metrics[\"augmentations_by_pattern\"]:\n                            self.metrics[\"augmentations_by_pattern\"][pattern_type] = 0\n                        self.metrics[\"augmentations_by_pattern\"][pattern_type] += 1\n            \n            logger.info(f\"Created {augmentation_counts[pattern_type]} augmentations for pattern: {pattern_type}\")\n        \n        # Apply maximum limit if specified\n        if max_total and len(augmented_examples) > max_total:\n            augmented_examples = random.sample(augmented_examples, max_total)\n        \n        # Update time metrics\n        end_time = time.time()\n        self.metrics[\"time_spent_augmenting\"] += (end_time - start_time)\n        \n        logger.info(f\"Augmentation complete. Created {len(augmented_examples)} new examples in {end_time - start_time:.2f}s\")\n        return augmented_examples\n    \n    def _find_pattern_examples(self, pattern_types: Set[str]) -> Dict[str, List[str]]:\n        \"\"\"\n        Find examples for each pattern type."
+        },
+        "_find_pattern_examples": {
+          "start_line": 181,
+          "end_line": 257,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_types"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "pattern_examples.items",
+              "line": 252
+            },
+            {
+              "name": "logger.warning",
+              "line": 195
+            },
+            {
+              "name": "self._find_examples_from_standardized_map",
+              "line": 200
+            },
+            {
+              "name": "logger.info",
+              "line": 207
+            },
+            {
+              "name": "pattern_distribution.items",
+              "line": 210
+            },
+            {
+              "name": "any",
+              "line": 246
+            },
+            {
+              "name": "logger.warning",
+              "line": 247
+            },
+            {
+              "name": "logger.info",
+              "line": 253
+            },
+            {
+              "name": "....get",
+              "line": 220
+            },
+            {
+              "name": "pattern_examples.values",
+              "line": 246
+            },
+            {
+              "name": "min",
+              "line": 213
+            },
+            {
+              "name": "logger.info",
+              "line": 215
+            },
+            {
+              "name": "patterns.items",
+              "line": 224
+            },
+            {
+              "name": "....get",
+              "line": 234
+            },
+            {
+              "name": "logger.info",
+              "line": 235
+            },
+            {
+              "name": "pattern_distribution.items",
+              "line": 238
+            },
+            {
+              "name": "str",
+              "line": 249
+            },
+            {
+              "name": "str",
+              "line": 214
+            },
+            {
+              "name": "pattern_info.get",
+              "line": 225
+            },
+            {
+              "name": "range",
+              "line": 249
+            },
+            {
+              "name": "len",
+              "line": 253
+            },
+            {
+              "name": "range",
+              "line": 214
+            },
+            {
+              "name": "....append",
+              "line": 231
+            },
+            {
+              "name": "min",
+              "line": 241
+            },
+            {
+              "name": "logger.info",
+              "line": 243
+            },
+            {
+              "name": "str",
+              "line": 242
+            },
+            {
+              "name": "range",
+              "line": 242
+            }
+          ],
+          "docstring": "\n        Find examples for each pattern type.\n        \n        Args:\n            pattern_types: Set of pattern types to find examples for\n            \n        Returns:\n            Dictionary mapping pattern types to lists of example indices\n        ",
+          "code_snippet": "        return augmented_examples\n    \n    def _find_pattern_examples(self, pattern_types: Set[str]) -> Dict[str, List[str]]:\n        \"\"\"\n        Find examples for each pattern type.\n        \n        Args:\n            pattern_types: Set of pattern types to find examples for\n            \n        Returns:\n            Dictionary mapping pattern types to lists of example indices\n        \"\"\"\n        pattern_examples = {}\n        \n        # Check if we have a pattern map\n        if not self.pattern_map:\n            logger.warning(\"No pattern map available for finding examples\")\n            return pattern_examples\n        \n        # Check for standardized pattern map format\n        if 'format_version' in self.pattern_map:\n            return self._find_examples_from_standardized_map(pattern_types)\n        \n        # Try legacy pattern map formats\n        \n        # Format 1: Direct pattern_distribution at root level\n        if 'pattern_distribution' in self.pattern_map:\n            pattern_distribution = self.pattern_map['pattern_distribution']\n            logger.info(f\"Found pattern distribution at root level: {pattern_distribution}\")\n            \n            # Create synthetic indices for each pattern type\n            for pattern_type, count in pattern_distribution.items():\n                if pattern_type in pattern_types and count > 0:\n                    # Create example indices (limit to 1000 for performance)\n                    max_examples = min(count, 1000)\n                    pattern_examples[pattern_type] = [str(i) for i in range(max_examples)]\n                    logger.info(f\"Created {max_examples} synthetic indices for pattern {pattern_type}\")\n        \n        # Format 2: Nested pattern_map structure\n        elif 'pattern_map' in self.pattern_map:\n            # Try to extract from nested pattern_map (original structure)\n            patterns = self.pattern_map['pattern_map'].get('pattern_map', {})\n            \n            if patterns:\n                # Original logic for nested structure\n                for idx_str, pattern_info in patterns.items():\n                    pattern_type = pattern_info.get('pattern_type')\n                    \n                    if pattern_type in pattern_types:\n                        if pattern_type not in pattern_examples:\n                            pattern_examples[pattern_type] = []\n                            \n                        pattern_examples[pattern_type].append(idx_str)\n            else:\n                # Try alternative format with pattern_distribution in pattern_map\n                pattern_distribution = self.pattern_map['pattern_map'].get('pattern_distribution', {})\n                logger.info(f\"Found pattern distribution in nested structure: {pattern_distribution}\")\n                \n                # Create synthetic indices for each pattern type\n                for pattern_type, count in pattern_distribution.items():\n                    if pattern_type in pattern_types and count > 0:\n                        # Create example indices (limit to 1000 for performance)\n                        max_examples = min(count, 1000)\n                        pattern_examples[pattern_type] = [str(i) for i in range(max_examples)]\n                        logger.info(f\"Created {max_examples} synthetic indices for pattern {pattern_type}\")\n        \n        # If no pattern examples found, create at least some for each requested pattern\n        if not any(pattern_examples.values()):\n            logger.warning(\"No pattern examples found in pattern map. Creating defaults.\")\n            for pattern_type in pattern_types:\n                pattern_examples[pattern_type] = [str(i) for i in range(100)]\n        \n        # Log summary of found examples\n        for pattern_type, examples in pattern_examples.items():\n            logger.info(f\"Found {len(examples)} examples for pattern {pattern_type}\")\n        \n        return pattern_examples\n        \n    def _find_examples_from_standardized_map(self, pattern_types: Set[str]) -> Dict[str, List[str]]:\n        \"\"\"Find examples for pattern types from a standardized pattern map.\"\"\"\n        pattern_examples = {}"
+        },
+        "_find_examples_from_standardized_map": {
+          "start_line": 257,
+          "end_line": 310,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_types"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 263
+            },
+            {
+              "name": "assignments.items",
+              "line": 267
+            },
+            {
+              "name": "pattern_examples.items",
+              "line": 277
+            },
+            {
+              "name": "any",
+              "line": 284
+            },
+            {
+              "name": "logger.info",
+              "line": 289
+            },
+            {
+              "name": "pattern_distribution.items",
+              "line": 294
+            },
+            {
+              "name": "any",
+              "line": 303
+            },
+            {
+              "name": "logger.warning",
+              "line": 304
+            },
+            {
+              "name": "assignment.get",
+              "line": 268
+            },
+            {
+              "name": "logger.info",
+              "line": 281
+            },
+            {
+              "name": "pattern_examples.values",
+              "line": 284
+            },
+            {
+              "name": "pattern_examples.values",
+              "line": 303
+            },
+            {
+              "name": "....append",
+              "line": 274
+            },
+            {
+              "name": "len",
+              "line": 279
+            },
+            {
+              "name": "min",
+              "line": 297
+            },
+            {
+              "name": "logger.info",
+              "line": 299
+            },
+            {
+              "name": "str",
+              "line": 306
+            },
+            {
+              "name": "str",
+              "line": 298
+            },
+            {
+              "name": "range",
+              "line": 306
+            },
+            {
+              "name": "len",
+              "line": 281
+            },
+            {
+              "name": "range",
+              "line": 298
+            }
+          ],
+          "docstring": "Find examples for pattern types from a standardized pattern map.",
+          "code_snippet": "        return pattern_examples\n        \n    def _find_examples_from_standardized_map(self, pattern_types: Set[str]) -> Dict[str, List[str]]:\n        \"\"\"Find examples for pattern types from a standardized pattern map.\"\"\"\n        pattern_examples = {}\n        \n        # First check for explicit pattern assignments\n        if 'pattern_assignments' in self.pattern_map and self.pattern_map['pattern_assignments']:\n            logger.info(\"Finding examples from standardized pattern assignments\")\n            \n            # Extract examples by pattern type\n            assignments = self.pattern_map['pattern_assignments']\n            for idx, assignment in assignments.items():\n                pattern_type = assignment.get('pattern_type')\n                \n                if pattern_type in pattern_types:\n                    if pattern_type not in pattern_examples:\n                        pattern_examples[pattern_type] = []\n                        \n                    pattern_examples[pattern_type].append(idx)\n            \n            # Log what we found\n            for pattern_type, examples in pattern_examples.items():\n                # Limit to 1000 examples per pattern for performance\n                if len(examples) > 1000:\n                    pattern_examples[pattern_type] = examples[:1000]\n                logger.info(f\"Found {len(pattern_examples[pattern_type])} examples for pattern {pattern_type}\")\n                \n            # Return if we found at least something\n            if any(pattern_examples.values()):\n                return pattern_examples\n        \n        # If no assignments or nothing found, use pattern distribution\n        if 'pattern_distribution' in self.pattern_map:\n            logger.info(\"Creating examples from standardized pattern distribution\")\n            \n            pattern_distribution = self.pattern_map['pattern_distribution']\n            start_idx = 0\n            \n            for pattern_type, count in pattern_distribution.items():\n                if pattern_type in pattern_types and count > 0:\n                    # Create example indices (limit to 1000 for performance)\n                    max_examples = min(count, 1000)\n                    pattern_examples[pattern_type] = [str(i) for i in range(start_idx, start_idx + max_examples)]\n                    logger.info(f\"Created {max_examples} synthetic indices for pattern {pattern_type}\")\n                    start_idx += count\n        \n        # If still nothing found, create defaults\n        if not any(pattern_examples.values()):\n            logger.warning(\"No examples found in standardized map. Creating defaults.\")\n            for pattern_type in pattern_types:\n                pattern_examples[pattern_type] = [str(i) for i in range(100)]\n        \n        return pattern_examples\n    \n    def _augment_structural_pattern(self, example, label):\n        \"\"\"Augment example with structural pattern\"\"\"\n        try:"
+        },
+        "_augment_structural_pattern": {
+          "start_line": 310,
+          "end_line": 336,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example"
+            },
+            {
+              "name": "label"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 315
+            },
+            {
+              "name": "transforms.Compose",
+              "line": 320
+            },
+            {
+              "name": "aug_transforms",
+              "line": 328
+            },
+            {
+              "name": "logger.error",
+              "line": 333
+            },
+            {
+              "name": "len",
+              "line": 315
+            },
+            {
+              "name": "transforms.ToPILImage",
+              "line": 317
+            },
+            {
+              "name": "example.cpu",
+              "line": 317
+            },
+            {
+              "name": "augmented.to",
+              "line": 329
+            },
+            {
+              "name": "transforms.RandomRotation",
+              "line": 321
+            },
+            {
+              "name": "transforms.RandomHorizontalFlip",
+              "line": 322
+            },
+            {
+              "name": "transforms.RandomPerspective",
+              "line": 323
+            },
+            {
+              "name": "transforms.RandomAffine",
+              "line": 324
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 325
+            }
+          ],
+          "docstring": "Augment example with structural pattern",
+          "code_snippet": "        return pattern_examples\n    \n    def _augment_structural_pattern(self, example, label):\n        \"\"\"Augment example with structural pattern\"\"\"\n        try:\n            # Structural patterns focus on shapes, edges, and geometric properties\n            # For images: rotations, flips, and perspective transforms\n            if isinstance(example, torch.Tensor) and len(example.shape) == 3:\n                # Convert to PIL for transformations\n                image = transforms.ToPILImage()(example.cpu())\n                \n                # Apply structural-enhancing transforms\n                aug_transforms = transforms.Compose([\n                    transforms.RandomRotation(15),\n                    transforms.RandomHorizontalFlip(),\n                    transforms.RandomPerspective(distortion_scale=0.2, p=0.5),\n                    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)),\n                    transforms.ToTensor()\n                ])\n                \n                augmented = aug_transforms(image)\n                return augmented.to(self.device), label\n            \n            return None\n        except Exception as e:\n            logger.error(f\"Error augmenting structural pattern: {e}\")\n            return None\n    \n    def _augment_statistical_pattern(self, example, label):\n        \"\"\"Augment example with statistical pattern\"\"\"\n        try:"
+        },
+        "_augment_statistical_pattern": {
+          "start_line": 336,
+          "end_line": 363,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example"
+            },
+            {
+              "name": "label"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 341
+            },
+            {
+              "name": "transforms.Compose",
+              "line": 346
+            },
+            {
+              "name": "aug_transforms",
+              "line": 355
+            },
+            {
+              "name": "logger.error",
+              "line": 360
+            },
+            {
+              "name": "len",
+              "line": 341
+            },
+            {
+              "name": "transforms.ToPILImage",
+              "line": 343
+            },
+            {
+              "name": "example.cpu",
+              "line": 343
+            },
+            {
+              "name": "augmented.to",
+              "line": 356
+            },
+            {
+              "name": "transforms.ColorJitter",
+              "line": 347
+            },
+            {
+              "name": "transforms.RandomAutocontrast",
+              "line": 350
+            },
+            {
+              "name": "transforms.RandomEqualize",
+              "line": 351
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 352
+            }
+          ],
+          "docstring": "Augment example with statistical pattern",
+          "code_snippet": "            return None\n    \n    def _augment_statistical_pattern(self, example, label):\n        \"\"\"Augment example with statistical pattern\"\"\"\n        try:\n            # Statistical patterns focus on intensity distributions, contrast, brightness\n            # For images: color jitter, contrast, brightness, normalization adjustments\n            if isinstance(example, torch.Tensor) and len(example.shape) == 3:\n                # Convert to PIL for transformations\n                image = transforms.ToPILImage()(example.cpu())\n                \n                # Apply statistical-enhancing transforms\n                aug_transforms = transforms.Compose([\n                    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),\n                    # Gaussian noise would be added here in a custom transform\n                    # Instead we use random adjustments to approximate statistical variation\n                    transforms.RandomAutocontrast(p=0.3),\n                    transforms.RandomEqualize(p=0.3),\n                    transforms.ToTensor()\n                ])\n                \n                augmented = aug_transforms(image)\n                return augmented.to(self.device), label\n            \n            return None\n        except Exception as e:\n            logger.error(f\"Error augmenting statistical pattern: {e}\")\n            return None\n    \n    def _augment_temporal_pattern(self, example, label):\n        \"\"\"Augment example with temporal pattern\"\"\"\n        try:"
+        },
+        "_augment_temporal_pattern": {
+          "start_line": 363,
+          "end_line": 408,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example"
+            },
+            {
+              "name": "label"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 368
+            },
+            {
+              "name": "random.choice",
+              "line": 377
+            },
+            {
+              "name": "logger.error",
+              "line": 405
+            },
+            {
+              "name": "len",
+              "line": 368
+            },
+            {
+              "name": "transforms.ToPILImage",
+              "line": 370
+            },
+            {
+              "name": "example.cpu",
+              "line": 370
+            },
+            {
+              "name": "random.uniform",
+              "line": 381
+            },
+            {
+              "name": "image.filter",
+              "line": 382
+            },
+            {
+              "name": "transforms.Compose",
+              "line": 385
+            },
+            {
+              "name": "transforms.Compose",
+              "line": 391
+            },
+            {
+              "name": "aug_transforms",
+              "line": 397
+            },
+            {
+              "name": "aug_transforms",
+              "line": 399
+            },
+            {
+              "name": "augmented.to",
+              "line": 401
+            },
+            {
+              "name": "ImageFilter.GaussianBlur",
+              "line": 382
+            },
+            {
+              "name": "transforms.RandomAffine",
+              "line": 386
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 387
+            },
+            {
+              "name": "transforms.ColorJitter",
+              "line": 392
+            },
+            {
+              "name": "transforms.ToTensor",
+              "line": 393
+            }
+          ],
+          "docstring": "Augment example with temporal pattern",
+          "code_snippet": "            return None\n    \n    def _augment_temporal_pattern(self, example, label):\n        \"\"\"Augment example with temporal pattern\"\"\"\n        try:\n            # Temporal patterns focus on sequential or time-based aspects\n            # For images: simple version using blur to simulate motion, exposure changes\n            if isinstance(example, torch.Tensor) and len(example.shape) == 3:\n                # Convert to PIL for transformations\n                image = transforms.ToPILImage()(example.cpu())\n                \n                # Apply temporal-simulating transforms\n                # We use blur to simulate motion and exposure changes\n                from PIL import ImageFilter\n                \n                # Randomly choose motion simulation method\n                method = random.choice(['motion', 'exposure'])\n                \n                if method == 'motion':\n                    # Simulate motion blur\n                    blur_radius = random.uniform(0.5, 2.0)\n                    image = image.filter(ImageFilter.GaussianBlur(radius=blur_radius))\n                    \n                    # Apply mild directional transforms to simulate movement\n                    aug_transforms = transforms.Compose([\n                        transforms.RandomAffine(degrees=0, translate=(0.05, 0.02)),\n                        transforms.ToTensor()\n                    ])\n                else:  # exposure\n                    # Simulate exposure changes\n                    aug_transforms = transforms.Compose([\n                        transforms.ColorJitter(brightness=0.3, contrast=0.2),\n                        transforms.ToTensor()\n                    ])\n                \n                if method == 'motion':\n                    augmented = aug_transforms(image)\n                else:\n                    augmented = aug_transforms(image)\n                    \n                return augmented.to(self.device), label\n            \n            return None\n        except Exception as e:\n            logger.error(f\"Error augmenting temporal pattern: {e}\")\n            return None\n        \n    def augment_pattern(self, dataset, pattern_type, count=50):\n        \"\"\"\n        Augment dataset with examples of a specific pattern type."
+        },
+        "augment_pattern": {
+          "start_line": 408,
+          "end_line": 493,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "pattern_type"
+            },
+            {
+              "name": "count"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 421
+            },
+            {
+              "name": "logger.info",
+              "line": 423
+            },
+            {
+              "name": "self._find_pattern_examples",
+              "line": 439
+            },
+            {
+              "name": "pattern_examples.get",
+              "line": 440
+            },
+            {
+              "name": "min",
+              "line": 457
+            },
+            {
+              "name": "logger.info",
+              "line": 460
+            },
+            {
+              "name": "time.time",
+              "line": 486
+            },
+            {
+              "name": "logger.info",
+              "line": 490
+            },
+            {
+              "name": "logger.warning",
+              "line": 427
+            },
+            {
+              "name": "logger.warning",
+              "line": 432
+            },
+            {
+              "name": "logger.warning",
+              "line": 444
+            },
+            {
+              "name": "int",
+              "line": 449
+            },
+            {
+              "name": "logger.warning",
+              "line": 453
+            },
+            {
+              "name": "len",
+              "line": 457
+            },
+            {
+              "name": "str",
+              "line": 446
+            },
+            {
+              "name": "idx.isdigit",
+              "line": 449
+            },
+            {
+              "name": "len",
+              "line": 466
+            },
+            {
+              "name": "augmentation_strategy",
+              "line": 472
+            },
+            {
+              "name": "random.sample",
+              "line": 446
+            },
+            {
+              "name": "len",
+              "line": 460
+            },
+            {
+              "name": "augmented_examples.append",
+              "line": 475
+            },
+            {
+              "name": "logger.error",
+              "line": 483
+            },
+            {
+              "name": "len",
+              "line": 490
+            },
+            {
+              "name": "range",
+              "line": 446
+            },
+            {
+              "name": "min",
+              "line": 446
+            },
+            {
+              "name": "len",
+              "line": 446
+            },
+            {
+              "name": "len",
+              "line": 446
+            },
+            {
+              "name": "str",
+              "line": 483
+            }
+          ],
+          "docstring": "\n        Augment dataset with examples of a specific pattern type.\n        \n        Args:\n            dataset: PyTorch dataset to augment\n            pattern_type: Pattern type to augment\n            count: Number of augmentations to create\n            \n        Returns:\n            List of augmented examples (features, labels)\n        ",
+          "code_snippet": "            return None\n        \n    def augment_pattern(self, dataset, pattern_type, count=50):\n        \"\"\"\n        Augment dataset with examples of a specific pattern type.\n        \n        Args:\n            dataset: PyTorch dataset to augment\n            pattern_type: Pattern type to augment\n            count: Number of augmentations to create\n            \n        Returns:\n            List of augmented examples (features, labels)\n        \"\"\"\n        import time\n        start_time = time.time()\n        \n        logger.info(f\"Creating {count} augmentations for pattern: {pattern_type}\")\n        \n        # Check if pattern type is supported\n        if pattern_type not in self.pattern_types:\n            logger.warning(f\"Pattern type '{pattern_type}' not in known patterns: {self.pattern_types}\")\n            return []\n        \n        # Check if augmentation strategy exists\n        if pattern_type not in self.augmentation_strategies:\n            logger.warning(f\"No augmentation strategy for pattern: {pattern_type}\")\n            return []\n        \n        # Get augmentation strategy for this pattern\n        augmentation_strategy = self.augmentation_strategies[pattern_type]\n        \n        # Find indices of examples with this pattern type\n        pattern_examples = self._find_pattern_examples({pattern_type})\n        example_indices = pattern_examples.get(pattern_type, [])\n        \n        # If no specific examples found, sample randomly from dataset\n        if not example_indices:\n            logger.warning(f\"No examples found for pattern {pattern_type}. Sampling randomly.\")\n            import random\n            example_indices = [str(i) for i in random.sample(range(len(dataset)), min(count*2, len(dataset)))]\n        \n        # Convert string indices to integers\n        example_indices = [int(idx) for idx in example_indices if idx.isdigit()]\n        \n        # If still no valid indices, return empty list\n        if not example_indices:\n            logger.warning(f\"No valid indices for pattern {pattern_type}. Skipping augmentation.\")\n            return []\n        \n        # Limit number of examples to process\n        max_to_process = min(len(example_indices), count * 3)  # Process 3x more examples to account for failures\n        examples_to_process = example_indices[:max_to_process]\n        \n        logger.info(f\"Processing {len(examples_to_process)} examples for pattern {pattern_type} augmentation\")\n        \n        # Generate augmentations\n        augmented_examples = []\n        for example_idx in examples_to_process:\n            # Stop if we've reached our target count\n            if len(augmented_examples) >= count:\n                break\n                \n            try:\n                # Get example and augment it\n                example, label = dataset[example_idx]\n                augmented = augmentation_strategy(example, label)\n                \n                if augmented:\n                    augmented_examples.append(augmented)\n                    \n                    # Update metrics\n                    self.metrics[\"total_augmentations\"] += 1\n                    if pattern_type not in self.metrics[\"augmentations_by_pattern\"]:\n                        self.metrics[\"augmentations_by_pattern\"][pattern_type] = 0\n                    self.metrics[\"augmentations_by_pattern\"][pattern_type] += 1\n            except Exception as e:\n                logger.error(f\"Error augmenting example {example_idx} for pattern {pattern_type}: {str(e)}\")\n        \n        # Calculate time spent\n        end_time = time.time()\n        time_spent = end_time - start_time\n        self.metrics[\"time_spent_augmenting\"] += time_spent\n        \n        logger.info(f\"Created {len(augmented_examples)} augmentations for pattern {pattern_type} in {time_spent:.2f}s\")\n        return augmented_examples"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Augments datasets based on pattern responsiveness of the model.\n    \n    This class tracks which patterns the model recognizes well and augments\n    the dataset to emphasize those patterns, creating a positive feedback loop\n    that reinforces successful learning pathways.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

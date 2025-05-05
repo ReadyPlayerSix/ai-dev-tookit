@@ -1,0 +1,33 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\cli\\__init__.py",
+  "imports": [
+    {
+      "name": "train.train_cli",
+      "line": 12
+    },
+    {
+      "name": "train_augmented.train_with_augmentation",
+      "line": 17
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "get_train_cli": {
+      "start_line": 11,
+      "end_line": 15,
+      "parameters": [],
+      "return_type": null,
+      "calls": [],
+      "code_snippet": "\n# Import train_cli function using a separate function to avoid circular imports\ndef get_train_cli():\n    from .train import train_cli\n    return train_cli\n    \n# Import train_augmented function\ndef get_train_augmented_cli():\n    from .train_augmented import train_with_augmentation"
+    },
+    "get_train_augmented_cli": {
+      "start_line": 16,
+      "end_line": 20,
+      "parameters": [],
+      "return_type": null,
+      "calls": [],
+      "code_snippet": "    \n# Import train_augmented function\ndef get_train_augmented_cli():\n    from .train_augmented import train_with_augmentation\n    return train_with_augmentation\n\n__all__ = []  # Don't export anything directly from __init__"
+    }
+  },
+  "constants": {}
+}

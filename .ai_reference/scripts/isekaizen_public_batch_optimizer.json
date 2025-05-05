@@ -1,0 +1,232 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\public\\batch_optimizer.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "math",
+      "line": 9
+    },
+    {
+      "name": "logging",
+      "line": 10
+    },
+    {
+      "name": "typing.Union",
+      "line": 11
+    },
+    {
+      "name": "typing.Optional",
+      "line": 11
+    },
+    {
+      "name": "typing.Dict",
+      "line": 11
+    },
+    {
+      "name": "typing.List",
+      "line": 11
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 11
+    },
+    {
+      "name": "typing.Any",
+      "line": 11
+    },
+    {
+      "name": "time",
+      "line": 126
+    }
+  ],
+  "classes": {
+    "BatchOptimizer": {
+      "start_line": 15,
+      "end_line": 142,
+      "methods": {
+        "__init__": {
+          "start_line": 23,
+          "end_line": 48,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "precision",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.to",
+              "line": 42
+            },
+            {
+              "name": "self.model.half",
+              "line": 46
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 38
+            },
+            {
+              "name": "torch.device",
+              "line": 38
+            },
+            {
+              "name": "torch.device",
+              "line": 38
+            }
+          ],
+          "docstring": "\n        Initialize the batch optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Target device for optimization (default: auto-detect)\n            precision: Model precision (\"float32\", \"float16\", \"bfloat16\")\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self, \n        model: torch.nn.Module, \n        device: Optional[torch.device] = None,\n        precision: str = \"float32\",\n    ):\n        \"\"\"\n        Initialize the batch optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Target device for optimization (default: auto-detect)\n            precision: Model precision (\"float32\", \"float16\", \"bfloat16\")\n        \"\"\"\n        self.model = model\n        self.device = device or (torch.device(\"cuda\") if torch.cuda.is_available() else torch.device(\"cpu\"))\n        self.precision = precision\n        \n        # Move model to appropriate device\n        self.model.to(self.device)\n        \n        # Set precision\n        if precision == \"float16\" and self.device.type == \"cuda\":\n            self.model.half()\n    \n    def find_optimal_batch_size(\n        self, \n        sample_data: torch.Tensor,"
+        },
+        "find_optimal_batch_size": {
+          "start_line": 48,
+          "end_line": 91,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "sample_data"
+            },
+            {
+              "name": "min_batch",
+              "type": "int"
+            },
+            {
+              "name": "max_batch",
+              "type": "int"
+            },
+            {
+              "name": "step_size",
+              "type": "int"
+            },
+            {
+              "name": "criterion",
+              "type": "str"
+            },
+            {
+              "name": "iterations",
+              "type": "int"
+            }
+          ],
+          "return_type": "int",
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 71
+            },
+            {
+              "name": "range",
+              "line": 77
+            },
+            {
+              "name": "self._benchmark_batch_size",
+              "line": 79
+            },
+            {
+              "name": "logger.warning",
+              "line": 86
+            },
+            {
+              "name": "str",
+              "line": 86
+            }
+          ],
+          "docstring": "\n        Find the optimal batch size for the given model and hardware.\n        \n        Args:\n            sample_data: Representative input data sample\n            min_batch: Minimum batch size to try\n            max_batch: Maximum batch size to try\n            step_size: Step size for batch sizes to try\n            criterion: Optimization criterion (throughput, memory, efficiency)\n            iterations: Number of iterations for each batch size\n            \n        Returns:\n            Optimal batch size\n        ",
+          "code_snippet": "            self.model.half()\n    \n    def find_optimal_batch_size(\n        self, \n        sample_data: torch.Tensor,\n        min_batch: int = 1, \n        max_batch: int = 1024,\n        step_size: int = 1,\n        criterion: str = \"throughput\",\n        iterations: int = 5,\n    ) -> int:\n        \"\"\"\n        Find the optimal batch size for the given model and hardware.\n        \n        Args:\n            sample_data: Representative input data sample\n            min_batch: Minimum batch size to try\n            max_batch: Maximum batch size to try\n            step_size: Step size for batch sizes to try\n            criterion: Optimization criterion (throughput, memory, efficiency)\n            iterations: Number of iterations for each batch size\n            \n        Returns:\n            Optimal batch size\n        \"\"\"\n        logger.info(f\"Finding optimal batch size between {min_batch} and {max_batch}\")\n        \n        # Simple implementation that benchmarks different batch sizes\n        optimal_batch = min_batch\n        best_score = 0.0\n        \n        for batch_size in range(min_batch, max_batch + 1, step_size):\n            try:\n                score = self._benchmark_batch_size(batch_size, sample_data, iterations)\n                \n                if score > best_score:\n                    best_score = score\n                    optimal_batch = batch_size\n            except RuntimeError as e:\n                # Out of memory or other error\n                logger.warning(f\"Batch size {batch_size} failed: {str(e)}\")\n                break\n        \n        return optimal_batch\n    \n    def _benchmark_batch_size(\n        self, \n        batch_size: int, "
+        },
+        "_benchmark_batch_size": {
+          "start_line": 91,
+          "end_line": 142,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            },
+            {
+              "name": "sample_data"
+            },
+            {
+              "name": "iterations",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "self.model.eval",
+              "line": 117
+            },
+            {
+              "name": "time.time",
+              "line": 127
+            },
+            {
+              "name": "time.time",
+              "line": 135
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 118
+            },
+            {
+              "name": "range",
+              "line": 119
+            },
+            {
+              "name": "torch.cuda.synchronize",
+              "line": 124
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 129
+            },
+            {
+              "name": "range",
+              "line": 130
+            },
+            {
+              "name": "sample_data.repeat",
+              "line": 114
+            },
+            {
+              "name": "self.model",
+              "line": 120
+            },
+            {
+              "name": "self.model",
+              "line": 131
+            },
+            {
+              "name": "torch.cuda.synchronize",
+              "line": 133
+            }
+          ],
+          "docstring": "\n        Benchmark performance for a specific batch size.\n        \n        Args:\n            batch_size: Batch size to benchmark\n            sample_data: Sample data to use for benchmarking\n            iterations: Number of iterations\n            \n        Returns:\n            Performance score (higher is better)\n        ",
+          "code_snippet": "        return optimal_batch\n    \n    def _benchmark_batch_size(\n        self, \n        batch_size: int, \n        sample_data: torch.Tensor, \n        iterations: int\n    ) -> float:\n        \"\"\"\n        Benchmark performance for a specific batch size.\n        \n        Args:\n            batch_size: Batch size to benchmark\n            sample_data: Sample data to use for benchmarking\n            iterations: Number of iterations\n            \n        Returns:\n            Performance score (higher is better)\n        \"\"\"\n        # Create a batch of appropriate size\n        if batch_size <= sample_data.shape[0]:\n            batch = sample_data[:batch_size]\n        else:\n            # Repeat data to fill batch\n            repeats = batch_size // sample_data.shape[0] + 1\n            batch = sample_data.repeat((repeats, 1, 1, 1))[:batch_size]\n        \n        # Warmup\n        self.model.eval()\n        with torch.no_grad():\n            for _ in range(2):\n                _ = self.model(batch)\n        \n        # Time execution\n        if self.device.type == \"cuda\":\n            torch.cuda.synchronize()\n        \n        import time\n        start_time = time.time()\n        \n        with torch.no_grad():\n            for _ in range(iterations):\n                _ = self.model(batch)\n                if self.device.type == \"cuda\":\n                    torch.cuda.synchronize()\n        \n        end_time = time.time()\n        \n        # Calculate throughput\n        throughput = batch_size * iterations / (end_time - start_time)\n        \n        return throughput"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Optimize batch sizes for PyTorch models.\n    \n    This public implementation provides basic functionality for finding optimal\n    batch sizes based on hardware constraints and model architecture.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

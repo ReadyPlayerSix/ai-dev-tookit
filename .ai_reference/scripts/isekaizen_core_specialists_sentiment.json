@@ -1,0 +1,364 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\specialists\\sentiment.py",
+  "imports": [
+    {
+      "name": "dataclasses.dataclass",
+      "line": 4
+    },
+    {
+      "name": "typing.Dict",
+      "line": 5
+    },
+    {
+      "name": "typing.List",
+      "line": 5
+    },
+    {
+      "name": "typing.Any",
+      "line": 5
+    },
+    {
+      "name": "typing.Optional",
+      "line": 5
+    },
+    {
+      "name": "torch",
+      "line": 6
+    },
+    {
+      "name": "numpy",
+      "line": 7
+    },
+    {
+      "name": "isekaizen.core.specialists.base.BaseSpecialist",
+      "line": 10
+    },
+    {
+      "name": "isekaizen.utils.types.DomainType",
+      "line": 11
+    },
+    {
+      "name": "transformers.RobertaTokenizer",
+      "line": 28
+    },
+    {
+      "name": "transformers.RobertaForSequenceClassification",
+      "line": 28
+    }
+  ],
+  "classes": {
+    "EmotionalPattern": {
+      "start_line": 14,
+      "end_line": 21,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Represents a pure emotional pattern"
+    },
+    "SentimentSpecialist": {
+      "start_line": 21,
+      "end_line": 327,
+      "methods": {
+        "__init__": {
+          "start_line": 22,
+          "end_line": 74,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "resource_manager"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 23
+            },
+            {
+              "name": "RobertaTokenizer.from_pretrained",
+              "line": 32
+            },
+            {
+              "name": "....to",
+              "line": 33
+            },
+            {
+              "name": "super",
+              "line": 23
+            },
+            {
+              "name": "RobertaForSequenceClassification.from_pretrained",
+              "line": 33
+            }
+          ],
+          "code_snippet": "\nclass SentimentSpecialist(BaseSpecialist):\n    def __init__(self, resource_manager=None):\n        super().__init__(DomainType.EMOTIONAL, resource_manager)\n        self.memory_requirement = 100\n        \n        # Try to import transformers for advanced processing\n        try:\n            from transformers import RobertaTokenizer, RobertaForSequenceClassification\n            \n            # Initialize RoBERTa\n            self.model_name = \"roberta-base\"\n            self.tokenizer = RobertaTokenizer.from_pretrained(self.model_name)\n            self.model = RobertaForSequenceClassification.from_pretrained(\n                self.model_name,\n                num_labels=7  # joy, sadness, anger, fear, surprise, disgust, neutral\n            ).to(self.device)\n            \n            self.has_transformers = True\n            self.transformers_initialized = True\n            \n        except (ImportError, Exception) as e:\n            self.has_transformers = False\n            self.transformers_initialized = False\n        \n        # Pattern thresholds\n        self.emotion_patterns = {\n            \"strong_emotion\": {\n                \"intensity_threshold\": 0.4,\n                \"confidence_threshold\": 0.6,\n                \"max_secondary_ratio\": 0.3\n            },\n            \"mixed_emotion\": {\n                \"secondary_ratio_min\": 0.4,\n                \"intensity_threshold\": 0.25,\n                \"confidence_threshold\": 0.5\n            },\n            \"neutral_emotion\": {\n                \"max_intensity\": 0.3,\n                \"min_complexity\": 0.3,\n                \"confidence_threshold\": 0.5\n            }\n        }\n        \n        # Metrics tracking\n        self.pattern_metrics = {\n            \"patterns_identified\": 0,\n            \"high_confidence_patterns\": 0,\n            \"pattern_preservation_score\": 0.0,\n            \"pattern_distribution\": {\n                \"strong_emotion\": 0,\n                \"mixed_emotion\": 0,\n                \"neutral_emotion\": 0\n            }\n        }\n\n    def _analyze_text_sentiment(self, text):"
+        },
+        "_analyze_text_sentiment": {
+          "start_line": 76,
+          "end_line": 132,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "text"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "set",
+              "line": 82
+            },
+            {
+              "name": "set",
+              "line": 87
+            },
+            {
+              "name": "....split",
+              "line": 93
+            },
+            {
+              "name": "sum",
+              "line": 94
+            },
+            {
+              "name": "sum",
+              "line": 95
+            },
+            {
+              "name": "len",
+              "line": 96
+            },
+            {
+              "name": "np.log2",
+              "line": 117
+            },
+            {
+              "name": "max",
+              "line": 99
+            },
+            {
+              "name": "max",
+              "line": 100
+            },
+            {
+              "name": "text.lower",
+              "line": 93
+            },
+            {
+              "name": "np.log2",
+              "line": 114
+            },
+            {
+              "name": "np.log2",
+              "line": 115
+            },
+            {
+              "name": "abs",
+              "line": 130
+            }
+          ],
+          "docstring": "\n        Analyze sentiment from text using basic heuristics.\n        Used when transformers isn't available.\n        ",
+          "code_snippet": "        }\n\n    def _analyze_text_sentiment(self, text):\n        \"\"\"\n        Analyze sentiment from text using basic heuristics.\n        Used when transformers isn't available.\n        \"\"\"\n        # Define sentiment words\n        positive_words = set([\n            'good', 'great', 'excellent', 'happy', 'joy', 'love', 'wonderful',\n            'amazing', 'fantastic', 'awesome', 'nice', 'best', 'positive'\n        ])\n        \n        negative_words = set([\n            'bad', 'terrible', 'horrible', 'sad', 'hate', 'awful', 'worst',\n            'poor', 'negative', 'angry', 'upset', 'disappointed', 'disgusting'\n        ])\n        \n        # Count occurrences\n        words = text.lower().split()\n        pos_count = sum(1 for word in words if word in positive_words)\n        neg_count = sum(1 for word in words if word in negative_words)\n        total_words = len(words)\n        \n        # Calculate intensities\n        pos_intensity = pos_count / max(1, total_words)\n        neg_intensity = neg_count / max(1, total_words)\n        \n        # Calculate overall sentiment\n        if pos_intensity > neg_intensity:\n            primary_intensity = pos_intensity\n            secondary_intensity = neg_intensity\n            primary_emotion = \"positive\"\n        else:\n            primary_intensity = neg_intensity\n            secondary_intensity = pos_intensity\n            primary_emotion = \"negative\"\n            \n        # Calculate emotion complexity\n        intensity_ratio = secondary_intensity / primary_intensity if primary_intensity > 0 else 0\n        emotion_entropy = -(pos_intensity * np.log2(pos_intensity + 1e-10) + \n                            neg_intensity * np.log2(neg_intensity + 1e-10))\n        \n        max_entropy = np.log2(2)  # Maximum entropy for 2 emotions\n        normalized_complexity = emotion_entropy / max_entropy\n        \n        return {\n            \"intensity_metrics\": {\n                \"primary_emotion\": primary_intensity,\n                \"secondary_emotion\": secondary_intensity,\n                \"intensity_ratio\": intensity_ratio,\n                \"emotion_type\": primary_emotion\n            },\n            \"complexity_metrics\": {\n                \"emotional_entropy\": normalized_complexity,\n                \"emotion_count\": 2 if pos_intensity > 0.1 and neg_intensity > 0.1 else 1,\n                \"distribution_evenness\": 1 - abs(pos_intensity - neg_intensity)\n            }\n        }\n\n    def _identify_emotional_pattern(self, "
+        },
+        "_identify_emotional_pattern": {
+          "start_line": 134,
+          "end_line": 202,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "emotion_metrics"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "EmotionalPattern",
+              "line": 149
+            },
+            {
+              "name": "EmotionalPattern",
+              "line": 169
+            },
+            {
+              "name": "EmotionalPattern",
+              "line": 190
+            },
+            {
+              "name": "intensity.get",
+              "line": 155
+            },
+            {
+              "name": "intensity.get",
+              "line": 176
+            }
+          ],
+          "docstring": "Identify pure emotional patterns from metrics",
+          "code_snippet": "        }\n\n    def _identify_emotional_pattern(self, \n                                  emotion_metrics: Dict[str, Any]) -> Optional[EmotionalPattern]:\n        \"\"\"Identify pure emotional patterns from metrics\"\"\"\n        intensity = emotion_metrics[\"intensity_metrics\"]\n        complexity = emotion_metrics[\"complexity_metrics\"]\n        \n        # Check for strong emotion pattern\n        if (intensity[\"primary_emotion\"] >= \n            self.emotion_patterns[\"strong_emotion\"][\"intensity_threshold\"] and\n            intensity[\"intensity_ratio\"] <= \n            self.emotion_patterns[\"strong_emotion\"][\"max_secondary_ratio\"]):\n            \n            self.pattern_metrics[\"pattern_distribution\"][\"strong_emotion\"] += 1\n            confidence = intensity[\"primary_emotion\"] * (1 - intensity[\"intensity_ratio\"])\n            \n            return EmotionalPattern(\n                pattern_type=\"strong_emotion\",\n                emotional_features={\n                    \"intensity\": intensity[\"primary_emotion\"],\n                    \"purity\": 1 - intensity[\"intensity_ratio\"],\n                    \"complexity\": complexity[\"emotional_entropy\"],\n                    \"emotion_type\": intensity.get(\"emotion_type\", \"unknown\")\n                },\n                confidence=confidence\n            )\n        \n        # Check for mixed emotion pattern\n        elif (intensity[\"intensity_ratio\"] >= \n              self.emotion_patterns[\"mixed_emotion\"][\"secondary_ratio_min\"] and\n              intensity[\"primary_emotion\"] >= \n              self.emotion_patterns[\"mixed_emotion\"][\"intensity_threshold\"]):\n            \n            self.pattern_metrics[\"pattern_distribution\"][\"mixed_emotion\"] += 1\n            confidence = (intensity[\"primary_emotion\"] + intensity[\"secondary_emotion\"]) / 2\n            \n            return EmotionalPattern(\n                pattern_type=\"mixed_emotion\",\n                emotional_features={\n                    \"primary_intensity\": intensity[\"primary_emotion\"],\n                    \"secondary_ratio\": intensity[\"intensity_ratio\"],\n                    \"complexity\": complexity[\"emotional_entropy\"],\n                    \"emotion_count\": complexity[\"emotion_count\"],\n                    \"emotion_type\": intensity.get(\"emotion_type\", \"unknown\")\n                },\n                confidence=confidence\n            )\n        \n        # Check for neutral emotion pattern\n        elif (intensity[\"primary_emotion\"] <= \n              self.emotion_patterns[\"neutral_emotion\"][\"max_intensity\"] and\n              complexity[\"emotional_entropy\"] >= \n              self.emotion_patterns[\"neutral_emotion\"][\"min_complexity\"]):\n            \n            self.pattern_metrics[\"pattern_distribution\"][\"neutral_emotion\"] += 1\n            confidence = 1 - intensity[\"primary_emotion\"]\n            \n            return EmotionalPattern(\n                pattern_type=\"neutral_emotion\",\n                emotional_features={\n                    \"evenness\": complexity[\"distribution_evenness\"],\n                    \"complexity\": complexity[\"emotional_entropy\"],\n                    \"max_intensity\": intensity[\"primary_emotion\"]\n                },\n                confidence=confidence\n            )\n            \n        return None\n\n    def process_input(self, input_data: Any) -> Dict[str, Any]:\n        \"\"\"Process text and identify emotional patterns\"\"\"\n        # Try to allocate resources if resource manager is available"
+        },
+        "process_input": {
+          "start_line": 202,
+          "end_line": 299,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "input_data",
+              "type": "Any"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "isinstance",
+              "line": 217
+            },
+            {
+              "name": "self._identify_emotional_pattern",
+              "line": 246
+            },
+            {
+              "name": "self.resource_manager.allocate_resources",
+              "line": 205
+            },
+            {
+              "name": "....to",
+              "line": 233
+            },
+            {
+              "name": "self._calculate_emotional_metrics",
+              "line": 240
+            },
+            {
+              "name": "self._analyze_text_sentiment",
+              "line": 243
+            },
+            {
+              "name": "self.update_metrics",
+              "line": 255
+            },
+            {
+              "name": "self.update_metrics",
+              "line": 276
+            },
+            {
+              "name": "self.update_metrics",
+              "line": 285
+            },
+            {
+              "name": "self.resource_manager.release_resources",
+              "line": 295
+            },
+            {
+              "name": "str",
+              "line": 206
+            },
+            {
+              "name": "str",
+              "line": 222
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 236
+            },
+            {
+              "name": "self.model",
+              "line": 237
+            },
+            {
+              "name": "str",
+              "line": 288
+            },
+            {
+              "name": "str",
+              "line": 296
+            },
+            {
+              "name": "self.tokenizer",
+              "line": 233
+            }
+          ],
+          "docstring": "Process text and identify emotional patterns",
+          "code_snippet": "        return None\n\n    def process_input(self, input_data: Any) -> Dict[str, Any]:\n        \"\"\"Process text and identify emotional patterns\"\"\"\n        # Try to allocate resources if resource manager is available\n        if self.resource_manager and not self.resource_manager.allocate_resources(\n            str(self.domain), \n            self.memory_requirement\n        ):\n            return {\n                \"success\": False,\n                \"error\": \"Failed to allocate resources\",\n                \"domain\": self.domain\n            }\n        \n        try:\n            # Process text\n            if isinstance(input_data, str):\n                text = input_data\n            else:\n                # Try to convert to string\n                try:\n                    text = str(input_data)\n                except:\n                    return {\n                        \"success\": False,\n                        \"error\": \"Input data cannot be converted to text\",\n                        \"domain\": self.domain\n                    }\n            \n            # Analyze sentiment\n            if self.has_transformers and self.transformers_initialized:\n                # Use RoBERTa for sentiment analysis\n                inputs = self.tokenizer(text, return_tensors=\"pt\", \n                                       truncation=True, max_length=512).to(self.device)\n                \n                with torch.no_grad():\n                    outputs = self.model(**inputs)\n                    emotion_logits = outputs.logits\n                \n                emotion_metrics = self._calculate_emotional_metrics(emotion_logits)\n            else:\n                # Use basic sentiment analysis\n                emotion_metrics = self._analyze_text_sentiment(text)\n            \n            # Identify patterns\n            pattern = self._identify_emotional_pattern(emotion_metrics)\n            \n            if pattern:\n                self.pattern_metrics[\"patterns_identified\"] += 1\n                pattern_threshold = self.emotion_patterns[pattern.pattern_type][\"confidence_threshold\"]\n                if pattern.confidence >= pattern_threshold:\n                    self.pattern_metrics[\"high_confidence_patterns\"] += 1\n                \n                # Update general metrics\n                self.update_metrics(True, pattern.confidence)\n                \n                # Update pattern preservation score\n                if self.pattern_metrics[\"patterns_identified\"] > 0:\n                    self.pattern_metrics[\"pattern_preservation_score\"] = (\n                        self.pattern_metrics[\"high_confidence_patterns\"] / \n                        self.pattern_metrics[\"patterns_identified\"]\n                    )\n                \n                return {\n                    \"success\": True,\n                    \"pattern\": {\n                        \"pattern_type\": pattern.pattern_type,\n                        \"confidence\": pattern.confidence,\n                        \"features\": pattern.emotional_features\n                    },\n                    \"metrics\": self.metrics,\n                    \"domain\": self.domain\n                }\n            else:\n                # No pattern identified\n                self.update_metrics(False)\n                return {\n                    \"success\": False,\n                    \"error\": \"No pattern identified\",\n                    \"domain\": self.domain\n                }\n                \n        except Exception as e:\n            # Update failure metrics\n            self.update_metrics(False)\n            return {\n                \"success\": False,\n                \"error\": str(e),\n                \"domain\": self.domain\n            }\n            \n        finally:\n            # Release resources if using resource manager\n            if self.resource_manager:\n                self.resource_manager.release_resources(\n                    str(self.domain),\n                    self.memory_requirement\n                )\n    \n    def _calculate_emotional_metrics(self, \n                                  emotion_logits: torch.Tensor) -> Dict[str, float]:"
+        },
+        "_calculate_emotional_metrics": {
+          "start_line": 300,
+          "end_line": 327,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "emotion_logits"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "torch.sort",
+              "line": 307
+            },
+            {
+              "name": "float",
+              "line": 309
+            },
+            {
+              "name": "float",
+              "line": 310
+            },
+            {
+              "name": "np.log",
+              "line": 313
+            },
+            {
+              "name": "torch.softmax",
+              "line": 305
+            },
+            {
+              "name": "....item",
+              "line": 311
+            },
+            {
+              "name": "....item",
+              "line": 324
+            },
+            {
+              "name": "torch.sum",
+              "line": 311
+            },
+            {
+              "name": "torch.sum",
+              "line": 324
+            },
+            {
+              "name": "....item",
+              "line": 325
+            },
+            {
+              "name": "torch.log",
+              "line": 311
+            },
+            {
+              "name": "torch.mean",
+              "line": 325
+            }
+          ],
+          "docstring": "Calculate pure emotional characteristics",
+          "code_snippet": "                )\n    \n    def _calculate_emotional_metrics(self, \n                                  emotion_logits: torch.Tensor) -> Dict[str, float]:\n        \"\"\"Calculate pure emotional characteristics\"\"\"\n        temperature = 2.0\n        scaled_logits = emotion_logits / temperature\n        probs = torch.softmax(scaled_logits, dim=1)[0]\n        \n        sorted_probs, indices = torch.sort(probs, descending=True)\n        \n        primary_intensity = float(sorted_probs[0])\n        secondary_intensity = float(sorted_probs[1])\n        emotional_complexity = -torch.sum(probs * torch.log(probs + 1e-10)).item()\n        \n        max_entropy = np.log(7)  # Maximum possible entropy for 7 emotions\n        normalized_complexity = emotional_complexity / max_entropy\n        \n        return {\n            \"intensity_metrics\": {\n                \"primary_emotion\": primary_intensity,\n                \"secondary_emotion\": secondary_intensity,\n                \"intensity_ratio\": secondary_intensity / primary_intensity if primary_intensity > 0 else 0\n            },\n            \"complexity_metrics\": {\n                \"emotional_entropy\": normalized_complexity,\n                \"emotion_count\": torch.sum(probs > 0.1).item(),\n                \"distribution_evenness\": 1 - (primary_intensity - torch.mean(probs).item())\n            }\n        }"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "BaseSpecialist"
+      ]
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

@@ -1,0 +1,415 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\modified\\baseline_tests\\debug_pattern_tracker.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 7
+    },
+    {
+      "name": "sys",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "json",
+      "line": 10
+    },
+    {
+      "name": "torch",
+      "line": 11
+    },
+    {
+      "name": "torch.nn",
+      "line": 12
+    },
+    {
+      "name": "typing.Dict",
+      "line": 13
+    },
+    {
+      "name": "typing.Any",
+      "line": 13
+    },
+    {
+      "name": "isekaizen.pattern.tracking.PatternRecognitionTracker",
+      "line": 24
+    },
+    {
+      "name": "isekaizen.pattern.detection.PatternRecognitionService",
+      "line": 25
+    },
+    {
+      "name": "isekaizen.optimizers.eve.EVENaturalWeights",
+      "line": 26
+    },
+    {
+      "name": "isekaizen.core.optimizer.pattern_risk_accuracy_tracker.PatternRiskAccuracyTracker",
+      "line": 27
+    },
+    {
+      "name": "isekaizen.core.optimizer.enhanced_pattern_responsive.EnhancedPatternResponsiveOptimizer",
+      "line": 28
+    },
+    {
+      "name": "isekaizen.utils.pattern_map_utils.translate_pattern_map_to_standard_format",
+      "line": 29
+    },
+    {
+      "name": "isekaizen.pattern.data_loading.load_latest_pattern_map",
+      "line": 30
+    },
+    {
+      "name": "traceback",
+      "line": 74
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "debug_pattern_tracker_initialization": {
+      "start_line": 32,
+      "end_line": 186,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "print",
+          "line": 35
+        },
+        {
+          "name": "print",
+          "line": 38
+        },
+        {
+          "name": "load_latest_pattern_map",
+          "line": 39
+        },
+        {
+          "name": "print",
+          "line": 56
+        },
+        {
+          "name": "print",
+          "line": 79
+        },
+        {
+          "name": "PatternRecognitionTracker",
+          "line": 80
+        },
+        {
+          "name": "pattern_tracker.initialize_from_standardized_map",
+          "line": 83
+        },
+        {
+          "name": "print",
+          "line": 84
+        },
+        {
+          "name": "print",
+          "line": 87
+        },
+        {
+          "name": "pattern_tracker.get_pattern_risks",
+          "line": 94
+        },
+        {
+          "name": "print",
+          "line": 95
+        },
+        {
+          "name": "print",
+          "line": 98
+        },
+        {
+          "name": "PatternRiskAccuracyTracker",
+          "line": 99
+        },
+        {
+          "name": "print",
+          "line": 102
+        },
+        {
+          "name": "print",
+          "line": 103
+        },
+        {
+          "name": "risk_accuracy_tracker.get_pattern_risks",
+          "line": 106
+        },
+        {
+          "name": "print",
+          "line": 107
+        },
+        {
+          "name": "print",
+          "line": 110
+        },
+        {
+          "name": "list",
+          "line": 112
+        },
+        {
+          "name": "risk_accuracy_tracker.update_with_batch_results",
+          "line": 115
+        },
+        {
+          "name": "print",
+          "line": 123
+        },
+        {
+          "name": "risk_accuracy_tracker.update_with_epoch_results",
+          "line": 124
+        },
+        {
+          "name": "risk_accuracy_tracker.get_pattern_risks",
+          "line": 127
+        },
+        {
+          "name": "print",
+          "line": 128
+        },
+        {
+          "name": "print",
+          "line": 131
+        },
+        {
+          "name": "nn.Linear",
+          "line": 133
+        },
+        {
+          "name": "EVENaturalWeights",
+          "line": 134
+        },
+        {
+          "name": "eve_optimizer.initialize_from_pattern_map",
+          "line": 137
+        },
+        {
+          "name": "eve_optimizer.pattern_tracker.get_pattern_risks",
+          "line": 140
+        },
+        {
+          "name": "print",
+          "line": 141
+        },
+        {
+          "name": "hasattr",
+          "line": 144
+        },
+        {
+          "name": "print",
+          "line": 148
+        },
+        {
+          "name": "EnhancedPatternResponsiveOptimizer",
+          "line": 149
+        },
+        {
+          "name": "print",
+          "line": 156
+        },
+        {
+          "name": "print",
+          "line": 157
+        },
+        {
+          "name": "enhanced_optimizer.update_with_batch_results",
+          "line": 160
+        },
+        {
+          "name": "enhanced_optimizer.update_with_pattern_recognition",
+          "line": 161
+        },
+        {
+          "name": "enhanced_optimizer.pattern_tracker.get_pattern_risks",
+          "line": 164
+        },
+        {
+          "name": "print",
+          "line": 165
+        },
+        {
+          "name": "print",
+          "line": 168
+        },
+        {
+          "name": "PatternRecognitionService",
+          "line": 170
+        },
+        {
+          "name": "print",
+          "line": 173
+        },
+        {
+          "name": "range",
+          "line": 176
+        },
+        {
+          "name": "pattern_service.get_batch_pattern_states",
+          "line": 181
+        },
+        {
+          "name": "print",
+          "line": 182
+        },
+        {
+          "name": "print",
+          "line": 184
+        },
+        {
+          "name": "print",
+          "line": 41
+        },
+        {
+          "name": "print",
+          "line": 52
+        },
+        {
+          "name": "translate_pattern_map_to_standard_format",
+          "line": 58
+        },
+        {
+          "name": "print",
+          "line": 59
+        },
+        {
+          "name": "print",
+          "line": 91
+        },
+        {
+          "name": "range",
+          "line": 112
+        },
+        {
+          "name": "print",
+          "line": 120
+        },
+        {
+          "name": "model.parameters",
+          "line": 134
+        },
+        {
+          "name": "print",
+          "line": 145
+        },
+        {
+          "name": "pattern_service.get_pattern_type",
+          "line": 177
+        },
+        {
+          "name": "print",
+          "line": 178
+        },
+        {
+          "name": "print",
+          "line": 43
+        },
+        {
+          "name": "print",
+          "line": 45
+        },
+        {
+          "name": "list",
+          "line": 47
+        },
+        {
+          "name": "print",
+          "line": 63
+        },
+        {
+          "name": "print",
+          "line": 65
+        },
+        {
+          "name": "print",
+          "line": 69
+        },
+        {
+          "name": "print",
+          "line": 71
+        },
+        {
+          "name": "print",
+          "line": 73
+        },
+        {
+          "name": "print",
+          "line": 75
+        },
+        {
+          "name": "list",
+          "line": 90
+        },
+        {
+          "name": "....keys",
+          "line": 47
+        },
+        {
+          "name": "print",
+          "line": 50
+        },
+        {
+          "name": "traceback.format_exc",
+          "line": 75
+        },
+        {
+          "name": "list",
+          "line": 87
+        },
+        {
+          "name": "pattern_tracker.pattern_stats.keys",
+          "line": 90
+        },
+        {
+          "name": "enhanced_optimizer.pattern_tracker.get_pattern_risks",
+          "line": 157
+        },
+        {
+          "name": "len",
+          "line": 173
+        },
+        {
+          "name": "list",
+          "line": 41
+        },
+        {
+          "name": "list",
+          "line": 59
+        },
+        {
+          "name": "pattern_tracker.pattern_stats.keys",
+          "line": 87
+        },
+        {
+          "name": "pattern_map.keys",
+          "line": 41
+        },
+        {
+          "name": "list",
+          "line": 43
+        },
+        {
+          "name": "standardized_map.keys",
+          "line": 59
+        },
+        {
+          "name": "len",
+          "line": 69
+        },
+        {
+          "name": "str",
+          "line": 73
+        },
+        {
+          "name": "....keys",
+          "line": 43
+        }
+      ],
+      "docstring": "Debug pattern tracker initialization and data flow.",
+      "code_snippet": "from isekaizen.pattern.data_loading import load_latest_pattern_map\n\ndef debug_pattern_tracker_initialization():\n    \"\"\"Debug pattern tracker initialization and data flow.\"\"\"\n    \n    print(\"\\n=== Starting Pattern Tracker Debug ===\\n\")\n    \n    # Step 1: Load pattern map\n    print(\"Step 1: Loading pattern map...\")\n    pattern_map = load_latest_pattern_map()\n    if pattern_map:\n        print(f\"Pattern map loaded. Keys: {list(pattern_map.keys())}\")\n        if 'pattern_distribution' in pattern_map:\n            print(f\"Pattern types: {list(pattern_map['pattern_distribution'].keys())}\")\n        if 'pattern_complexities' in pattern_map:\n            print(\"Has pattern complexities\")\n            # Show a sample complexity\n            pattern_types = list(pattern_map['pattern_complexities'].keys())\n            if pattern_types:\n                sample_type = pattern_types[0]\n                print(f\"Sample complexity for {sample_type}: {pattern_map['pattern_complexities'][sample_type]}\")\n    else:\n        print(\"No pattern map found\")\n        return\n    \n    # Step 2: Convert to standardized format\n    print(\"\\nStep 2: Converting to standardized format...\")\n    try:\n        standardized_map = translate_pattern_map_to_standard_format(pattern_map)\n        print(f\"Standardized map keys: {list(standardized_map.keys())}\")\n        \n        # Check if standardized map has risk values\n        if 'pattern_risks' in standardized_map:\n            print(f\"Pattern risks: {standardized_map['pattern_risks']}\")\n        else:\n            print(\"No pattern risks in standardized map\")\n            \n        # Check if standardized map has pattern assignments\n        if 'pattern_assignments' in standardized_map:\n            print(f\"Number of pattern assignments: {len(standardized_map['pattern_assignments'])}\")\n        else:\n            print(\"No pattern assignments in standardized map\")\n    except Exception as e:\n        print(f\"Error converting pattern map: {str(e)}\")\n        import traceback\n        print(traceback.format_exc())\n        return\n    \n    # Step 3: Initialize pattern recognition tracker\n    print(\"\\nStep 3: Initializing PatternRecognitionTracker...\")\n    pattern_tracker = PatternRecognitionTracker()\n    \n    # Initialize with standardized map\n    result = pattern_tracker.initialize_from_standardized_map(standardized_map)\n    print(f\"Tracker initialization result: {result}\")\n    \n    # Check tracker's internal state\n    print(f\"Pattern tracker stats: {list(pattern_tracker.pattern_stats.keys())}\")\n    if pattern_tracker.pattern_stats:\n        # Show a sample stats structure\n        sample_type = list(pattern_tracker.pattern_stats.keys())[0]\n        print(f\"Sample stats for {sample_type}: {pattern_tracker.pattern_stats[sample_type]}\")\n        \n    # Get pattern risks\n    risks = pattern_tracker.get_pattern_risks()\n    print(f\"Pattern risks from tracker: {risks}\")\n    \n    # Step 4: Initialize PatternRiskAccuracyTracker\n    print(\"\\nStep 4: Initializing PatternRiskAccuracyTracker...\")\n    risk_accuracy_tracker = PatternRiskAccuracyTracker(standardized_map)\n    \n    # Check its internal state\n    print(f\"Risk/Accuracy tracker pattern types: {risk_accuracy_tracker.pattern_types}\")\n    print(f\"Risk/Accuracy tracker stats: {risk_accuracy_tracker.pattern_stats}\")\n    \n    # Get initial pattern risks\n    initial_risks = risk_accuracy_tracker.get_pattern_risks()\n    print(f\"Initial pattern risks: {initial_risks}\")\n    \n    # Step 5: Create a mock batch and update the tracker\n    print(\"\\nStep 5: Testing batch update...\")\n    # Create mock batch indices and correct mask\n    batch_indices = list(range(10))\n    correct_mask = [True, False, True, True, False, True, False, True, True, False]\n    \n    risk_accuracy_tracker.update_with_batch_results(batch_indices, correct_mask)\n    \n    # Check updated stats\n    for pattern_type in risk_accuracy_tracker.pattern_types:\n        stats = risk_accuracy_tracker.pattern_stats[pattern_type]\n        print(f\"{pattern_type} - correct: {stats['correct']}, total: {stats['total']}, accuracy: {stats['accuracy']}\")\n    \n    # Step 6: Update with epoch results\n    print(\"\\nStep 6: Testing epoch update...\")\n    risk_accuracy_tracker.update_with_epoch_results(0)\n    \n    # Get updated risks\n    updated_risks = risk_accuracy_tracker.get_pattern_risks()\n    print(f\"Updated pattern risks: {updated_risks}\")\n    \n    # Step 7: Initialize EVE optimizer and check its state\n    print(\"\\nStep 7: Initialize EVE optimizer...\")\n    # Create dummy model for EVE\n    model = nn.Linear(10, 2)\n    eve_optimizer = EVENaturalWeights(model.parameters())\n    \n    # Initialize with pattern map\n    eve_optimizer.initialize_from_pattern_map(standardized_map)\n    \n    # Check if pattern risks are properly set\n    internal_risks = eve_optimizer.pattern_tracker.get_pattern_risks()\n    print(f\"EVE internal pattern risks: {internal_risks}\")\n    \n    # Check the state of pattern tracker\n    if hasattr(eve_optimizer.pattern_tracker, 'pattern_stats'):\n        print(f\"EVE pattern tracker stats: {eve_optimizer.pattern_tracker.pattern_stats}\")\n    \n    # Step 8: Create and update EnhancedPatternResponsiveOptimizer\n    print(\"\\nStep 8: Testing EnhancedPatternResponsiveOptimizer...\")\n    enhanced_optimizer = EnhancedPatternResponsiveOptimizer(\n        model=model,\n        pattern_map=standardized_map,\n        run_diagnostics=False  # Skip diagnostics for speed\n    )\n    \n    # Check pattern tracker in enhanced optimizer\n    print(f\"Enhanced optimizer pattern types: {enhanced_optimizer.pattern_tracker.pattern_types}\")\n    print(f\"Enhanced optimizer pattern risks: {enhanced_optimizer.pattern_tracker.get_pattern_risks()}\")\n    \n    # Update with batch results\n    enhanced_optimizer.update_with_batch_results(batch_indices, 32, True)\n    enhanced_optimizer.update_with_pattern_recognition(batch_indices, correct_mask)\n    \n    # Get risks after update\n    final_risks = enhanced_optimizer.pattern_tracker.get_pattern_risks()\n    print(f\"Final pattern risks after updates: {final_risks}\")\n    \n    # Step 9: Debug pattern assignment lookup\n    print(\"\\nStep 9: Debugging pattern assignment lookup...\")\n    # Create pattern recognition service\n    pattern_service = PatternRecognitionService(standardized_map)\n    \n    # Check if pattern assignments were loaded\n    print(f\"Pattern service has {len(pattern_service.pattern_assignments)} assignments\")\n    \n    # Test getting pattern types for some indices\n    for idx in range(5):\n        pattern_type = pattern_service.get_pattern_type(idx)\n        print(f\"Index {idx} -> {pattern_type}\")\n    \n    # Get batch pattern states\n    pattern_states = pattern_service.get_batch_pattern_states(batch_indices)\n    print(f\"Batch pattern states: {pattern_states}\")\n    \n    print(\"\\n=== Debug Complete ===\")\n\nif __name__ == \"__main__\":\n    debug_pattern_tracker_initialization()"
+    }
+  },
+  "constants": {}
+}

@@ -1,0 +1,396 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\semantic\\compatibility.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 5
+    },
+    {
+      "name": "pickle",
+      "line": 6
+    },
+    {
+      "name": "logging",
+      "line": 7
+    },
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "torch.utils.data.Dataset",
+      "line": 9
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 10
+    },
+    {
+      "name": "numpy",
+      "line": 11
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 12
+    },
+    {
+      "name": "pickle",
+      "line": 158
+    },
+    {
+      "name": "sys",
+      "line": 159
+    },
+    {
+      "name": "types.ModuleType",
+      "line": 160
+    }
+  ],
+  "classes": {
+    "CIFAR10Augmented": {
+      "start_line": 16,
+      "end_line": 136,
+      "methods": {
+        "__init__": {
+          "start_line": 21,
+          "end_line": 69,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "original_dataset"
+            },
+            {
+              "name": "semantic_map"
+            },
+            {
+              "name": "augmentation_factor"
+            },
+            {
+              "name": "difficulty_threshold"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "semantic_map.get",
+              "line": 33
+            },
+            {
+              "name": "transforms.RandomRotation",
+              "line": 39
+            },
+            {
+              "name": "transforms.ColorJitter",
+              "line": 40
+            },
+            {
+              "name": "transforms.ColorJitter",
+              "line": 41
+            },
+            {
+              "name": "transforms.RandomAffine",
+              "line": 42
+            },
+            {
+              "name": "transforms.RandomAffine",
+              "line": 43
+            },
+            {
+              "name": "transforms.RandomResizedCrop",
+              "line": 44
+            },
+            {
+              "name": "self.create_augmentation_indices",
+              "line": 56
+            },
+            {
+              "name": "hasattr",
+              "line": 59
+            },
+            {
+              "name": "hasattr",
+              "line": 54
+            },
+            {
+              "name": "len",
+              "line": 62
+            },
+            {
+              "name": "....strftime",
+              "line": 67
+            },
+            {
+              "name": "len",
+              "line": 61
+            },
+            {
+              "name": "hasattr",
+              "line": 65
+            },
+            {
+              "name": "len",
+              "line": 65
+            },
+            {
+              "name": "hasattr",
+              "line": 66
+            },
+            {
+              "name": "len",
+              "line": 66
+            },
+            {
+              "name": "set",
+              "line": 65
+            },
+            {
+              "name": "datetime.now",
+              "line": 67
+            }
+          ],
+          "docstring": "\n        Initialize augmented dataset.\n        \n        Args:\n            original_dataset: Original CIFAR-10 dataset\n            semantic_map: Semantic difficulty map\n            augmentation_factor: Factor to increase dataset size (e.g., 1.5 = 50% more data)\n            difficulty_threshold: Minimum difficulty level for examples to be augmented\n        ",
+          "code_snippet": "    This class is maintained for backwards compatibility.\n    \"\"\"\n    def __init__(self, original_dataset, semantic_map, augmentation_factor=1.5, difficulty_threshold=3):\n        \"\"\"\n        Initialize augmented dataset.\n        \n        Args:\n            original_dataset: Original CIFAR-10 dataset\n            semantic_map: Semantic difficulty map\n            augmentation_factor: Factor to increase dataset size (e.g., 1.5 = 50% more data)\n            difficulty_threshold: Minimum difficulty level for examples to be augmented\n        \"\"\"\n        self.original_dataset = original_dataset\n        self.semantic_map = semantic_map\n        self.difficulty_ratings = semantic_map.get('difficulty_ratings', {})\n        self.augmentation_factor = augmentation_factor\n        self.difficulty_threshold = difficulty_threshold\n        \n        # Pre-compute augmentation transforms for difficult examples\n        self.difficulty_focused_transforms = {\n            'rotate': transforms.RandomRotation(15),\n            'brightness': transforms.ColorJitter(brightness=0.2),\n            'contrast': transforms.ColorJitter(contrast=0.2),\n            'translate': transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),\n            'scale': transforms.RandomAffine(degrees=0, scale=(0.9, 1.1)),\n            'crop': transforms.RandomResizedCrop(32, scale=(0.8, 1.0))\n        }\n        \n        # These attributes will be populated during augmentation\n        self.original_indices = []\n        self.difficult_indices = []\n        self.augmentation_indices = []\n        self.augmentation_transforms = []\n        \n        # Check if we already have the indices (e.g., loading from pickle)\n        if not hasattr(self, 'original_indices') or not self.original_indices:\n            # Create indices for augmentation\n            self.create_augmentation_indices()\n        \n        # Store augmentation stats for reference if not already present\n        if not hasattr(self, 'augmentation_stats'):\n            self.augmentation_stats = {\n                'original_size': len(original_dataset) if original_dataset is not None else 0,\n                'augmented_size': len(self),\n                'augmentation_factor': augmentation_factor,\n                'difficulty_threshold': difficulty_threshold,\n                'unique_difficult_examples': len(set(self.difficult_indices)) if hasattr(self, 'difficult_indices') else 0,\n                'total_augmentations': len(self.augmentation_indices) if hasattr(self, 'augmentation_indices') else 0,\n                'timestamp': datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n            }\n    \n    def create_augmentation_indices(self):\n        \"\"\""
+        },
+        "create_augmentation_indices": {
+          "start_line": 70,
+          "end_line": 111,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "list",
+              "line": 75
+            },
+            {
+              "name": "self.difficulty_ratings.items",
+              "line": 79
+            },
+            {
+              "name": "int",
+              "line": 85
+            },
+            {
+              "name": "logger.info",
+              "line": 108
+            },
+            {
+              "name": "logger.info",
+              "line": 109
+            },
+            {
+              "name": "range",
+              "line": 75
+            },
+            {
+              "name": "int",
+              "line": 80
+            },
+            {
+              "name": "len",
+              "line": 86
+            },
+            {
+              "name": "len",
+              "line": 89
+            },
+            {
+              "name": "max",
+              "line": 91
+            },
+            {
+              "name": "list",
+              "line": 101
+            },
+            {
+              "name": "np.random.choice",
+              "line": 102
+            },
+            {
+              "name": "len",
+              "line": 75
+            },
+            {
+              "name": "self.difficult_indices.append",
+              "line": 82
+            },
+            {
+              "name": "len",
+              "line": 85
+            },
+            {
+              "name": "len",
+              "line": 95
+            },
+            {
+              "name": "np.random.choice",
+              "line": 97
+            },
+            {
+              "name": "self.augmentation_indices.extend",
+              "line": 98
+            },
+            {
+              "name": "self.difficulty_focused_transforms.keys",
+              "line": 101
+            },
+            {
+              "name": "len",
+              "line": 102
+            },
+            {
+              "name": "len",
+              "line": 81
+            },
+            {
+              "name": "len",
+              "line": 91
+            },
+            {
+              "name": "len",
+              "line": 108
+            },
+            {
+              "name": "len",
+              "line": 109
+            },
+            {
+              "name": "set",
+              "line": 108
+            }
+          ],
+          "docstring": "\n        Create indices of original examples to include and those to augment.\n        ",
+          "code_snippet": "            }\n    \n    def create_augmentation_indices(self):\n        \"\"\"\n        Create indices of original examples to include and those to augment.\n        \"\"\"\n        # All original examples are included\n        self.original_indices = list(range(len(self.original_dataset)))\n        \n        # Find indices of difficult examples to augment\n        self.difficult_indices = []\n        for idx_str, difficulty in self.difficulty_ratings.items():\n            idx = int(idx_str)\n            if idx < len(self.original_dataset) and difficulty >= self.difficulty_threshold:\n                self.difficult_indices.append(idx)\n        \n        # Calculate how many augmented examples to create\n        target_size = int(len(self.original_dataset) * self.augmentation_factor)\n        num_augmentations = target_size - len(self.original_dataset)\n        \n        # Create augmentation plan: which indices to augment and how many times\n        if len(self.difficult_indices) > 0:\n            # Repeat indices to achieve desired augmentation count\n            repeats = max(1, num_augmentations // len(self.difficult_indices))\n            self.augmentation_indices = self.difficult_indices * repeats\n            \n            # If we need more, randomly sample from difficult examples again\n            remaining = num_augmentations - len(self.augmentation_indices)\n            if remaining > 0:\n                extra_indices = np.random.choice(self.difficult_indices, remaining, replace=True)\n                self.augmentation_indices.extend(extra_indices)\n            \n            # Assign a transformation type to each augmentation\n            transform_types = list(self.difficulty_focused_transforms.keys())\n            self.augmentation_transforms = np.random.choice(transform_types, len(self.augmentation_indices))\n        else:\n            # Fallback if no difficult examples found\n            self.augmentation_indices = []\n            self.augmentation_transforms = []\n        \n        logger.info(f\"Selected {len(set(self.difficult_indices))} unique difficult examples\")\n        logger.info(f\"Created {len(self.augmentation_indices)} total augmentations\")\n    \n    def __len__(self):\n        return len(self.original_indices) + len(self.augmentation_indices)\n    "
+        },
+        "__len__": {
+          "start_line": 111,
+          "end_line": 114,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 112
+            },
+            {
+              "name": "len",
+              "line": 112
+            }
+          ],
+          "code_snippet": "        logger.info(f\"Created {len(self.augmentation_indices)} total augmentations\")\n    \n    def __len__(self):\n        return len(self.original_indices) + len(self.augmentation_indices)\n    \n    def __getitem__(self, idx):\n        # If within range of original dataset, return original example\n        if idx < len(self.original_indices):"
+        },
+        "__getitem__": {
+          "start_line": 114,
+          "end_line": 136,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "idx"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "IndexError",
+              "line": 134
+            },
+            {
+              "name": "len",
+              "line": 116
+            },
+            {
+              "name": "len",
+              "line": 120
+            },
+            {
+              "name": "len",
+              "line": 121
+            },
+            {
+              "name": "transform_fn",
+              "line": 129
+            }
+          ],
+          "code_snippet": "        return len(self.original_indices) + len(self.augmentation_indices)\n    \n    def __getitem__(self, idx):\n        # If within range of original dataset, return original example\n        if idx < len(self.original_indices):\n            return self.original_dataset[self.original_indices[idx]]\n        \n        # Otherwise, return an augmented example\n        aug_idx = idx - len(self.original_indices)\n        if aug_idx < len(self.augmentation_indices):\n            # Get original example to augment\n            orig_idx = self.augmentation_indices[aug_idx]\n            img, label = self.original_dataset[orig_idx]\n            \n            # Apply augmentation\n            transform_type = self.augmentation_transforms[aug_idx]\n            transform_fn = self.difficulty_focused_transforms[transform_type]\n            augmented_img = transform_fn(img)\n            \n            return augmented_img, label\n        \n        # Should never reach here\n        raise IndexError(f\"Index {idx} out of range for augmented dataset\")\n\n\ndef load_with_class_fixup(file_path):\n    \"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Dataset"
+      ],
+      "docstring": "\n    Dataset wrapper for CIFAR-10 that applies augmentations based on semantic difficulty.\n    This class is maintained for backwards compatibility.\n    "
+    }
+  },
+  "functions": {
+    "load_with_class_fixup": {
+      "start_line": 137,
+      "end_line": 180,
+      "parameters": [
+        {
+          "name": "file_path"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "open",
+          "line": 150
+        },
+        {
+          "name": "pickle.load",
+          "line": 151
+        },
+        {
+          "name": "logger.warning",
+          "line": 153
+        },
+        {
+          "name": "logger.info",
+          "line": 154
+        },
+        {
+          "name": "ModuleType",
+          "line": 163
+        },
+        {
+          "name": "logger.info",
+          "line": 171
+        },
+        {
+          "name": "open",
+          "line": 169
+        },
+        {
+          "name": "pickle.load",
+          "line": 170
+        },
+        {
+          "name": "logger.error",
+          "line": 174
+        },
+        {
+          "name": "str",
+          "line": 153
+        },
+        {
+          "name": "str",
+          "line": 174
+        }
+      ],
+      "docstring": "\n    Load a pickle file with class fixup for compatibility.\n    This handles cases where the class was defined in __main__.\n    \n    Args:\n        file_path: Path to the pickle file\n        \n    Returns:\n        Unpickled object\n    ",
+      "code_snippet": "\n\ndef load_with_class_fixup(file_path):\n    \"\"\"\n    Load a pickle file with class fixup for compatibility.\n    This handles cases where the class was defined in __main__.\n    \n    Args:\n        file_path: Path to the pickle file\n        \n    Returns:\n        Unpickled object\n    \"\"\"\n    try:\n        # First try to load normally\n        with open(file_path, 'rb') as f:\n            return pickle.load(f)\n    except (ModuleNotFoundError, AttributeError) as e:\n        logger.warning(f\"Encountered pickle load error: {str(e)}\")\n        logger.info(\"Attempting to fix class references for compatibility...\")\n        \n        # Register our compatibility class to handle __main__.CIFAR10Augmented\n        # This is done by monkeypatching pickle's find_class method\n        import pickle\n        import sys\n        from types import ModuleType\n        \n        # Create a fake main module to handle the import\n        fake_main = ModuleType(\"__main__\")\n        fake_main.CIFAR10Augmented = CIFAR10Augmented\n        sys.modules[\"__main__\"] = fake_main\n        \n        try:\n            # Try loading again with the patched environment\n            with open(file_path, 'rb') as f:\n                result = pickle.load(f)\n            logger.info(\"Successfully loaded with class fixup\")\n            return result\n        except Exception as e2:\n            logger.error(f\"Failed to load even with class fixup: {str(e2)}\")\n            return None\n        finally:\n            # Restore the original __main__\n            del sys.modules[\"__main__\"]"
+    }
+  },
+  "constants": {}
+}

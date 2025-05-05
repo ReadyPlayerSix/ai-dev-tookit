@@ -1,0 +1,1311 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\trainer\\optimized\\optimized_trainer.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 11
+    },
+    {
+      "name": "logging",
+      "line": 12
+    },
+    {
+      "name": "time",
+      "line": 13
+    },
+    {
+      "name": "types",
+      "line": 14
+    },
+    {
+      "name": "collections.deque",
+      "line": 15
+    },
+    {
+      "name": "collections.defaultdict",
+      "line": 15
+    },
+    {
+      "name": "typing.Dict",
+      "line": 16
+    },
+    {
+      "name": "typing.List",
+      "line": 16
+    },
+    {
+      "name": "typing.Optional",
+      "line": 16
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 16
+    },
+    {
+      "name": "typing.Any",
+      "line": 16
+    },
+    {
+      "name": "typing.Callable",
+      "line": 16
+    },
+    {
+      "name": "types",
+      "line": 800
+    },
+    {
+      "name": "torch.utils.data.Subset",
+      "line": 816
+    },
+    {
+      "name": "isekaizen.pattern.unified.unified_tracker.UnifiedPatternTracker",
+      "line": 93
+    },
+    {
+      "name": "isekaizen.pattern.unified.streamlined_optimizer.StreamlinedBatchOptimizer",
+      "line": 107
+    },
+    {
+      "name": "isekaizen.mediators.pattern.data_mediator.PatternDataMediator",
+      "line": 147
+    },
+    {
+      "name": "multiprocessing",
+      "line": 248
+    },
+    {
+      "name": "platform",
+      "line": 249
+    }
+  ],
+  "classes": {
+    "OptimizedTrainer": {
+      "start_line": 20,
+      "end_line": 852,
+      "methods": {
+        "__init__": {
+          "start_line": 38,
+          "end_line": 208,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "criterion"
+            },
+            {
+              "name": "optimizer"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "pattern_tracker"
+            },
+            {
+              "name": "batch_optimizer"
+            },
+            {
+              "name": "val_interval"
+            },
+            {
+              "name": "history_window"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "mini_val_interval"
+            },
+            {
+              "name": "scheduler"
+            },
+            {
+              "name": "disable_per_batch_pattern_tracking"
+            },
+            {
+              "name": "use_pattern_mediator"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.to",
+              "line": 88
+            },
+            {
+              "name": "logger.info",
+              "line": 205
+            },
+            {
+              "name": "torch.device",
+              "line": 75
+            },
+            {
+              "name": "logger.info",
+              "line": 83
+            },
+            {
+              "name": "logger.info",
+              "line": 85
+            },
+            {
+              "name": "deque",
+              "line": 128
+            },
+            {
+              "name": "deque",
+              "line": 129
+            },
+            {
+              "name": "deque",
+              "line": 130
+            },
+            {
+              "name": "deque",
+              "line": 131
+            },
+            {
+              "name": "deque",
+              "line": 132
+            },
+            {
+              "name": "deque",
+              "line": 133
+            },
+            {
+              "name": "deque",
+              "line": 134
+            },
+            {
+              "name": "hasattr",
+              "line": 194
+            },
+            {
+              "name": "logger.info",
+              "line": 196
+            },
+            {
+              "name": "hasattr",
+              "line": 199
+            },
+            {
+              "name": "hasattr",
+              "line": 199
+            },
+            {
+              "name": "UnifiedPatternTracker",
+              "line": 94
+            },
+            {
+              "name": "StreamlinedBatchOptimizer",
+              "line": 108
+            },
+            {
+              "name": "PatternDataMediator",
+              "line": 150
+            },
+            {
+              "name": "self.pattern_mediator.initialize",
+              "line": 151
+            },
+            {
+              "name": "PatternService",
+              "line": 165
+            },
+            {
+              "name": "self.pattern_mediator.set_pattern_service",
+              "line": 166
+            },
+            {
+              "name": "hasattr",
+              "line": 169
+            },
+            {
+              "name": "hasattr",
+              "line": 178
+            },
+            {
+              "name": "hasattr",
+              "line": 183
+            },
+            {
+              "name": "logger.info",
+              "line": 188
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 75
+            },
+            {
+              "name": "logger.warning",
+              "line": 99
+            },
+            {
+              "name": "logger.warning",
+              "line": 113
+            },
+            {
+              "name": "self.optimizer.set_pattern_mediator",
+              "line": 170
+            },
+            {
+              "name": "logger.info",
+              "line": 171
+            },
+            {
+              "name": "self.add_mediator_support_to_optimizer",
+              "line": 174
+            },
+            {
+              "name": "logger.info",
+              "line": 175
+            },
+            {
+              "name": "logger.info",
+              "line": 181
+            },
+            {
+              "name": "logger.info",
+              "line": 186
+            },
+            {
+              "name": "logger.warning",
+              "line": 190
+            },
+            {
+              "name": "str",
+              "line": 159
+            },
+            {
+              "name": "....get",
+              "line": 161
+            }
+          ],
+          "docstring": "\n        Initialize the optimized trainer.\n        \n        Args:\n            model: PyTorch model to train\n            criterion: Loss function\n            optimizer: Parameter optimizer\n            device: Training device\n            pattern_tracker: Unified pattern tracker (created if None)\n            batch_optimizer: Batch size optimizer (created if None)\n            val_interval: Validation frequency in epochs\n            history_window: Number of epochs of history to maintain\n            pattern_map: Pattern map with sample mappings\n            mini_val_interval: Mini-validation frequency in batches (None to disable)\n            scheduler: Learning rate scheduler\n            disable_per_batch_pattern_tracking: Whether to disable pattern tracking for each batch (recommended for pre-augmented datasets)\n            fibonacci_sync_tracking: Whether to synchronize pattern tracking with Fibonacci checkpoints\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self,\n        model,\n        criterion,\n        optimizer,\n        device=None,\n        pattern_tracker=None,\n        batch_optimizer=None,\n        val_interval=1,\n        history_window=3,\n        pattern_map=None,\n        mini_val_interval=None,\n        scheduler=None,\n        disable_per_batch_pattern_tracking=False,\n        use_pattern_mediator=True\n    ):\n        \"\"\"\n        Initialize the optimized trainer.\n        \n        Args:\n            model: PyTorch model to train\n            criterion: Loss function\n            optimizer: Parameter optimizer\n            device: Training device\n            pattern_tracker: Unified pattern tracker (created if None)\n            batch_optimizer: Batch size optimizer (created if None)\n            val_interval: Validation frequency in epochs\n            history_window: Number of epochs of history to maintain\n            pattern_map: Pattern map with sample mappings\n            mini_val_interval: Mini-validation frequency in batches (None to disable)\n            scheduler: Learning rate scheduler\n            disable_per_batch_pattern_tracking: Whether to disable pattern tracking for each batch (recommended for pre-augmented datasets)\n            fibonacci_sync_tracking: Whether to synchronize pattern tracking with Fibonacci checkpoints\n        \"\"\"\n        self.model = model\n        self.criterion = criterion\n        self.optimizer = optimizer\n        self.device = device or torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\n        self.scheduler = scheduler\n        self.disable_per_batch_pattern_tracking = disable_per_batch_pattern_tracking\n        self.current_epoch_pattern_tracking = True\n        self.last_pattern_tracking_epoch = -1\n        \n        # Log whether pattern tracking is enabled or disabled\n        if disable_per_batch_pattern_tracking:\n            logger.info(\"Per-batch pattern tracking is disabled - optimized for pre-augmented datasets\")\n        else:\n            logger.info(\"Per-batch pattern tracking is enabled - will update pattern metrics for each batch\")\n        \n        # Move model to device\n        self.model = self.model.to(self.device)\n        \n        # Create or use provided pattern tracker\n        if pattern_tracker is None:\n            try:\n                from isekaizen.pattern.unified.unified_tracker import UnifiedPatternTracker\n                self.pattern_tracker = UnifiedPatternTracker(\n                    pattern_map=pattern_map,\n                    history_window=history_window\n                )\n            except ImportError:\n                logger.warning(\"UnifiedPatternTracker not available - pattern tracking disabled\")\n                self.pattern_tracker = None\n        else:\n            self.pattern_tracker = pattern_tracker\n        \n        # Create or use provided batch optimizer\n        if batch_optimizer is None:\n            try:\n                from isekaizen.pattern.unified.streamlined_optimizer import StreamlinedBatchOptimizer\n                self.batch_optimizer = StreamlinedBatchOptimizer(\n                    model=model,\n                    device=self.device\n                )\n            except ImportError:\n                logger.warning(\"StreamlinedBatchOptimizer not available - using fixed batch size\")\n                self.batch_optimizer = None\n        else:\n            self.batch_optimizer = batch_optimizer\n        \n        # Store parameters\n        self.val_interval = val_interval\n        self.mini_val_interval = mini_val_interval\n        self.history_window = history_window\n        \n        # Initialize dataloader cache - store by (id, batch_size, is_train)\n        self.dataloader_cache = {}\n        \n        # Initialize metrics history with bounded size\n        self.metrics_history = {\n            'train_loss': deque(maxlen=history_window),\n            'train_acc': deque(maxlen=history_window),\n            'val_loss': deque(maxlen=history_window),\n            'val_acc': deque(maxlen=history_window),\n            'batch_sizes': deque(maxlen=history_window),\n            'epoch_times': deque(maxlen=history_window),\n            'learning_rates': deque(maxlen=history_window)  # Added learning rate tracking\n        }\n        \n        # Training state\n        self.current_epoch = 0\n        self.best_val_acc = 0.0\n        self.last_val_acc = 0.0\n        self.last_train_acc = 0.0\n        \n        # Initialize pattern mediator if requested\n        self.pattern_mediator = None\n        if use_pattern_mediator:\n            try:\n                from isekaizen.mediators.pattern.data_mediator import PatternDataMediator\n                \n                # Create the mediator\n                self.pattern_mediator = PatternDataMediator(pattern_map=pattern_map)\n                self.pattern_mediator.initialize()\n                \n                # Create pattern service wrapper for the mediator\n                class PatternService:\n                    def __init__(self, pattern_map):\n                        self.pattern_map = pattern_map\n                        \n                    def get_pattern_type(self, idx):\n                        idx_str = str(idx)\n                        if self.pattern_map and 'sample_to_pattern' in self.pattern_map:\n                            return self.pattern_map['sample_to_pattern'].get(idx_str, 'statistical')\n                        return 'statistical'\n                \n                # Set up the pattern service\n                pattern_service = PatternService(pattern_map)\n                self.pattern_mediator.set_pattern_service(pattern_service)\n                \n                # Connect mediator to optimizer if it supports it\n                if hasattr(self.optimizer, 'set_pattern_mediator'):\n                    self.optimizer.set_pattern_mediator(self.pattern_mediator)\n                    logger.info(\"Connected pattern mediator to optimizer\")\n                else:\n                    # Add the method dynamically if it doesn't exist\n                    self.add_mediator_support_to_optimizer()\n                    logger.info(\"Added pattern mediator support to optimizer\")\n                    \n                # Ensure ratio_tracker and pattern_tracker are connected to the mediator\n                if hasattr(self.optimizer, 'ratio_tracker'):\n                    # Store reference to mediator in ratio tracker\n                    self.optimizer.ratio_tracker.pattern_mediator = self.pattern_mediator\n                    logger.info(\"Connected pattern mediator to ratio tracker\")\n                    \n                if hasattr(self.optimizer, 'pattern_tracker'):\n                    # Store reference to mediator in pattern tracker\n                    self.optimizer.pattern_tracker.pattern_mediator = self.pattern_mediator\n                    logger.info(\"Connected pattern mediator to pattern tracker\")\n                    \n                logger.info(\"PatternDataMediator initialized and connected\")\n            except ImportError:\n                logger.warning(\"PatternDataMediator not available - using direct pattern tracking\")\n                self.pattern_mediator = None\n        \n        # Connect pattern tracker to optimizer as fallback if no mediator\n        if self.pattern_mediator is None and self.pattern_tracker is not None and hasattr(self.optimizer, 'pattern_tracker'):\n            self.optimizer.pattern_tracker = self.pattern_tracker\n            logger.info(\"Connected pattern tracker to optimizer (no mediator)\")\n            \n        # Connect batch recognition data from optimizer to pattern tracker\n        if hasattr(self.optimizer, 'last_batch_indices') and hasattr(self.optimizer, 'last_correct_mask'):\n            # Store references to avoid attribute lookup in training loop\n            self.optimizer_tracks_batches = True\n        else:\n            self.optimizer_tracks_batches = False\n            \n        logger.info(\"OptimizedTrainer initialized with history window: %d epochs\", \n                   self.history_window)\n    \n    def get_dataloader(self, dataset, batch_size, is_train=True):\n        \"\"\"\n        Get or create a DataLoader with caching for efficiency."
+        },
+        "get_dataloader": {
+          "start_line": 208,
+          "end_line": 301,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "is_train"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 266
+            },
+            {
+              "name": "id",
+              "line": 221
+            },
+            {
+              "name": "len",
+              "line": 228
+            },
+            {
+              "name": "next",
+              "line": 230
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 270
+            },
+            {
+              "name": "iter",
+              "line": 230
+            },
+            {
+              "name": "hasattr",
+              "line": 240
+            },
+            {
+              "name": "isinstance",
+              "line": 240
+            },
+            {
+              "name": "logger.debug",
+              "line": 243
+            },
+            {
+              "name": "logger.warning",
+              "line": 284
+            },
+            {
+              "name": "logger.info",
+              "line": 285
+            },
+            {
+              "name": "torch.utils.data.DataLoader",
+              "line": 288
+            },
+            {
+              "name": "getattr",
+              "line": 240
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 275
+            },
+            {
+              "name": "platform.system",
+              "line": 252
+            },
+            {
+              "name": "min",
+              "line": 253
+            },
+            {
+              "name": "logger.debug",
+              "line": 254
+            },
+            {
+              "name": "min",
+              "line": 256
+            },
+            {
+              "name": "logger.debug",
+              "line": 257
+            },
+            {
+              "name": "logger.debug",
+              "line": 259
+            },
+            {
+              "name": "str",
+              "line": 284
+            },
+            {
+              "name": "multiprocessing.cpu_count",
+              "line": 253
+            },
+            {
+              "name": "multiprocessing.cpu_count",
+              "line": 256
+            },
+            {
+              "name": "str",
+              "line": 259
+            }
+          ],
+          "docstring": "\n        Get or create a DataLoader with caching for efficiency.\n        \n        Args:\n            dataset: Dataset to load\n            batch_size: Batch size\n            is_train: Whether this is for training (affects shuffle)\n            \n        Returns:\n            DataLoader instance\n        ",
+          "code_snippet": "                   self.history_window)\n    \n    def get_dataloader(self, dataset, batch_size, is_train=True):\n        \"\"\"\n        Get or create a DataLoader with caching for efficiency.\n        \n        Args:\n            dataset: Dataset to load\n            batch_size: Batch size\n            is_train: Whether this is for training (affects shuffle)\n            \n        Returns:\n            DataLoader instance\n        \"\"\"\n        # Generate cache key based on dataset identity, batch size, and mode\n        key = (id(dataset), batch_size, is_train)\n        \n        # Return cached dataloader if available\n        if key in self.dataloader_cache:\n            return self.dataloader_cache[key]\n        \n        # Clean cache if it grows too large (keep at most 10 entries)\n        if len(self.dataloader_cache) >= 10:\n            # Remove oldest or least likely to be reused\n            oldest_key = next(iter(self.dataloader_cache))\n            del self.dataloader_cache[oldest_key]\n        \n        # Determine optimal number of workers\n        if is_train:\n            # Start with a safer default of 0 workers\n            num_workers = 0\n            \n            # Check if the dataset has been modified with dynamic attributes\n            has_dynamic_methods = False\n            if hasattr(dataset, 'get_pattern_type') and isinstance(getattr(dataset, 'get_pattern_type'), types.MethodType):\n                # Dataset has dynamically added methods which may cause issues with workers\n                has_dynamic_methods = True\n                logger.debug(\"Dataset has dynamically added methods, using safer worker configuration\")\n            \n            # Only attempt to use workers if no dynamic methods detected\n            if not has_dynamic_methods:\n                try:\n                    import multiprocessing\n                    import platform\n                    \n                    # Be more conservative on Windows\n                    if platform.system() == 'Windows':\n                        num_workers = min(2, multiprocessing.cpu_count() // 4)\n                        logger.debug(f\"Windows platform detected, using conservative worker count: {num_workers}\")\n                    else:\n                        num_workers = min(4, multiprocessing.cpu_count() // 2)\n                        logger.debug(f\"Using worker count: {num_workers}\")\n                except Exception as e:\n                    logger.debug(f\"Error determining worker count: {str(e)}, falling back to 0 workers\")\n                    num_workers = 0\n        else:\n            # For validation, use single-process loading\n            num_workers = 0\n        \n        # Log the worker configuration\n        logger.info(f\"Creating DataLoader with num_workers={num_workers}, batch_size={batch_size}\")\n        \n        try:\n            # Create dataloader with optimized settings\n            dataloader = torch.utils.data.DataLoader(\n                dataset,\n                batch_size=batch_size,\n                shuffle=is_train,\n                num_workers=num_workers,\n                pin_memory=torch.cuda.is_available(),  # Enable pin_memory for GPU\n                drop_last=is_train and batch_size > 1,  # Prevent BatchNorm issues\n                persistent_workers=num_workers > 0  # Keep workers alive between epochs if using workers\n            )\n            \n            # Cache for future reuse\n            self.dataloader_cache[key] = dataloader\n            return dataloader\n        except Exception as e:\n            logger.warning(f\"Error creating DataLoader with workers: {str(e)}\")\n            logger.info(\"Falling back to single-process DataLoader\")\n            \n            # Fallback to safer configuration with no workers\n            dataloader = torch.utils.data.DataLoader(\n                dataset,\n                batch_size=batch_size,\n                shuffle=is_train,\n                num_workers=0,\n                pin_memory=False,\n                drop_last=is_train and batch_size > 1\n            )\n            \n            # Cache the fallback loader\n            self.dataloader_cache[key] = dataloader\n            return dataloader\n    \n    def train(\n        self,\n        train_dataset,"
+        },
+        "train": {
+          "start_line": 301,
+          "end_line": 504,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_dataset"
+            },
+            {
+              "name": "val_dataset"
+            },
+            {
+              "name": "epochs"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "callbacks"
+            },
+            {
+              "name": "adaptive_batch_size"
+            },
+            {
+              "name": "verbose"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 340
+            },
+            {
+              "name": "time.time",
+              "line": 353
+            },
+            {
+              "name": "logger.info",
+              "line": 354
+            },
+            {
+              "name": "range",
+              "line": 357
+            },
+            {
+              "name": "logger.info",
+              "line": 499
+            },
+            {
+              "name": "logger.info",
+              "line": 500
+            },
+            {
+              "name": "self.batch_optimizer.get_optimal_batch_size",
+              "line": 345
+            },
+            {
+              "name": "logger.info",
+              "line": 346
+            },
+            {
+              "name": "logger.info",
+              "line": 350
+            },
+            {
+              "name": "time.time",
+              "line": 364
+            },
+            {
+              "name": "logger.debug",
+              "line": 370
+            },
+            {
+              "name": "logger.info",
+              "line": 377
+            },
+            {
+              "name": "self._train_epoch",
+              "line": 380
+            },
+            {
+              "name": "....append",
+              "line": 434
+            },
+            {
+              "name": "....append",
+              "line": 435
+            },
+            {
+              "name": "....append",
+              "line": 436
+            },
+            {
+              "name": "....append",
+              "line": 437
+            },
+            {
+              "name": "....append",
+              "line": 438
+            },
+            {
+              "name": "....append",
+              "line": 439
+            },
+            {
+              "name": "....append",
+              "line": 442
+            },
+            {
+              "name": "....append",
+              "line": 443
+            },
+            {
+              "name": "....append",
+              "line": 444
+            },
+            {
+              "name": "....append",
+              "line": 445
+            },
+            {
+              "name": "....append",
+              "line": 446
+            },
+            {
+              "name": "self.update_learning_rate_history",
+              "line": 462
+            },
+            {
+              "name": "logger.info",
+              "line": 465
+            },
+            {
+              "name": "hasattr",
+              "line": 482
+            },
+            {
+              "name": "time.time",
+              "line": 496
+            },
+            {
+              "name": "logger.info",
+              "line": 361
+            },
+            {
+              "name": "self._validate",
+              "line": 391
+            },
+            {
+              "name": "hasattr",
+              "line": 403
+            },
+            {
+              "name": "self.batch_optimizer.update_metrics",
+              "line": 404
+            },
+            {
+              "name": "hasattr",
+              "line": 407
+            },
+            {
+              "name": "self.pattern_tracker.update_equilibrium_status",
+              "line": 408
+            },
+            {
+              "name": "hasattr",
+              "line": 411
+            },
+            {
+              "name": "self.pattern_tracker.end_epoch",
+              "line": 412
+            },
+            {
+              "name": "self.pattern_mediator.end_epoch",
+              "line": 416
+            },
+            {
+              "name": "self.batch_optimizer.get_optimal_batch_size",
+              "line": 421
+            },
+            {
+              "name": "time.time",
+              "line": 431
+            },
+            {
+              "name": "float",
+              "line": 442
+            },
+            {
+              "name": "float",
+              "line": 443
+            },
+            {
+              "name": "float",
+              "line": 444
+            },
+            {
+              "name": "float",
+              "line": 445
+            },
+            {
+              "name": "int",
+              "line": 446
+            },
+            {
+              "name": "....append",
+              "line": 450
+            },
+            {
+              "name": "hasattr",
+              "line": 454
+            },
+            {
+              "name": "callback",
+              "line": 473
+            },
+            {
+              "name": "self.optimizer.update_accuracy_metrics_with_epoch",
+              "line": 484
+            },
+            {
+              "name": "logger.info",
+              "line": 485
+            },
+            {
+              "name": "time.time",
+              "line": 360
+            },
+            {
+              "name": "float",
+              "line": 394
+            },
+            {
+              "name": "logger.info",
+              "line": 425
+            },
+            {
+              "name": "logger.info",
+              "line": 428
+            },
+            {
+              "name": "float",
+              "line": 450
+            },
+            {
+              "name": "self.scheduler.step",
+              "line": 456
+            },
+            {
+              "name": "self.scheduler.step",
+              "line": 459
+            },
+            {
+              "name": "dict",
+              "line": 473
+            },
+            {
+              "name": "logger.info",
+              "line": 474
+            }
+          ],
+          "docstring": "\n        Train the model with efficient resource usage.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Validation dataset\n            epochs: Number of epochs to train\n            batch_size: Initial batch size (None for auto-determination)\n            callbacks: List of callback functions\n            adaptive_batch_size: Whether to use adaptive batch sizing\n            verbose: Whether to print verbose output\n            \n        Returns:\n            Dictionary of training metrics\n        ",
+          "code_snippet": "            return dataloader\n    \n    def train(\n        self,\n        train_dataset,\n        val_dataset,\n        epochs=10,\n        batch_size=None,\n        callbacks=None,\n        adaptive_batch_size=True,\n        verbose=False\n    ):\n        \"\"\"\n        Train the model with efficient resource usage.\n        \n        Args:\n            train_dataset: Training dataset\n            val_dataset: Validation dataset\n            epochs: Number of epochs to train\n            batch_size: Initial batch size (None for auto-determination)\n            callbacks: List of callback functions\n            adaptive_batch_size: Whether to use adaptive batch sizing\n            verbose: Whether to print verbose output\n            \n        Returns:\n            Dictionary of training metrics\n        \"\"\"\n        # Initialize callbacks\n        callbacks = callbacks or []\n        \n        # Define serializable history dictionary to return\n        history = {\n            'train_loss': [],\n            'train_acc': [],\n            'val_loss': [],\n            'val_acc': [],\n            'batch_sizes': [],\n            'learning_rates': []\n        }\n        \n        # Start timing\n        start_time = time.time()\n        \n        # Determine initial batch size\n        if batch_size is None and self.batch_optimizer is not None:\n            # Let batch optimizer determine initial size\n            current_batch_size = self.batch_optimizer.get_optimal_batch_size()\n            logger.info(\"Using optimizer's initial batch size: %d\", current_batch_size)\n        else:\n            # Use provided or default\n            current_batch_size = batch_size or 128\n            logger.info(\"Using specified initial batch size: %d\", current_batch_size)\n        \n        # Start timing for pre-epoch setup\n        pre_epoch_start_time = time.time()\n        logger.info(\"Setting up for first epoch (creating DataLoader, etc.)...\")\n        \n        # Train for specified number of epochs\n        for epoch in range(epochs):\n            # Log time taken for pre-epoch setup before the first epoch\n            if epoch == 0:\n                pre_epoch_time = time.time() - pre_epoch_start_time\n                logger.info(f\"Pre-first-epoch setup completed in {pre_epoch_time:.2f} seconds\")\n            # Update epoch counter\n            self.current_epoch = epoch\n            epoch_start = time.time()\n            \n            # Always enable pattern tracking for all epochs\n            self.current_epoch_pattern_tracking = True\n            \n            # Structured diagnostic output for pattern tracking status\n            logger.debug(f\"<CLAUDE:DIAGNOSTIC:PATTERN_TRACKING>\\n\" +\n                        f\"epoch: {epoch+1}\\n\" +\n                        f\"tracking_enabled: {self.current_epoch_pattern_tracking}\\n\" +\n                        f\"tracking_mode: normal\\n\" +\n                        f\"last_tracking_epoch: {self.last_pattern_tracking_epoch}\\n\" +\n                        f\"</CLAUDE:DIAGNOSTIC:PATTERN_TRACKING>\")\n            \n            logger.info(\"Epoch %d/%d\", epoch+1, epochs)\n            \n            # Train for one epoch\n            train_loss, train_acc = self._train_epoch(\n                train_dataset,\n                current_batch_size,\n                verbose=verbose\n            )\n            \n            # Only validate on specified intervals (or final epoch)\n            should_validate = (epoch % self.val_interval == 0) or (epoch == epochs - 1)\n            \n            if should_validate and val_dataset is not None:\n                # Validate the model\n                val_loss, val_acc = self._validate(val_dataset, current_batch_size)\n            else:\n                # Use previous values if skipping validation\n                val_loss = self.metrics_history['val_loss'][-1] if self.metrics_history['val_loss'] else float('inf')\n                val_acc = self.metrics_history['val_acc'][-1] if self.metrics_history['val_acc'] else 0.0\n                \n            # Check for validation improvement\n            val_improved = val_acc > self.best_val_acc\n            if val_improved:\n                self.best_val_acc = val_acc\n            \n            # Update batch optimizer with latest metrics\n            if self.batch_optimizer is not None and hasattr(self.batch_optimizer, 'update_metrics'):\n                self.batch_optimizer.update_metrics(train_acc, val_acc, improved=val_improved)\n            \n            # Update pattern tracker with epoch completion and global metrics\n            if self.pattern_tracker is not None and hasattr(self.pattern_tracker, 'update_equilibrium_status'):\n                self.pattern_tracker.update_equilibrium_status(train_acc, val_acc, epoch)\n            \n            # End epoch in pattern tracker\n            if self.pattern_tracker is not None and hasattr(self.pattern_tracker, 'end_epoch'):\n                self.pattern_tracker.end_epoch(epoch)\n                \n            # End epoch in pattern mediator if available\n            if self.pattern_mediator is not None:\n                self.pattern_mediator.end_epoch(epoch)\n            \n            # Adjust batch size if enabled\n            if adaptive_batch_size and self.batch_optimizer is not None:\n                # Get adjusted batch size\n                new_batch_size = self.batch_optimizer.get_optimal_batch_size(current_batch_size)\n                \n                # Only log if it changed\n                if new_batch_size != current_batch_size:\n                    logger.info(\"Adjusted batch size: %d -> %d\", current_batch_size, new_batch_size)\n                    current_batch_size = new_batch_size\n                else:\n                    logger.info(\"Batch size unchanged: %d\", current_batch_size)\n            \n            # Calculate epoch time\n            epoch_time = time.time() - epoch_start\n            \n            # Store metrics in trainer's bounded history\n            self.metrics_history['train_loss'].append(train_loss)\n            self.metrics_history['train_acc'].append(train_acc)\n            self.metrics_history['val_loss'].append(val_loss)\n            self.metrics_history['val_acc'].append(val_acc)\n            self.metrics_history['batch_sizes'].append(current_batch_size)\n            self.metrics_history['epoch_times'].append(epoch_time)\n            \n            # Also store in return history dictionary\n            history['train_loss'].append(float(train_loss))\n            history['train_acc'].append(float(train_acc))\n            history['val_loss'].append(float(val_loss))\n            history['val_acc'].append(float(val_acc))\n            history['batch_sizes'].append(int(current_batch_size))\n            \n            # Add learning rates to history\n            if self.metrics_history['learning_rates']:\n                history['learning_rates'].append(float(self.metrics_history['learning_rates'][-1]))\n            \n            # Apply learning rate scheduler if available\n            if self.scheduler is not None:\n                if hasattr(self.scheduler, 'is_better'):\n                    # ReduceLROnPlateau type\n                    self.scheduler.step(val_loss)\n                else:\n                    # Standard scheduler\n                    self.scheduler.step()\n            \n            # Update learning rate history\n            self.update_learning_rate_history()\n            \n            # Report metrics\n            logger.info(\"Epoch %d/%d - %.2fs - Loss: %.4f - Acc: %.2f%% - \"\n                      \"Val Loss: %.4f - Val Acc: %.2f%%\",\n                      epoch+1, epochs, epoch_time, train_loss, train_acc,\n                      val_loss, val_acc)\n            \n            # Execute callbacks\n            stop_training = False\n            for callback in callbacks:\n                if callback(epoch, dict(history), self.model, self.optimizer):\n                    logger.info(\"Early stopping triggered by callback\")\n                    stop_training = True\n                    break\n            \n            if stop_training:\n                break\n            \n            # Update optimizer's epoch counter if it supports it\n            if hasattr(self.optimizer, 'update_accuracy_metrics_with_epoch'):\n                total_epochs = epochs  # Pass the total number of epochs\n                self.optimizer.update_accuracy_metrics_with_epoch(train_acc, val_acc, epoch, total_epochs)\n                logger.info(f\"[EPOCH DEBUG] Updated optimizer's epoch counter to {epoch}\")\n            \n            # Update state for next epoch\n            self.last_val_acc = val_acc\n            self.last_train_acc = train_acc\n            \n            # If we tracked patterns this epoch, update our record\n            if self.current_epoch_pattern_tracking:\n                self.last_pattern_tracking_epoch = epoch\n        \n        # Calculate total training time\n        total_time = time.time() - start_time\n        history['total_time'] = total_time\n        \n        logger.info(\"Training completed in %.2fs\", total_time)\n        logger.info(\"Best validation accuracy: %.2f%%\", self.best_val_acc)\n        \n        return history\n    \n    def _train_epoch(self, dataset, batch_size, verbose=False):\n        \"\"\"\n        Train for one epoch with efficient resource usage."
+        },
+        "_train_epoch": {
+          "start_line": 504,
+          "end_line": 611,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            },
+            {
+              "name": "verbose"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.train",
+              "line": 516
+            },
+            {
+              "name": "self.get_dataloader",
+              "line": 522
+            },
+            {
+              "name": "enumerate",
+              "line": 528
+            },
+            {
+              "name": "torch.arange",
+              "line": 534
+            },
+            {
+              "name": "self.optimizer.zero_grad",
+              "line": 540
+            },
+            {
+              "name": "self.model",
+              "line": 543
+            },
+            {
+              "name": "self.criterion",
+              "line": 544
+            },
+            {
+              "name": "outputs.max",
+              "line": 547
+            },
+            {
+              "name": "predicted.eq",
+              "line": 548
+            },
+            {
+              "name": "loss.item",
+              "line": 589
+            },
+            {
+              "name": "....item",
+              "line": 590
+            },
+            {
+              "name": "targets.size",
+              "line": 592
+            },
+            {
+              "name": "loss.backward",
+              "line": 595
+            },
+            {
+              "name": "self.optimizer.step",
+              "line": 596
+            },
+            {
+              "name": "len",
+              "line": 606
+            },
+            {
+              "name": "inputs.to",
+              "line": 530
+            },
+            {
+              "name": "targets.to",
+              "line": 530
+            },
+            {
+              "name": "min",
+              "line": 536
+            },
+            {
+              "name": "self.pattern_mediator.update_with_batch_recognition",
+              "line": 555
+            },
+            {
+              "name": "hasattr",
+              "line": 576
+            },
+            {
+              "name": "self.pattern_tracker.update_from_batch",
+              "line": 577
+            },
+            {
+              "name": "self._run_mini_validation",
+              "line": 600
+            },
+            {
+              "name": "self.model.train",
+              "line": 603
+            },
+            {
+              "name": "len",
+              "line": 536
+            },
+            {
+              "name": "self.pattern_mediator.get_pattern_accuracies",
+              "line": 564
+            },
+            {
+              "name": "self.pattern_mediator.get_pattern_risks",
+              "line": 565
+            },
+            {
+              "name": "correct_mask.sum",
+              "line": 590
+            },
+            {
+              "name": "hasattr",
+              "line": 568
+            },
+            {
+              "name": "hasattr",
+              "line": 569
+            },
+            {
+              "name": "hasattr",
+              "line": 571
+            },
+            {
+              "name": "logger.debug",
+              "line": 573
+            },
+            {
+              "name": "self.optimizer.ratio_tracker.update_pattern_accuracies",
+              "line": 570
+            },
+            {
+              "name": "self.optimizer.ratio_tracker.update_pattern_risks",
+              "line": 572
+            }
+          ],
+          "docstring": "\n        Train for one epoch with efficient resource usage.\n        \n        Args:\n            dataset: Training dataset\n            batch_size: Batch size\n            verbose: Whether to print verbose output\n            \n        Returns:\n            Tuple of (epoch_loss, epoch_accuracy)\n        ",
+          "code_snippet": "        return history\n    \n    def _train_epoch(self, dataset, batch_size, verbose=False):\n        \"\"\"\n        Train for one epoch with efficient resource usage.\n        \n        Args:\n            dataset: Training dataset\n            batch_size: Batch size\n            verbose: Whether to print verbose output\n            \n        Returns:\n            Tuple of (epoch_loss, epoch_accuracy)\n        \"\"\"\n        self.model.train()\n        running_loss = 0.0\n        correct = 0\n        total = 0\n        \n        # Get cached or create dataloader\n        dataloader = self.get_dataloader(dataset, batch_size, is_train=True)\n        \n        # Track mini-validation\n        batch_count = 0\n        \n        # Process each batch\n        for i, (inputs, targets) in enumerate(dataloader):\n            batch_count += 1\n            inputs, targets = inputs.to(self.device), targets.to(self.device)\n            \n            # Get batch indices for pattern tracking\n            batch_start = i * batch_size\n            batch_indices = torch.arange(\n                batch_start, \n                min(batch_start + batch_size, len(dataset))\n            )\n            \n            # Zero gradients\n            self.optimizer.zero_grad()\n            \n            # Forward pass\n            outputs = self.model(inputs)\n            loss = self.criterion(outputs, targets)\n            \n            # Calculate correctness\n            _, predicted = outputs.max(1)\n            correct_mask = predicted.eq(targets)\n            \n            # Always enable pattern tracking for all batches unless explicitly disabled\n            enable_tracking = not self.disable_per_batch_pattern_tracking\n            \n            # Always update mediator if available regardless of pattern tracking setting\n            if self.pattern_mediator is not None:\n                self.pattern_mediator.update_with_batch_recognition(\n                    batch_indices,\n                    correct_mask,\n                    self.current_epoch\n                )\n                \n                # Process mediator data periodically to update ratio_tracker\n                if batch_count % 50 == 0:\n                    # Request mediator data\n                    pattern_accs = self.pattern_mediator.get_pattern_accuracies(self.current_epoch, force_recalculate=True)\n                    pattern_risks = self.pattern_mediator.get_pattern_risks(self.current_epoch, force_recalculate=True)\n                    \n                    # Update optimizer with this data\n                    if hasattr(self.optimizer, 'ratio_tracker') and pattern_accs and pattern_risks:\n                        if hasattr(self.optimizer.ratio_tracker, 'update_pattern_accuracies'):\n                            self.optimizer.ratio_tracker.update_pattern_accuracies(pattern_accs)\n                        if hasattr(self.optimizer.ratio_tracker, 'update_pattern_risks'):\n                            self.optimizer.ratio_tracker.update_pattern_risks(pattern_risks)\n                        logger.debug(f\"Updated ratio_tracker with mediator data at batch {batch_count}\")\n            \n            # Update pattern tracker with batch data if tracking is enabled\n            if enable_tracking and self.pattern_tracker is not None and hasattr(self.pattern_tracker, 'update_from_batch'):\n                self.pattern_tracker.update_from_batch(\n                    batch_indices, \n                    correct_mask,\n                    self.current_epoch\n                )\n            \n            # Pass batch data to optimizer if it tracks batches and tracking is enabled\n            if enable_tracking and self.optimizer_tracks_batches:\n                self.optimizer.last_batch_indices = batch_indices\n                self.optimizer.last_correct_mask = correct_mask\n            \n            # Update metrics\n            running_loss += loss.item()\n            batch_correct = correct_mask.sum().item()\n            correct += batch_correct\n            total += targets.size(0)\n            \n            # Backward pass and optimize\n            loss.backward()\n            self.optimizer.step()\n            \n            # Run mini-validation if requested\n            if self.mini_val_interval and batch_count % self.mini_val_interval == 0:\n                self._run_mini_validation(dataset, batch_size)\n                \n                # Reset to training mode\n                self.model.train()\n        \n        # Calculate epoch metrics\n        epoch_loss = running_loss / len(dataloader)\n        epoch_acc = 100. * correct / total\n        \n        return epoch_loss, epoch_acc\n    \n    def _validate(self, dataset, batch_size):\n        \"\"\"\n        Validate the model on a dataset."
+        },
+        "_validate": {
+          "start_line": 611,
+          "end_line": 657,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.eval",
+              "line": 622
+            },
+            {
+              "name": "self.get_dataloader",
+              "line": 628
+            },
+            {
+              "name": "hasattr",
+              "line": 650
+            },
+            {
+              "name": "hasattr",
+              "line": 652
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 631
+            },
+            {
+              "name": "len",
+              "line": 646
+            },
+            {
+              "name": "self.model",
+              "line": 636
+            },
+            {
+              "name": "self.criterion",
+              "line": 637
+            },
+            {
+              "name": "loss.item",
+              "line": 640
+            },
+            {
+              "name": "outputs.max",
+              "line": 641
+            },
+            {
+              "name": "....item",
+              "line": 642
+            },
+            {
+              "name": "targets.size",
+              "line": 643
+            },
+            {
+              "name": "inputs.to",
+              "line": 633
+            },
+            {
+              "name": "targets.to",
+              "line": 633
+            },
+            {
+              "name": "....sum",
+              "line": 642
+            },
+            {
+              "name": "predicted.eq",
+              "line": 642
+            }
+          ],
+          "docstring": "\n        Validate the model on a dataset.\n        \n        Args:\n            dataset: Validation dataset\n            batch_size: Batch size\n            \n        Returns:\n            Tuple of (validation_loss, validation_accuracy)\n        ",
+          "code_snippet": "        return epoch_loss, epoch_acc\n    \n    def _validate(self, dataset, batch_size):\n        \"\"\"\n        Validate the model on a dataset.\n        \n        Args:\n            dataset: Validation dataset\n            batch_size: Batch size\n            \n        Returns:\n            Tuple of (validation_loss, validation_accuracy)\n        \"\"\"\n        self.model.eval()\n        running_loss = 0.0\n        correct = 0\n        total = 0\n        \n        # Get cached or create dataloader\n        dataloader = self.get_dataloader(dataset, batch_size, is_train=False)\n        \n        # Disable gradient calculation\n        with torch.no_grad():\n            for inputs, targets in dataloader:\n                inputs, targets = inputs.to(self.device), targets.to(self.device)\n                \n                # Forward pass\n                outputs = self.model(inputs)\n                loss = self.criterion(outputs, targets)\n                \n                # Update metrics\n                running_loss += loss.item()\n                _, predicted = outputs.max(1)\n                correct += predicted.eq(targets).sum().item()\n                total += targets.size(0)\n        \n        # Calculate metrics\n        val_loss = running_loss / len(dataloader)\n        val_acc = 100. * correct / total\n        \n        # Update optimizer accuracy metrics if supported\n        if hasattr(self.optimizer, 'test_acc'):\n            self.optimizer.test_acc = val_acc\n        if hasattr(self.optimizer, 'train_acc'):\n            self.optimizer.train_acc = self.last_train_acc\n        \n        return val_loss, val_acc\n    \n    def update_learning_rate_history(self):\n        \"\"\"\n        Update learning rate history from optimizer if available."
+        },
+        "update_learning_rate_history": {
+          "start_line": 657,
+          "end_line": 666,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "hasattr",
+              "line": 661
+            },
+            {
+              "name": "....append",
+              "line": 663
+            },
+            {
+              "name": "logger.info",
+              "line": 664
+            },
+            {
+              "name": "len",
+              "line": 661
+            }
+          ],
+          "docstring": "\n        Update learning rate history from optimizer if available.\n        ",
+          "code_snippet": "        return val_loss, val_acc\n    \n    def update_learning_rate_history(self):\n        \"\"\"\n        Update learning rate history from optimizer if available.\n        \"\"\"\n        if hasattr(self.optimizer, 'param_groups') and len(self.optimizer.param_groups) > 0:\n            current_lr = self.optimizer.param_groups[0]['lr']\n            self.metrics_history['learning_rates'].append(current_lr)\n            logger.info(f\"[LR DEBUG] Tracked current learning rate: {current_lr:.6f}\")\n    \n    def add_mediator_support_to_optimizer(self):\n        \"\"\"\n        Add pattern mediator support to the optimizer if it doesn't already have it."
+        },
+        "add_mediator_support_to_optimizer": {
+          "start_line": 666,
+          "end_line": 806,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "hasattr",
+              "line": 673
+            },
+            {
+              "name": "types.MethodType",
+              "line": 801
+            },
+            {
+              "name": "self.optimizer.set_pattern_mediator",
+              "line": 804
+            },
+            {
+              "name": "hasattr",
+              "line": 678
+            },
+            {
+              "name": "types.MethodType",
+              "line": 797
+            },
+            {
+              "name": "self._is_fibonacci_check_point",
+              "line": 687
+            },
+            {
+              "name": "hasattr",
+              "line": 698
+            },
+            {
+              "name": "hasattr",
+              "line": 735
+            },
+            {
+              "name": "hasattr",
+              "line": 740
+            },
+            {
+              "name": "pattern_risks.items",
+              "line": 747
+            },
+            {
+              "name": "hasattr",
+              "line": 690
+            },
+            {
+              "name": "logger.info",
+              "line": 691
+            },
+            {
+              "name": "self.pattern_mediator.get_pattern_risks",
+              "line": 699
+            },
+            {
+              "name": "self.pattern_mediator.get_pattern_accuracies",
+              "line": 700
+            },
+            {
+              "name": "logger.info",
+              "line": 703
+            },
+            {
+              "name": "logger.info",
+              "line": 704
+            },
+            {
+              "name": "logger.info",
+              "line": 705
+            },
+            {
+              "name": "self.ratio_tracker.get_pattern_risks",
+              "line": 708
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_accuracies",
+              "line": 709
+            },
+            {
+              "name": "logger.info",
+              "line": 712
+            },
+            {
+              "name": "logger.info",
+              "line": 713
+            },
+            {
+              "name": "logger.info",
+              "line": 714
+            },
+            {
+              "name": "logger.warning",
+              "line": 718
+            },
+            {
+              "name": "hasattr",
+              "line": 728
+            },
+            {
+              "name": "hasattr",
+              "line": 728
+            },
+            {
+              "name": "self.equilibrium_tracker.get_current_bounds",
+              "line": 729
+            },
+            {
+              "name": "current_bounds.items",
+              "line": 730
+            },
+            {
+              "name": "self.ratio_tracker.update_pattern_risks",
+              "line": 736
+            },
+            {
+              "name": "self.ratio_tracker.update_pattern_accuracies",
+              "line": 737
+            },
+            {
+              "name": "logger.debug",
+              "line": 738
+            },
+            {
+              "name": "pattern_accuracies.items",
+              "line": 741
+            },
+            {
+              "name": "logger.debug",
+              "line": 744
+            },
+            {
+              "name": "hasattr",
+              "line": 720
+            },
+            {
+              "name": "hasattr",
+              "line": 720
+            },
+            {
+              "name": "logger.info",
+              "line": 721
+            },
+            {
+              "name": "hasattr",
+              "line": 742
+            },
+            {
+              "name": "max",
+              "line": 755
+            },
+            {
+              "name": "....append",
+              "line": 790
+            },
+            {
+              "name": "self.pattern_tracker.update_accuracy",
+              "line": 743
+            },
+            {
+              "name": "min",
+              "line": 775
+            },
+            {
+              "name": "abs",
+              "line": 793
+            },
+            {
+              "name": "logger.info",
+              "line": 794
+            },
+            {
+              "name": "bool",
+              "line": 704
+            },
+            {
+              "name": "bool",
+              "line": 705
+            },
+            {
+              "name": "bool",
+              "line": 713
+            },
+            {
+              "name": "bool",
+              "line": 714
+            },
+            {
+              "name": "max",
+              "line": 779
+            },
+            {
+              "name": "len",
+              "line": 721
+            }
+          ],
+          "docstring": "\n        Add pattern mediator support to the optimizer if it doesn't already have it.\n        \n        This method dynamically adds the necessary methods to the optimizer\n        to support interaction with the pattern mediator.\n        ",
+          "code_snippet": "            logger.info(f\"[LR DEBUG] Tracked current learning rate: {current_lr:.6f}\")\n    \n    def add_mediator_support_to_optimizer(self):\n        \"\"\"\n        Add pattern mediator support to the optimizer if it doesn't already have it.\n        \n        This method dynamically adds the necessary methods to the optimizer\n        to support interaction with the pattern mediator.\n        \"\"\"\n        if not hasattr(self.optimizer, 'set_pattern_mediator'):\n            def set_pattern_mediator(optimizer, mediator):\n                optimizer.pattern_mediator = mediator\n                \n                # Store original update_learning_rates_by_pattern method if it exists\n                if hasattr(optimizer, 'update_learning_rates_by_pattern'):\n                    optimizer._original_update_learning_rates_by_pattern = optimizer.update_learning_rates_by_pattern\n                    \n                    # Replace with enhanced version that uses mediator data\n                    def enhanced_update_learning_rates_by_pattern(self):\n                        # Get the current epoch number\n                        epoch = self.current_epoch\n                        \n                        # Only perform check at Fibonacci check points\n                        is_checkpoint = self._is_fibonacci_check_point(epoch)\n                        \n                        # Log every epoch for diagnostics, but only when epoch changes\n                        if hasattr(self, 'epoch_changed') and self.epoch_changed:\n                            logger.info(f\"Epoch {epoch+1} - Checking Fibonacci checkpoint status: {is_checkpoint}\")\n                            self.epoch_changed = False  # Reset flag after logging\n                            \n                        if not is_checkpoint:\n                            return\n                        \n                        # Get pattern metrics - CHANGED TO USE MEDIATOR IF AVAILABLE\n                        if hasattr(self, 'pattern_mediator'):\n                            pattern_risks = self.pattern_mediator.get_pattern_risks(epoch)\n                            pattern_accuracies = self.pattern_mediator.get_pattern_accuracies(epoch)\n                            \n                            # Add debugging for pattern data availability\n                            logger.info(f\"[LR DEBUG] Using mediator data for checkpoint {epoch+1}\")\n                            logger.info(f\"[LR DEBUG] Checkpoint {epoch+1}: Pattern risks available: {bool(pattern_risks)}\")\n                            logger.info(f\"[LR DEBUG] Checkpoint {epoch+1}: Pattern accuracies available: {bool(pattern_accuracies)}\")\n                        else:\n                            # Fallback to original method\n                            pattern_risks = self.ratio_tracker.get_pattern_risks()\n                            pattern_accuracies = self.pattern_tracker.get_pattern_accuracies()\n                            \n                            # Add debugging for pattern data availability\n                            logger.info(f\"[LR DEBUG] Using tracker data for checkpoint {epoch+1}\")\n                            logger.info(f\"[LR DEBUG] Checkpoint {epoch+1}: Pattern risks available: {bool(pattern_risks)}\")\n                            logger.info(f\"[LR DEBUG] Checkpoint {epoch+1}: Pattern accuracies available: {bool(pattern_accuracies)}\")\n                        \n                        # Continue with the original method logic for adjusting learning rates\n                        if not pattern_risks or not pattern_accuracies:\n                            logger.warning(f\"[LR DEBUG] Missing pattern data at Fibonacci checkpoint {epoch+1}\")\n                            # Add additional debugging info\n                            if hasattr(self, 'pattern_tracker') and hasattr(self.pattern_tracker, 'data'):\n                                logger.info(f\"[LR DEBUG] Pattern tracker data size: {len(self.pattern_tracker.data)}\")\n                            return\n                        \n                        # Rest of the original method here\n                        # Get pattern equilibrium bounds if available\n                        min_bounds = {}\n                        max_bounds = {}\n                        if hasattr(self, 'equilibrium_tracker') and hasattr(self, 'use_equilibrium_bounds') and self.use_equilibrium_bounds:\n                            current_bounds = self.equilibrium_tracker.get_current_bounds()\n                            for pattern_type, bounds in current_bounds.items():\n                                min_bounds[pattern_type] = bounds['min']\n                                max_bounds[pattern_type] = bounds['max']\n                        \n                        # Update ratio tracker and pattern tracker with mediator data to ensure consistency\n                        if hasattr(self, 'ratio_tracker'):\n                            self.ratio_tracker.update_pattern_risks(pattern_risks)\n                            self.ratio_tracker.update_pattern_accuracies(pattern_accuracies)\n                            logger.debug(\"Updated ratio tracker with mediator data\")\n                            \n                        if hasattr(self, 'pattern_tracker'):\n                            for pattern_type, accuracy in pattern_accuracies.items():\n                                if hasattr(self.pattern_tracker, 'update_accuracy'):\n                                    self.pattern_tracker.update_accuracy(pattern_type, accuracy)\n                            logger.debug(\"Updated pattern tracker with mediator data\")\n                        \n                        # Process the patterns with the data now available\n                        for pattern_type, risk in pattern_risks.items():\n                            if pattern_type not in pattern_accuracies:\n                                continue\n                                \n                            # Continue with the original learning rate adjustment logic\n                            accuracy = pattern_accuracies[pattern_type]\n                            \n                            # Calculate risk/accuracy ratio\n                            ratio = risk / max(accuracy, 0.1)  # Prevent division by zero\n                            \n                            # Check if pattern is within equilibrium bounds (if available)\n                            within_bounds = True\n                            if pattern_type in min_bounds and pattern_type in max_bounds:\n                                min_bound = min_bounds[pattern_type]\n                                max_bound = max_bounds[pattern_type]\n                                within_bounds = (min_bound <= accuracy <= max_bound)\n                            \n                            # Only apply adjustments if pattern is within equilibrium bounds\n                            if within_bounds:\n                                # Always use iris mode adjustment ranges\n                                # Start with base adjustment range\n                                adjustment_min = 0.92 * 0.95  # Base 0.92 with iris 5% reduction = 0.874\n                                adjustment_max = 1.08 * 1.05  # Base 1.08 with iris 5% increase = 1.134\n                                \n                                # Calculate learning rate adjustment factor\n                                if ratio > 1.2:  # High risk relative to accuracy - struggling pattern\n                                    # Reduce LR reduction (or slightly increase LR) to encourage exploration\n                                    # Scale based on ratio deviation from 1.0 and clamp to max adjustment\n                                    adjustment = min(adjustment_max, 1.0 + (ratio - 1.0) * self.lr_risk_sensitivity)\n                                elif ratio < 0.8:  # Low risk relative to accuracy - well-learned pattern\n                                    # Increase LR reduction to fine-tune well-learned patterns\n                                    # Scale based on ratio deviation from 1.0 and clamp to min adjustment\n                                    adjustment = max(adjustment_min, 1.0 - (1.0 - ratio) * self.lr_risk_sensitivity)\n                                else:\n                                    # Balanced ratio - no special adjustment\n                                    adjustment = 1.0\n                                \n                                # Store the adjustment factor for this pattern\n                                self.pattern_lr_multipliers[pattern_type] = adjustment\n                                \n                                # Store in history\n                                if pattern_type not in self.pattern_lr_history:\n                                    self.pattern_lr_history[pattern_type] = []\n                                self.pattern_lr_history[pattern_type].append((self.current_epoch, adjustment))\n                                \n                                # Log significant adjustments\n                                if abs(adjustment - 1.0) > 0.05:\n                                    logger.info(f\"Pattern {pattern_type} learning rate adjustment: {adjustment:.3f} (ratio: {ratio:.3f})\")\n                    \n                    # Replace the original method with the enhanced one\n                    optimizer.update_learning_rates_by_pattern = types.MethodType(enhanced_update_learning_rates_by_pattern, optimizer)\n            \n            # Add the set_pattern_mediator method to the optimizer\n            import types\n            self.optimizer.set_pattern_mediator = types.MethodType(set_pattern_mediator, self.optimizer)\n            \n            # Set the mediator\n            self.optimizer.set_pattern_mediator(self.pattern_mediator)\n    \n    def _run_mini_validation(self, dataset, batch_size):\n        \"\"\"\n        Run a quick validation on a small subset."
+        },
+        "_run_mini_validation": {
+          "start_line": 806,
+          "end_line": 852,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "dataset"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.model.eval",
+              "line": 822
+            },
+            {
+              "name": "hasattr",
+              "line": 845
+            },
+            {
+              "name": "min",
+              "line": 817
+            },
+            {
+              "name": "....tolist",
+              "line": 818
+            },
+            {
+              "name": "Subset",
+              "line": 819
+            },
+            {
+              "name": "torch.no_grad",
+              "line": 826
+            },
+            {
+              "name": "self.get_dataloader",
+              "line": 828
+            },
+            {
+              "name": "self.optimizer.update_accuracy_metrics",
+              "line": 850
+            },
+            {
+              "name": "hasattr",
+              "line": 814
+            },
+            {
+              "name": "len",
+              "line": 817
+            },
+            {
+              "name": "min",
+              "line": 830
+            },
+            {
+              "name": "self.model",
+              "line": 836
+            },
+            {
+              "name": "outputs.max",
+              "line": 837
+            },
+            {
+              "name": "....item",
+              "line": 838
+            },
+            {
+              "name": "targets.size",
+              "line": 839
+            },
+            {
+              "name": "inputs.to",
+              "line": 835
+            },
+            {
+              "name": "targets.to",
+              "line": 835
+            },
+            {
+              "name": "torch.randperm",
+              "line": 818
+            },
+            {
+              "name": "....sum",
+              "line": 838
+            },
+            {
+              "name": "len",
+              "line": 818
+            },
+            {
+              "name": "predicted.eq",
+              "line": 838
+            }
+          ],
+          "docstring": "\n        Run a quick validation on a small subset.\n        \n        Args:\n            dataset: Full validation dataset\n            batch_size: Batch size to use\n        ",
+          "code_snippet": "            self.optimizer.set_pattern_mediator(self.pattern_mediator)\n    \n    def _run_mini_validation(self, dataset, batch_size):\n        \"\"\"\n        Run a quick validation on a small subset.\n        \n        Args:\n            dataset: Full validation dataset\n            batch_size: Batch size to use\n        \"\"\"\n        if not hasattr(self, '_mini_val_subset') or self._mini_val_subset is None:\n            # Create subset of validation data (at most 1000 samples)\n            from torch.utils.data import Subset\n            subset_size = min(1000, len(dataset))\n            indices = torch.randperm(len(dataset))[:subset_size].tolist()\n            self._mini_val_subset = Subset(dataset, indices)\n        \n        # Quick evaluation\n        self.model.eval()\n        correct = 0\n        total = 0\n        \n        with torch.no_grad():\n            # Use smaller batch size for mini-validation\n            mini_val_loader = self.get_dataloader(\n                self._mini_val_subset, \n                min(batch_size, 64),\n                is_train=False\n            )\n            \n            for inputs, targets in mini_val_loader:\n                inputs, targets = inputs.to(self.device), targets.to(self.device)\n                outputs = self.model(inputs)\n                _, predicted = outputs.max(1)\n                correct += predicted.eq(targets).sum().item()\n                total += targets.size(0)\n        \n        # Calculate metrics\n        mini_val_acc = 100. * correct / total\n        \n        # Update optimizer if it supports incremental updates\n        if hasattr(self.optimizer, 'update_accuracy_metrics'):\n            # Calculate current training accuracy\n            current_train_acc = 0.0\n            if self.metrics_history['train_acc']:\n                current_train_acc = self.metrics_history['train_acc'][-1]\n            self.optimizer.update_accuracy_metrics(current_train_acc, mini_val_acc)"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Memory-efficient, consolidated trainer for isekaiZen.\n    \n    This trainer implements a streamlined training loop with efficient\n    pattern tracking, dataloader caching, and bounded memory usage.\n    \n    Attributes:\n        model: Model to train\n        criterion: Loss function\n        optimizer: Parameter optimizer\n        device: Training device\n        pattern_tracker: Unified pattern tracker\n        batch_optimizer: Batch size optimizer\n        dataloader_cache: Cache of DataLoader instances\n        metrics_history: Fixed-size history of training metrics\n    "
+    },
+    "PatternService": {
+      "start_line": 154,
+      "end_line": 164,
+      "methods": {
+        "__init__": {
+          "start_line": 155,
+          "end_line": 158,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "                # Create pattern service wrapper for the mediator\n                class PatternService:\n                    def __init__(self, pattern_map):\n                        self.pattern_map = pattern_map\n                        \n                    def get_pattern_type(self, idx):\n                        idx_str = str(idx)\n                        if self.pattern_map and 'sample_to_pattern' in self.pattern_map:"
+        },
+        "get_pattern_type": {
+          "start_line": 158,
+          "end_line": 164,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "idx"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "str",
+              "line": 159
+            },
+            {
+              "name": "....get",
+              "line": 161
+            }
+          ],
+          "code_snippet": "                        self.pattern_map = pattern_map\n                        \n                    def get_pattern_type(self, idx):\n                        idx_str = str(idx)\n                        if self.pattern_map and 'sample_to_pattern' in self.pattern_map:\n                            return self.pattern_map['sample_to_pattern'].get(idx_str, 'statistical')\n                        return 'statistical'\n                \n                # Set up the pattern service\n                pattern_service = PatternService(pattern_map)\n                self.pattern_mediator.set_pattern_service(pattern_service)"
+        }
+      },
+      "class_variables": [],
+      "bases": []
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

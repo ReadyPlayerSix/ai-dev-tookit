@@ -1,0 +1,654 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\optimizer\\pattern_risk_accuracy_tracker.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "time",
+      "line": 10
+    },
+    {
+      "name": "typing.Dict",
+      "line": 11
+    },
+    {
+      "name": "typing.List",
+      "line": 11
+    },
+    {
+      "name": "typing.Any",
+      "line": 11
+    },
+    {
+      "name": "typing.Optional",
+      "line": 11
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 11
+    },
+    {
+      "name": "typing.Set",
+      "line": 11
+    },
+    {
+      "name": "typing.Union",
+      "line": 11
+    },
+    {
+      "name": "time",
+      "line": 251
+    },
+    {
+      "name": "time",
+      "line": 292
+    },
+    {
+      "name": "time",
+      "line": 326
+    },
+    {
+      "name": "time",
+      "line": 357
+    },
+    {
+      "name": "isekaizen.utils.pattern_map_utils.translate_pattern_map_to_standard_format",
+      "line": 28
+    }
+  ],
+  "classes": {
+    "PatternRiskAccuracyTracker": {
+      "start_line": 15,
+      "end_line": 382,
+      "methods": {
+        "__init__": {
+          "start_line": 23,
+          "end_line": 70,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self._extract_pattern_types",
+              "line": 38
+            },
+            {
+              "name": "set",
+              "line": 63
+            },
+            {
+              "name": "set",
+              "line": 64
+            },
+            {
+              "name": "logger.info",
+              "line": 68
+            },
+            {
+              "name": "logger.info",
+              "line": 55
+            },
+            {
+              "name": "....items",
+              "line": 56
+            },
+            {
+              "name": "self._extract_pattern_preferences",
+              "line": 66
+            },
+            {
+              "name": "translate_pattern_map_to_standard_format",
+              "line": 29
+            },
+            {
+              "name": "logger.info",
+              "line": 30
+            },
+            {
+              "name": "logger.error",
+              "line": 32
+            },
+            {
+              "name": "....append",
+              "line": 59
+            },
+            {
+              "name": "logger.info",
+              "line": 60
+            },
+            {
+              "name": "len",
+              "line": 68
+            },
+            {
+              "name": "str",
+              "line": 32
+            }
+          ],
+          "docstring": "Initialize the pattern risk-accuracy tracker.",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, pattern_map=None):\n        \"\"\"Initialize the pattern risk-accuracy tracker.\"\"\"\n        # Check if pattern map needs conversion to standardized format\n        if pattern_map and 'format_version' not in pattern_map:\n            try:\n                from isekaizen.utils.pattern_map_utils import translate_pattern_map_to_standard_format\n                self.pattern_map = translate_pattern_map_to_standard_format(pattern_map)\n                logger.info(\"Pattern map converted to standardized format for risk-accuracy tracking\")\n            except Exception as e:\n                logger.error(f\"Failed to convert pattern map: {str(e)}, using original\")\n                self.pattern_map = pattern_map or {}\n        else:\n            self.pattern_map = pattern_map or {}\n        \n        # Extract pattern types from map\n        self.pattern_types = self._extract_pattern_types()\n        \n        # Initialize pattern stats\n        self.pattern_stats = {\n            pattern_type: {\n                'correct': 0,\n                'total': 0,\n                'accuracy': 0.0,\n                'risk': 0.5,  # Start with median risk (neutral)\n                'accuracy_history': [],\n                'risk_history': []\n            }\n            for pattern_type in self.pattern_types\n        }\n        \n        # If we have standardized risks, use them as initial values\n        if 'pattern_risks' in self.pattern_map:\n            logger.info(\"Using standardized risk values from pattern map\")\n            for pattern_type, risk in self.pattern_map['pattern_risks'].items():\n                if pattern_type in self.pattern_stats:\n                    self.pattern_stats[pattern_type]['risk'] = risk\n                    self.pattern_stats[pattern_type]['risk_history'].append(risk)\n                    logger.info(f\"Set initial risk for {pattern_type} to {risk:.2f}\")\n        \n        # Track preferred/challenging patterns\n        self.preferred_patterns = set()\n        self.challenging_patterns = set()\n        if pattern_map:\n            self._extract_pattern_preferences()\n        \n        logger.info(f\"Pattern Risk-Accuracy Tracker initialized with {len(self.pattern_types)} pattern types\")\n    \n    def _extract_pattern_types(self) -> Set[str]:\n        \"\"\"\n        Extract pattern types from pattern map."
+        },
+        "_extract_pattern_types": {
+          "start_line": 70,
+          "end_line": 104,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "set",
+              "line": 77
+            },
+            {
+              "name": "logger.warning",
+              "line": 100
+            },
+            {
+              "name": "set",
+              "line": 83
+            },
+            {
+              "name": "logger.info",
+              "line": 84
+            },
+            {
+              "name": "set",
+              "line": 92
+            },
+            {
+              "name": "....keys",
+              "line": 83
+            },
+            {
+              "name": "set",
+              "line": 86
+            },
+            {
+              "name": "logger.info",
+              "line": 87
+            },
+            {
+              "name": "pattern_distribution.keys",
+              "line": 92
+            },
+            {
+              "name": "set",
+              "line": 95
+            },
+            {
+              "name": "....keys",
+              "line": 86
+            },
+            {
+              "name": "pattern_distribution.keys",
+              "line": 95
+            },
+            {
+              "name": "len",
+              "line": 84
+            },
+            {
+              "name": "len",
+              "line": 87
+            }
+          ],
+          "docstring": "\n        Extract pattern types from pattern map.\n        \n        Returns:\n            Set of pattern types\n        ",
+          "code_snippet": "        logger.info(f\"Pattern Risk-Accuracy Tracker initialized with {len(self.pattern_types)} pattern types\")\n    \n    def _extract_pattern_types(self) -> Set[str]:\n        \"\"\"\n        Extract pattern types from pattern map.\n        \n        Returns:\n            Set of pattern types\n        \"\"\"\n        pattern_types = set()\n        \n        # Check if this is a standardized pattern map\n        if 'format_version' in self.pattern_map:\n            # Extract from standardized format\n            if 'pattern_distribution' in self.pattern_map:\n                pattern_types = set(self.pattern_map['pattern_distribution'].keys())\n                logger.info(f\"Extracted {len(pattern_types)} pattern types from standardized distribution\")\n            elif 'pattern_risks' in self.pattern_map:\n                pattern_types = set(self.pattern_map['pattern_risks'].keys())\n                logger.info(f\"Extracted {len(pattern_types)} pattern types from standardized risks\")\n        else:\n            # Extract from legacy pattern map formats\n            if 'pattern_map' in self.pattern_map and 'pattern_distribution' in self.pattern_map['pattern_map']:\n                pattern_distribution = self.pattern_map['pattern_map']['pattern_distribution']\n                pattern_types = set(pattern_distribution.keys())\n            elif 'pattern_distribution' in self.pattern_map:\n                pattern_distribution = self.pattern_map['pattern_distribution']\n                pattern_types = set(pattern_distribution.keys())\n        \n        # Fall back to default types if none found\n        if not pattern_types:\n            pattern_types = {\"structure\", \"relationship\", \"intensity\", \"dominance\", \"temporal\"}\n            logger.warning(f\"No pattern types found in map, using defaults: {pattern_types}\")\n            \n        return pattern_types\n    \n    def _extract_pattern_preferences(self):\n        \"\"\"Extract preferred and challenging patterns from the pattern map.\"\"\"\n        # Check if this is a standardized pattern map"
+        },
+        "_extract_pattern_preferences": {
+          "start_line": 104,
+          "end_line": 121,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "set",
+              "line": 111
+            },
+            {
+              "name": "set",
+              "line": 112
+            },
+            {
+              "name": "logger.info",
+              "line": 113
+            },
+            {
+              "name": "set",
+              "line": 118
+            },
+            {
+              "name": "set",
+              "line": 119
+            },
+            {
+              "name": "preferences.get",
+              "line": 111
+            },
+            {
+              "name": "preferences.get",
+              "line": 112
+            },
+            {
+              "name": "preferences.get",
+              "line": 118
+            },
+            {
+              "name": "preferences.get",
+              "line": 119
+            }
+          ],
+          "docstring": "Extract preferred and challenging patterns from the pattern map.",
+          "code_snippet": "        return pattern_types\n    \n    def _extract_pattern_preferences(self):\n        \"\"\"Extract preferred and challenging patterns from the pattern map.\"\"\"\n        # Check if this is a standardized pattern map\n        if 'format_version' in self.pattern_map:\n            # Extract preferences from standardized format\n            if 'pattern_metadata' in self.pattern_map and 'pattern_preferences' in self.pattern_map['pattern_metadata']:\n                preferences = self.pattern_map['pattern_metadata']['pattern_preferences']\n                self.preferred_patterns = set(preferences.get('preferred_patterns', []))\n                self.challenging_patterns = set(preferences.get('challenging_patterns', []))\n                logger.info(f\"Extracted pattern preferences from standardized map: preferred={self.preferred_patterns}, challenging={self.challenging_patterns}\")\n        else:\n            # Extract from legacy format\n            if 'pattern_map' in self.pattern_map and 'pattern_preferences' in self.pattern_map['pattern_map']:\n                preferences = self.pattern_map['pattern_map']['pattern_preferences']\n                self.preferred_patterns = set(preferences.get('preferred_patterns', []))\n                self.challenging_patterns = set(preferences.get('challenging_patterns', []))\n    \n    def _get_pattern_type(self, example_idx: Union[int, str]) -> Optional[str]:\n        \"\"\"\n        Get pattern type for an example from the pattern map."
+        },
+        "_get_pattern_type": {
+          "start_line": 121,
+          "end_line": 167,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "example_idx"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "str",
+              "line": 132
+            },
+            {
+              "name": "list",
+              "line": 161
+            },
+            {
+              "name": "....get",
+              "line": 138
+            },
+            {
+              "name": "sum",
+              "line": 148
+            },
+            {
+              "name": "idx_str.isdigit",
+              "line": 160
+            },
+            {
+              "name": "int",
+              "line": 160
+            },
+            {
+              "name": "idx_str.isdigit",
+              "line": 145
+            },
+            {
+              "name": "int",
+              "line": 145
+            },
+            {
+              "name": "distribution.values",
+              "line": 148
+            },
+            {
+              "name": "distribution.items",
+              "line": 152
+            },
+            {
+              "name": "hash",
+              "line": 160
+            },
+            {
+              "name": "len",
+              "line": 162
+            },
+            {
+              "name": "hash",
+              "line": 145
+            }
+          ],
+          "docstring": "\n        Get pattern type for an example from the pattern map.\n        \n        Args:\n            example_idx: Example index\n            \n        Returns:\n            Pattern type or None if not found\n        ",
+          "code_snippet": "                self.challenging_patterns = set(preferences.get('challenging_patterns', []))\n    \n    def _get_pattern_type(self, example_idx: Union[int, str]) -> Optional[str]:\n        \"\"\"\n        Get pattern type for an example from the pattern map.\n        \n        Args:\n            example_idx: Example index\n            \n        Returns:\n            Pattern type or None if not found\n        \"\"\"\n        # Convert to string for lookup\n        idx_str = str(example_idx)\n        \n        # Look up in pattern map - try nested structure first\n        if 'pattern_map' in self.pattern_map and 'pattern_map' in self.pattern_map['pattern_map']:\n            pattern_data = self.pattern_map['pattern_map']['pattern_map']\n            if idx_str in pattern_data:\n                return pattern_data[idx_str].get('pattern_type')\n        \n        # If we have direct pattern distribution, use it for proportional assignment\n        if 'pattern_distribution' in self.pattern_map:\n            distribution = self.pattern_map['pattern_distribution']\n            if distribution:\n                # Create a deterministic mapping based on example index\n                idx_int = int(idx_str) if idx_str.isdigit() else hash(idx_str) % 10000\n                \n                # Calculate total patterns\n                total = sum(distribution.values())\n                if total > 0:\n                    # Assign based on weighted distribution\n                    cumulative = 0\n                    for pattern_type, count in distribution.items():\n                        if count > 0:  # Skip empty patterns\n                            cumulative += count\n                            if idx_int % total < cumulative:\n                                return pattern_type\n        \n        # If still no pattern found, use example index to assign in a round-robin fashion\n        if self.pattern_types:\n            idx_int = int(idx_str) if idx_str.isdigit() else hash(idx_str) % 10000\n            pattern_list = list(self.pattern_types)\n            return pattern_list[idx_int % len(pattern_list)]\n            \n        # Fallback to default\n        return \"default\"\n    \n    def update_with_batch_results(self, batch_indices, correct_mask):\n        \"\"\"\n        Update pattern stats with batch results."
+        },
+        "update_with_batch_results": {
+          "start_line": 167,
+          "end_line": 204,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_indices"
+            },
+            {
+              "name": "correct_mask"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "enumerate",
+              "line": 178
+            },
+            {
+              "name": "self._get_pattern_type",
+              "line": 180
+            },
+            {
+              "name": "....join",
+              "line": 201
+            },
+            {
+              "name": "logger.debug",
+              "line": 202
+            },
+            {
+              "name": "isinstance",
+              "line": 179
+            },
+            {
+              "name": "....item",
+              "line": 179
+            },
+            {
+              "name": "pattern_assignments.items",
+              "line": 201
+            }
+          ],
+          "docstring": "\n        Update pattern stats with batch results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        ",
+          "code_snippet": "        return \"default\"\n    \n    def update_with_batch_results(self, batch_indices, correct_mask):\n        \"\"\"\n        Update pattern stats with batch results.\n        \n        Args:\n            batch_indices: Indices of examples in the batch\n            correct_mask: Boolean mask of whether each prediction was correct\n        \"\"\"\n        # Track pattern assignments to verify they're working correctly\n        pattern_assignments = {}\n        \n        for i, example_idx in enumerate(batch_indices):\n            is_correct = correct_mask[i].item() if isinstance(correct_mask[i], torch.Tensor) else correct_mask[i]\n            pattern_type = self._get_pattern_type(example_idx)\n            \n            # Track pattern assignments for logging\n            if pattern_type not in pattern_assignments:\n                pattern_assignments[pattern_type] = 0\n            pattern_assignments[pattern_type] += 1\n            \n            if pattern_type and pattern_type in self.pattern_stats:\n                # Update accuracy stats\n                self.pattern_stats[pattern_type]['total'] += 1\n                if is_correct:\n                    self.pattern_stats[pattern_type]['correct'] += 1\n                \n                # Update accuracy\n                total = self.pattern_stats[pattern_type]['total']\n                correct = self.pattern_stats[pattern_type]['correct']\n                if total > 0:\n                    self.pattern_stats[pattern_type]['accuracy'] = correct / total\n        \n        # Log pattern assignments to verify distribution is working\n        if pattern_assignments:\n            assignment_summary = \", \".join([f\"{p}: {c}\" for p, c in pattern_assignments.items()])\n            logger.debug(f\"Batch pattern assignments: {assignment_summary}\")\n    \n    def update_with_epoch_results(self, epoch):\n        \"\"\"\n        Update risk based on accuracy changes after an epoch."
+        },
+        "update_with_epoch_results": {
+          "start_line": 204,
+          "end_line": 244,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_stats.items",
+              "line": 212
+            },
+            {
+              "name": "....append",
+              "line": 218
+            },
+            {
+              "name": "min",
+              "line": 239
+            },
+            {
+              "name": "....append",
+              "line": 240
+            },
+            {
+              "name": "logger.info",
+              "line": 242
+            },
+            {
+              "name": "len",
+              "line": 224
+            },
+            {
+              "name": "max",
+              "line": 239
+            },
+            {
+              "name": "min",
+              "line": 231
+            },
+            {
+              "name": "min",
+              "line": 235
+            },
+            {
+              "name": "max",
+              "line": 236
+            },
+            {
+              "name": "abs",
+              "line": 231
+            }
+          ],
+          "docstring": "\n        Update risk based on accuracy changes after an epoch.\n        \n        Args:\n            epoch: Current epoch number\n        ",
+          "code_snippet": "            logger.debug(f\"Batch pattern assignments: {assignment_summary}\")\n    \n    def update_with_epoch_results(self, epoch):\n        \"\"\"\n        Update risk based on accuracy changes after an epoch.\n        \n        Args:\n            epoch: Current epoch number\n        \"\"\"\n        # For each pattern type, check accuracy changes\n        for pattern_type, stats in self.pattern_stats.items():\n            if stats['total'] == 0:\n                continue\n                \n            # Record current accuracy\n            current_accuracy = stats['accuracy']\n            stats['accuracy_history'].append(current_accuracy)\n            \n            # Calculate risk directly from accuracy\n            base_risk = 1.0 - current_accuracy  # Inverse of accuracy\n            \n            # If we have history, consider accuracy changes\n            if len(stats['accuracy_history']) > 1:\n                prev_accuracy = stats['accuracy_history'][-2]\n                accuracy_change = current_accuracy - prev_accuracy\n                \n                # If accuracy decreased, increase risk\n                if accuracy_change < 0:\n                    # Scale risk increase based on magnitude of loss\n                    risk_increase = min(0.2, abs(accuracy_change) * 2.0)\n                    base_risk += risk_increase\n                else:\n                    # If accuracy improved, decrease risk gradually\n                    risk_decrease = min(0.1, accuracy_change)\n                    base_risk = max(0.0, base_risk - risk_decrease)\n            \n            # Ensure risk stays in 0-1 range\n            stats['risk'] = min(1.0, max(0.0, base_risk))\n            stats['risk_history'].append(stats['risk'])\n            \n            logger.info(f\"Pattern {pattern_type} - Accuracy: {current_accuracy:.2f}, Risk: {stats['risk']:.2f}\")\n    \n    def get_pattern_risks(self):\n        \"\"\"\n        Get current risk levels for all patterns."
+        },
+        "get_pattern_risks": {
+          "start_line": 244,
+          "end_line": 285,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 252
+            },
+            {
+              "name": "self.pattern_stats.items",
+              "line": 257
+            },
+            {
+              "name": "logger.info",
+              "line": 281
+            },
+            {
+              "name": "pattern_risks.items",
+              "line": 264
+            },
+            {
+              "name": "logger.info",
+              "line": 270
+            },
+            {
+              "name": "logger.warning",
+              "line": 272
+            },
+            {
+              "name": "time.time",
+              "line": 280
+            },
+            {
+              "name": "logger.info",
+              "line": 276
+            },
+            {
+              "name": "self.pattern_stats.keys",
+              "line": 277
+            }
+          ],
+          "docstring": "\n        Get current risk levels for all patterns.\n        \n        Returns:\n            Dictionary of pattern types to risk levels\n        ",
+          "code_snippet": "            logger.info(f\"Pattern {pattern_type} - Accuracy: {current_accuracy:.2f}, Risk: {stats['risk']:.2f}\")\n    \n    def get_pattern_risks(self):\n        \"\"\"\n        Get current risk levels for all patterns.\n        \n        Returns:\n            Dictionary of pattern types to risk levels\n        \"\"\"\n        import time\n        start_time = time.time()\n        \n        pattern_risks = {}\n        \n        # Get risks for patterns with data\n        for pattern_type, stats in self.pattern_stats.items():\n            if stats['total'] > 0:\n                pattern_risks[pattern_type] = stats['risk']\n        \n        # Log detailed risk information\n        if pattern_risks:\n            risk_summary = \"Pattern risks:\\n\"\n            for pattern_type, risk in pattern_risks.items():\n                stats = self.pattern_stats[pattern_type]\n                accuracy = stats['accuracy'] if 'accuracy' in stats else 0.0\n                correct = stats['correct'] if 'correct' in stats else 0\n                total = stats['total'] if 'total' in stats else 0\n                risk_summary += f\"  {pattern_type}: risk={risk:.4f}, accuracy={accuracy:.4f}, correct={correct}/{total}\\n\"\n            logger.info(risk_summary)\n        else:\n            logger.warning(\"No pattern risks available - no examples have been processed\")\n            \n            # If no risks yet, assign default risks based on pattern types\n            if self.pattern_stats:\n                logger.info(\"Using default risk values for patterns\")\n                for pattern_type in self.pattern_stats.keys():\n                    pattern_risks[pattern_type] = 0.5  # Default medium risk\n        \n        elapsed_time = time.time() - start_time\n        logger.info(f\"TIMING: get_pattern_risks took {elapsed_time:.4f} seconds\")\n        \n        return pattern_risks\n    \n    def get_current_recognition_rates(self):\n        \"\"\"\n        Get current recognition rates (accuracies) for all patterns."
+        },
+        "get_current_recognition_rates": {
+          "start_line": 285,
+          "end_line": 306,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 293
+            },
+            {
+              "name": "logger.info",
+              "line": 302
+            },
+            {
+              "name": "time.time",
+              "line": 301
+            },
+            {
+              "name": "self.pattern_stats.items",
+              "line": 297
+            }
+          ],
+          "docstring": "\n        Get current recognition rates (accuracies) for all patterns.\n        \n        Returns:\n            Dictionary of pattern types to accuracy levels\n        ",
+          "code_snippet": "        return pattern_risks\n    \n    def get_current_recognition_rates(self):\n        \"\"\"\n        Get current recognition rates (accuracies) for all patterns.\n        \n        Returns:\n            Dictionary of pattern types to accuracy levels\n        \"\"\"\n        import time\n        start_time = time.time()\n        \n        pattern_accuracies = {\n            pattern_type: stats['accuracy']\n            for pattern_type, stats in self.pattern_stats.items()\n            if stats['total'] > 0\n        }\n        \n        elapsed_time = time.time() - start_time\n        logger.info(f\"TIMING: get_current_recognition_rates took {elapsed_time:.4f} seconds\")\n        \n        return pattern_accuracies\n    \n    def get_pattern_accuracies(self):\n        \"\"\"\n        Get current accuracy levels for all patterns."
+        },
+        "get_pattern_accuracies": {
+          "start_line": 306,
+          "end_line": 318,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.pattern_stats.items",
+              "line": 315
+            }
+          ],
+          "docstring": "\n        Get current accuracy levels for all patterns.\n        \n        Returns:\n            Dictionary of pattern types to accuracy levels\n        ",
+          "code_snippet": "        return pattern_accuracies\n    \n    def get_pattern_accuracies(self):\n        \"\"\"\n        Get current accuracy levels for all patterns.\n        \n        Returns:\n            Dictionary of pattern types to accuracy levels\n        \"\"\"\n        return {\n            pattern_type: stats['accuracy']\n            for pattern_type, stats in self.pattern_stats.items()\n            if stats['total'] > 0\n        }\n        \n    def get_overall_risk(self):\n        \"\"\""
+        },
+        "get_overall_risk": {
+          "start_line": 319,
+          "end_line": 355,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 327
+            },
+            {
+              "name": "self.get_pattern_risks",
+              "line": 329
+            },
+            {
+              "name": "self._calculate_weighted_risk",
+              "line": 351
+            },
+            {
+              "name": "logger.info",
+              "line": 352
+            },
+            {
+              "name": "logger.info",
+              "line": 331
+            },
+            {
+              "name": "self._calculate_weighted_risk",
+              "line": 339
+            },
+            {
+              "name": "logger.info",
+              "line": 347
+            },
+            {
+              "name": "hasattr",
+              "line": 341
+            },
+            {
+              "name": "min",
+              "line": 342
+            },
+            {
+              "name": "time.time",
+              "line": 352
+            },
+            {
+              "name": "time.time",
+              "line": 331
+            },
+            {
+              "name": "time.time",
+              "line": 347
+            }
+          ],
+          "docstring": "\n        Get overall risk level across all patterns.\n        \n        Returns:\n            Overall risk level (0.0-1.0)\n        ",
+          "code_snippet": "        }\n        \n    def get_overall_risk(self):\n        \"\"\"\n        Get overall risk level across all patterns.\n        \n        Returns:\n            Overall risk level (0.0-1.0)\n        \"\"\"\n        import time\n        start_time = time.time()\n        \n        pattern_risks = self.get_pattern_risks()\n        if not pattern_risks:\n            logger.info(f\"TIMING: get_overall_risk (early return) took {time.time() - start_time:.4f} seconds\")\n            return 0.5  # Default to medium risk\n        \n        # Check if we have a predefined overall risk in the standardized map\n        if 'format_version' in self.pattern_map and 'pattern_metadata' in self.pattern_map:\n            if 'overall_avg_risk' in self.pattern_map['pattern_metadata']:\n                overall_risk = self.pattern_map['pattern_metadata']['overall_avg_risk']\n                # Use this as a starting point, but blend with current calculated risk\n                calculated_risk = self._calculate_weighted_risk(pattern_risks)\n                # Initially favor the predefined risk, gradually shift to calculated risk\n                if hasattr(self, 'update_count') and self.update_count > 0:\n                    blend_factor = min(1.0, self.update_count / 10.0)  # Fully transition after 10 updates\n                else:\n                    blend_factor = 0.3  # Start with 30% calculated, 70% predefined\n                \n                blended_risk = (calculated_risk * blend_factor) + (overall_risk * (1.0 - blend_factor))\n                logger.info(f\"TIMING: get_overall_risk (with predefined) took {time.time() - start_time:.4f} seconds\")\n                return blended_risk\n        \n        # Calculate weighted risk if no predefined value\n        result = self._calculate_weighted_risk(pattern_risks)\n        logger.info(f\"TIMING: get_overall_risk took {time.time() - start_time:.4f} seconds\")\n        return result\n        \n    def _calculate_weighted_risk(self, pattern_risks):\n        \"\"\"Calculate weighted risk average across patterns.\"\"\"\n        import time"
+        },
+        "_calculate_weighted_risk": {
+          "start_line": 355,
+          "end_line": 382,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_risks"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 358
+            },
+            {
+              "name": "pattern_risks.items",
+              "line": 362
+            },
+            {
+              "name": "sum",
+              "line": 371
+            },
+            {
+              "name": "sum",
+              "line": 372
+            },
+            {
+              "name": "logger.info",
+              "line": 379
+            },
+            {
+              "name": "weighted_risks.append",
+              "line": 368
+            },
+            {
+              "name": "time.time",
+              "line": 379
+            }
+          ],
+          "docstring": "Calculate weighted risk average across patterns.",
+          "code_snippet": "        return result\n        \n    def _calculate_weighted_risk(self, pattern_risks):\n        \"\"\"Calculate weighted risk average across patterns.\"\"\"\n        import time\n        start_time = time.time()\n        \n        # Weight risks by their importance\n        weighted_risks = []\n        for pattern_type, risk in pattern_risks.items():\n            # More weight to challenging patterns\n            weight = 2.0 if pattern_type in self.challenging_patterns else 1.0\n            # Even more weight to preferred patterns\n            weight = 3.0 if pattern_type in self.preferred_patterns else weight\n            \n            weighted_risks.append((risk, weight))\n        \n        # Calculate weighted average\n        total_risk = sum(risk * weight for risk, weight in weighted_risks)\n        total_weight = sum(weight for _, weight in weighted_risks)\n        \n        if total_weight > 0:\n            result = total_risk / total_weight\n        else:\n            result = 0.5  # Default to medium risk\n            \n        logger.info(f\"TIMING: _calculate_weighted_risk took {time.time() - start_time:.4f} seconds\")\n        return result"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Unified tracker for pattern risk and accuracy.\n    \n    This class directly links pattern accuracy to risk assessment,\n    viewing them as two sides of the same coin.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

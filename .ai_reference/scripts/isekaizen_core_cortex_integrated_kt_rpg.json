@@ -1,0 +1,482 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\cortex\\integrated_kt_rpg.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 4
+    },
+    {
+      "name": "numpy",
+      "line": 5
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 6
+    },
+    {
+      "name": "dataclasses.field",
+      "line": 6
+    },
+    {
+      "name": "isekaizen.utils.kt_batch_optimizer.KTBatchOptimizer",
+      "line": 7
+    },
+    {
+      "name": "isekaizen.utils.kt_batch_optimizer.KTParameters",
+      "line": 7
+    },
+    {
+      "name": "typing.Dict",
+      "line": 8
+    },
+    {
+      "name": "typing.List",
+      "line": 8
+    },
+    {
+      "name": "typing.Optional",
+      "line": 8
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 8
+    },
+    {
+      "name": "typing.Any",
+      "line": 8
+    },
+    {
+      "name": "enum.Enum",
+      "line": 9
+    },
+    {
+      "name": "math",
+      "line": 10
+    }
+  ],
+  "classes": {
+    "SkillTree": {
+      "start_line": 12,
+      "end_line": 19,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "PATTERN_RECOGNITION",
+          "line": 13
+        },
+        {
+          "name": "RISK_ASSESSMENT",
+          "line": 14
+        },
+        {
+          "name": "INTUITION",
+          "line": 15
+        },
+        {
+          "name": "PATTERN_MEMORY",
+          "line": 16
+        },
+        {
+          "name": "BATCH_PROCESSING",
+          "line": 17
+        }
+      ],
+      "bases": [
+        "Enum"
+      ]
+    },
+    "KTParameters": {
+      "start_line": 20,
+      "end_line": 26,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Parameters from validated K(t) framework"
+    },
+    "Pattern": {
+      "start_line": 27,
+      "end_line": 36,
+      "methods": {},
+      "class_variables": [],
+      "bases": []
+    },
+    "IntegratedCortexSystem": {
+      "start_line": 36,
+      "end_line": 179,
+      "methods": {
+        "__init__": {
+          "start_line": 37,
+          "end_line": 65,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.device",
+              "line": 38
+            },
+            {
+              "name": "KTBatchOptimizer",
+              "line": 39
+            },
+            {
+              "name": "math.floor",
+              "line": 63
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 38
+            },
+            {
+              "name": "range",
+              "line": 63
+            }
+          ],
+          "code_snippet": "\nclass IntegratedCortexSystem:\n    def __init__(self):\n        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        self.batch_optimizer = KTBatchOptimizer()\n        \n        # RPG Stats\n        self.level = 1\n        self.xp = 0\n        self.total_xp = 0\n        self.skills = {skill: 1 for skill in SkillTree}\n        \n        # Batch Processing Configuration\n        self.current_batch_size = 1\n        self.optimal_batch_size = 1\n        self.max_memory_mb = 4089  # RTX 4070 SUPER\n        \n        # Performance Tracking\n        self.metrics = {\n            \"patterns_processed\": 0,\n            \"successful_predictions\": 0,\n            \"average_efficiency\": 0.0,\n            \"cognitive_load\": 0.0,\n            \"memory_usage_mb\": 0.0\n        }\n        \n        # Experience thresholds based on validated results\n        self.level_thresholds = [\n            math.floor(1000 * (1.2 ** i)) for i in range(50)\n        ]\n\n    def _calculate_efficiency(self, batch_size: int) -> float:\n        \"\"\"Temporary efficiency calculation until full optimization integration\"\"\""
+        },
+        "_calculate_efficiency": {
+          "start_line": 66,
+          "end_line": 72,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "self.batch_optimizer.optimize_batch_size",
+              "line": 69
+            }
+          ],
+          "docstring": "Temporary efficiency calculation until full optimization integration",
+          "code_snippet": "        ]\n\n    def _calculate_efficiency(self, batch_size: int) -> float:\n        \"\"\"Temporary efficiency calculation until full optimization integration\"\"\"\n        # Use batch optimizer for now as a simple wrapper\n        results = self.batch_optimizer.optimize_batch_size()\n        return results['peak_efficiency']\n\n    def optimize_batch_size(self) -> Dict[str, Any]:\n        \"\"\"Use KTBatchOptimizer for optimal batch size calculation\"\"\"\n        results = self.batch_optimizer.optimize_batch_size()"
+        },
+        "optimize_batch_size": {
+          "start_line": 72,
+          "end_line": 90,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.batch_optimizer.optimize_batch_size",
+              "line": 74
+            },
+            {
+              "name": "self.metrics.update",
+              "line": 78
+            }
+          ],
+          "docstring": "Use KTBatchOptimizer for optimal batch size calculation",
+          "code_snippet": "        return results['peak_efficiency']\n\n    def optimize_batch_size(self) -> Dict[str, Any]:\n        \"\"\"Use KTBatchOptimizer for optimal batch size calculation\"\"\"\n        results = self.batch_optimizer.optimize_batch_size()\n        \n        # Update our local settings based on optimizer results\n        self.optimal_batch_size = results['optimal_batch_size']\n        self.metrics.update({\n            'cognitive_load': results['optimal_metrics']['cognitive_load'],\n            'memory_usage_mb': results['optimal_metrics']['estimated_memory'],\n            'batch_processing_efficiency': results['optimal_metrics']['efficiency']\n        })\n        \n        return {\n            \"optimal_batch_size\": self.optimal_batch_size,\n            \"efficiency\": results['peak_efficiency'],\n            \"cognitive_load\": results['optimal_metrics']['cognitive_load'],\n            \"memory_usage\": results['optimal_metrics']['estimated_memory']\n        }\n\n    def _calculate_xp_reward(self, pattern: Pattern, success: bool) -> float:\n        \"\"\"Calculate XP reward based on pattern complexity and batch processing\"\"\""
+        },
+        "_calculate_xp_reward": {
+          "start_line": 91,
+          "end_line": 100,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern",
+              "type": "Pattern"
+            },
+            {
+              "name": "success",
+              "type": "bool"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "max",
+              "line": 95
+            },
+            {
+              "name": "np.log2",
+              "line": 94
+            }
+          ],
+          "docstring": "Calculate XP reward based on pattern complexity and batch processing",
+          "code_snippet": "        }\n\n    def _calculate_xp_reward(self, pattern: Pattern, success: bool) -> float:\n        \"\"\"Calculate XP reward based on pattern complexity and batch processing\"\"\"\n        base_xp = pattern.xp_value * pattern.complexity\n        batch_bonus = np.log2(pattern.batch_size + 1) * 0.1\n        level_modifier = max(0.1, 1.0 - (self.level / 50))  # Scale with max level\n        success_multiplier = 1.5 if success else 0.5\n        \n        return base_xp * (1 + batch_bonus) * level_modifier * success_multiplier\n\n    def _check_level_up(self):\n        \"\"\"Handle level ups and skill improvements\"\"\"\n        while self.level < len(self.level_thresholds) and self.total_xp >= self.level_thresholds[self.level - 1]:"
+        },
+        "_check_level_up": {
+          "start_line": 100,
+          "end_line": 113,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "print",
+              "line": 104
+            },
+            {
+              "name": "self.optimize_batch_size",
+              "line": 111
+            },
+            {
+              "name": "len",
+              "line": 102
+            },
+            {
+              "name": "self._improve_random_skill",
+              "line": 108
+            }
+          ],
+          "docstring": "Handle level ups and skill improvements",
+          "code_snippet": "        return base_xp * (1 + batch_bonus) * level_modifier * success_multiplier\n\n    def _check_level_up(self):\n        \"\"\"Handle level ups and skill improvements\"\"\"\n        while self.level < len(self.level_thresholds) and self.total_xp >= self.level_thresholds[self.level - 1]:\n            self.level += 1\n            print(f\"\\nLEVEL UP! Now level {self.level}\")\n            \n            # Improve capabilities\n            if self.level % 2 == 0:\n                self._improve_random_skill()\n                \n            # Reoptimize batch size after level up\n            self.optimize_batch_size()\n\n    def _improve_random_skill(self):\n        \"\"\"Improve a random skill with weighted probability\"\"\"\n        skill_weights = {"
+        },
+        "_improve_random_skill": {
+          "start_line": 113,
+          "end_line": 130,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "list",
+              "line": 123
+            },
+            {
+              "name": "list",
+              "line": 124
+            },
+            {
+              "name": "np.random.choice",
+              "line": 125
+            },
+            {
+              "name": "print",
+              "line": 128
+            },
+            {
+              "name": "skill_weights.keys",
+              "line": 123
+            },
+            {
+              "name": "skill_weights.values",
+              "line": 124
+            }
+          ],
+          "docstring": "Improve a random skill with weighted probability",
+          "code_snippet": "            self.optimize_batch_size()\n\n    def _improve_random_skill(self):\n        \"\"\"Improve a random skill with weighted probability\"\"\"\n        skill_weights = {\n            SkillTree.BATCH_PROCESSING: 0.3,  # Higher weight for batch processing\n            SkillTree.PATTERN_RECOGNITION: 0.2,\n            SkillTree.PATTERN_MEMORY: 0.2,\n            SkillTree.RISK_ASSESSMENT: 0.15,\n            SkillTree.INTUITION: 0.15\n        }\n        \n        skills = list(skill_weights.keys())\n        weights = list(skill_weights.values())\n        skill = np.random.choice(skills, p=weights)\n        \n        self.skills[skill] += 1\n        print(f\"Skill increased: {skill.value} is now level {self.skills[skill]}\")\n\n    def process_pattern(self, pattern: Pattern) -> Dict[str, Any]:\n        \"\"\"Process a pattern using current batch configuration\"\"\"\n        # Update pattern batch size"
+        },
+        "process_pattern": {
+          "start_line": 130,
+          "end_line": 179,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern",
+              "type": "Pattern"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self._calculate_xp_reward",
+              "line": 144
+            },
+            {
+              "name": "self._calculate_efficiency",
+              "line": 153
+            },
+            {
+              "name": "self._check_level_up",
+              "line": 163
+            },
+            {
+              "name": "np.random.random",
+              "line": 141
+            },
+            {
+              "name": "self.batch_optimizer.optimize_batch_size",
+              "line": 159
+            },
+            {
+              "name": "self.batch_optimizer.optimize_batch_size",
+              "line": 160
+            }
+          ],
+          "docstring": "Process a pattern using current batch configuration",
+          "code_snippet": "        print(f\"Skill increased: {skill.value} is now level {self.skills[skill]}\")\n\n    def process_pattern(self, pattern: Pattern) -> Dict[str, Any]:\n        \"\"\"Process a pattern using current batch configuration\"\"\"\n        # Update pattern batch size\n        pattern.batch_size = self.optimal_batch_size\n        \n        # Calculate success chance based on skills\n        recognition_bonus = (self.skills[SkillTree.PATTERN_RECOGNITION] - 1) * 0.05\n        batch_bonus = (self.skills[SkillTree.BATCH_PROCESSING] - 1) * 0.03\n        base_chance = 0.5 + recognition_bonus + batch_bonus\n        \n        # Process pattern\n        success = np.random.random() < base_chance\n        \n        # Calculate rewards\n        xp_gained = self._calculate_xp_reward(pattern, success)\n        self.xp += xp_gained\n        self.total_xp += xp_gained\n        \n        # Update metrics\n        self.metrics[\"patterns_processed\"] += 1\n        if success:\n            self.metrics[\"successful_predictions\"] += 1\n        \n        current_efficiency = self._calculate_efficiency(self.optimal_batch_size)\n        self.metrics[\"average_efficiency\"] = (\n            (self.metrics[\"average_efficiency\"] * (self.metrics[\"patterns_processed\"] - 1) +\n             current_efficiency) / self.metrics[\"patterns_processed\"]\n        )\n        \n        self.metrics[\"cognitive_load\"] = self.batch_optimizer.optimize_batch_size()['optimal_metrics']['cognitive_load']\n        self.metrics[\"memory_usage_mb\"] = self.batch_optimizer.optimize_batch_size()['optimal_metrics']['estimated_memory']\n        \n        # Check for level up\n        self._check_level_up()\n        \n        return {\n            \"success\": success,\n            \"xp_gained\": xp_gained,\n            \"current_level\": self.level,\n            \"current_xp\": self.xp,\n            \"next_level_xp\": self.level_thresholds[self.level - 1],\n            \"batch_metrics\": {\n                \"size\": self.optimal_batch_size,\n                \"efficiency\": current_efficiency,\n                \"cognitive_load\": self.metrics[\"cognitive_load\"],\n                \"memory_usage\": self.metrics[\"memory_usage_mb\"]\n            },\n            \"metrics\": self.metrics\n        }\n\ndef test_integrated_system():\n    \"\"\"Test the integrated cortex system\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": []
+    }
+  },
+  "functions": {
+    "test_integrated_system": {
+      "start_line": 180,
+      "end_line": 237,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "IntegratedCortexSystem",
+          "line": 182
+        },
+        {
+          "name": "print",
+          "line": 184
+        },
+        {
+          "name": "print",
+          "line": 185
+        },
+        {
+          "name": "print",
+          "line": 186
+        },
+        {
+          "name": "system.optimize_batch_size",
+          "line": 189
+        },
+        {
+          "name": "print",
+          "line": 190
+        },
+        {
+          "name": "print",
+          "line": 191
+        },
+        {
+          "name": "print",
+          "line": 192
+        },
+        {
+          "name": "print",
+          "line": 193
+        },
+        {
+          "name": "print",
+          "line": 194
+        },
+        {
+          "name": "np.random.seed",
+          "line": 198
+        },
+        {
+          "name": "range",
+          "line": 200
+        },
+        {
+          "name": "print",
+          "line": 224
+        },
+        {
+          "name": "print",
+          "line": 225
+        },
+        {
+          "name": "print",
+          "line": 226
+        },
+        {
+          "name": "print",
+          "line": 227
+        },
+        {
+          "name": "print",
+          "line": 228
+        },
+        {
+          "name": "print",
+          "line": 229
+        },
+        {
+          "name": "print",
+          "line": 230
+        },
+        {
+          "name": "print",
+          "line": 231
+        },
+        {
+          "name": "print",
+          "line": 233
+        },
+        {
+          "name": "system.skills.items",
+          "line": 234
+        },
+        {
+          "name": "Pattern",
+          "line": 203
+        },
+        {
+          "name": "system.process_pattern",
+          "line": 211
+        },
+        {
+          "name": "print",
+          "line": 235
+        },
+        {
+          "name": "print",
+          "line": 215
+        },
+        {
+          "name": "print",
+          "line": 216
+        },
+        {
+          "name": "print",
+          "line": 217
+        },
+        {
+          "name": "print",
+          "line": 218
+        },
+        {
+          "name": "print",
+          "line": 219
+        },
+        {
+          "name": "print",
+          "line": 220
+        },
+        {
+          "name": "print",
+          "line": 221
+        },
+        {
+          "name": "np.random.rand",
+          "line": 204
+        },
+        {
+          "name": "np.random.random",
+          "line": 205
+        },
+        {
+          "name": "system.skills.items",
+          "line": 186
+        }
+      ],
+      "docstring": "Test the integrated cortex system",
+      "code_snippet": "        }\n\ndef test_integrated_system():\n    \"\"\"Test the integrated cortex system\"\"\"\n    system = IntegratedCortexSystem()\n    \n    print(\"Beginning Integrated Cortex System test...\")\n    print(f\"Initial Level: {system.level}\")\n    print(f\"Initial Skills: {[(skill.value, level) for skill, level in system.skills.items()]}\")\n    \n    # Initial batch optimization\n    initial_batch = system.optimize_batch_size()\n    print(\"\\nInitial Batch Configuration:\")\n    print(f\"Optimal Batch Size: {initial_batch['optimal_batch_size']}\")\n    print(f\"Efficiency: {initial_batch['efficiency']:.3f}\")\n    print(f\"Cognitive Load: {initial_batch['cognitive_load']:.3f}\")\n    print(f\"Memory Usage: {initial_batch['memory_usage']:.1f}MB\")\n    \n    # Test pattern processing\n    n_tests = 100\n    np.random.seed(42)\n    \n    for i in range(n_tests):\n        # Create test pattern\n        complexity = 1.0 + (i / 50)  # Gradually increase complexity\n        pattern = Pattern(\n            signature=np.random.rand(10),\n            weight=np.random.random(),\n            complexity=complexity,\n            xp_value=100\n        )\n        \n        # Process pattern\n        result = system.process_pattern(pattern)\n        \n        # Print progress every 10 patterns\n        if (i + 1) % 10 == 0:\n            print(f\"\\nProcessing Pattern {i + 1}/{n_tests}\")\n            print(f\"Pattern Complexity: {complexity:.2f}\")\n            print(f\"Result: {'Success' if result['success'] else 'Failure'}\")\n            print(f\"XP Gained: {result['xp_gained']:.2f}\")\n            print(f\"Current Level: {result['current_level']}\")\n            print(f\"Batch Size: {result['batch_metrics']['size']}\")\n            print(f\"Efficiency: {result['batch_metrics']['efficiency']:.3f}\")\n    \n    # Print final stats\n    print(\"\\nFinal Results:\")\n    print(f\"Final Level: {system.level}\")\n    print(f\"Total XP Gained: {system.total_xp:.0f}\")\n    print(f\"Patterns Processed: {system.metrics['patterns_processed']}\")\n    print(f\"Successful Predictions: {system.metrics['successful_predictions']}\")\n    print(f\"Average Efficiency: {system.metrics['average_efficiency']:.3f}\")\n    print(f\"Final Cognitive Load: {system.metrics['cognitive_load']:.3f}\")\n    print(f\"Final Memory Usage: {system.metrics['memory_usage_mb']:.1f}MB\")\n    \n    print(\"\\nFinal Skills:\")\n    for skill, level in system.skills.items():\n        print(f\"{skill.value}: Level {level}\")\n\nif __name__ == \"__main__\":\n    test_integrated_system()"
+    }
+  },
+  "constants": {}
+}

@@ -1,0 +1,134 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\formatting.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 10
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "format_metrics_table": {
+      "start_line": 14,
+      "end_line": 49,
+      "parameters": [
+        {
+          "name": "metrics_dict"
+        },
+        {
+          "name": "title"
+        },
+        {
+          "name": "min_width"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "max",
+          "line": 27
+        },
+        {
+          "name": "max",
+          "line": 28
+        },
+        {
+          "name": "max",
+          "line": 31
+        },
+        {
+          "name": "max",
+          "line": 32
+        },
+        {
+          "name": "metrics_dict.items",
+          "line": 40
+        },
+        {
+          "name": "....join",
+          "line": 47
+        },
+        {
+          "name": "isinstance",
+          "line": 41
+        },
+        {
+          "name": "lines.append",
+          "line": 45
+        },
+        {
+          "name": "len",
+          "line": 27
+        },
+        {
+          "name": "len",
+          "line": 28
+        },
+        {
+          "name": "str",
+          "line": 44
+        },
+        {
+          "name": "str",
+          "line": 27
+        },
+        {
+          "name": "metrics_dict.keys",
+          "line": 27
+        },
+        {
+          "name": "metrics_dict.values",
+          "line": 28
+        },
+        {
+          "name": "isinstance",
+          "line": 28
+        },
+        {
+          "name": "str",
+          "line": 28
+        },
+        {
+          "name": "str",
+          "line": 45
+        }
+      ],
+      "docstring": "\n    Format metrics as a readable table with aligned columns.\n    \n    Args:\n        metrics_dict: Dictionary of metrics to format\n        title: Table title\n        min_width: Minimum column width\n        \n    Returns:\n        Formatted table as a string\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef format_metrics_table(metrics_dict, title=\"Metrics\", min_width=15):\n    \"\"\"\n    Format metrics as a readable table with aligned columns.\n    \n    Args:\n        metrics_dict: Dictionary of metrics to format\n        title: Table title\n        min_width: Minimum column width\n        \n    Returns:\n        Formatted table as a string\n    \"\"\"\n    # Calculate column widths\n    key_width = max(len(str(k)) for k in metrics_dict.keys())\n    val_width = max(len(f\"{v:.4f}\" if isinstance(v, float) else str(v)) for v in metrics_dict.values())\n    \n    # Ensure minimum width\n    key_width = max(key_width, min_width)\n    val_width = max(val_width, min_width)\n    \n    # Create header\n    total_width = key_width + val_width + 3  # 3 for spacing and separator\n    header = f\"\\n{title}\\n\" + \"-\" * total_width\n    \n    # Format each line\n    lines = [header]\n    for key, value in metrics_dict.items():\n        if isinstance(value, float):\n            val_str = f\"{value:.4f}\"\n        else:\n            val_str = str(value)\n        lines.append(f\"{str(key):<{key_width}} | {val_str:>{val_width}}\")\n    \n    return \"\\n\".join(lines)\n\ndef log_section(title, width=80):\n    \"\"\"\n    Print a clearly defined section header in the log."
+    },
+    "log_section": {
+      "start_line": 49,
+      "end_line": 61,
+      "parameters": [
+        {
+          "name": "title"
+        },
+        {
+          "name": "width"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "logger.info",
+          "line": 57
+        },
+        {
+          "name": "logger.info",
+          "line": 58
+        },
+        {
+          "name": "logger.info",
+          "line": 59
+        },
+        {
+          "name": "title.center",
+          "line": 58
+        }
+      ],
+      "docstring": "\n    Print a clearly defined section header in the log.\n    \n    Args:\n        title: Section title\n        width: Width of the section header\n    ",
+      "code_snippet": "    return \"\\n\".join(lines)\n\ndef log_section(title, width=80):\n    \"\"\"\n    Print a clearly defined section header in the log.\n    \n    Args:\n        title: Section title\n        width: Width of the section header\n    \"\"\"\n    logger.info(\"\\n\" + \"=\" * width)\n    logger.info(f\"{title.center(width)}\")\n    logger.info(\"=\" * width)"
+    }
+  },
+  "constants": {}
+}

@@ -1,0 +1,1990 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\cli\\train_dataset.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 10
+    },
+    {
+      "name": "sys",
+      "line": 11
+    },
+    {
+      "name": "json",
+      "line": 12
+    },
+    {
+      "name": "argparse",
+      "line": 13
+    },
+    {
+      "name": "logging",
+      "line": 14
+    },
+    {
+      "name": "time",
+      "line": 15
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 16
+    },
+    {
+      "name": "typing.Dict",
+      "line": 17
+    },
+    {
+      "name": "typing.Any",
+      "line": 17
+    },
+    {
+      "name": "typing.Optional",
+      "line": 17
+    },
+    {
+      "name": "typing.List",
+      "line": 17
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 17
+    },
+    {
+      "name": "isekaizen.configs.PATTERN_MAPS_DIR",
+      "line": 20
+    },
+    {
+      "name": "isekaizen.configs.MODELS_DIR",
+      "line": 20
+    },
+    {
+      "name": "isekaizen.configs.METRICS_DIR",
+      "line": 20
+    },
+    {
+      "name": "isekaizen.configs.VISUALIZATIONS_DIR",
+      "line": 20
+    },
+    {
+      "name": "torch",
+      "line": 27
+    },
+    {
+      "name": "torch.nn",
+      "line": 28
+    },
+    {
+      "name": "glob",
+      "line": 29
+    },
+    {
+      "name": "isekaizen.optimizers.RiskAwareEVEOptimizer",
+      "line": 32
+    },
+    {
+      "name": "isekaizen.core.models.architecture.create_model",
+      "line": 33
+    },
+    {
+      "name": "isekaizen.pattern.data_loading.load_latest_pattern_map",
+      "line": 34
+    },
+    {
+      "name": "isekaizen.utils.training_utils.get_fibonacci_check_intervals",
+      "line": 35
+    },
+    {
+      "name": "isekaizen.pattern.pre_augmentation.create_pattern_biased_augmentations",
+      "line": 38
+    },
+    {
+      "name": "isekaizen.pattern.unified.UnifiedPatternTracker",
+      "line": 41
+    },
+    {
+      "name": "isekaizen.pattern.unified.StreamlinedBatchOptimizer",
+      "line": 41
+    },
+    {
+      "name": "isekaizen.trainer.optimized.OptimizedTrainer",
+      "line": 42
+    },
+    {
+      "name": "torchvision.transforms",
+      "line": 435
+    },
+    {
+      "name": "torchvision",
+      "line": 436
+    },
+    {
+      "name": "signal",
+      "line": 850
+    },
+    {
+      "name": "types",
+      "line": 520
+    },
+    {
+      "name": "matplotlib.pyplot",
+      "line": 944
+    }
+  ],
+  "classes": {
+    "SimplePatternMediator": {
+      "start_line": 676,
+      "end_line": 784,
+      "methods": {
+        "__init__": {
+          "start_line": 679,
+          "end_line": 696,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "pattern_tracker"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 694
+            },
+            {
+              "name": "list",
+              "line": 688
+            },
+            {
+              "name": "....keys",
+              "line": 688
+            }
+          ],
+          "code_snippet": "        \"\"\"Simple pattern mediator that works with existing pattern data.\"\"\"\n        \n        def __init__(self, pattern_map, pattern_tracker):\n            self.pattern_map = pattern_map\n            self.pattern_tracker = pattern_tracker\n            self.current_epoch = 0\n            self._pattern_risks = {}\n            self._pattern_accuracies = {}\n            \n            # Initialize with default data if we have pattern map\n            if pattern_map and 'pattern_distribution' in pattern_map:\n                pattern_types = list(pattern_map['pattern_distribution'].keys())\n                default_risks = {pt: 0.5 for pt in pattern_types}\n                default_accs = {pt: 0.5 for pt in pattern_types}\n                self._pattern_risks[-1] = default_risks\n                self._pattern_accuracies[-1] = default_accs\n                \n            logger.info(\"SimplePatternMediator initialized\")\n        \n        def update_with_batch_recognition(self, batch_indices, correct_mask, epoch):\n            \"\"\"Store batch recognition data - required for PatternDataMediator interface.\"\"\"\n            # Update current epoch"
+        },
+        "update_with_batch_recognition": {
+          "start_line": 696,
+          "end_line": 705,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_indices"
+            },
+            {
+              "name": "correct_mask"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "hasattr",
+              "line": 702
+            },
+            {
+              "name": "self.pattern_tracker.update_from_batch",
+              "line": 703
+            }
+          ],
+          "docstring": "Store batch recognition data - required for PatternDataMediator interface.",
+          "code_snippet": "            logger.info(\"SimplePatternMediator initialized\")\n        \n        def update_with_batch_recognition(self, batch_indices, correct_mask, epoch):\n            \"\"\"Store batch recognition data - required for PatternDataMediator interface.\"\"\"\n            # Update current epoch\n            self.current_epoch = epoch\n            \n            # Allow the pattern tracker to process the batch\n            if hasattr(self.pattern_tracker, 'update_from_batch'):\n                self.pattern_tracker.update_from_batch(batch_indices, correct_mask, epoch)\n        \n        def end_epoch(self, epoch):\n            \"\"\"Signal the end of an epoch.\"\"\"\n            self.current_epoch = epoch"
+        },
+        "end_epoch": {
+          "start_line": 705,
+          "end_line": 724,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "hasattr",
+              "line": 710
+            },
+            {
+              "name": "hasattr",
+              "line": 716
+            },
+            {
+              "name": "logger.info",
+              "line": 722
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_accuracies",
+              "line": 711
+            },
+            {
+              "name": "self.pattern_tracker.get_risk_levels",
+              "line": 717
+            },
+            {
+              "name": "logger.debug",
+              "line": 714
+            },
+            {
+              "name": "logger.debug",
+              "line": 720
+            }
+          ],
+          "docstring": "Signal the end of an epoch.",
+          "code_snippet": "                self.pattern_tracker.update_from_batch(batch_indices, correct_mask, epoch)\n        \n        def end_epoch(self, epoch):\n            \"\"\"Signal the end of an epoch.\"\"\"\n            self.current_epoch = epoch\n            \n            # Process data from pattern tracker at epoch end\n            if hasattr(self.pattern_tracker, 'get_pattern_accuracies'):\n                accs = self.pattern_tracker.get_pattern_accuracies(epoch)\n                if accs:\n                    self._pattern_accuracies[epoch] = accs\n                    logger.debug(f\"Updated pattern accuracies at epoch end: {epoch}\")\n                    \n            if hasattr(self.pattern_tracker, 'get_risk_levels'):\n                risks = self.pattern_tracker.get_risk_levels(epoch)\n                if risks:\n                    self._pattern_risks[epoch] = risks\n                    logger.debug(f\"Updated pattern risks at epoch end: {epoch}\")\n                    \n            logger.info(f\"SimplePatternMediator updated to epoch {epoch}\")\n        \n        def get_pattern_risks(self, epoch=None, force_recalculate=False):\n            \"\"\"Get pattern risks.\"\"\"\n            if epoch is None:"
+        },
+        "get_pattern_risks": {
+          "start_line": 724,
+          "end_line": 754,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            },
+            {
+              "name": "force_recalculate"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "sorted",
+              "line": 741
+            },
+            {
+              "name": "hasattr",
+              "line": 734
+            },
+            {
+              "name": "self.pattern_tracker.get_risk_levels",
+              "line": 735
+            },
+            {
+              "name": "self._pattern_risks.keys",
+              "line": 741
+            },
+            {
+              "name": "list",
+              "line": 747
+            },
+            {
+              "name": "....keys",
+              "line": 747
+            }
+          ],
+          "docstring": "Get pattern risks.",
+          "code_snippet": "            logger.info(f\"SimplePatternMediator updated to epoch {epoch}\")\n        \n        def get_pattern_risks(self, epoch=None, force_recalculate=False):\n            \"\"\"Get pattern risks.\"\"\"\n            if epoch is None:\n                epoch = self.current_epoch\n                \n            # Check cache first\n            if not force_recalculate and epoch in self._pattern_risks and self._pattern_risks[epoch]:\n                return self._pattern_risks[epoch]\n            \n            # If forcing recalculation, get fresh data from tracker\n            if force_recalculate and hasattr(self.pattern_tracker, 'get_risk_levels'):\n                risks = self.pattern_tracker.get_risk_levels(epoch)\n                if risks:\n                    self._pattern_risks[epoch] = risks\n                    return risks\n            \n            # Try to get from any epoch as fallback\n            for e in sorted(self._pattern_risks.keys(), reverse=True):\n                if self._pattern_risks[e]:\n                    return self._pattern_risks[e]\n                \n            # Generate default values if we have pattern map\n            if self.pattern_map and 'pattern_distribution' in self.pattern_map:\n                pattern_types = list(self.pattern_map['pattern_distribution'].keys())\n                default_risks = {pt: 0.5 for pt in pattern_types}\n                self._pattern_risks[epoch] = default_risks\n                return default_risks\n                \n            return {}\n        \n        def get_pattern_accuracies(self, epoch=None, force_recalculate=False):\n            \"\"\"Get pattern accuracies.\"\"\"\n            if epoch is None:"
+        },
+        "get_pattern_accuracies": {
+          "start_line": 754,
+          "end_line": 784,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "epoch"
+            },
+            {
+              "name": "force_recalculate"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "sorted",
+              "line": 771
+            },
+            {
+              "name": "hasattr",
+              "line": 764
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_accuracies",
+              "line": 765
+            },
+            {
+              "name": "self._pattern_accuracies.keys",
+              "line": 771
+            },
+            {
+              "name": "list",
+              "line": 777
+            },
+            {
+              "name": "....keys",
+              "line": 777
+            }
+          ],
+          "docstring": "Get pattern accuracies.",
+          "code_snippet": "            return {}\n        \n        def get_pattern_accuracies(self, epoch=None, force_recalculate=False):\n            \"\"\"Get pattern accuracies.\"\"\"\n            if epoch is None:\n                epoch = self.current_epoch\n                \n            # Check cache first\n            if not force_recalculate and epoch in self._pattern_accuracies and self._pattern_accuracies[epoch]:\n                return self._pattern_accuracies[epoch]\n                \n            # If forcing recalculation, get fresh data from tracker\n            if force_recalculate and hasattr(self.pattern_tracker, 'get_pattern_accuracies'):\n                accs = self.pattern_tracker.get_pattern_accuracies(epoch)\n                if accs:\n                    self._pattern_accuracies[epoch] = accs\n                    return accs\n            \n            # Try to get from any epoch as fallback\n            for e in sorted(self._pattern_accuracies.keys(), reverse=True):\n                if self._pattern_accuracies[e]:\n                    return self._pattern_accuracies[e]\n                \n            # Generate default values if we have pattern map\n            if self.pattern_map and 'pattern_distribution' in self.pattern_map:\n                pattern_types = list(self.pattern_map['pattern_distribution'].keys())\n                default_accs = {pt: 0.5 for pt in pattern_types}\n                self._pattern_accuracies[epoch] = default_accs\n                return default_accs\n                \n            return {}\n\n    # Create the pattern mediator\n    pattern_mediator = SimplePatternMediator(pattern_map, pattern_tracker)\n    logger.info(\"Created SimplePatternMediator for optimizer\")"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Simple pattern mediator that works with existing pattern data."
+    }
+  },
+  "functions": {
+    "list_available_prepared_datasets": {
+      "start_line": 52,
+      "end_line": 111,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "os.path.join",
+          "line": 60
+        },
+        {
+          "name": "glob.glob",
+          "line": 61
+        },
+        {
+          "name": "logger.info",
+          "line": 64
+        },
+        {
+          "name": "logger.info",
+          "line": 65
+        },
+        {
+          "name": "enumerate",
+          "line": 70
+        },
+        {
+          "name": "sorted",
+          "line": 70
+        },
+        {
+          "name": "os.path.basename",
+          "line": 72
+        },
+        {
+          "name": "....split",
+          "line": 75
+        },
+        {
+          "name": "len",
+          "line": 78
+        },
+        {
+          "name": "....join",
+          "line": 81
+        },
+        {
+          "name": "enumerate",
+          "line": 87
+        },
+        {
+          "name": "len",
+          "line": 65
+        },
+        {
+          "name": "....replace",
+          "line": 75
+        },
+        {
+          "name": "....join",
+          "line": 90
+        },
+        {
+          "name": "filename.replace",
+          "line": 75
+        },
+        {
+          "name": "len",
+          "line": 96
+        }
+      ],
+      "docstring": "\n    Lists all available prepared datasets with augmentation data.\n    \n    Returns:\n        dict: A dictionary mapping dataset IDs to file paths\n    ",
+      "code_snippet": "\n\ndef list_available_prepared_datasets():\n    \"\"\"\n    Lists all available prepared datasets with augmentation data.\n    \n    Returns:\n        dict: A dictionary mapping dataset IDs to file paths\n    \"\"\"\n    # Search for augmentation files in the metrics directory\n    pattern = os.path.join(METRICS_DIR, \"augmentation_info_*.json\")\n    augmentation_files = glob.glob(pattern)\n    \n    # Log search result for debugging\n    logger.info(f\"Searching for augmentation files in: {METRICS_DIR}\")\n    logger.info(f\"Found {len(augmentation_files)} augmentation files\")\n    \n    # Create a mapping of dataset info\n    available_datasets = {}\n    \n    for i, file_path in enumerate(sorted(augmentation_files, reverse=True)):\n        # Extract information from filename\n        filename = os.path.basename(file_path)\n        \n        # Remove the \"augmentation_info_\" prefix and \".json\" suffix\n        name_parts = filename.replace(\"augmentation_info_\", \"\").replace(\".json\", \"\").split(\"_\")\n        \n        # Extract components (dataset, model, timestamp)\n        if len(name_parts) >= 3:\n            # The dataset name could have multiple parts, model has format like 'resnet18-pretrained'\n            # Last two parts are usually the timestamp (YYYYMMDD_HHMMSS)\n            timestamp = \"_\".join(name_parts[-2:])\n            \n            # Check if there's a pretrained indicator in parts before timestamp\n            model_info = None\n            dataset_name = None\n            \n            for i, part in enumerate(name_parts[:-2]):\n                if \"-pretrained\" in part or part in ['resnet18', 'resnet34', 'resnet50', 'vgg16', 'mobilenet_v2']:\n                    model_info = part\n                    dataset_name = \"_\".join(name_parts[:i])\n                    break\n            \n            # If we couldn't extract properly, use a generic approach\n            if not dataset_name:\n                dataset_name = name_parts[0]\n                model_info = name_parts[1] if len(name_parts) > 1 else \"unknown\"\n            \n            # Create a readable ID that includes the timestamp to ensure uniqueness\n            dataset_id = f\"{dataset_name}_{model_info}_{timestamp}\"\n            \n            # Add to available datasets\n            available_datasets[dataset_id] = {\n                \"path\": file_path,\n                \"dataset\": dataset_name,\n                \"model\": model_info,\n                \"timestamp\": timestamp\n            }\n    \n    return available_datasets\n\n\ndef print_available_datasets():\n    \"\"\""
+    },
+    "print_available_datasets": {
+      "start_line": 112,
+      "end_line": 144,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "list_available_prepared_datasets",
+          "line": 116
+        },
+        {
+          "name": "print",
+          "line": 123
+        },
+        {
+          "name": "print",
+          "line": 124
+        },
+        {
+          "name": "print",
+          "line": 125
+        },
+        {
+          "name": "print",
+          "line": 126
+        },
+        {
+          "name": "available_datasets.items",
+          "line": 128
+        },
+        {
+          "name": "print",
+          "line": 140
+        },
+        {
+          "name": "print",
+          "line": 141
+        },
+        {
+          "name": "print",
+          "line": 119
+        },
+        {
+          "name": "print",
+          "line": 120
+        },
+        {
+          "name": "print",
+          "line": 138
+        },
+        {
+          "name": "len",
+          "line": 131
+        }
+      ],
+      "docstring": "\n    Prints a formatted list of available prepared datasets.\n    ",
+      "code_snippet": "\n\ndef print_available_datasets():\n    \"\"\"\n    Prints a formatted list of available prepared datasets.\n    \"\"\"\n    available_datasets = list_available_prepared_datasets()\n    \n    if not available_datasets:\n        print(\"\\nNo prepared datasets found.\")\n        print(\"Run 'python -m isekaizen.tools.pattern_mapper --dataset <dataset> --model <model>' first.\")\n        return\n    \n    print(\"\\nAvailable Prepared Datasets:\")\n    print(\"-\" * 90)\n    print(f\"{'ID':<45} {'Dataset':<10} {'Model':<15} {'Date Created':<20}\")\n    print(\"-\" * 90)\n    \n    for dataset_id, info in available_datasets.items():\n        # Format timestamp for readability\n        timestamp = info['timestamp']\n        if len(timestamp) >= 15:  # Format like \"20250503_123456\"\n            date = timestamp[:8]\n            time = timestamp[9:]\n            formatted_date = f\"{date[:4]}-{date[4:6]}-{date[6:]} {time[:2]}:{time[2:4]}\"\n        else:\n            formatted_date = timestamp\n            \n        print(f\"{dataset_id:<45} {info['dataset']:<10} {info['model']:<15} {formatted_date:<20}\")\n    \n    print(\"-\" * 90)\n    print(\"Use '--prepared-dataset <ID>' to train with a specific prepared dataset.\")\n    return available_datasets\n\n\ndef train_with_prepared_dataset(args=None):\n    \"\"\""
+    },
+    "train_with_prepared_dataset": {
+      "start_line": 145,
+      "end_line": 1041,
+      "parameters": [
+        {
+          "name": "args"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "time.time",
+          "line": 153
+        },
+        {
+          "name": "time.time",
+          "line": 154
+        },
+        {
+          "name": "logger.info",
+          "line": 155
+        },
+        {
+          "name": "argparse.ArgumentParser",
+          "line": 189
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 196
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 198
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 202
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 205
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 209
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 211
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 215
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 217
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 221
+        },
+        {
+          "name": "parser.parse_args",
+          "line": 225
+        },
+        {
+          "name": "torch.manual_seed",
+          "line": 233
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 234
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 240
+        },
+        {
+          "name": "torch.device",
+          "line": 241
+        },
+        {
+          "name": "logger.info",
+          "line": 242
+        },
+        {
+          "name": "list_available_prepared_datasets",
+          "line": 245
+        },
+        {
+          "name": "logger.info",
+          "line": 255
+        },
+        {
+          "name": "model_info.replace",
+          "line": 270
+        },
+        {
+          "name": "logger.info",
+          "line": 272
+        },
+        {
+          "name": "logger.info",
+          "line": 273
+        },
+        {
+          "name": "time.time",
+          "line": 276
+        },
+        {
+          "name": "logger.info",
+          "line": 277
+        },
+        {
+          "name": "logger.info",
+          "line": 338
+        },
+        {
+          "name": "augmentation_data.get",
+          "line": 341
+        },
+        {
+          "name": "dataset_params.get",
+          "line": 409
+        },
+        {
+          "name": "time.time",
+          "line": 417
+        },
+        {
+          "name": "logger.info",
+          "line": 418
+        },
+        {
+          "name": "create_model",
+          "line": 419
+        },
+        {
+          "name": "model.to",
+          "line": 426
+        },
+        {
+          "name": "logger.info",
+          "line": 428
+        },
+        {
+          "name": "time.time",
+          "line": 431
+        },
+        {
+          "name": "logger.info",
+          "line": 432
+        },
+        {
+          "name": "logger.info",
+          "line": 484
+        },
+        {
+          "name": "logger.info",
+          "line": 545
+        },
+        {
+          "name": "logger.info",
+          "line": 586
+        },
+        {
+          "name": "nn.CrossEntropyLoss",
+          "line": 589
+        },
+        {
+          "name": "get_fibonacci_check_intervals",
+          "line": 648
+        },
+        {
+          "name": "logger.info",
+          "line": 651
+        },
+        {
+          "name": "RiskAwareEVEOptimizer",
+          "line": 652
+        },
+        {
+          "name": "logger.info",
+          "line": 661
+        },
+        {
+          "name": "UnifiedPatternTracker",
+          "line": 662
+        },
+        {
+          "name": "logger.info",
+          "line": 667
+        },
+        {
+          "name": "StreamlinedBatchOptimizer",
+          "line": 668
+        },
+        {
+          "name": "SimplePatternMediator",
+          "line": 785
+        },
+        {
+          "name": "logger.info",
+          "line": 786
+        },
+        {
+          "name": "hasattr",
+          "line": 789
+        },
+        {
+          "name": "logger.info",
+          "line": 793
+        },
+        {
+          "name": "OptimizedTrainer",
+          "line": 794
+        },
+        {
+          "name": "hasattr",
+          "line": 806
+        },
+        {
+          "name": "logger.info",
+          "line": 826
+        },
+        {
+          "name": "logger.info",
+          "line": 828
+        },
+        {
+          "name": "signal.getsignal",
+          "line": 852
+        },
+        {
+          "name": "signal.signal",
+          "line": 862
+        },
+        {
+          "name": "logger.info",
+          "line": 886
+        },
+        {
+          "name": "logger.info",
+          "line": 887
+        },
+        {
+          "name": "logger.info",
+          "line": 888
+        },
+        {
+          "name": "os.makedirs",
+          "line": 891
+        },
+        {
+          "name": "....strftime",
+          "line": 894
+        },
+        {
+          "name": "os.makedirs",
+          "line": 897
+        },
+        {
+          "name": "os.path.join",
+          "line": 898
+        },
+        {
+          "name": "torch.save",
+          "line": 899
+        },
+        {
+          "name": "logger.info",
+          "line": 900
+        },
+        {
+          "name": "os.path.join",
+          "line": 903
+        },
+        {
+          "name": "history.items",
+          "line": 907
+        },
+        {
+          "name": "hasattr",
+          "line": 923
+        },
+        {
+          "name": "hasattr",
+          "line": 934
+        },
+        {
+          "name": "logger.info",
+          "line": 939
+        },
+        {
+          "name": "divmod",
+          "line": 1035
+        },
+        {
+          "name": "divmod",
+          "line": 1036
+        },
+        {
+          "name": "logger.info",
+          "line": 1037
+        },
+        {
+          "name": "print_available_datasets",
+          "line": 229
+        },
+        {
+          "name": "torch.cuda.manual_seed",
+          "line": 235
+        },
+        {
+          "name": "logger.error",
+          "line": 247
+        },
+        {
+          "name": "print",
+          "line": 248
+        },
+        {
+          "name": "print_available_datasets",
+          "line": 249
+        },
+        {
+          "name": "logger.info",
+          "line": 282
+        },
+        {
+          "name": "logger.info",
+          "line": 299
+        },
+        {
+          "name": "logger.info",
+          "line": 321
+        },
+        {
+          "name": "logger.warning",
+          "line": 324
+        },
+        {
+          "name": "logger.info",
+          "line": 326
+        },
+        {
+          "name": "time.time",
+          "line": 337
+        },
+        {
+          "name": "logger.warning",
+          "line": 343
+        },
+        {
+          "name": "logger.info",
+          "line": 354
+        },
+        {
+          "name": "dataset_name.lower",
+          "line": 409
+        },
+        {
+          "name": "time.time",
+          "line": 427
+        },
+        {
+          "name": "dataset_name.lower",
+          "line": 439
+        },
+        {
+          "name": "transforms.Compose",
+          "line": 440
+        },
+        {
+          "name": "torchvision.datasets.CIFAR10",
+          "line": 444
+        },
+        {
+          "name": "transforms.Compose",
+          "line": 448
+        },
+        {
+          "name": "torchvision.datasets.CIFAR10",
+          "line": 452
+        },
+        {
+          "name": "create_pattern_biased_augmentations",
+          "line": 487
+        },
+        {
+          "name": "logger.info",
+          "line": 495
+        },
+        {
+          "name": "hasattr",
+          "line": 498
+        },
+        {
+          "name": "hasattr",
+          "line": 548
+        },
+        {
+          "name": "logger.info",
+          "line": 552
+        },
+        {
+          "name": "hasattr",
+          "line": 579
+        },
+        {
+          "name": "logger.warning",
+          "line": 580
+        },
+        {
+          "name": "logger.warning",
+          "line": 581
+        },
+        {
+          "name": "logger.info",
+          "line": 583
+        },
+        {
+          "name": "time.time",
+          "line": 585
+        },
+        {
+          "name": "....setLevel",
+          "line": 608
+        },
+        {
+          "name": "....setLevel",
+          "line": 609
+        },
+        {
+          "name": "....strftime",
+          "line": 612
+        },
+        {
+          "name": "os.makedirs",
+          "line": 613
+        },
+        {
+          "name": "os.path.join",
+          "line": 614
+        },
+        {
+          "name": "logging.FileHandler",
+          "line": 617
+        },
+        {
+          "name": "file_handler.setLevel",
+          "line": 618
+        },
+        {
+          "name": "file_handler.setFormatter",
+          "line": 619
+        },
+        {
+          "name": "....addHandler",
+          "line": 620
+        },
+        {
+          "name": "logger.info",
+          "line": 622
+        },
+        {
+          "name": "model.parameters",
+          "line": 653
+        },
+        {
+          "name": "optimizer.set_pattern_mediator",
+          "line": 790
+        },
+        {
+          "name": "logger.info",
+          "line": 791
+        },
+        {
+          "name": "trainer.set_pattern_mediator",
+          "line": 807
+        },
+        {
+          "name": "logger.info",
+          "line": 808
+        },
+        {
+          "name": "callbacks.append",
+          "line": 821
+        },
+        {
+          "name": "logger.info",
+          "line": 822
+        },
+        {
+          "name": "time.time",
+          "line": 825
+        },
+        {
+          "name": "hasattr",
+          "line": 831
+        },
+        {
+          "name": "hasattr",
+          "line": 834
+        },
+        {
+          "name": "augmented_dataset.get_augmentation_info",
+          "line": 835
+        },
+        {
+          "name": "aug_info.get",
+          "line": 836
+        },
+        {
+          "name": "aug_info.get",
+          "line": 837
+        },
+        {
+          "name": "logger.info",
+          "line": 839
+        },
+        {
+          "name": "logger.info",
+          "line": 847
+        },
+        {
+          "name": "logger.info",
+          "line": 855
+        },
+        {
+          "name": "sys.stdout.isatty",
+          "line": 857
+        },
+        {
+          "name": "sys.exit",
+          "line": 860
+        },
+        {
+          "name": "trainer.train",
+          "line": 866
+        },
+        {
+          "name": "sys.stdout.isatty",
+          "line": 876
+        },
+        {
+          "name": "signal.signal",
+          "line": 880
+        },
+        {
+          "name": "model.state_dict",
+          "line": 899
+        },
+        {
+          "name": "isinstance",
+          "line": 908
+        },
+        {
+          "name": "optimizer.get_learning_rate_history",
+          "line": 924
+        },
+        {
+          "name": "logger.warning",
+          "line": 931
+        },
+        {
+          "name": "open",
+          "line": 937
+        },
+        {
+          "name": "json.dump",
+          "line": 938
+        },
+        {
+          "name": "time.time",
+          "line": 1034
+        },
+        {
+          "name": "open",
+          "line": 258
+        },
+        {
+          "name": "json.load",
+          "line": 259
+        },
+        {
+          "name": "logger.error",
+          "line": 261
+        },
+        {
+          "name": "load_latest_pattern_map",
+          "line": 295
+        },
+        {
+          "name": "logger.info",
+          "line": 316
+        },
+        {
+          "name": "logger.info",
+          "line": 329
+        },
+        {
+          "name": "logger.info",
+          "line": 331
+        },
+        {
+          "name": "logger.info",
+          "line": 333
+        },
+        {
+          "name": "logger.info",
+          "line": 335
+        },
+        {
+          "name": "logger.info",
+          "line": 357
+        },
+        {
+          "name": "weighted_scores.items",
+          "line": 358
+        },
+        {
+          "name": "weighted_scores.items",
+          "line": 369
+        },
+        {
+          "name": "....update",
+          "line": 375
+        },
+        {
+          "name": "logger.info",
+          "line": 377
+        },
+        {
+          "name": "logger.info",
+          "line": 380
+        },
+        {
+          "name": "dataset_name.lower",
+          "line": 455
+        },
+        {
+          "name": "transforms.Compose",
+          "line": 456
+        },
+        {
+          "name": "torchvision.datasets.CIFAR100",
+          "line": 460
+        },
+        {
+          "name": "transforms.Compose",
+          "line": 463
+        },
+        {
+          "name": "torchvision.datasets.CIFAR100",
+          "line": 467
+        },
+        {
+          "name": "augmented_dataset.get_augmentation_info",
+          "line": 499
+        },
+        {
+          "name": "logger.info",
+          "line": 500
+        },
+        {
+          "name": "hasattr",
+          "line": 505
+        },
+        {
+          "name": "logger.info",
+          "line": 506
+        },
+        {
+          "name": "logger.info",
+          "line": 511
+        },
+        {
+          "name": "types.MethodType",
+          "line": 521
+        },
+        {
+          "name": "logger.info",
+          "line": 522
+        },
+        {
+          "name": "logger.warning",
+          "line": 526
+        },
+        {
+          "name": "logger.info",
+          "line": 527
+        },
+        {
+          "name": "augmentation_data.get",
+          "line": 530
+        },
+        {
+          "name": "logger.info",
+          "line": 534
+        },
+        {
+          "name": "create_pattern_biased_augmentations",
+          "line": 537
+        },
+        {
+          "name": "create_pattern_biased_augmentations",
+          "line": 561
+        },
+        {
+          "name": "logger.info",
+          "line": 569
+        },
+        {
+          "name": "hasattr",
+          "line": 571
+        },
+        {
+          "name": "logger.info",
+          "line": 603
+        },
+        {
+          "name": "os.path.join",
+          "line": 613
+        },
+        {
+          "name": "logging.Formatter",
+          "line": 619
+        },
+        {
+          "name": "logger.info",
+          "line": 625
+        },
+        {
+          "name": "....setLevel",
+          "line": 627
+        },
+        {
+          "name": "....setLevel",
+          "line": 628
+        },
+        {
+          "name": "....strftime",
+          "line": 631
+        },
+        {
+          "name": "os.makedirs",
+          "line": 632
+        },
+        {
+          "name": "os.path.join",
+          "line": 633
+        },
+        {
+          "name": "logging.FileHandler",
+          "line": 636
+        },
+        {
+          "name": "file_handler.setLevel",
+          "line": 637
+        },
+        {
+          "name": "file_handler.setFormatter",
+          "line": 638
+        },
+        {
+          "name": "....addHandler",
+          "line": 639
+        },
+        {
+          "name": "logger.info",
+          "line": 641
+        },
+        {
+          "name": "epoch_mapping.get",
+          "line": 644
+        },
+        {
+          "name": "logger.info",
+          "line": 645
+        },
+        {
+          "name": "logger.info",
+          "line": 694
+        },
+        {
+          "name": "hasattr",
+          "line": 702
+        },
+        {
+          "name": "hasattr",
+          "line": 710
+        },
+        {
+          "name": "hasattr",
+          "line": 716
+        },
+        {
+          "name": "logger.info",
+          "line": 722
+        },
+        {
+          "name": "sorted",
+          "line": 741
+        },
+        {
+          "name": "sorted",
+          "line": 771
+        },
+        {
+          "name": "len",
+          "line": 832
+        },
+        {
+          "name": "....join",
+          "line": 844
+        },
+        {
+          "name": "logger.info",
+          "line": 845
+        },
+        {
+          "name": "sys.stdout.write",
+          "line": 858
+        },
+        {
+          "name": "sys.stdout.flush",
+          "line": 859
+        },
+        {
+          "name": "sys.stdout.write",
+          "line": 877
+        },
+        {
+          "name": "sys.stdout.flush",
+          "line": 878
+        },
+        {
+          "name": "datetime.now",
+          "line": 894
+        },
+        {
+          "name": "logger.info",
+          "line": 927
+        },
+        {
+          "name": "logger.warning",
+          "line": 929
+        },
+        {
+          "name": "plt.figure",
+          "line": 946
+        },
+        {
+          "name": "range",
+          "line": 949
+        },
+        {
+          "name": "plt.subplot",
+          "line": 952
+        },
+        {
+          "name": "plt.plot",
+          "line": 953
+        },
+        {
+          "name": "plt.title",
+          "line": 956
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 957
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 958
+        },
+        {
+          "name": "plt.legend",
+          "line": 959
+        },
+        {
+          "name": "plt.grid",
+          "line": 960
+        },
+        {
+          "name": "plt.subplot",
+          "line": 963
+        },
+        {
+          "name": "plt.plot",
+          "line": 964
+        },
+        {
+          "name": "plt.title",
+          "line": 967
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 968
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 969
+        },
+        {
+          "name": "plt.legend",
+          "line": 970
+        },
+        {
+          "name": "plt.grid",
+          "line": 971
+        },
+        {
+          "name": "plt.tight_layout",
+          "line": 1022
+        },
+        {
+          "name": "os.makedirs",
+          "line": 1025
+        },
+        {
+          "name": "os.path.join",
+          "line": 1026
+        },
+        {
+          "name": "plt.savefig",
+          "line": 1027
+        },
+        {
+          "name": "plt.close",
+          "line": 1028
+        },
+        {
+          "name": "logger.info",
+          "line": 1029
+        },
+        {
+          "name": "logger.info",
+          "line": 288
+        },
+        {
+          "name": "logger.info",
+          "line": 311
+        },
+        {
+          "name": "len",
+          "line": 348
+        },
+        {
+          "name": "logger.info",
+          "line": 359
+        },
+        {
+          "name": "int",
+          "line": 370
+        },
+        {
+          "name": "weighted_scores.items",
+          "line": 390
+        },
+        {
+          "name": "....update",
+          "line": 396
+        },
+        {
+          "name": "logger.info",
+          "line": 398
+        },
+        {
+          "name": "transforms.ToTensor",
+          "line": 441
+        },
+        {
+          "name": "transforms.Normalize",
+          "line": 442
+        },
+        {
+          "name": "transforms.ToTensor",
+          "line": 449
+        },
+        {
+          "name": "transforms.Normalize",
+          "line": 450
+        },
+        {
+          "name": "dataset_name.lower",
+          "line": 470
+        },
+        {
+          "name": "transforms.Compose",
+          "line": 471
+        },
+        {
+          "name": "torchvision.datasets.MNIST",
+          "line": 475
+        },
+        {
+          "name": "torchvision.datasets.MNIST",
+          "line": 477
+        },
+        {
+          "name": "logger.error",
+          "line": 480
+        },
+        {
+          "name": "aug_info.get",
+          "line": 501
+        },
+        {
+          "name": "logger.warning",
+          "line": 502
+        },
+        {
+          "name": "hasattr",
+          "line": 509
+        },
+        {
+          "name": "len",
+          "line": 545
+        },
+        {
+          "name": "len",
+          "line": 545
+        },
+        {
+          "name": "augmented_dataset.get_augmentation_info",
+          "line": 572
+        },
+        {
+          "name": "logger.info",
+          "line": 573
+        },
+        {
+          "name": "logger.warning",
+          "line": 576
+        },
+        {
+          "name": "logger.info",
+          "line": 606
+        },
+        {
+          "name": "logging.getLogger",
+          "line": 608
+        },
+        {
+          "name": "logging.getLogger",
+          "line": 609
+        },
+        {
+          "name": "datetime.now",
+          "line": 612
+        },
+        {
+          "name": "logging.getLogger",
+          "line": 620
+        },
+        {
+          "name": "os.path.join",
+          "line": 632
+        },
+        {
+          "name": "logging.Formatter",
+          "line": 638
+        },
+        {
+          "name": "list",
+          "line": 688
+        },
+        {
+          "name": "self.pattern_tracker.update_from_batch",
+          "line": 703
+        },
+        {
+          "name": "self.pattern_tracker.get_pattern_accuracies",
+          "line": 711
+        },
+        {
+          "name": "self.pattern_tracker.get_risk_levels",
+          "line": 717
+        },
+        {
+          "name": "hasattr",
+          "line": 734
+        },
+        {
+          "name": "self.pattern_tracker.get_risk_levels",
+          "line": 735
+        },
+        {
+          "name": "self._pattern_risks.keys",
+          "line": 741
+        },
+        {
+          "name": "list",
+          "line": 747
+        },
+        {
+          "name": "hasattr",
+          "line": 764
+        },
+        {
+          "name": "self.pattern_tracker.get_pattern_accuracies",
+          "line": 765
+        },
+        {
+          "name": "self._pattern_accuracies.keys",
+          "line": 771
+        },
+        {
+          "name": "list",
+          "line": 777
+        },
+        {
+          "name": "logger.info",
+          "line": 817
+        },
+        {
+          "name": "plt.plot",
+          "line": 955
+        },
+        {
+          "name": "plt.plot",
+          "line": 966
+        },
+        {
+          "name": "plt.subplot",
+          "line": 975
+        },
+        {
+          "name": "plt.plot",
+          "line": 976
+        },
+        {
+          "name": "plt.title",
+          "line": 977
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 978
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 979
+        },
+        {
+          "name": "plt.grid",
+          "line": 980
+        },
+        {
+          "name": "plt.subplot",
+          "line": 985
+        },
+        {
+          "name": "hasattr",
+          "line": 994
+        },
+        {
+          "name": "logger.warning",
+          "line": 1031
+        },
+        {
+          "name": "int",
+          "line": 1037
+        },
+        {
+          "name": "int",
+          "line": 1037
+        },
+        {
+          "name": "open",
+          "line": 286
+        },
+        {
+          "name": "json.load",
+          "line": 287
+        },
+        {
+          "name": "logger.warning",
+          "line": 290
+        },
+        {
+          "name": "logger.info",
+          "line": 291
+        },
+        {
+          "name": "load_latest_pattern_map",
+          "line": 292
+        },
+        {
+          "name": "int",
+          "line": 391
+        },
+        {
+          "name": "transforms.ToTensor",
+          "line": 457
+        },
+        {
+          "name": "transforms.Normalize",
+          "line": 458
+        },
+        {
+          "name": "transforms.ToTensor",
+          "line": 464
+        },
+        {
+          "name": "transforms.Normalize",
+          "line": 465
+        },
+        {
+          "name": "len",
+          "line": 495
+        },
+        {
+          "name": "....get",
+          "line": 516
+        },
+        {
+          "name": "logging.getLogger",
+          "line": 627
+        },
+        {
+          "name": "logging.getLogger",
+          "line": 628
+        },
+        {
+          "name": "datetime.now",
+          "line": 631
+        },
+        {
+          "name": "logging.getLogger",
+          "line": 639
+        },
+        {
+          "name": "....keys",
+          "line": 688
+        },
+        {
+          "name": "logger.debug",
+          "line": 714
+        },
+        {
+          "name": "logger.debug",
+          "line": 720
+        },
+        {
+          "name": "....keys",
+          "line": 747
+        },
+        {
+          "name": "....keys",
+          "line": 777
+        },
+        {
+          "name": "isinstance",
+          "line": 910
+        },
+        {
+          "name": "float",
+          "line": 910
+        },
+        {
+          "name": "len",
+          "line": 949
+        },
+        {
+          "name": "plt.plot",
+          "line": 988
+        },
+        {
+          "name": "plt.title",
+          "line": 989
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 990
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 991
+        },
+        {
+          "name": "plt.grid",
+          "line": 992
+        },
+        {
+          "name": "logger.info",
+          "line": 993
+        },
+        {
+          "name": "plt.subplot",
+          "line": 996
+        },
+        {
+          "name": "optimizer.get_learning_rate_history",
+          "line": 997
+        },
+        {
+          "name": "plt.subplot",
+          "line": 1007
+        },
+        {
+          "name": "list",
+          "line": 1008
+        },
+        {
+          "name": "plt.bar",
+          "line": 1011
+        },
+        {
+          "name": "plt.title",
+          "line": 1012
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 1013
+        },
+        {
+          "name": "plt.ylim",
+          "line": 1014
+        },
+        {
+          "name": "str",
+          "line": 261
+        },
+        {
+          "name": "len",
+          "line": 329
+        },
+        {
+          "name": "len",
+          "line": 331
+        },
+        {
+          "name": "len",
+          "line": 333
+        },
+        {
+          "name": "len",
+          "line": 335
+        },
+        {
+          "name": "transforms.ToTensor",
+          "line": 472
+        },
+        {
+          "name": "transforms.Normalize",
+          "line": 473
+        },
+        {
+          "name": "aug_info.get",
+          "line": 500
+        },
+        {
+          "name": "aug_info.get",
+          "line": 500
+        },
+        {
+          "name": "str",
+          "line": 516
+        },
+        {
+          "name": "str",
+          "line": 526
+        },
+        {
+          "name": "pattern_counts.items",
+          "line": 844
+        },
+        {
+          "name": "len",
+          "line": 927
+        },
+        {
+          "name": "range",
+          "line": 988
+        },
+        {
+          "name": "plt.plot",
+          "line": 999
+        },
+        {
+          "name": "plt.title",
+          "line": 1000
+        },
+        {
+          "name": "plt.xlabel",
+          "line": 1001
+        },
+        {
+          "name": "plt.ylabel",
+          "line": 1002
+        },
+        {
+          "name": "plt.grid",
+          "line": 1003
+        },
+        {
+          "name": "logger.info",
+          "line": 1004
+        },
+        {
+          "name": "bias_scores.keys",
+          "line": 1008
+        },
+        {
+          "name": "bar.get_height",
+          "line": 1018
+        },
+        {
+          "name": "plt.text",
+          "line": 1019
+        },
+        {
+          "name": "aug_info.get",
+          "line": 573
+        },
+        {
+          "name": "aug_info.get",
+          "line": 574
+        },
+        {
+          "name": "str",
+          "line": 576
+        },
+        {
+          "name": "range",
+          "line": 999
+        },
+        {
+          "name": "len",
+          "line": 1010
+        },
+        {
+          "name": "str",
+          "line": 1031
+        },
+        {
+          "name": "str",
+          "line": 290
+        },
+        {
+          "name": "len",
+          "line": 988
+        },
+        {
+          "name": "len",
+          "line": 993
+        },
+        {
+          "name": "bar.get_x",
+          "line": 1019
+        },
+        {
+          "name": "len",
+          "line": 999
+        },
+        {
+          "name": "len",
+          "line": 1004
+        },
+        {
+          "name": "bar.get_width",
+          "line": 1019
+        }
+      ],
+      "docstring": "\n    Streamlined training function that only works with prepared datasets.\n    \n    Args:\n        args: Command-line arguments (optional)\n    ",
+      "code_snippet": "\n\ndef train_with_prepared_dataset(args=None):\n    \"\"\"\n    Streamlined training function that only works with prepared datasets.\n    \n    Args:\n        args: Command-line arguments (optional)\n    \"\"\"\n    # Start global timer for entire process\n    global_start_time = time.time()\n    initialization_start_time = time.time()\n    logger.info(\"Starting initialization phase...\")\n    \n    # Create a more helpful description with specific examples\n    description = \"\"\"isekaiZen Dataset Training - Streamlined training with prepared datasets\"\"\"\n    \n    epilog = \"\"\"\nExamples:\n\n  # List available prepared datasets\n  python -m isekaizen.cli.train_dataset --list\n\n  # Train with a specific prepared dataset\n  python -m isekaizen.cli.train_dataset --prepared-dataset cifar10_resnet18\n\n  # Train with a specific epoch preset\n  python -m isekaizen.cli.train_dataset --prepared-dataset cifar10_resnet18 --epochs thorough\n\n  # Train with a target accuracy for early stopping\n  python -m isekaizen.cli.train_dataset --prepared-dataset cifar10_resnet18 --target-accuracy 95.0\n\n  # Train with visualizations and a specific output directory\n  python -m isekaizen.cli.train_dataset --prepared-dataset cifar10_resnet18 --visualize --output-dir ./my_results\n\n  # Run in diagnostic mode for debugging learning rate issues\n  python -m isekaizen.cli.train_dataset --prepared-dataset cifar10_resnet18 --diagnostic min  # 3 epochs with detailed logging\n  python -m isekaizen.cli.train_dataset --prepared-dataset cifar10_resnet18 --diagnostic max  # 5 epochs with detailed logging\n\n  # Run a custom number of epochs in test mode\n  python -m isekaizen.cli.train_dataset --prepared-dataset cifar10_resnet18 --epoch-test 4    # 4 epochs with detailed logging\n\n  # Train with a specific random seed for reproducibility\n  python -m isekaizen.cli.train_dataset --prepared-dataset cifar10_resnet18 --seed 42\n\"\"\"\n    \n    parser = argparse.ArgumentParser(\n        description=description, \n        epilog=epilog,\n        formatter_class=argparse.RawDescriptionHelpFormatter\n    )\n    \n    # Main options\n    parser.add_argument('--prepared-dataset', type=str, required='--list' not in sys.argv,\n                       help='ID of prepared dataset to use for training')\n    parser.add_argument('--list', action='store_true',\n                       help='List available prepared datasets and exit')\n                       \n    # Training options\n    parser.add_argument('--epochs', type=str, default='standard',\n                       choices=['quick', 'standard', 'thorough', 'extended'],\n                       help='Number of epochs to train. quick=20, standard=54, thorough=143, extended=232')\n    parser.add_argument('--target-accuracy', type=float, default=None,\n                       help='Target accuracy for early stopping (e.g., 95.0 for 95%%)')\n                       \n    # Output options\n    parser.add_argument('--output-dir', type=str, default=METRICS_DIR,\n                       help='Directory for output files')\n    parser.add_argument('--visualize', action='store_true',\n                       help='Generate visualizations of the training process')\n    \n    # Diagnostic options\n    parser.add_argument('--diagnostic', type=str, choices=['min', 'max'], \n                      help='Run in diagnostic mode (min=3 epochs, max=5 epochs) with detailed logging')\n    parser.add_argument('--epoch-test', type=int, default=None,\n                      help='Run for a specific number of epochs in test mode with detailed logging')\n    \n    # Reproducibility options\n    parser.add_argument('--seed', type=int, default=42,\n                       help='Random seed for reproducible training')\n    \n    # Parse arguments\n    args = parser.parse_args(args)\n    \n    # Handle list only mode\n    if args.list:\n        print_available_datasets()\n        return 0\n    \n    # Set random seed for reproducibility\n    torch.manual_seed(args.seed)\n    if torch.cuda.is_available():\n        torch.cuda.manual_seed(args.seed)\n        torch.backends.cudnn.deterministic = True\n        torch.backends.cudnn.benchmark = False\n    \n    # Set device - automatically use CUDA if available\n    cuda_available = torch.cuda.is_available()\n    device = torch.device(\"cuda\" if cuda_available else \"cpu\")\n    logger.info(f\"Using device: {device}\")\n    \n    # Find the prepared dataset\n    available_datasets = list_available_prepared_datasets()\n    if args.prepared_dataset not in available_datasets:\n        logger.error(f\"Prepared dataset '{args.prepared_dataset}' not found\")\n        print(\"\\nAvailable prepared datasets:\")\n        print_available_datasets()\n        return 1\n    \n    # Load the augmentation data\n    dataset_info = available_datasets[args.prepared_dataset]\n    augmentation_path = dataset_info['path']\n    logger.info(f\"Loading prepared dataset from: {augmentation_path}\")\n    \n    try:\n        with open(augmentation_path, 'r') as f:\n            augmentation_data = json.load(f)\n    except Exception as e:\n        logger.error(f\"Error loading augmentation data: {str(e)}\")\n        return 1\n    \n    # Extract model and dataset information\n    model_info = dataset_info[\"model\"]\n    dataset_name = dataset_info[\"dataset\"]\n    \n    # Determine if model is pretrained\n    is_pretrained = \"-pretrained\" in model_info\n    model_type = model_info.replace(\"-pretrained\", \"\")\n    \n    logger.info(f\"Dataset: {dataset_name}\")\n    logger.info(f\"Model: {model_type} (Pretrained: {is_pretrained})\")\n    \n    # Load pattern map (from augmentation data or latest)\n    pattern_map_start_time = time.time()\n    logger.info(\"Loading pattern map...\")\n    \n    # Check for complete pattern map in augmentation data first (most reliable)\n    if 'complete_pattern_map' in augmentation_data:\n        pattern_map = augmentation_data['complete_pattern_map']\n        logger.info(f\"Using complete pattern map from augmentation data\")\n    elif 'pattern_map_path' in augmentation_data:\n        pattern_map_path = augmentation_data['pattern_map_path']\n        try:\n            with open(pattern_map_path, 'r') as f:\n                pattern_map = json.load(f)\n            logger.info(f\"Pattern map loaded from {pattern_map_path}\")\n        except Exception as e:\n            logger.warning(f\"Error loading pattern map from {pattern_map_path}: {str(e)}\")\n            logger.info(\"Falling back to latest pattern map\")\n            pattern_map = load_latest_pattern_map()\n    else:\n        # Load latest pattern map\n        pattern_map = load_latest_pattern_map()\n    \n    # If still no pattern map, attempt to reconstruct from components in augmentation data\n    if not pattern_map:\n        logger.info(\"Reconstructing pattern map from components in augmentation data\")\n        pattern_map = {}\n        \n        # Add critical components if available in augmentation data\n        critical_components = [\n            'pattern_distribution', 'pattern_complexities', 'pattern_types',\n            'sample_to_pattern', 'patterns_by_complexity'\n        ]\n        \n        for component in critical_components:\n            if component in augmentation_data:\n                pattern_map[component] = augmentation_data[component]\n                logger.info(f\"Added {component} to reconstructed pattern map\")\n        \n        # Add weighted_distribution if available\n        if 'weighted_scores' in augmentation_data:\n            pattern_map['weighted_distribution'] = augmentation_data['weighted_scores']\n            logger.info(\"Added weighted_distribution to reconstructed pattern map\")\n    \n    # Ensure pattern_map has weighted_distribution for EVE optimizer\n    if pattern_map and 'weighted_distribution' not in pattern_map and 'weighted_scores' in augmentation_data:\n        pattern_map['weighted_distribution'] = augmentation_data['weighted_scores']\n        logger.info(\"Added weighted_distribution from augmentation data to pattern map\")\n    \n    if not pattern_map:\n        logger.warning(\"No pattern map found. Pattern-specific optimization will be limited.\")\n    else:\n        logger.info(\"Pattern map validated with critical components for optimizer and tracking\")\n        # Log key components for debugging\n        if 'pattern_distribution' in pattern_map:\n            logger.info(f\"Pattern distribution available with {len(pattern_map['pattern_distribution'])} types\")\n        if 'weighted_distribution' in pattern_map:\n            logger.info(f\"Weighted distribution available with {len(pattern_map['weighted_distribution'])} types\")\n        if 'pattern_complexities' in pattern_map:\n            logger.info(f\"Pattern complexities available with {len(pattern_map['pattern_complexities'])} types\")\n        if 'sample_to_pattern' in pattern_map:\n            logger.info(f\"Sample to pattern mapping available with {len(pattern_map['sample_to_pattern'])} samples\")\n    \n    pattern_map_time = time.time() - pattern_map_start_time\n    logger.info(f\"Pattern map loading completed in {pattern_map_time:.2f} seconds\")\n    \n    # Extract bias scores from augmentation data\n    bias_scores = augmentation_data.get('bias_scores', {})\n    if not bias_scores:\n        logger.warning(\"No bias scores found in augmentation data. Using uniform bias.\")\n        if pattern_map and 'pattern_types' in pattern_map:\n            pattern_types = pattern_map['pattern_types']\n        else:\n            pattern_types = ['structural', 'statistical', 'temporal']\n        bias_scores = {pt: 1.0 / len(pattern_types) for pt in pattern_types}\n        \n    # Extract weighted scores if available and update pattern map\n    weighted_scores = None\n    if 'metadata' in augmentation_data and 'weighted_scores' in augmentation_data['metadata']:\n        weighted_scores = augmentation_data['metadata']['weighted_scores']\n        logger.info(f\"Using weighted scores from prepared dataset\")\n        # Log weighted scores for debugging\n        if weighted_scores:\n            logger.info(\"Weighted scores by pattern type:\")\n            for pattern_type, score in weighted_scores.items():\n                logger.info(f\"  {pattern_type}: {score:.4f}\")\n        \n        # Update pattern distribution in pattern map for EVE optimizer\n        if pattern_map is not None:\n            # Store weighted scores in a separate field for the EVE optimizer to use\n            pattern_map['weighted_distribution'] = weighted_scores\n            \n            # Convert weights to integer counts for pattern_distribution (used by utils that expect integers)\n            total_samples = 1000  # Base number to convert percentages to integer counts\n            int_distribution = {}\n            for pattern_type, weight in weighted_scores.items():\n                int_distribution[pattern_type] = int(weight * total_samples)\n            \n            # Update pattern_distribution with integer counts\n            if 'pattern_distribution' not in pattern_map:\n                pattern_map['pattern_distribution'] = {}\n            pattern_map['pattern_distribution'].update(int_distribution)\n            \n            logger.info(\"Pattern distribution updated in pattern map with integer counts\")\n    elif 'weighted_scores' in augmentation_data:\n        weighted_scores = augmentation_data['weighted_scores']\n        logger.info(f\"Using weighted scores directly from prepared dataset\")\n        \n        # Update pattern distribution in pattern map for EVE optimizer\n        if pattern_map is not None:\n            # Store weighted scores in a separate field for the EVE optimizer to use\n            pattern_map['weighted_distribution'] = weighted_scores\n            \n            # Convert weights to integer counts for pattern_distribution (used by utils that expect integers)\n            total_samples = 1000  # Base number to convert percentages to integer counts\n            int_distribution = {}\n            for pattern_type, weight in weighted_scores.items():\n                int_distribution[pattern_type] = int(weight * total_samples)\n            \n            # Update pattern_distribution with integer counts\n            if 'pattern_distribution' not in pattern_map:\n                pattern_map['pattern_distribution'] = {}\n            pattern_map['pattern_distribution'].update(int_distribution)\n            \n            logger.info(\"Pattern distribution updated in pattern map with integer counts\")\n    \n    # Determine dataset parameters based on dataset name\n    dataset_params = {\n        'cifar10': {'num_classes': 10, 'input_channels': 3, 'input_size': 32},\n        'cifar100': {'num_classes': 100, 'input_channels': 3, 'input_size': 32},\n        'mnist': {'num_classes': 10, 'input_channels': 1, 'input_size': 28},\n        # Add more datasets as needed\n    }\n    \n    # Default to CIFAR-10 settings if dataset not found\n    dataset_config = dataset_params.get(dataset_name.lower(), \n                                    {'num_classes': 10, 'input_channels': 3, 'input_size': 32})\n    \n    num_classes = dataset_config['num_classes']\n    input_channels = dataset_config['input_channels']\n    input_size = dataset_config['input_size']\n    \n    # Create model\n    model_start_time = time.time()\n    logger.info(f\"Creating model: {model_type} (Pretrained: {is_pretrained})\")\n    model = create_model(\n        model_type=model_type,\n        use_pretrained=is_pretrained,\n        num_classes=num_classes,\n        input_channels=input_channels,\n        input_size=input_size\n    )\n    model = model.to(device)\n    model_time = time.time() - model_start_time\n    logger.info(f\"Model creation completed in {model_time:.2f} seconds\")\n    \n    # Create training and test datasets\n    dataset_start_time = time.time()\n    logger.info(f\"Creating datasets...\")\n    \n    # Import the correct dataset class based on dataset_name\n    import torchvision.transforms as transforms\n    import torchvision\n    \n    # Basic transforms for test dataset (no augmentation)\n    if dataset_name.lower() == 'cifar10':\n        transform_test = transforms.Compose([\n            transforms.ToTensor(),\n            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),\n        ])\n        test_dataset = torchvision.datasets.CIFAR10(\n            root='./data', train=False, download=True, transform=transform_test)\n            \n        # Basic transform for the base training dataset (augmentation will be applied later)\n        transform_train = transforms.Compose([\n            transforms.ToTensor(),\n            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),\n        ])\n        base_train_dataset = torchvision.datasets.CIFAR10(\n            root='./data', train=True, download=True, transform=transform_train)\n            \n    elif dataset_name.lower() == 'cifar100':\n        transform_test = transforms.Compose([\n            transforms.ToTensor(),\n            transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),\n        ])\n        test_dataset = torchvision.datasets.CIFAR100(\n            root='./data', train=False, download=True, transform=transform_test)\n            \n        transform_train = transforms.Compose([\n            transforms.ToTensor(),\n            transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),\n        ])\n        base_train_dataset = torchvision.datasets.CIFAR100(\n            root='./data', train=True, download=True, transform=transform_train)\n            \n    elif dataset_name.lower() == 'mnist':\n        transform = transforms.Compose([\n            transforms.ToTensor(),\n            transforms.Normalize((0.1307,), (0.3081,))\n        ])\n        test_dataset = torchvision.datasets.MNIST(\n            root='./data', train=False, download=True, transform=transform)\n        base_train_dataset = torchvision.datasets.MNIST(\n            root='./data', train=True, download=True, transform=transform)\n    else:\n        logger.error(f\"Unsupported dataset: {dataset_name}\")\n        return 1\n    \n    # Try to directly create the same type of augmented dataset as train_optimized.py would\n    logger.info(\"Creating augmented dataset from augmentation data...\")\n    try:\n        # First try with augmentation_data parameter like train_optimized.py does\n        augmented_dataset = create_pattern_biased_augmentations(\n            dataset=base_train_dataset,\n            pattern_map=pattern_map,\n            augmentation_data=augmentation_data,  # Pass the complete augmentation data\n            device=device\n        )\n        \n        # Debug augmented dataset\n        logger.info(f\"Created augmented dataset with {len(augmented_dataset)} total samples\")\n        \n        # Log important properties of the augmented dataset\n        if hasattr(augmented_dataset, 'get_augmentation_info'):\n            aug_info = augmented_dataset.get_augmentation_info()\n            logger.info(f\"Augmentation info: original={aug_info.get('original_count', 0)}, augmented={aug_info.get('augmented_count', 0)}\")\n            if aug_info.get('augmented_count', 0) == 0:\n                logger.warning(\"No augmented samples found in dataset - will use virtual augmentation\")\n        \n        # Check for virtual augmentation\n        if hasattr(augmented_dataset, 'virtual_augmentation') and augmented_dataset.virtual_augmentation:\n            logger.info(\"Dataset using virtual augmentation mode\")\n        \n        # If we have a pattern map, check for pattern mediator capability\n        if pattern_map and not hasattr(augmented_dataset, 'get_pattern_type'):\n            # Add pattern mediator functionality directly to dataset\n            logger.info(\"Adding pattern mediator capability to augmented dataset\")\n            \n            # Create lookup function that uses the pattern map\n            def get_pattern_type(self, idx):\n                if 'sample_to_pattern' in pattern_map:\n                    return pattern_map['sample_to_pattern'].get(str(idx))\n                return None\n            \n            # Add the method to the dataset instance\n            import types\n            augmented_dataset.get_pattern_type = types.MethodType(get_pattern_type, augmented_dataset)\n            logger.info(\"Pattern mediator capability added to dataset\")\n        \n    except Exception as e:\n        # If that fails, fall back to the old method with bias scores\n        logger.warning(f\"Error creating augmented dataset with augmentation_data: {str(e)}\")\n        logger.info(\"Falling back to recreating augmentation with bias scores...\")\n        \n        # Extract bias scores from augmentation data for fallback\n        bias_scores_for_augmentation = augmentation_data.get('bias_scores', bias_scores)\n        \n        # Fixed augmentation ratio to match train_optimized.py\n        augmentation_ratio = 0.23\n        logger.info(f\"Creating pre-pattern augmented dataset with fixed ratio of {augmentation_ratio:.2f} (23%)...\")\n        \n        # Create augmented dataset with bias scores and fixed ratio\n        augmented_dataset = create_pattern_biased_augmentations(\n            dataset=base_train_dataset,\n            pattern_map=pattern_map,\n            bias_scores=bias_scores_for_augmentation,\n            augmentation_ratio=augmentation_ratio,\n            device=device\n        )\n    \n    logger.info(f\"Datasets created: {len(augmented_dataset)} training samples, {len(test_dataset)} test samples\")\n    \n    # Check if we have a virtual augmentation dataset with no real augmented samples\n    if (hasattr(augmented_dataset, 'virtual_augmentation') and \n            augmented_dataset.virtual_augmentation and \n            'bias_scores' in augmentation_data):\n        \n        logger.info(\"Creating real augmented samples from virtual augmentation data\")\n        \n        # Get real augmentation ratio from metadata or use default (33%)\n        augmentation_ratio = 0.33\n        if 'metadata' in augmentation_data and 'augmentation_ratio' in augmentation_data['metadata']:\n            augmentation_ratio = augmentation_data['metadata']['augmentation_ratio']\n        \n        try:\n            # Create real augmented dataset\n            augmented_dataset = create_pattern_biased_augmentations(\n                dataset=base_train_dataset,\n                pattern_map=pattern_map,\n                bias_scores=augmentation_data['bias_scores'],\n                augmentation_ratio=augmentation_ratio,\n                device=device\n            )\n            \n            logger.info(f\"Created real augmentations with ratio {augmentation_ratio} instead of virtual augmentation\")\n            # Log new dataset info\n            if hasattr(augmented_dataset, 'get_augmentation_info'):\n                aug_info = augmented_dataset.get_augmentation_info()\n                logger.info(f\"New augmentation info: original={aug_info.get('original_count', 0)}, \"\n                           f\"augmented={aug_info.get('augmented_count', 0)}\")\n        except Exception as e:\n            logger.warning(f\"Error creating real augmentations: {str(e)}. Continuing with virtual augmentation.\")\n    \n    # If we still don't have real augmentations, log a clear message\n    if hasattr(augmented_dataset, 'virtual_augmentation') and augmented_dataset.virtual_augmentation:\n        logger.warning(\"Using VIRTUAL augmentation - no real augmented samples will be used in training\")\n        logger.warning(\"This is not optimal for model performance but training will continue.\")\n    else:\n        logger.info(\"Using REAL augmented samples in training\")\n    \n    dataset_time = time.time() - dataset_start_time\n    logger.info(f\"Dataset creation completed in {dataset_time:.2f} seconds\")\n    \n    # Create criterion\n    criterion = nn.CrossEntropyLoss()\n    \n    # Map epoch presets to actual numbers\n    epoch_mapping = {\n        'quick': 20,\n        'standard': 54,\n        'thorough': 143,\n        'extended': 232\n    }\n    \n    # Check for diagnostic mode or epoch-test and override epochs if needed\n    if args.diagnostic:\n        if args.diagnostic == 'min':\n            epochs = 3\n            logger.info(f\"DIAGNOSTIC MODE (min): Running for {epochs} epochs with detailed logging\")\n        elif args.diagnostic == 'max':\n            epochs = 5\n            logger.info(f\"DIAGNOSTIC MODE (max): Running for {epochs} epochs with detailed logging\")\n        # Configure logging for diagnostic mode\n        logging.getLogger().setLevel(logging.DEBUG)\n        logging.getLogger('isekaizen').setLevel(logging.DEBUG)\n        \n        # Set up special diagnostic log file\n        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')\n        os.makedirs(os.path.join(args.output_dir, 'diagnostics'), exist_ok=True)\n        diagnostic_log_file = os.path.join(args.output_dir, 'diagnostics', f\"lr_diagnostic_{timestamp}.log\")\n        \n        # Create file handler for diagnostic log\n        file_handler = logging.FileHandler(diagnostic_log_file)\n        file_handler.setLevel(logging.DEBUG)\n        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))\n        logging.getLogger().addHandler(file_handler)\n        \n        logger.info(f\"Diagnostic logging enabled - saving to {diagnostic_log_file}\")\n    elif args.epoch_test is not None:\n        epochs = args.epoch_test\n        logger.info(f\"EPOCH TEST MODE: Running for {epochs} epochs with detailed logging\")\n        # Configure logging for diagnostic mode\n        logging.getLogger().setLevel(logging.DEBUG)\n        logging.getLogger('isekaizen').setLevel(logging.DEBUG)\n        \n        # Set up special diagnostic log file\n        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')\n        os.makedirs(os.path.join(args.output_dir, 'diagnostics'), exist_ok=True)\n        diagnostic_log_file = os.path.join(args.output_dir, 'diagnostics', f\"epoch_test_{epochs}_{timestamp}.log\")\n        \n        # Create file handler for diagnostic log\n        file_handler = logging.FileHandler(diagnostic_log_file)\n        file_handler.setLevel(logging.DEBUG)\n        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))\n        logging.getLogger().addHandler(file_handler)\n        \n        logger.info(f\"Epoch test logging enabled - saving to {diagnostic_log_file}\")\n    else:\n        # Get number of epochs from preset or use standard if invalid\n        epochs = epoch_mapping.get(args.epochs, epoch_mapping['standard'])\n        logger.info(f\"Using {args.epochs} preset: {epochs} epochs\")\n    \n    # Calculate Fibonacci check intervals for the entire training\n    fibonacci_intervals = get_fibonacci_check_intervals(epochs)\n    \n    # Create optimizer\n    logger.info(\"Creating RiskAwareEVEOptimizer with risk/accuracy-based LR adjustments...\")\n    optimizer = RiskAwareEVEOptimizer(\n        model.parameters(),\n        lr=0.01,  # Initial learning rate (will be adjusted by Fibonacci schedule)\n        weight_decay=5e-4,  # Optimized weight decay\n        fibonacci_intervals=fibonacci_intervals,\n        pattern_map=pattern_map\n    )\n\n    # Create unified components\n    logger.info(\"Creating unified pattern tracker...\")\n    pattern_tracker = UnifiedPatternTracker(\n        pattern_map=pattern_map,\n        history_window=2  # Only keep current and previous epoch data\n    )\n    \n    logger.info(\"Creating streamlined batch optimizer...\")\n    batch_optimizer = StreamlinedBatchOptimizer(\n        model=model,\n        device=device,\n        total_epochs=epochs,\n        run_diagnostics=True  # Run hardware diagnostics\n    )\n    \n    # Create pattern mediator for optimizer\n    class SimplePatternMediator:\n        \"\"\"Simple pattern mediator that works with existing pattern data.\"\"\"\n        \n        def __init__(self, pattern_map, pattern_tracker):\n            self.pattern_map = pattern_map\n            self.pattern_tracker = pattern_tracker\n            self.current_epoch = 0\n            self._pattern_risks = {}\n            self._pattern_accuracies = {}\n            \n            # Initialize with default data if we have pattern map\n            if pattern_map and 'pattern_distribution' in pattern_map:\n                pattern_types = list(pattern_map['pattern_distribution'].keys())\n                default_risks = {pt: 0.5 for pt in pattern_types}\n                default_accs = {pt: 0.5 for pt in pattern_types}\n                self._pattern_risks[-1] = default_risks\n                self._pattern_accuracies[-1] = default_accs\n                \n            logger.info(\"SimplePatternMediator initialized\")\n        \n        def update_with_batch_recognition(self, batch_indices, correct_mask, epoch):\n            \"\"\"Store batch recognition data - required for PatternDataMediator interface.\"\"\"\n            # Update current epoch\n            self.current_epoch = epoch\n            \n            # Allow the pattern tracker to process the batch\n            if hasattr(self.pattern_tracker, 'update_from_batch'):\n                self.pattern_tracker.update_from_batch(batch_indices, correct_mask, epoch)\n        \n        def end_epoch(self, epoch):\n            \"\"\"Signal the end of an epoch.\"\"\"\n            self.current_epoch = epoch\n            \n            # Process data from pattern tracker at epoch end\n            if hasattr(self.pattern_tracker, 'get_pattern_accuracies'):\n                accs = self.pattern_tracker.get_pattern_accuracies(epoch)\n                if accs:\n                    self._pattern_accuracies[epoch] = accs\n                    logger.debug(f\"Updated pattern accuracies at epoch end: {epoch}\")\n                    \n            if hasattr(self.pattern_tracker, 'get_risk_levels'):\n                risks = self.pattern_tracker.get_risk_levels(epoch)\n                if risks:\n                    self._pattern_risks[epoch] = risks\n                    logger.debug(f\"Updated pattern risks at epoch end: {epoch}\")\n                    \n            logger.info(f\"SimplePatternMediator updated to epoch {epoch}\")\n        \n        def get_pattern_risks(self, epoch=None, force_recalculate=False):\n            \"\"\"Get pattern risks.\"\"\"\n            if epoch is None:\n                epoch = self.current_epoch\n                \n            # Check cache first\n            if not force_recalculate and epoch in self._pattern_risks and self._pattern_risks[epoch]:\n                return self._pattern_risks[epoch]\n            \n            # If forcing recalculation, get fresh data from tracker\n            if force_recalculate and hasattr(self.pattern_tracker, 'get_risk_levels'):\n                risks = self.pattern_tracker.get_risk_levels(epoch)\n                if risks:\n                    self._pattern_risks[epoch] = risks\n                    return risks\n            \n            # Try to get from any epoch as fallback\n            for e in sorted(self._pattern_risks.keys(), reverse=True):\n                if self._pattern_risks[e]:\n                    return self._pattern_risks[e]\n                \n            # Generate default values if we have pattern map\n            if self.pattern_map and 'pattern_distribution' in self.pattern_map:\n                pattern_types = list(self.pattern_map['pattern_distribution'].keys())\n                default_risks = {pt: 0.5 for pt in pattern_types}\n                self._pattern_risks[epoch] = default_risks\n                return default_risks\n                \n            return {}\n        \n        def get_pattern_accuracies(self, epoch=None, force_recalculate=False):\n            \"\"\"Get pattern accuracies.\"\"\"\n            if epoch is None:\n                epoch = self.current_epoch\n                \n            # Check cache first\n            if not force_recalculate and epoch in self._pattern_accuracies and self._pattern_accuracies[epoch]:\n                return self._pattern_accuracies[epoch]\n                \n            # If forcing recalculation, get fresh data from tracker\n            if force_recalculate and hasattr(self.pattern_tracker, 'get_pattern_accuracies'):\n                accs = self.pattern_tracker.get_pattern_accuracies(epoch)\n                if accs:\n                    self._pattern_accuracies[epoch] = accs\n                    return accs\n            \n            # Try to get from any epoch as fallback\n            for e in sorted(self._pattern_accuracies.keys(), reverse=True):\n                if self._pattern_accuracies[e]:\n                    return self._pattern_accuracies[e]\n                \n            # Generate default values if we have pattern map\n            if self.pattern_map and 'pattern_distribution' in self.pattern_map:\n                pattern_types = list(self.pattern_map['pattern_distribution'].keys())\n                default_accs = {pt: 0.5 for pt in pattern_types}\n                self._pattern_accuracies[epoch] = default_accs\n                return default_accs\n                \n            return {}\n\n    # Create the pattern mediator\n    pattern_mediator = SimplePatternMediator(pattern_map, pattern_tracker)\n    logger.info(\"Created SimplePatternMediator for optimizer\")\n    \n    # Connect mediator to optimizer\n    if hasattr(optimizer, 'set_pattern_mediator'):\n        optimizer.set_pattern_mediator(pattern_mediator)\n        logger.info(\"Connected pattern mediator to optimizer\")\n    \n    logger.info(\"Creating optimized trainer...\")\n    trainer = OptimizedTrainer(\n        model=model,\n        criterion=criterion,\n        optimizer=optimizer,\n        device=device,\n        pattern_tracker=pattern_tracker,\n        batch_optimizer=batch_optimizer,\n        mini_val_interval=50,  # Run mini-validation every 50 batches\n        disable_per_batch_pattern_tracking=False  # Enable pattern tracking for all batches\n    )\n    \n    # Connect pattern mediator to trainer if it supports it\n    if hasattr(trainer, 'set_pattern_mediator'):\n        trainer.set_pattern_mediator(pattern_mediator)\n        logger.info(\"Connected pattern mediator to trainer\")\n    \n    # Create early stopping callback if target accuracy is provided\n    callbacks = []\n    if args.target_accuracy is not None:\n        # Create early stopping callback\n        def early_stopping_callback(epoch, history, model, optimizer):\n            current_val_acc = history['val_acc'][-1] if history['val_acc'] else 0\n            if current_val_acc >= args.target_accuracy:\n                logger.info(f\"Target accuracy {args.target_accuracy:.2f}% reached: {current_val_acc:.2f}%\")\n                return True  # Signal to stop training\n            return False\n        \n        callbacks.append(early_stopping_callback)\n        logger.info(f\"Early stopping set at target accuracy: {args.target_accuracy:.2f}%\")\n    \n    # Calculate total initialization time\n    initialization_time = time.time() - initialization_start_time\n    logger.info(f\"Total initialization time: {initialization_time:.2f} seconds\")\n    \n    logger.info(f\"Starting training for {epochs} epochs with unified components...\")\n    \n    # Check if dataset is augmented and show information\n    is_pre_augmented = hasattr(augmented_dataset, 'is_pre_augmented') and augmented_dataset.is_pre_augmented\n    dataset_info = f\"Training with dataset of size: {len(augmented_dataset)}\"\n    \n    if is_pre_augmented and hasattr(augmented_dataset, 'get_augmentation_info'):\n        aug_info = augmented_dataset.get_augmentation_info()\n        original_count = aug_info.get('original_count', 0)\n        augmented_count = aug_info.get('augmented_count', 0)\n        dataset_info += f\" ({original_count} original + {augmented_count} augmented)\"\n        logger.info(dataset_info)\n        \n        # Log pattern type distribution if available\n        if 'metadata' in aug_info and 'count_by_pattern' in aug_info['metadata']:\n            pattern_counts = aug_info['metadata']['count_by_pattern']\n            pattern_info = \", \".join([f\"{pt}: {count}\" for pt, count in pattern_counts.items()])\n            logger.info(f\"Augmentation by pattern type: {pattern_info}\")\n    else:\n        logger.info(dataset_info)\n    \n    # Set up signal handler for graceful exit\n    import signal\n    \n    original_sigint = signal.getsignal(signal.SIGINT)\n    \n    def signal_handler(sig, frame):\n        logger.info(\"\\nTraining interrupted by user - shutting down gracefully...\")\n        # Restore cursor if in a terminal\n        if sys.stdout.isatty():\n            sys.stdout.write(\"\\033[?25h\")\n            sys.stdout.flush()\n        sys.exit(0)\n    \n    signal.signal(signal.SIGINT, signal_handler)\n    \n    try:\n        # Use the augmented dataset for training\n        history = trainer.train(\n            train_dataset=augmented_dataset,\n            val_dataset=test_dataset,\n            epochs=epochs,\n            batch_size=None,  # Let the batch optimizer determine\n            adaptive_batch_size=True,\n            callbacks=callbacks  # Add the callbacks list with early stopping if provided\n        )\n    finally:\n        # Ensure cursor is restored even if there's an exception\n        if sys.stdout.isatty():\n            sys.stdout.write(\"\\033[?25h\")\n            sys.stdout.flush()\n        # Restore original signal handler\n        signal.signal(signal.SIGINT, original_sigint)\n    \n    # Calculate final metrics\n    train_acc = history['train_acc'][-1] if history['train_acc'] else 0\n    val_acc = history['val_acc'][-1] if history['val_acc'] else 0\n    \n    logger.info(\"Training completed\")\n    logger.info(f\"Final training accuracy: {train_acc:.2f}%\")\n    logger.info(f\"Final validation accuracy: {val_acc:.2f}%\")\n    \n    # Create output directory if it doesn't exist\n    os.makedirs(args.output_dir, exist_ok=True)\n    \n    # Add timestamp to filenames\n    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')\n    \n    # Save model to models directory\n    os.makedirs(MODELS_DIR, exist_ok=True)\n    model_path = os.path.join(MODELS_DIR, f\"model_{args.prepared_dataset}_{timestamp}.pth\")\n    torch.save(model.state_dict(), model_path)\n    logger.info(f\"Model saved to {model_path}\")\n    \n    # Save metrics as JSON\n    metrics_path = os.path.join(args.output_dir, f\"metrics_{args.prepared_dataset}_{timestamp}.json\")\n    \n    # Convert tensors to float for serialization\n    serializable_history = {}\n    for key, value in history.items():\n        if isinstance(value, list):\n            serializable_history[key] = [\n                float(v) if isinstance(v, torch.Tensor) else v\n                for v in value\n            ]\n        else:\n            serializable_history[key] = value\n            \n    # Add bias scores and seed info to metrics\n    serializable_history['bias_scores'] = bias_scores\n    serializable_history['seed'] = args.seed\n    serializable_history['prepared_dataset'] = args.prepared_dataset\n    serializable_history['augmentation_info'] = augmentation_data\n    \n    # Add learning rate history if available with improved debugging\n    if hasattr(optimizer, 'get_learning_rate_history'):\n        lr_history = optimizer.get_learning_rate_history()\n        if lr_history:\n            serializable_history['learning_rate_history'] = lr_history\n            logger.info(f\"Added learning rate history to metrics ({len(lr_history)} entries)\")\n        else:\n            logger.warning(\"Learning rate history method exists but returned empty history\")\n    else:\n        logger.warning(\"Optimizer does not have get_learning_rate_history method\")\n    \n    # Add Fibonacci interval information if available\n    if hasattr(optimizer, 'fibonacci_intervals'):\n        serializable_history['fibonacci_intervals'] = optimizer.fibonacci_intervals[:epochs]\n            \n    with open(metrics_path, 'w') as f:\n        json.dump(serializable_history, f, indent=2)\n    logger.info(f\"Metrics saved to {metrics_path}\")\n    \n    # Create visualization if requested\n    if args.visualize:\n        try:\n            import matplotlib.pyplot as plt\n            \n            plt.figure(figsize=(12, 10))\n            \n            # Plot training metrics\n            epochs_range = range(1, len(history['train_loss']) + 1)\n            \n            # Loss plot\n            plt.subplot(2, 2, 1)\n            plt.plot(epochs_range, history['train_loss'], 'b-', label='Training Loss')\n            if 'val_loss' in history and history['val_loss']:\n                plt.plot(epochs_range, history['val_loss'], 'r-', label='Validation Loss')\n            plt.title('Loss')\n            plt.xlabel('Epoch')\n            plt.ylabel('Loss')\n            plt.legend()\n            plt.grid(True)\n            \n            # Accuracy plot\n            plt.subplot(2, 2, 2)\n            plt.plot(epochs_range, history['train_acc'], 'b-', label='Training Accuracy')\n            if 'val_acc' in history and history['val_acc']:\n                plt.plot(epochs_range, history['val_acc'], 'r-', label='Validation Accuracy')\n            plt.title('Accuracy')\n            plt.xlabel('Epoch')\n            plt.ylabel('Accuracy (%)')\n            plt.legend()\n            plt.grid(True)\n            \n            # Batch size plot\n            if 'batch_sizes' in history and history['batch_sizes']:\n                plt.subplot(2, 2, 3)\n                plt.plot(epochs_range, history['batch_sizes'], 'g-o')\n                plt.title('Batch Size')\n                plt.xlabel('Epoch')\n                plt.ylabel('Batch Size')\n                plt.grid(True)\n            \n            # Bottom right plot - learning rate history or bias scores\n            if 'learning_rate_history' in serializable_history:\n                # If learning rate history is available in metrics, show it\n                plt.subplot(2, 2, 4)\n                lr_history = serializable_history['learning_rate_history']\n                if lr_history:\n                    plt.plot(range(1, len(lr_history) + 1), lr_history, 'm-o')\n                    plt.title('Learning Rate')\n                    plt.xlabel('Update')\n                    plt.ylabel('Learning Rate')\n                    plt.grid(True)\n                    logger.info(f\"Added learning rate visualization with {len(lr_history)} data points\")\n            elif hasattr(optimizer, 'get_learning_rate_history'):\n                # As a fallback, try to get from optimizer directly\n                plt.subplot(2, 2, 4)\n                lr_history = optimizer.get_learning_rate_history()\n                if lr_history:\n                    plt.plot(range(1, len(lr_history) + 1), lr_history, 'm-o')\n                    plt.title('Learning Rate')\n                    plt.xlabel('Update')\n                    plt.ylabel('Learning Rate')\n                    plt.grid(True)\n                    logger.info(f\"Added learning rate visualization from optimizer with {len(lr_history)} data points\")\n            else:\n                # Otherwise show bias scores\n                plt.subplot(2, 2, 4)\n                patterns = list(bias_scores.keys())\n                scores = [bias_scores[p] for p in patterns]\n                colors = ['blue', 'green', 'red'][:len(patterns)]\n                bars = plt.bar(patterns, scores, color=colors)\n                plt.title('Model Pattern Bias Scores')\n                plt.ylabel('Bias Score')\n                plt.ylim(0, 1.0)\n                \n                # Add value labels\n                for bar in bars:\n                    height = bar.get_height()\n                    plt.text(bar.get_x() + bar.get_width()/2., height + 0.02,\n                            f'{height:.2f}', ha='center', va='bottom')\n            \n            plt.tight_layout()\n            \n            # Save plot to visualizations directory\n            os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)\n            plot_path = os.path.join(VISUALIZATIONS_DIR, f\"training_{args.prepared_dataset}_{timestamp}.png\")\n            plt.savefig(plot_path)\n            plt.close()\n            logger.info(f\"Training visualization saved to {plot_path}\")\n        except Exception as e:\n            logger.warning(f\"Could not create visualization: {str(e)}\")\n    \n    # Display total training time\n    total_time = time.time() - global_start_time\n    hours, remainder = divmod(total_time, 3600)\n    minutes, seconds = divmod(remainder, 60)\n    logger.info(f\"Total training time: {int(hours)}h {int(minutes)}m {seconds:.2f}s\")\n    \n    return val_acc\n\n\ndef main():\n    \"\"\"Entry point for the CLI when running as a module.\"\"\""
+    },
+    "main": {
+      "start_line": 1042,
+      "end_line": 1062,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "argparse.ArgumentParser",
+          "line": 1050
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 1051
+        },
+        {
+          "name": "parser.parse_known_args",
+          "line": 1052
+        },
+        {
+          "name": "train_with_prepared_dataset",
+          "line": 1060
+        },
+        {
+          "name": "train_with_prepared_dataset",
+          "line": 1046
+        },
+        {
+          "name": "print_available_datasets",
+          "line": 1056
+        },
+        {
+          "name": "len",
+          "line": 1045
+        },
+        {
+          "name": "any",
+          "line": 1055
+        },
+        {
+          "name": "arg.startswith",
+          "line": 1055
+        }
+      ],
+      "docstring": "Entry point for the CLI when running as a module.",
+      "code_snippet": "\n\ndef main():\n    \"\"\"Entry point for the CLI when running as a module.\"\"\"\n    # Handle help option specially to ensure all options are displayed\n    if len(sys.argv) > 1 and sys.argv[1] in ['-h', '--help']:\n        train_with_prepared_dataset([sys.argv[1]])\n        return 0\n        \n    # Parse only the list argument first to check if we need to list and exit\n    parser = argparse.ArgumentParser(add_help=False)\n    parser.add_argument('--list', action='store_true')\n    args, remaining = parser.parse_known_args()\n    \n    # If list flag is set, show the list and exit\n    if args.list and not any(arg.startswith('--prepared-dataset') for arg in remaining):\n        print_available_datasets()\n        return 0\n    \n    # Otherwise continue with normal training\n    return train_with_prepared_dataset()\n\n\nif __name__ == \"__main__\":\n    main()"
+    }
+  },
+  "constants": {}
+}

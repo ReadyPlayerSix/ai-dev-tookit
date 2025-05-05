@@ -1,0 +1,202 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\mathematical_foundation\\polling_optimization.py",
+  "imports": [
+    {
+      "name": "math",
+      "line": 11
+    },
+    {
+      "name": "numpy",
+      "line": 12
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "calculate_polling_frequency": {
+      "start_line": 17,
+      "end_line": 82,
+      "parameters": [
+        {
+          "name": "base_frequency"
+        },
+        {
+          "name": "priority"
+        },
+        {
+          "name": "volatility"
+        },
+        {
+          "name": "component_count"
+        },
+        {
+          "name": "cognitive_load"
+        },
+        {
+          "name": "all_priorities"
+        },
+        {
+          "name": "all_volatilities"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "ValueError",
+          "line": 43
+        },
+        {
+          "name": "ValueError",
+          "line": 45
+        },
+        {
+          "name": "ValueError",
+          "line": 47
+        },
+        {
+          "name": "ValueError",
+          "line": 49
+        },
+        {
+          "name": "math.pow",
+          "line": 52
+        },
+        {
+          "name": "math.pow",
+          "line": 52
+        },
+        {
+          "name": "zip",
+          "line": 60
+        },
+        {
+          "name": "calculate_adjustment_factor",
+          "line": 73
+        },
+        {
+          "name": "len",
+          "line": 56
+        },
+        {
+          "name": "len",
+          "line": 56
+        },
+        {
+          "name": "ValueError",
+          "line": 57
+        },
+        {
+          "name": "math.pow",
+          "line": 61
+        },
+        {
+          "name": "math.pow",
+          "line": 61
+        }
+      ],
+      "docstring": "\n    Calculate the optimal polling frequency for a component.\n    \n    Implements the formula from Section 5 of the Mathematical Foundation:\n    polling_frequency_i = base_frequency * (priority_i^0.5 * volatility_i^0.3) / \n                          sum(priority_j^0.5 * volatility_j^0.3) * n * adjustment_factor\n    \n    Args:\n        base_frequency (float): System-wide base polling frequency\n        priority (float): Priority of the component\n        volatility (float): Metric volatility of the component\n        component_count (int): Total number of components\n        cognitive_load (float, optional): Current system cognitive load\n        all_priorities (list, optional): Priorities of all components (for normalization)\n        all_volatilities (list, optional): Volatilities of all components (for normalization)\n        \n    Returns:\n        float: Optimal polling frequency for the component\n        \n    Raises:\n        ValueError: If base_frequency is not positive or priority/volatility are out of range\n    ",
+      "code_snippet": "L_C = 8.0  # Critical cognitive threshold\n\ndef calculate_polling_frequency(base_frequency, priority, volatility, component_count, \n                              cognitive_load=None, all_priorities=None, all_volatilities=None):\n    \"\"\"\n    Calculate the optimal polling frequency for a component.\n    \n    Implements the formula from Section 5 of the Mathematical Foundation:\n    polling_frequency_i = base_frequency * (priority_i^0.5 * volatility_i^0.3) / \n                          sum(priority_j^0.5 * volatility_j^0.3) * n * adjustment_factor\n    \n    Args:\n        base_frequency (float): System-wide base polling frequency\n        priority (float): Priority of the component\n        volatility (float): Metric volatility of the component\n        component_count (int): Total number of components\n        cognitive_load (float, optional): Current system cognitive load\n        all_priorities (list, optional): Priorities of all components (for normalization)\n        all_volatilities (list, optional): Volatilities of all components (for normalization)\n        \n    Returns:\n        float: Optimal polling frequency for the component\n        \n    Raises:\n        ValueError: If base_frequency is not positive or priority/volatility are out of range\n    \"\"\"\n    # Input validation\n    if base_frequency <= 0:\n        raise ValueError(\"Base frequency must be positive\")\n    if priority < 0 or priority > 1:\n        raise ValueError(\"Priority must be in range [0, 1]\")\n    if volatility < 0:\n        raise ValueError(\"Volatility must be non-negative\")\n    if component_count <= 0:\n        raise ValueError(\"Component count must be positive\")\n    \n    # Calculate priority-volatility factor\n    pv_factor = math.pow(priority, 0.5) * math.pow(volatility, 0.3)\n    \n    # Normalize by sum of all priority-volatility factors if provided\n    if all_priorities is not None and all_volatilities is not None:\n        if len(all_priorities) != len(all_volatilities):\n            raise ValueError(\"Priorities and volatilities lists must have the same length\")\n        \n        sum_pv = 0.0\n        for p, v in zip(all_priorities, all_volatilities):\n            sum_pv += math.pow(p, 0.5) * math.pow(v, 0.3)\n        \n        if sum_pv > 0:\n            normalized_pv = pv_factor / sum_pv\n        else:\n            normalized_pv = 1.0 / component_count\n    else:\n        # Approximate normalization if all components not provided\n        normalized_pv = pv_factor / component_count\n    \n    # Calculate adjustment factor based on cognitive load\n    if cognitive_load is not None:\n        adjustment_factor = calculate_adjustment_factor(cognitive_load)\n    else:\n        adjustment_factor = 1.0\n    \n    # Calculate polling frequency\n    polling_frequency = base_frequency * normalized_pv * component_count * adjustment_factor\n    \n    return polling_frequency\n\ndef calculate_metric_volatility(metric_values):\n    \"\"\"\n    Calculate the volatility of a metric from historical measurements."
+    },
+    "calculate_metric_volatility": {
+      "start_line": 82,
+      "end_line": 119,
+      "parameters": [
+        {
+          "name": "metric_values"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "np.array",
+          "line": 103
+        },
+        {
+          "name": "np.mean",
+          "line": 106
+        },
+        {
+          "name": "np.std",
+          "line": 107
+        },
+        {
+          "name": "ValueError",
+          "line": 100
+        },
+        {
+          "name": "abs",
+          "line": 110
+        },
+        {
+          "name": "abs",
+          "line": 115
+        }
+      ],
+      "docstring": "\n    Calculate the volatility of a metric from historical measurements.\n    \n    Implements the concept from Section 5.1 of the Mathematical Foundation:\n    volatility = coefficient of variation (standard deviation / mean)\n    \n    Args:\n        metric_values (list): Historical measurements of the metric\n        \n    Returns:\n        float: Volatility measure for the metric\n        \n    Raises:\n        ValueError: If metric_values is empty\n    ",
+      "code_snippet": "    return polling_frequency\n\ndef calculate_metric_volatility(metric_values):\n    \"\"\"\n    Calculate the volatility of a metric from historical measurements.\n    \n    Implements the concept from Section 5.1 of the Mathematical Foundation:\n    volatility = coefficient of variation (standard deviation / mean)\n    \n    Args:\n        metric_values (list): Historical measurements of the metric\n        \n    Returns:\n        float: Volatility measure for the metric\n        \n    Raises:\n        ValueError: If metric_values is empty\n    \"\"\"\n    # Input validation\n    if not metric_values:\n        raise ValueError(\"Metric values list cannot be empty\")\n    \n    # Convert to numpy array for statistical calculations\n    values = np.array(metric_values)\n    \n    # Calculate mean and standard deviation\n    mean = np.mean(values)\n    std_dev = np.std(values)\n    \n    # Handle case where mean is zero or very close to zero\n    if abs(mean) < 1e-10:\n        # Return a high volatility value for near-zero means\n        return 1.0\n    \n    # Calculate coefficient of variation (standard deviation / mean)\n    volatility = std_dev / abs(mean)\n    \n    return volatility\n\ndef calculate_adjustment_factor(cognitive_load):\n    \"\"\"\n    Calculate the adjustment factor for polling based on cognitive load."
+    },
+    "calculate_adjustment_factor": {
+      "start_line": 119,
+      "end_line": 145,
+      "parameters": [
+        {
+          "name": "cognitive_load"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "max",
+          "line": 143
+        },
+        {
+          "name": "ValueError",
+          "line": 137
+        }
+      ],
+      "docstring": "\n    Calculate the adjustment factor for polling based on cognitive load.\n    \n    Implements the formula from Section 5.2 of the Mathematical Foundation:\n    adjustment_factor = 1.5 - 0.5 * (cognitive_load / L_c)\n    \n    Args:\n        cognitive_load (float): Current system cognitive load\n        \n    Returns:\n        float: Adjustment factor for polling frequency\n        \n    Raises:\n        ValueError: If cognitive_load is negative\n    ",
+      "code_snippet": "    return volatility\n\ndef calculate_adjustment_factor(cognitive_load):\n    \"\"\"\n    Calculate the adjustment factor for polling based on cognitive load.\n    \n    Implements the formula from Section 5.2 of the Mathematical Foundation:\n    adjustment_factor = 1.5 - 0.5 * (cognitive_load / L_c)\n    \n    Args:\n        cognitive_load (float): Current system cognitive load\n        \n    Returns:\n        float: Adjustment factor for polling frequency\n        \n    Raises:\n        ValueError: If cognitive_load is negative\n    \"\"\"\n    # Input validation\n    if cognitive_load < 0:\n        raise ValueError(\"Cognitive load must be non-negative\")\n    \n    # Calculate adjustment factor\n    adjustment = 1.5 - 0.5 * (cognitive_load / L_C)\n    \n    # Ensure result is positive\n    return max(0.1, adjustment)\n\ndef calculate_tier_boundaries(system_load, component_count):\n    \"\"\"\n    Calculate tier boundaries based on system load and component count."
+    },
+    "calculate_tier_boundaries": {
+      "start_line": 145,
+      "end_line": 191,
+      "parameters": [
+        {
+          "name": "system_load"
+        },
+        {
+          "name": "component_count"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "min",
+          "line": 180
+        },
+        {
+          "name": "max",
+          "line": 181
+        },
+        {
+          "name": "ValueError",
+          "line": 166
+        },
+        {
+          "name": "ValueError",
+          "line": 168
+        },
+        {
+          "name": "math.log10",
+          "line": 172
+        }
+      ],
+      "docstring": "\n    Calculate tier boundaries based on system load and component count.\n    \n    Implements the formulas from Section 3 of the Mathematical Foundation:\n    high_boundary = 0.8 + (0.1 * load_factor * component_factor)\n    medium_boundary = 0.5\n    low_boundary = 0.2 - (0.1 * load_factor * component_factor)\n    \n    Args:\n        system_load (float): Current system load (0.0-1.0)\n        component_count (int): Number of components in the system\n        \n    Returns:\n        tuple: (low_boundary, medium_boundary, high_boundary)\n        \n    Raises:\n        ValueError: If system_load is out of range\n    ",
+      "code_snippet": "    return max(0.1, adjustment)\n\ndef calculate_tier_boundaries(system_load, component_count):\n    \"\"\"\n    Calculate tier boundaries based on system load and component count.\n    \n    Implements the formulas from Section 3 of the Mathematical Foundation:\n    high_boundary = 0.8 + (0.1 * load_factor * component_factor)\n    medium_boundary = 0.5\n    low_boundary = 0.2 - (0.1 * load_factor * component_factor)\n    \n    Args:\n        system_load (float): Current system load (0.0-1.0)\n        component_count (int): Number of components in the system\n        \n    Returns:\n        tuple: (low_boundary, medium_boundary, high_boundary)\n        \n    Raises:\n        ValueError: If system_load is out of range\n    \"\"\"\n    # Input validation\n    if system_load < 0 or system_load > 1:\n        raise ValueError(\"System load must be in range [0, 1]\")\n    if component_count <= 0:\n        raise ValueError(\"Component count must be positive\")\n    \n    # Calculate scaling factors\n    load_factor = system_load / 0.5  # Normalized system load\n    component_factor = math.log10(1 + component_count) / 2  # Logarithmic scaling\n    \n    # Calculate boundaries\n    high_boundary = 0.8 + (0.1 * load_factor * component_factor)\n    medium_boundary = 0.5  # Fixed\n    low_boundary = 0.2 - (0.1 * load_factor * component_factor)\n    \n    # Ensure boundaries are in valid ranges and properly ordered\n    high_boundary = min(0.95, high_boundary)\n    low_boundary = max(0.05, low_boundary)\n    \n    # Ensure proper ordering: low < medium < high\n    if medium_boundary <= low_boundary:\n        medium_boundary = low_boundary + 0.1\n    if high_boundary <= medium_boundary:\n        high_boundary = medium_boundary + 0.1\n    \n    return (low_boundary, medium_boundary, high_boundary)"
+    }
+  },
+  "constants": {
+    "L_C": {
+      "line": 15
+    }
+  }
+}

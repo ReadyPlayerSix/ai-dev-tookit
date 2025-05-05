@@ -1,0 +1,12 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\data\\loaders\\__init__.py",
+  "imports": [
+    {
+      "name": "cifar10_loader.load_cifar10_data",
+      "line": 10
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

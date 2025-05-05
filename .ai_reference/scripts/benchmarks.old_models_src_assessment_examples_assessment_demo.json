@@ -1,0 +1,109 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\assessment\\examples\\assessment_demo.py",
+  "imports": [],
+  "classes": {},
+  "functions": {
+    "run_educational_assessment": {
+      "start_line": 1,
+      "end_line": 112,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "CortexCoordinator",
+          "line": 3
+        },
+        {
+          "name": "AIEducationalAssessment",
+          "line": 4
+        },
+        {
+          "name": "print",
+          "line": 88
+        },
+        {
+          "name": "print",
+          "line": 96
+        },
+        {
+          "name": "assessment.administer_test",
+          "line": 97
+        },
+        {
+          "name": "print",
+          "line": 98
+        },
+        {
+          "name": "print",
+          "line": 99
+        },
+        {
+          "name": "print",
+          "line": 100
+        },
+        {
+          "name": "assessment.generate_progress_report",
+          "line": 103
+        },
+        {
+          "name": "print",
+          "line": 104
+        },
+        {
+          "name": "print",
+          "line": 105
+        },
+        {
+          "name": "print",
+          "line": 106
+        },
+        {
+          "name": "....items",
+          "line": 107
+        },
+        {
+          "name": "ProcessingConfig",
+          "line": 3
+        },
+        {
+          "name": "StudyMaterial",
+          "line": 8
+        },
+        {
+          "name": "StudyMaterial",
+          "line": 20
+        },
+        {
+          "name": "TestQuestion",
+          "line": 38
+        },
+        {
+          "name": "TestQuestion",
+          "line": 61
+        },
+        {
+          "name": "assessment.provide_study_material",
+          "line": 90
+        },
+        {
+          "name": "print",
+          "line": 91
+        },
+        {
+          "name": "print",
+          "line": 92
+        },
+        {
+          "name": "print",
+          "line": 93
+        },
+        {
+          "name": "print",
+          "line": 108
+        }
+      ],
+      "code_snippet": "def run_educational_assessment():\n    # Initialize coordinator and assessment framework\n    coordinator = CortexCoordinator(ProcessingConfig())\n    assessment = AIEducationalAssessment(coordinator)\n    \n    # Create study materials (progressive difficulty)\n    study_materials = [\n        StudyMaterial(\n            domain=\"visual\",\n            content={\n                \"bbox\": [10, 20, 100, 200],\n                \"confidence\": 0.85,\n                \"width\": 640,\n                \"height\": 480\n            },\n            difficulty=0.3,\n            prerequisites=[],\n            concepts=[\"basic_object_detection\"]\n        ),\n        StudyMaterial(\n            domain=\"visual\",\n            content={\n                \"bbox\": [15, 25, 120, 220],\n                \"confidence\": 0.88,\n                \"width\": 640,\n                \"height\": 480,\n                \"object_count\": 2,\n                \"relationships\": [\"overlap\"]\n            },\n            difficulty=0.5,\n            prerequisites=[\"basic_object_detection\"],\n            concepts=[\"object_relationships\"]\n        )\n    ]\n    \n    # Create test questions\n    test_questions = [\n        TestQuestion(\n            question_id=\"q1\",\n            domain=\"visual\",\n            content={\n                \"bbox\": [12, 22, 110, 210],\n                \"confidence\": 0.82,\n                \"width\": 640,\n                \"height\": 480\n            },\n            difficulty=0.3,\n            concepts=[\"basic_object_detection\"],\n            correct_response={\n                \"expected_patterns\": {\n                    \"bbox_recognition\": True,\n                    \"confidence_threshold\": 0.8\n                },\n                \"expected_semantics\": {\n                    \"pattern_type\": \"dominance\",\n                    \"confidence\": 0.82\n                }\n            },\n            points=10\n        ),\n        TestQuestion(\n            question_id=\"q2\",\n            domain=\"visual\",\n            content={\n                \"bbox\": [[10, 20, 100, 200], [90, 180, 150, 250]],\n                \"confidence\": 0.86,\n                \"width\": 640,\n                \"height\": 480,\n                \"relationships\": [\"overlap\"]\n            },\n            difficulty=0.5,\n            concepts=[\"object_relationships\"],\n            correct_response={\n                \"expected_patterns\": {\n                    \"relationship_detection\": True,\n                    \"overlap_recognition\": True\n                },\n                \"expected_semantics\": {\n                    \"pattern_type\": \"relationship\",\n                    \"confidence\": 0.86\n                }\n            },\n            points=15\n        )\n    ]\n    \n    # Study phase\n    print(\"\\n=== Study Phase ===\")\n    for material in study_materials:\n        result = assessment.provide_study_material(material)\n        print(f\"\\nStudied {material.concepts[0]}:\")\n        print(f\"Learning impact: {result['learning_impact']}\")\n        print(f\"Concept progress: {result['concept_progress']}\")\n    \n    # Testing phase\n    print(\"\\n=== Testing Phase ===\")\n    test_results = assessment.administer_test(test_questions)\n    print(f\"\\nTest Results:\")\n    print(f\"Final Score: {test_results['final_score']:.2%}\")\n    print(f\"Points Earned: {test_results['earned_points']}/{test_results['total_points']}\")\n    \n    # Generate progress report\n    progress = assessment.generate_progress_report()\n    print(\"\\n=== Progress Report ===\")\n    print(f\"Average Score: {progress['metrics']['average_score']:.2%}\")\n    print(\"\\nConcept Mastery:\")\n    for concept, mastery in progress['concept_mastery'].items():\n        print(f\"  {concept}: {mastery:.2%}\")\n    \n    return progress\n\nif __name__ == \"__main__\":\n    progress_report = run_educational_assessment()"
+    }
+  },
+  "constants": {}
+}

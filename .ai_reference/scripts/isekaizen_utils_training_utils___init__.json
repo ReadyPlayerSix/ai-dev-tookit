@@ -1,0 +1,16 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\training_utils\\__init__.py",
+  "imports": [
+    {
+      "name": "fibonacci_intervals.get_fibonacci_check_intervals",
+      "line": 10
+    },
+    {
+      "name": "worker_calculation.calculate_optimal_workers",
+      "line": 11
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

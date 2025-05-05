@@ -1,0 +1,295 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\paths.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 11
+    },
+    {
+      "name": "glob",
+      "line": 12
+    },
+    {
+      "name": "typing.Optional",
+      "line": 13
+    },
+    {
+      "name": "typing.List",
+      "line": 13
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 14
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "ensure_dir_exists": {
+      "start_line": 24,
+      "end_line": 37,
+      "parameters": [
+        {
+          "name": "path",
+          "type": "str"
+        }
+      ],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "os.makedirs",
+          "line": 34
+        }
+      ],
+      "docstring": "\n    Ensure a directory exists, creating it if necessary.\n    \n    Args:\n        path: Directory path to ensure exists\n        \n    Returns:\n        The same path that was passed in\n    ",
+      "code_snippet": "\n\ndef ensure_dir_exists(path: str) -> str:\n    \"\"\"\n    Ensure a directory exists, creating it if necessary.\n    \n    Args:\n        path: Directory path to ensure exists\n        \n    Returns:\n        The same path that was passed in\n    \"\"\"\n    os.makedirs(path, exist_ok=True)\n    return path\n\n\ndef get_pattern_maps_dir() -> str:\n    \"\"\"Get the path to the pattern maps directory.\"\"\""
+    },
+    "get_pattern_maps_dir": {
+      "start_line": 38,
+      "end_line": 42,
+      "parameters": [],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "ensure_dir_exists",
+          "line": 40
+        }
+      ],
+      "docstring": "Get the path to the pattern maps directory.",
+      "code_snippet": "\n\ndef get_pattern_maps_dir() -> str:\n    \"\"\"Get the path to the pattern maps directory.\"\"\"\n    return ensure_dir_exists(PATTERN_MAPS_DIR)\n\n\ndef get_model_checkpoint_dir() -> str:\n    \"\"\"Get the path to model checkpoints directory.\"\"\""
+    },
+    "get_model_checkpoint_dir": {
+      "start_line": 43,
+      "end_line": 47,
+      "parameters": [],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "ensure_dir_exists",
+          "line": 45
+        }
+      ],
+      "docstring": "Get the path to model checkpoints directory.",
+      "code_snippet": "\n\ndef get_model_checkpoint_dir() -> str:\n    \"\"\"Get the path to model checkpoints directory.\"\"\"\n    return ensure_dir_exists(CHECKPOINTS_DIR)\n\n\ndef get_output_dir() -> str:\n    \"\"\"Get the path to the output directory for training results.\"\"\""
+    },
+    "get_output_dir": {
+      "start_line": 48,
+      "end_line": 52,
+      "parameters": [],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "ensure_dir_exists",
+          "line": 50
+        }
+      ],
+      "docstring": "Get the path to the output directory for training results.",
+      "code_snippet": "\n\ndef get_output_dir() -> str:\n    \"\"\"Get the path to the output directory for training results.\"\"\"\n    return ensure_dir_exists(OUTPUT_DIR)\n\n\ndef get_visualization_dir() -> str:\n    \"\"\"Get the path to the visualization directory.\"\"\""
+    },
+    "get_visualization_dir": {
+      "start_line": 53,
+      "end_line": 57,
+      "parameters": [],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "ensure_dir_exists",
+          "line": 55
+        }
+      ],
+      "docstring": "Get the path to the visualization directory.",
+      "code_snippet": "\n\ndef get_visualization_dir() -> str:\n    \"\"\"Get the path to the visualization directory.\"\"\"\n    return ensure_dir_exists(VISUALIZATION_DIR)\n\n\ndef get_pattern_map_path(dataset_name: str, timestamp: Optional[str] = None) -> str:\n    \"\"\""
+    },
+    "get_pattern_map_path": {
+      "start_line": 58,
+      "end_line": 89,
+      "parameters": [
+        {
+          "name": "dataset_name",
+          "type": "str"
+        },
+        {
+          "name": "timestamp"
+        }
+      ],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "get_pattern_maps_dir",
+          "line": 72
+        },
+        {
+          "name": "glob.glob",
+          "line": 77
+        },
+        {
+          "name": "matching_files.sort",
+          "line": 83
+        },
+        {
+          "name": "os.path.join",
+          "line": 87
+        },
+        {
+          "name": "os.path.join",
+          "line": 77
+        },
+        {
+          "name": "FileNotFoundError",
+          "line": 80
+        },
+        {
+          "name": "os.path.getmtime",
+          "line": 83
+        }
+      ],
+      "docstring": "\n    Get the path to a specific pattern map.\n    \n    Args:\n        dataset_name: Name of the dataset\n        timestamp: Optional timestamp for the pattern map. If None, returns the latest.\n        \n    Returns:\n        Path to the pattern map file\n        \n    Raises:\n        FileNotFoundError: If no pattern map exists for the dataset\n    ",
+      "code_snippet": "\n\ndef get_pattern_map_path(dataset_name: str, timestamp: Optional[str] = None) -> str:\n    \"\"\"\n    Get the path to a specific pattern map.\n    \n    Args:\n        dataset_name: Name of the dataset\n        timestamp: Optional timestamp for the pattern map. If None, returns the latest.\n        \n    Returns:\n        Path to the pattern map file\n        \n    Raises:\n        FileNotFoundError: If no pattern map exists for the dataset\n    \"\"\"\n    pattern_maps_dir = get_pattern_maps_dir()\n    \n    if timestamp is None:\n        # Get latest pattern map for this dataset\n        pattern = f\"{dataset_name}_*pattern_map_*.json\"\n        matching_files = glob.glob(os.path.join(pattern_maps_dir, pattern))\n        \n        if not matching_files:\n            raise FileNotFoundError(f\"No pattern map found for dataset: {dataset_name}\")\n            \n        # Sort by modification time, newest first\n        matching_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)\n        return matching_files[0]\n    else:\n        # Get specific pattern map\n        return os.path.join(pattern_maps_dir, f\"{dataset_name}_pattern_map_{timestamp}.json\")\n\n\ndef get_checkpoint_path(model_name: str, timestamp: Optional[str] = None) -> str:\n    \"\"\""
+    },
+    "get_checkpoint_path": {
+      "start_line": 90,
+      "end_line": 121,
+      "parameters": [
+        {
+          "name": "model_name",
+          "type": "str"
+        },
+        {
+          "name": "timestamp"
+        }
+      ],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "get_model_checkpoint_dir",
+          "line": 104
+        },
+        {
+          "name": "glob.glob",
+          "line": 109
+        },
+        {
+          "name": "matching_files.sort",
+          "line": 115
+        },
+        {
+          "name": "os.path.join",
+          "line": 119
+        },
+        {
+          "name": "os.path.join",
+          "line": 109
+        },
+        {
+          "name": "FileNotFoundError",
+          "line": 112
+        },
+        {
+          "name": "os.path.getmtime",
+          "line": 115
+        }
+      ],
+      "docstring": "\n    Get the path to a model checkpoint.\n    \n    Args:\n        model_name: Name of the model\n        timestamp: Optional timestamp for the checkpoint. If None, returns the latest.\n        \n    Returns:\n        Path to the checkpoint file\n        \n    Raises:\n        FileNotFoundError: If no checkpoint exists for the model\n    ",
+      "code_snippet": "\n\ndef get_checkpoint_path(model_name: str, timestamp: Optional[str] = None) -> str:\n    \"\"\"\n    Get the path to a model checkpoint.\n    \n    Args:\n        model_name: Name of the model\n        timestamp: Optional timestamp for the checkpoint. If None, returns the latest.\n        \n    Returns:\n        Path to the checkpoint file\n        \n    Raises:\n        FileNotFoundError: If no checkpoint exists for the model\n    \"\"\"\n    checkpoints_dir = get_model_checkpoint_dir()\n    \n    if timestamp is None:\n        # Get latest checkpoint for this model\n        pattern = f\"{model_name}_*.pth\"\n        matching_files = glob.glob(os.path.join(checkpoints_dir, pattern))\n        \n        if not matching_files:\n            raise FileNotFoundError(f\"No checkpoint found for model: {model_name}\")\n            \n        # Sort by modification time, newest first\n        matching_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)\n        return matching_files[0]\n    else:\n        # Get specific checkpoint\n        return os.path.join(checkpoints_dir, f\"{model_name}_{timestamp}.pth\")\n\n\ndef generate_timestamp() -> str:\n    \"\"\""
+    },
+    "generate_timestamp": {
+      "start_line": 122,
+      "end_line": 131,
+      "parameters": [],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "....strftime",
+          "line": 129
+        },
+        {
+          "name": "datetime.now",
+          "line": 129
+        }
+      ],
+      "docstring": "\n    Generate a timestamp string for file naming.\n    \n    Returns:\n        Timestamp string in format YYYYMMDD_HHMMSS\n    ",
+      "code_snippet": "\n\ndef generate_timestamp() -> str:\n    \"\"\"\n    Generate a timestamp string for file naming.\n    \n    Returns:\n        Timestamp string in format YYYYMMDD_HHMMSS\n    \"\"\"\n    return datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n\n\ndef get_output_file_path(base_name: str, extension: str, timestamp: Optional[str] = None) -> str:\n    \"\"\""
+    },
+    "get_output_file_path": {
+      "start_line": 132,
+      "end_line": 150,
+      "parameters": [
+        {
+          "name": "base_name",
+          "type": "str"
+        },
+        {
+          "name": "extension",
+          "type": "str"
+        },
+        {
+          "name": "timestamp"
+        }
+      ],
+      "return_type": "str",
+      "calls": [
+        {
+          "name": "os.path.join",
+          "line": 148
+        },
+        {
+          "name": "generate_timestamp",
+          "line": 145
+        },
+        {
+          "name": "get_output_dir",
+          "line": 148
+        }
+      ],
+      "docstring": "\n    Generate a path for an output file with timestamp.\n    \n    Args:\n        base_name: Base name for the file\n        extension: File extension (without dot)\n        timestamp: Optional timestamp to use. If None, generates a new timestamp.\n        \n    Returns:\n        Full path to the output file\n    ",
+      "code_snippet": "\n\ndef get_output_file_path(base_name: str, extension: str, timestamp: Optional[str] = None) -> str:\n    \"\"\"\n    Generate a path for an output file with timestamp.\n    \n    Args:\n        base_name: Base name for the file\n        extension: File extension (without dot)\n        timestamp: Optional timestamp to use. If None, generates a new timestamp.\n        \n    Returns:\n        Full path to the output file\n    \"\"\"\n    if timestamp is None:\n        timestamp = generate_timestamp()\n        \n    filename = f\"{base_name}_{timestamp}.{extension}\"\n    return os.path.join(get_output_dir(), filename)\n\n\ndef find_files(directory: str, pattern: str) -> List[str]:\n    \"\"\""
+    },
+    "find_files": {
+      "start_line": 151,
+      "end_line": 167,
+      "parameters": [
+        {
+          "name": "directory",
+          "type": "str"
+        },
+        {
+          "name": "pattern",
+          "type": "str"
+        }
+      ],
+      "return_type": "complex_type",
+      "calls": [
+        {
+          "name": "glob.glob",
+          "line": 165
+        },
+        {
+          "name": "os.path.exists",
+          "line": 162
+        },
+        {
+          "name": "os.path.join",
+          "line": 165
+        }
+      ],
+      "docstring": "\n    Find files matching a pattern in a directory.\n    \n    Args:\n        directory: Directory to search in\n        pattern: Glob pattern to match\n        \n    Returns:\n        List of matching file paths\n    ",
+      "code_snippet": "\n\ndef find_files(directory: str, pattern: str) -> List[str]:\n    \"\"\"\n    Find files matching a pattern in a directory.\n    \n    Args:\n        directory: Directory to search in\n        pattern: Glob pattern to match\n        \n    Returns:\n        List of matching file paths\n    \"\"\"\n    if not os.path.exists(directory):\n        return []\n        \n    return glob.glob(os.path.join(directory, pattern))"
+    }
+  },
+  "constants": {
+    "DATA_DIR": {
+      "line": 17
+    },
+    "PATTERN_MAPS_DIR": {
+      "line": 18
+    },
+    "CHECKPOINTS_DIR": {
+      "line": 19
+    },
+    "OUTPUT_DIR": {
+      "line": 20
+    },
+    "VISUALIZATION_DIR": {
+      "line": 21
+    }
+  }
+}

@@ -1,0 +1,584 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\cortex\\semantic_core.py",
+  "imports": [
+    {
+      "name": "dataclasses.dataclass",
+      "line": 4
+    },
+    {
+      "name": "typing.Dict",
+      "line": 5
+    },
+    {
+      "name": "typing.List",
+      "line": 5
+    },
+    {
+      "name": "typing.Optional",
+      "line": 5
+    },
+    {
+      "name": "typing.Set",
+      "line": 5
+    },
+    {
+      "name": "typing.Any",
+      "line": 5
+    },
+    {
+      "name": "enum.Enum",
+      "line": 6
+    },
+    {
+      "name": "numpy",
+      "line": 7
+    },
+    {
+      "name": "torch",
+      "line": 8
+    },
+    {
+      "name": "logging",
+      "line": 9
+    },
+    {
+      "name": "time",
+      "line": 10
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 11
+    }
+  ],
+  "classes": {
+    "SemanticType": {
+      "start_line": 13,
+      "end_line": 20,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "DOMINANCE",
+          "line": 14
+        },
+        {
+          "name": "RELATIONSHIP",
+          "line": 15
+        },
+        {
+          "name": "INTENSITY",
+          "line": 16
+        },
+        {
+          "name": "STRUCTURE",
+          "line": 17
+        },
+        {
+          "name": "TEMPORAL",
+          "line": 18
+        }
+      ],
+      "bases": [
+        "Enum"
+      ]
+    },
+    "SemanticPattern": {
+      "start_line": 21,
+      "end_line": 30,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "A pure semantic pattern, independent of domain"
+    },
+    "SemanticPatternRegistry": {
+      "start_line": 30,
+      "end_line": 184,
+      "methods": {
+        "__init__": {
+          "start_line": 32,
+          "end_line": 57,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logging.getLogger",
+              "line": 36
+            }
+          ],
+          "code_snippet": "class SemanticPatternRegistry:\n    \"\"\"Maintains semantic patterns recognized across domains\"\"\"\n    def __init__(self):\n        self.patterns: Dict[SemanticType, List[SemanticPattern]] = {\n            pattern_type: [] for pattern_type in SemanticType\n        }\n        self.logger = logging.getLogger(__name__)\n        \n        # Pattern flow tracking\n        self.pattern_flow = {}\n        \n        # Track pattern recognition metrics\n        self.metrics = {\n            \"patterns_recognized\": 0,\n            \"pattern_confidences\": [],\n            \"domain_contributions\": {},\n            \"flow_metrics\": {\n                \"patterns_received\": 0,\n                \"patterns_processed\": 0,\n                \"patterns_stored\": 0\n            }\n        }\n        \n        # Semantic similarity thresholds\n        self.similarity_threshold = 0.75\n        self.confidence_threshold = 0.65\n    \n    def recognize_pattern(self, pattern: SemanticPattern) -> Dict[str, Any]:\n        \"\"\"Process new pattern with cortex flow tracking\"\"\"\n        try:"
+        },
+        "recognize_pattern": {
+          "start_line": 57,
+          "end_line": 126,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern",
+              "type": "SemanticPattern"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "....update",
+              "line": 102
+            },
+            {
+              "name": "self._calculate_semantic_similarity",
+              "line": 74
+            },
+            {
+              "name": "....append",
+              "line": 96
+            },
+            {
+              "name": "....append",
+              "line": 97
+            },
+            {
+              "name": "self.logger.error",
+              "line": 118
+            },
+            {
+              "name": "time.time",
+              "line": 65
+            },
+            {
+              "name": "similar_patterns.append",
+              "line": 80
+            },
+            {
+              "name": "len",
+              "line": 106
+            },
+            {
+              "name": "str",
+              "line": 122
+            },
+            {
+              "name": "time.time",
+              "line": 104
+            },
+            {
+              "name": "str",
+              "line": 118
+            }
+          ],
+          "docstring": "Process new pattern with cortex flow tracking",
+          "code_snippet": "        self.confidence_threshold = 0.65\n    \n    def recognize_pattern(self, pattern: SemanticPattern) -> Dict[str, Any]:\n        \"\"\"Process new pattern with cortex flow tracking\"\"\"\n        try:\n            self.metrics[\"flow_metrics\"][\"patterns_received\"] += 1\n            \n            # Track in pattern flow\n            if pattern.cortex_flow_id not in self.pattern_flow:\n                self.pattern_flow[pattern.cortex_flow_id] = {\n                    \"received_time\": time.time(),\n                    \"processing_status\": \"started\",\n                    \"pattern_type\": pattern.pattern_type.value,\n                    \"source_domain\": pattern.source_domain\n                }\n            \n            # Find similar patterns\n            similar_patterns = []\n            for existing_pattern in self.patterns[pattern.pattern_type]:\n                similarity = self._calculate_semantic_similarity(\n                    pattern.features,\n                    existing_pattern.features\n                )\n                \n                if similarity >= self.similarity_threshold:\n                    similar_patterns.append({\n                        \"pattern\": existing_pattern,\n                        \"similarity\": similarity\n                    })\n            \n            # Update metrics\n            self.metrics[\"patterns_recognized\"] += 1\n            self.metrics[\"flow_metrics\"][\"patterns_processed\"] += 1\n            \n            if pattern.source_domain not in self.metrics[\"domain_contributions\"]:\n                self.metrics[\"domain_contributions\"][pattern.source_domain] = 0\n            self.metrics[\"domain_contributions\"][pattern.source_domain] += 1\n            \n            # Store if confident enough\n            stored = False\n            if pattern.confidence >= self.confidence_threshold:\n                self.patterns[pattern.pattern_type].append(pattern)\n                self.metrics[\"pattern_confidences\"].append(pattern.confidence)\n                self.metrics[\"flow_metrics\"][\"patterns_stored\"] += 1\n                stored = True\n            \n            # Update flow tracking\n            self.pattern_flow[pattern.cortex_flow_id].update({\n                \"processing_status\": \"completed\",\n                \"processing_time\": time.time() - self.pattern_flow[pattern.cortex_flow_id][\"received_time\"],\n                \"stored\": stored,\n                \"similar_patterns_found\": len(similar_patterns)\n            })\n            \n            return {\n                \"pattern_type\": pattern.pattern_type.value,\n                \"confidence\": pattern.confidence,\n                \"similar_patterns\": similar_patterns,\n                \"stored\": stored,\n                \"flow_id\": pattern.cortex_flow_id\n            }\n            \n        except Exception as e:\n            self.logger.error(f\"Error recognizing pattern: {str(e)}\")\n            if pattern.cortex_flow_id in self.pattern_flow:\n                self.pattern_flow[pattern.cortex_flow_id][\"processing_status\"] = \"error\"\n            return {\n                \"error\": str(e),\n                \"stored\": False,\n                \"flow_id\": pattern.cortex_flow_id\n            }\n\n    def get_pattern_flow_status(self, flow_id: str) -> Optional[Dict[str, Any]]:\n        \"\"\"Get status of a pattern in the cortex flow\"\"\""
+        },
+        "get_pattern_flow_status": {
+          "start_line": 127,
+          "end_line": 131,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "flow_id",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.pattern_flow.get",
+              "line": 129
+            }
+          ],
+          "docstring": "Get status of a pattern in the cortex flow",
+          "code_snippet": "            }\n\n    def get_pattern_flow_status(self, flow_id: str) -> Optional[Dict[str, Any]]:\n        \"\"\"Get status of a pattern in the cortex flow\"\"\"\n        return self.pattern_flow.get(flow_id)\n    \n    def get_semantic_stats(self) -> Dict[str, Any]:\n        \"\"\"Get current semantic recognition statistics\"\"\"\n        current_time = time.time()"
+        },
+        "get_semantic_stats": {
+          "start_line": 131,
+          "end_line": 160,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 133
+            },
+            {
+              "name": "self.pattern_flow.items",
+              "line": 135
+            },
+            {
+              "name": "len",
+              "line": 142
+            },
+            {
+              "name": "np.mean",
+              "line": 146
+            },
+            {
+              "name": "len",
+              "line": 150
+            },
+            {
+              "name": "len",
+              "line": 151
+            },
+            {
+              "name": "len",
+              "line": 153
+            },
+            {
+              "name": "self.patterns.items",
+              "line": 143
+            },
+            {
+              "name": "np.mean",
+              "line": 155
+            },
+            {
+              "name": "self.pattern_flow.values",
+              "line": 151
+            },
+            {
+              "name": "self.pattern_flow.values",
+              "line": 153
+            },
+            {
+              "name": "f.get",
+              "line": 156
+            },
+            {
+              "name": "self.pattern_flow.values",
+              "line": 157
+            }
+          ],
+          "docstring": "Get current semantic recognition statistics",
+          "code_snippet": "        return self.pattern_flow.get(flow_id)\n    \n    def get_semantic_stats(self) -> Dict[str, Any]:\n        \"\"\"Get current semantic recognition statistics\"\"\"\n        current_time = time.time()\n        active_flows = [\n            flow_id for flow_id, flow_data in self.pattern_flow.items()\n            if flow_data[\"processing_status\"] == \"started\"\n        ]\n        \n        return {\n            \"total_patterns\": self.metrics[\"patterns_recognized\"],\n            \"patterns_by_type\": {\n                pattern_type.value: len(patterns)\n                for pattern_type, patterns in self.patterns.items()\n            },\n            \"domain_contributions\": self.metrics[\"domain_contributions\"],\n            \"average_confidence\": np.mean(self.metrics[\"pattern_confidences\"]) \n                if self.metrics[\"pattern_confidences\"] else 0.0,\n            \"flow_metrics\": self.metrics[\"flow_metrics\"],\n            \"pattern_flow_stats\": {\n                \"active_flows\": len(active_flows),\n                \"completed_flows\": len([f for f in self.pattern_flow.values() \n                                     if f[\"processing_status\"] == \"completed\"]),\n                \"error_flows\": len([f for f in self.pattern_flow.values() \n                                  if f[\"processing_status\"] == \"error\"]),\n                \"average_processing_time\": np.mean([\n                    f.get(\"processing_time\", current_time - f[\"received_time\"])\n                    for f in self.pattern_flow.values()\n                ]) if self.pattern_flow else 0.0\n            }\n        }\n\n    def _calculate_semantic_similarity(self, "
+        },
+        "_calculate_semantic_similarity": {
+          "start_line": 162,
+          "end_line": 184,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern1"
+            },
+            {
+              "name": "pattern2"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "np.mean",
+              "line": 178
+            },
+            {
+              "name": "set",
+              "line": 167
+            },
+            {
+              "name": "set",
+              "line": 167
+            },
+            {
+              "name": "similarities.append",
+              "line": 176
+            },
+            {
+              "name": "self.logger.error",
+              "line": 181
+            },
+            {
+              "name": "pattern1.keys",
+              "line": 167
+            },
+            {
+              "name": "pattern2.keys",
+              "line": 167
+            },
+            {
+              "name": "abs",
+              "line": 175
+            },
+            {
+              "name": "max",
+              "line": 175
+            },
+            {
+              "name": "abs",
+              "line": 175
+            },
+            {
+              "name": "abs",
+              "line": 175
+            },
+            {
+              "name": "str",
+              "line": 181
+            }
+          ],
+          "docstring": "Calculate similarity between semantic feature sets",
+          "code_snippet": "        }\n\n    def _calculate_semantic_similarity(self, \n                                    pattern1: Dict[str, float], \n                                    pattern2: Dict[str, float]) -> float:\n        \"\"\"Calculate similarity between semantic feature sets\"\"\"\n        try:\n            common_features = set(pattern1.keys()) & set(pattern2.keys())\n            if not common_features:\n                return 0.0\n                \n            similarities = []\n            for feature in common_features:\n                value1 = pattern1[feature]\n                value2 = pattern2[feature]\n                similarity = 1 - abs(value1 - value2) / max(abs(value1), abs(value2))\n                similarities.append(similarity)\n                \n            return np.mean(similarities)\n            \n        except Exception as e:\n            self.logger.error(f\"Error calculating semantic similarity: {str(e)}\")\n            return 0.0\n\nclass DomainPatternExtractor:\n    \"\"\"Extracts semantic patterns from domain-specific data\"\"\"\n    "
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Maintains semantic patterns recognized across domains"
+    },
+    "DomainPatternExtractor": {
+      "start_line": 184,
+      "end_line": 292,
+      "methods": {
+        "__init__": {
+          "start_line": 187,
+          "end_line": 190,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logging.getLogger",
+              "line": 188
+            }
+          ],
+          "code_snippet": "    \"\"\"Extracts semantic patterns from domain-specific data\"\"\"\n    \n    def __init__(self):\n        self.logger = logging.getLogger(__name__)\n    \n    def extract_visual_semantics(self, detection_data: Dict[str, Any]) -> Optional[SemanticPattern]:\n        \"\"\"Extract semantic patterns from visual detection\"\"\"\n        try:"
+        },
+        "extract_visual_semantics": {
+          "start_line": 190,
+          "end_line": 243,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "detection_data"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.logger.error",
+              "line": 239
+            },
+            {
+              "name": "len",
+              "line": 199
+            },
+            {
+              "name": "min",
+              "line": 216
+            },
+            {
+              "name": "detection_data.get",
+              "line": 220
+            },
+            {
+              "name": "SemanticPattern",
+              "line": 222
+            },
+            {
+              "name": "str",
+              "line": 239
+            },
+            {
+              "name": "detection_data.get",
+              "line": 236
+            },
+            {
+              "name": "detection_data.get",
+              "line": 228
+            },
+            {
+              "name": "detection_data.get",
+              "line": 233
+            },
+            {
+              "name": "detection_data.get",
+              "line": 234
+            },
+            {
+              "name": "str",
+              "line": 236
+            },
+            {
+              "name": "time.time",
+              "line": 236
+            }
+          ],
+          "docstring": "Extract semantic patterns from visual detection",
+          "code_snippet": "        self.logger = logging.getLogger(__name__)\n    \n    def extract_visual_semantics(self, detection_data: Dict[str, Any]) -> Optional[SemanticPattern]:\n        \"\"\"Extract semantic patterns from visual detection\"\"\"\n        try:\n            if not detection_data:\n                return None\n                \n            # Handle both bbox format [x1,y1,x2,y2] and [x,y,w,h]\n            if \"bbox\" in detection_data:\n                bbox = detection_data[\"bbox\"]\n                if len(bbox) == 4:\n                    if \"width\" in detection_data and \"height\" in detection_data:\n                        # [x,y,w,h] format\n                        x, y, w, h = bbox\n                        area = w * h\n                        center_x = x + (w/2)\n                        center_y = y + (h/2)\n                        image_area = detection_data[\"width\"] * detection_data[\"height\"]\n                    else:\n                        # [x1,y1,x2,y2] format\n                        x1, y1, x2, y2 = bbox\n                        area = (x2 - x1) * (y2 - y1)\n                        center_x = (x1 + x2) / 2\n                        center_y = (y1 + y2) / 2\n                        image_area = 1920 * 1080  # Default HD resolution if not provided\n                        \n                    # Calculate semantic features\n                    relative_size = min(1.0, area / image_area)\n                    centrality = 1 - ((center_x / (image_area ** 0.5)) ** 2 + \n                                    (center_y / (image_area ** 0.5)) ** 2) ** 0.5\n                    \n                    confidence = detection_data.get(\"confidence\", 0.0)\n                    if confidence > 0.2:  # Minimum confidence threshold\n                        return SemanticPattern(\n                            pattern_type=SemanticType.DOMINANCE,\n                            features={\n                                \"relative_size\": relative_size,\n                                \"centrality\": centrality,\n                                \"confidence\": confidence,\n                                \"class_confidence\": detection_data.get(\"class_confidence\", confidence)\n                            },\n                            confidence=confidence,\n                            source_domain=\"visual\",\n                            context={\n                                \"detection_type\": detection_data.get(\"class_id\"),\n                                \"detection_class\": detection_data.get(\"class_name\", \"unknown\")\n                            },\n                            cortex_flow_id=detection_data.get(\"flow_id\", str(time.time()))\n                        )\n        except Exception as e:\n            self.logger.error(f\"Error extracting visual semantics: {str(e)}\")\n            return None\n        return None\n\n    def extract_text_semantics(self, text_data: Dict[str, Any]) -> Optional[SemanticPattern]:\n        \"\"\"Extract semantic patterns from text analysis\"\"\"\n        try:"
+        },
+        "extract_text_semantics": {
+          "start_line": 243,
+          "end_line": 268,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "text_data"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "len",
+              "line": 248
+            },
+            {
+              "name": "np.mean",
+              "line": 249
+            },
+            {
+              "name": "SemanticPattern",
+              "line": 251
+            },
+            {
+              "name": "self.logger.error",
+              "line": 264
+            },
+            {
+              "name": "....split",
+              "line": 248
+            },
+            {
+              "name": "len",
+              "line": 249
+            },
+            {
+              "name": "text_data.get",
+              "line": 258
+            },
+            {
+              "name": "text_data.get",
+              "line": 261
+            },
+            {
+              "name": "....split",
+              "line": 249
+            },
+            {
+              "name": "min",
+              "line": 254
+            },
+            {
+              "name": "min",
+              "line": 255
+            },
+            {
+              "name": "text_data.get",
+              "line": 256
+            },
+            {
+              "name": "text_data.get",
+              "line": 260
+            },
+            {
+              "name": "str",
+              "line": 261
+            },
+            {
+              "name": "str",
+              "line": 264
+            },
+            {
+              "name": "time.time",
+              "line": 261
+            }
+          ],
+          "docstring": "Extract semantic patterns from text analysis",
+          "code_snippet": "        return None\n\n    def extract_text_semantics(self, text_data: Dict[str, Any]) -> Optional[SemanticPattern]:\n        \"\"\"Extract semantic patterns from text analysis\"\"\"\n        try:\n            # Example: Detect structural patterns in text\n            if \"sentence_data\" in text_data:\n                word_count = len(text_data[\"sentence_data\"].split())\n                avg_word_length = np.mean([len(w) for w in text_data[\"sentence_data\"].split()])\n                \n                return SemanticPattern(\n                    pattern_type=SemanticType.STRUCTURE,\n                    features={\n                        \"complexity\": min(1.0, word_count / 20),  # Normalize to 0-1\n                        \"avg_word_length\": min(1.0, avg_word_length / 10),\n                        \"grammatical_confidence\": text_data.get(\"grammar_score\", 0.5)\n                    },\n                    confidence=text_data.get(\"confidence\", 0.5),\n                    source_domain=\"linguistic\",\n                    context={\"sentence_type\": text_data.get(\"sentence_type\")},\n                    cortex_flow_id=text_data.get(\"flow_id\", str(time.time()))\n                )\n        except Exception as e:\n            self.logger.error(f\"Error extracting text semantics: {str(e)}\")\n            return None\n        return None\n\n    def extract_emotion_semantics(self, emotion_data: Dict[str, Any]) -> Optional[SemanticPattern]:\n        \"\"\"Extract semantic patterns from emotional analysis\"\"\"\n        try:"
+        },
+        "extract_emotion_semantics": {
+          "start_line": 268,
+          "end_line": 292,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "emotion_data"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "max",
+              "line": 273
+            },
+            {
+              "name": "SemanticPattern",
+              "line": 275
+            },
+            {
+              "name": "self.logger.error",
+              "line": 288
+            },
+            {
+              "name": "scores.values",
+              "line": 273
+            },
+            {
+              "name": "emotion_data.get",
+              "line": 282
+            },
+            {
+              "name": "emotion_data.get",
+              "line": 285
+            },
+            {
+              "name": "len",
+              "line": 280
+            },
+            {
+              "name": "max",
+              "line": 284
+            },
+            {
+              "name": "str",
+              "line": 285
+            },
+            {
+              "name": "str",
+              "line": 288
+            },
+            {
+              "name": "sum",
+              "line": 279
+            },
+            {
+              "name": "time.time",
+              "line": 285
+            },
+            {
+              "name": "scores.values",
+              "line": 279
+            },
+            {
+              "name": "scores.values",
+              "line": 280
+            }
+          ],
+          "docstring": "Extract semantic patterns from emotional analysis",
+          "code_snippet": "        return None\n\n    def extract_emotion_semantics(self, emotion_data: Dict[str, Any]) -> Optional[SemanticPattern]:\n        \"\"\"Extract semantic patterns from emotional analysis\"\"\"\n        try:\n            if \"emotion_scores\" in emotion_data:\n                scores = emotion_data[\"emotion_scores\"]\n                max_score = max(scores.values())\n                \n                return SemanticPattern(\n                    pattern_type=SemanticType.INTENSITY,\n                    features={\n                        \"intensity\": max_score,\n                        \"clarity\": max_score / sum(scores.values()),\n                        \"complexity\": len([s for s in scores.values() if s > 0.2])\n                    },\n                    confidence=emotion_data.get(\"confidence\", 0.5),\n                    source_domain=\"emotional\",\n                    context={\"primary_emotion\": max(scores, key=scores.get)},\n                    cortex_flow_id=emotion_data.get(\"flow_id\", str(time.time()))\n                )\n        except Exception as e:\n            self.logger.error(f\"Error extracting emotion semantics: {str(e)}\")\n            return None\n        return None"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Extracts semantic patterns from domain-specific data"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

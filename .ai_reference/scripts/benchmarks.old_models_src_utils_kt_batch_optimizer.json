@@ -1,0 +1,259 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\kt_batch_optimizer.py",
+  "imports": [
+    {
+      "name": "numpy",
+      "line": 1
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 2
+    },
+    {
+      "name": "typing.Dict",
+      "line": 3
+    },
+    {
+      "name": "typing.List",
+      "line": 3
+    },
+    {
+      "name": "typing.Optional",
+      "line": 3
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 3
+    },
+    {
+      "name": "typing.Any",
+      "line": 3
+    },
+    {
+      "name": "torch",
+      "line": 4
+    }
+  ],
+  "classes": {
+    "KTParameters": {
+      "start_line": 7,
+      "end_line": 15,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Parameters from the K(t) framework"
+    },
+    "KTBatchOptimizer": {
+      "start_line": 15,
+      "end_line": 104,
+      "methods": {
+        "__init__": {
+          "start_line": 16,
+          "end_line": 25,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "total_gpu_memory",
+              "type": "int"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "KTParameters",
+              "line": 17
+            },
+            {
+              "name": "torch.device",
+              "line": 19
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 19
+            }
+          ],
+          "code_snippet": "\nclass KTBatchOptimizer:\n    def __init__(self, total_gpu_memory: int = 4089):\n        self.kt_params = KTParameters()\n        self.total_energy = total_gpu_memory  # GPU memory as energy proxy\n        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Critical thresholds from framework\n        self.min_efficiency = 0.65  # Based on \u03c6(L) threshold\n        self.max_sync_cost = 0.35   # Based on \u03b2 parameter\n    \n    def _calculate_cognitive_load(self, batch_size: int) -> float:\n        \"\"\"Calculate cognitive load based on batch size\"\"\"\n        # Normalize batch size relative to critical threshold"
+        },
+        "_calculate_cognitive_load": {
+          "start_line": 25,
+          "end_line": 35,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size",
+              "type": "int"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "np.log2",
+              "line": 31
+            }
+          ],
+          "docstring": "Calculate cognitive load based on batch size",
+          "code_snippet": "        self.max_sync_cost = 0.35   # Based on \u03b2 parameter\n    \n    def _calculate_cognitive_load(self, batch_size: int) -> float:\n        \"\"\"Calculate cognitive load based on batch size\"\"\"\n        # Normalize batch size relative to critical threshold\n        normalized_load = batch_size / self.kt_params.Lc\n        \n        # Apply synchronization cost\n        sync_cost = self.kt_params.sync_cost * np.log2(batch_size + 1)\n        \n        return normalized_load + sync_cost\n    \n    def _calculate_efficiency(self, energy_used: float, cognitive_load: float) -> float:\n        \"\"\"Implementation of \u03b7(E, L) = [1 - e^(-E/Etotal)] \u00b7 \u03c6(L)\"\"\"\n        # Energy efficiency term"
+        },
+        "_calculate_efficiency": {
+          "start_line": 35,
+          "end_line": 46,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "energy_used",
+              "type": "float"
+            },
+            {
+              "name": "cognitive_load",
+              "type": "float"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "np.exp",
+              "line": 38
+            },
+            {
+              "name": "np.exp",
+              "line": 41
+            }
+          ],
+          "docstring": "Implementation of \u03b7(E, L) = [1 - e^(-E/Etotal)] \u00b7 \u03c6(L)",
+          "code_snippet": "        return normalized_load + sync_cost\n    \n    def _calculate_efficiency(self, energy_used: float, cognitive_load: float) -> float:\n        \"\"\"Implementation of \u03b7(E, L) = [1 - e^(-E/Etotal)] \u00b7 \u03c6(L)\"\"\"\n        # Energy efficiency term\n        energy_efficiency = 1 - np.exp(-energy_used / self.total_energy)\n        \n        # Cognitive load function \u03c6(L)\n        cognitive_efficiency = 1 / (1 + np.exp((cognitive_load - self.kt_params.Lc) / \n                                             self.kt_params.efficiency_coefficient))\n        \n        return energy_efficiency * cognitive_efficiency\n    \n    def optimize_batch_size(self, \n                           min_batch: int = 1, \n                           max_batch: int = 32) -> Dict[str, Any]:"
+        },
+        "optimize_batch_size": {
+          "start_line": 46,
+          "end_line": 104,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "min_batch",
+              "type": "int"
+            },
+            {
+              "name": "max_batch",
+              "type": "int"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "print",
+              "line": 54
+            },
+            {
+              "name": "range",
+              "line": 56
+            },
+            {
+              "name": "torch.zeros",
+              "line": 60
+            },
+            {
+              "name": "torch.cuda.empty_cache",
+              "line": 62
+            },
+            {
+              "name": "self._calculate_cognitive_load",
+              "line": 65
+            },
+            {
+              "name": "self._calculate_efficiency",
+              "line": 66
+            },
+            {
+              "name": "results.append",
+              "line": 68
+            },
+            {
+              "name": "torch.cuda.memory_allocated",
+              "line": 61
+            },
+            {
+              "name": "print",
+              "line": 80
+            },
+            {
+              "name": "print",
+              "line": 84
+            }
+          ],
+          "docstring": "Find optimal batch size using K(t) framework",
+          "code_snippet": "        return energy_efficiency * cognitive_efficiency\n    \n    def optimize_batch_size(self, \n                           min_batch: int = 1, \n                           max_batch: int = 32) -> Dict[str, Any]:\n        \"\"\"Find optimal batch size using K(t) framework\"\"\"\n        best_efficiency = 0\n        optimal_batch = min_batch\n        results = []\n        \n        print(\"\\nOptimizing batch size using K(t) framework...\")\n        \n        for batch_size in range(min_batch, max_batch + 1):\n            # Simulate memory requirements for batch\n            try:\n                # Test tensor allocation\n                test_tensor = torch.zeros((batch_size, 3, 640, 640), device=self.device)\n                memory_used = torch.cuda.memory_allocated() / (1024 * 1024)  # MB\n                torch.cuda.empty_cache()\n                \n                # Calculate metrics\n                cognitive_load = self._calculate_cognitive_load(batch_size)\n                efficiency = self._calculate_efficiency(memory_used, cognitive_load)\n                \n                results.append({\n                    \"batch_size\": batch_size,\n                    \"efficiency\": efficiency,\n                    \"cognitive_load\": cognitive_load,\n                    \"memory_used\": memory_used\n                })\n                \n                if efficiency > best_efficiency:\n                    best_efficiency = efficiency\n                    optimal_batch = batch_size\n                \n                if batch_size % 4 == 0:\n                    print(f\"Batch {batch_size:2d}: Efficiency = {efficiency:.3f}, \"\n                          f\"Load = {cognitive_load:.3f}\")\n                \n            except RuntimeError:\n                print(f\"Memory limit reached at batch size {batch_size}\")\n                break\n        \n        # Analyze results\n        efficiency_curve = [r[\"efficiency\"] for r in results]\n        load_curve = [r[\"cognitive_load\"] for r in results]\n        \n        return {\n            \"optimal_batch_size\": optimal_batch,\n            \"peak_efficiency\": best_efficiency,\n            \"metrics\": {\n                \"efficiency_curve\": efficiency_curve,\n                \"cognitive_load_curve\": load_curve,\n                \"memory_curve\": [r[\"memory_used\"] for r in results]\n            },\n            \"parameters\": {\n                \"Lc\": self.kt_params.Lc,\n                \"gamma\": self.kt_params.efficiency_coefficient,\n                \"beta\": self.kt_params.sync_cost\n            }\n        }\n\ndef test_kt_optimizer():"
+        }
+      },
+      "class_variables": [],
+      "bases": []
+    }
+  },
+  "functions": {
+    "test_kt_optimizer": {
+      "start_line": 106,
+      "end_line": 128,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "KTBatchOptimizer",
+          "line": 108
+        },
+        {
+          "name": "optimizer.optimize_batch_size",
+          "line": 109
+        },
+        {
+          "name": "print",
+          "line": 111
+        },
+        {
+          "name": "print",
+          "line": 112
+        },
+        {
+          "name": "print",
+          "line": 113
+        },
+        {
+          "name": "print",
+          "line": 115
+        },
+        {
+          "name": "print",
+          "line": 117
+        },
+        {
+          "name": "print",
+          "line": 119
+        },
+        {
+          "name": "print",
+          "line": 123
+        },
+        {
+          "name": "print",
+          "line": 124
+        },
+        {
+          "name": "print",
+          "line": 125
+        },
+        {
+          "name": "print",
+          "line": 126
+        }
+      ],
+      "docstring": "Test the K(t) framework batch optimizer",
+      "code_snippet": "        }\n\ndef test_kt_optimizer():\n    \"\"\"Test the K(t) framework batch optimizer\"\"\"\n    optimizer = KTBatchOptimizer()\n    results = optimizer.optimize_batch_size()\n    \n    print(\"\\nOptimization Results:\")\n    print(f\"Optimal Batch Size: {results['optimal_batch_size']}\")\n    print(f\"Peak Efficiency: {results['peak_efficiency']:.3f}\")\n    \n    print(\"\\nEfficiency Analysis:\")\n    opt_idx = results['optimal_batch_size'] - 1\n    print(f\"Cognitive Load at optimum: \"\n          f\"{results['metrics']['cognitive_load_curve'][opt_idx]:.3f}\")\n    print(f\"Memory usage at optimum: \"\n          f\"{results['metrics']['memory_curve'][opt_idx]:.1f}MB\")\n    \n    # Verify against theoretical thresholds\n    print(\"\\nTheoretical Validation:\")\n    print(f\"Critical threshold (Lc): {results['parameters']['Lc']}\")\n    print(f\"Efficiency coefficient (\u03b3): {results['parameters']['gamma']}\")\n    print(f\"Sync cost (\u03b2): {results['parameters']['beta']}\")\n\nif __name__ == \"__main__\":\n    test_kt_optimizer()"
+    }
+  },
+  "constants": {}
+}

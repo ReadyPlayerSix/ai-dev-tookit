@@ -1,0 +1,155 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\mathematical_foundation\\resource_allocation.py",
+  "imports": [
+    {
+      "name": "math",
+      "line": 11
+    },
+    {
+      "name": "numpy",
+      "line": 12
+    },
+    {
+      "name": "scipy.optimize.minimize",
+      "line": 13
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "optimize_resource_allocation": {
+      "start_line": 15,
+      "end_line": 98,
+      "parameters": [
+        {
+          "name": "priorities"
+        },
+        {
+          "name": "min_resources"
+        },
+        {
+          "name": "total_resources"
+        },
+        {
+          "name": "alpha_values"
+        },
+        {
+          "name": "beta_values"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "sum",
+          "line": 43
+        },
+        {
+          "name": "len",
+          "line": 47
+        },
+        {
+          "name": "sum",
+          "line": 79
+        },
+        {
+          "name": "range",
+          "line": 82
+        },
+        {
+          "name": "minimize",
+          "line": 90
+        },
+        {
+          "name": "result.x.tolist",
+          "line": 96
+        },
+        {
+          "name": "len",
+          "line": 40
+        },
+        {
+          "name": "len",
+          "line": 40
+        },
+        {
+          "name": "ValueError",
+          "line": 41
+        },
+        {
+          "name": "ValueError",
+          "line": 45
+        },
+        {
+          "name": "range",
+          "line": 63
+        },
+        {
+          "name": "initial_guess.append",
+          "line": 87
+        },
+        {
+          "name": "len",
+          "line": 52
+        },
+        {
+          "name": "ValueError",
+          "line": 53
+        },
+        {
+          "name": "len",
+          "line": 57
+        },
+        {
+          "name": "ValueError",
+          "line": 58
+        },
+        {
+          "name": "range",
+          "line": 75
+        },
+        {
+          "name": "component_utility_function",
+          "line": 64
+        },
+        {
+          "name": "sum",
+          "line": 71
+        }
+      ],
+      "docstring": "\n    Optimize resource allocation across components by solving the maximization problem.\n    \n    Implements the optimization problem described in Section 4 of the Mathematical Foundation:\n    \n    max \u2211(priority_i * utility_i(resource_i))\n    s.t. \u2211resource_i \u2264 total_resources\n         resource_i \u2265 min_resource_i \u2200i\n    \n    Args:\n        priorities (list): List of component priorities\n        min_resources (list): List of minimum resource requirements for each component\n        total_resources (float): Total available resources\n        alpha_values (list, optional): Utility scaling factors for each component\n        beta_values (list, optional): Resource sensitivity for each component\n        \n    Returns:\n        list: Optimal resource allocation for each component\n        \n    Raises:\n        ValueError: If priorities and min_resources have different lengths or\n                   if total_resources is less than sum of min_resources\n    ",
+      "code_snippet": "from scipy.optimize import minimize\n\ndef optimize_resource_allocation(priorities, min_resources, total_resources, alpha_values=None, beta_values=None):\n    \"\"\"\n    Optimize resource allocation across components by solving the maximization problem.\n    \n    Implements the optimization problem described in Section 4 of the Mathematical Foundation:\n    \n    max \u2211(priority_i * utility_i(resource_i))\n    s.t. \u2211resource_i \u2264 total_resources\n         resource_i \u2265 min_resource_i \u2200i\n    \n    Args:\n        priorities (list): List of component priorities\n        min_resources (list): List of minimum resource requirements for each component\n        total_resources (float): Total available resources\n        alpha_values (list, optional): Utility scaling factors for each component\n        beta_values (list, optional): Resource sensitivity for each component\n        \n    Returns:\n        list: Optimal resource allocation for each component\n        \n    Raises:\n        ValueError: If priorities and min_resources have different lengths or\n                   if total_resources is less than sum of min_resources\n    \"\"\"\n    # Input validation\n    if len(priorities) != len(min_resources):\n        raise ValueError(\"Priorities and minimum resources must have the same length\")\n    \n    min_resources_sum = sum(min_resources)\n    if total_resources < min_resources_sum:\n        raise ValueError(f\"Total resources ({total_resources}) must be at least the sum of minimum resources ({min_resources_sum})\")\n    \n    n = len(priorities)\n    \n    # Default utility function parameters if not provided\n    if alpha_values is None:\n        alpha_values = [1.0] * n\n    elif len(alpha_values) != n:\n        raise ValueError(\"Alpha values must have the same length as priorities\")\n    \n    if beta_values is None:\n        beta_values = [1.0] * n\n    elif len(beta_values) != n:\n        raise ValueError(\"Beta values must have the same length as priorities\")\n    \n    # Define the negative utility function to minimize (since optimize.minimize minimizes)\n    def negative_utility(resources):\n        total_utility = 0.0\n        for i in range(n):\n            component_utility = priorities[i] * component_utility_function(resources[i], alpha_values[i], beta_values[i])\n            total_utility += component_utility\n        return -total_utility\n    \n    # Define constraints\n    constraints = [\n        # Total resources constraint\n        {'type': 'ineq', 'fun': lambda x: total_resources - sum(x)},\n    ]\n    \n    # Define bounds for each resource allocation (must be at least minimum resource)\n    bounds = [(min_resources[i], total_resources) for i in range(n)]\n    \n    # Initial guess: distribute remaining resources proportionally to priorities\n    remaining_resources = total_resources - min_resources_sum\n    priority_sum = sum(priorities)\n    \n    initial_guess = []\n    for i in range(n):\n        if priority_sum > 0:\n            initial_allocation = min_resources[i] + (priorities[i] / priority_sum) * remaining_resources\n        else:\n            initial_allocation = min_resources[i] + remaining_resources / n\n        initial_guess.append(initial_allocation)\n    \n    # Solve the optimization problem\n    result = minimize(negative_utility, initial_guess, method='SLSQP', bounds=bounds, constraints=constraints)\n    \n    if not result.success:\n        # If optimization fails, fall back to proportional allocation\n        return initial_guess\n    \n    return result.x.tolist()\n\ndef component_utility_function(resource, alpha=1.0, beta=1.0):\n    \"\"\"\n    Calculate the utility function for a component based on allocated resources."
+    },
+    "component_utility_function": {
+      "start_line": 98,
+      "end_line": 128,
+      "parameters": [
+        {
+          "name": "resource"
+        },
+        {
+          "name": "alpha"
+        },
+        {
+          "name": "beta"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "ValueError",
+          "line": 118
+        },
+        {
+          "name": "ValueError",
+          "line": 120
+        },
+        {
+          "name": "math.log",
+          "line": 126
+        }
+      ],
+      "docstring": "\n    Calculate the utility function for a component based on allocated resources.\n    \n    Implements the formula from Section 4.1 of the Mathematical Foundation:\n    utility_i(resource_i) = \u03b1_i * ln(1 + \u03b2_i * resource_i)\n    \n    Args:\n        resource (float): Amount of resource allocated to the component\n        alpha (float, optional): Utility scaling factor. Defaults to 1.0.\n        beta (float, optional): Resource sensitivity. Defaults to 1.0.\n        \n    Returns:\n        float: Utility value for the component\n        \n    Raises:\n        ValueError: If resource is negative or alpha/beta are not positive\n    ",
+      "code_snippet": "    return result.x.tolist()\n\ndef component_utility_function(resource, alpha=1.0, beta=1.0):\n    \"\"\"\n    Calculate the utility function for a component based on allocated resources.\n    \n    Implements the formula from Section 4.1 of the Mathematical Foundation:\n    utility_i(resource_i) = \u03b1_i * ln(1 + \u03b2_i * resource_i)\n    \n    Args:\n        resource (float): Amount of resource allocated to the component\n        alpha (float, optional): Utility scaling factor. Defaults to 1.0.\n        beta (float, optional): Resource sensitivity. Defaults to 1.0.\n        \n    Returns:\n        float: Utility value for the component\n        \n    Raises:\n        ValueError: If resource is negative or alpha/beta are not positive\n    \"\"\"\n    # Input validation\n    if resource < 0:\n        raise ValueError(\"Resource allocation must be non-negative\")\n    if alpha <= 0 or beta <= 0:\n        raise ValueError(\"Alpha and beta must be positive\")\n    \n    # Calculate utility using logarithmic utility function\n    if resource == 0:\n        return 0.0\n    \n    return alpha * math.log(1.0 + beta * resource)"
+    }
+  },
+  "constants": {}
+}

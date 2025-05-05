@@ -1,0 +1,411 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\benchmark_topology_analysis.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 8
+    },
+    {
+      "name": "sys",
+      "line": 9
+    },
+    {
+      "name": "time",
+      "line": 10
+    },
+    {
+      "name": "numpy",
+      "line": 11
+    },
+    {
+      "name": "matplotlib.pyplot",
+      "line": 12
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 13
+    },
+    {
+      "name": "argparse",
+      "line": 14
+    },
+    {
+      "name": "isekaizen.semantic.mapper_math.SemanticTopographicalMapper",
+      "line": 19
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "create_test_data": {
+      "start_line": 22,
+      "end_line": 29,
+      "parameters": [
+        {
+          "name": "n_samples"
+        },
+        {
+          "name": "n_features"
+        },
+        {
+          "name": "n_classes"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "np.random.seed",
+          "line": 24
+        },
+        {
+          "name": "np.random.randn",
+          "line": 25
+        },
+        {
+          "name": "np.random.randint",
+          "line": 26
+        }
+      ],
+      "docstring": "Create random test data for benchmarking",
+      "code_snippet": "\n\ndef create_test_data(n_samples, n_features, n_classes=10):\n    \"\"\"Create random test data for benchmarking\"\"\"\n    np.random.seed(42)  # For reproducibility\n    features = np.random.randn(n_samples, n_features)\n    labels = np.random.randint(0, n_classes, size=n_samples)\n    return features, labels\n\n\ndef naive_topology_analysis(features, labels, n_neighbors=10):\n    \"\"\"Original O(n\u00b2) implementation for comparison\"\"\""
+    },
+    "naive_topology_analysis": {
+      "start_line": 30,
+      "end_line": 57,
+      "parameters": [
+        {
+          "name": "features"
+        },
+        {
+          "name": "labels"
+        },
+        {
+          "name": "n_neighbors"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "len",
+          "line": 32
+        },
+        {
+          "name": "range",
+          "line": 37
+        },
+        {
+          "name": "range",
+          "line": 46
+        },
+        {
+          "name": "range",
+          "line": 39
+        },
+        {
+          "name": "distances.append",
+          "line": 43
+        },
+        {
+          "name": "sum",
+          "line": 52
+        },
+        {
+          "name": "sorted",
+          "line": 48
+        },
+        {
+          "name": "np.sqrt",
+          "line": 41
+        },
+        {
+          "name": "row_distances.append",
+          "line": 42
+        },
+        {
+          "name": "np.sum",
+          "line": 41
+        }
+      ],
+      "docstring": "Original O(n\u00b2) implementation for comparison",
+      "code_snippet": "\n\ndef naive_topology_analysis(features, labels, n_neighbors=10):\n    \"\"\"Original O(n\u00b2) implementation for comparison\"\"\"\n    n_samples = len(labels)\n    topology_scores = [0.0] * n_samples\n    \n    # Calculate all pairwise distances\n    distances = []\n    for i in range(n_samples):\n        row_distances = []\n        for j in range(n_samples):\n            if i != j:\n                dist = np.sqrt(np.sum((features[i] - features[j])**2))\n                row_distances.append((dist, j))\n        distances.append(row_distances)\n    \n    # Find neighbors and calculate scores\n    for i in range(n_samples):\n        # Sort distances and take k nearest\n        nearest = sorted(distances[i])[:n_neighbors]\n        nearest_indices = [j for _, j in nearest]\n        \n        # Count neighbors with different labels\n        diff_label_count = sum(1 for j in nearest_indices if labels[j] != labels[i])\n        topology_scores[i] = diff_label_count / n_neighbors\n    \n    return topology_scores\n\n\ndef run_benchmark(sample_sizes, n_features=64, n_neighbors=10):\n    \"\"\"Run the benchmark across different sample sizes\"\"\""
+    },
+    "run_benchmark": {
+      "start_line": 58,
+      "end_line": 95,
+      "parameters": [
+        {
+          "name": "sample_sizes"
+        },
+        {
+          "name": "n_features"
+        },
+        {
+          "name": "n_neighbors"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "print",
+          "line": 68
+        },
+        {
+          "name": "create_test_data",
+          "line": 69
+        },
+        {
+          "name": "SemanticTopographicalMapper",
+          "line": 72
+        },
+        {
+          "name": "time.time",
+          "line": 75
+        },
+        {
+          "name": "naive_topology_analysis",
+          "line": 76
+        },
+        {
+          "name": "....append",
+          "line": 78
+        },
+        {
+          "name": "print",
+          "line": 79
+        },
+        {
+          "name": "time.time",
+          "line": 82
+        },
+        {
+          "name": "mapper._analyze_local_topology",
+          "line": 83
+        },
+        {
+          "name": "....append",
+          "line": 85
+        },
+        {
+          "name": "print",
+          "line": 86
+        },
+        {
+          "name": "....append",
+          "line": 90
+        },
+        {
+          "name": "print",
+          "line": 91
+        },
+        {
+          "name": "time.time",
+          "line": 77
+        },
+        {
+          "name": "time.time",
+          "line": 84
+        }
+      ],
+      "docstring": "Run the benchmark across different sample sizes",
+      "code_snippet": "\n\ndef run_benchmark(sample_sizes, n_features=64, n_neighbors=10):\n    \"\"\"Run the benchmark across different sample sizes\"\"\"\n    results = {\n        'sample_size': sample_sizes,\n        'old_time': [],\n        'new_time': [],\n        'speedup': []\n    }\n    \n    for size in sample_sizes:\n        print(f\"Benchmarking with {size} samples...\")\n        features, labels = create_test_data(size, n_features)\n        \n        # Create mapper with specified neighbors\n        mapper = SemanticTopographicalMapper(n_neighbors=n_neighbors)\n        \n        # Time the old implementation\n        start_time = time.time()\n        naive_topology_analysis(features, labels, n_neighbors)\n        old_time = time.time() - start_time\n        results['old_time'].append(old_time)\n        print(f\"  O(n\u00b2) implementation: {old_time:.4f}s\")\n        \n        # Time the new implementation\n        start_time = time.time()\n        mapper._analyze_local_topology(features, labels)\n        new_time = time.time() - start_time\n        results['new_time'].append(new_time)\n        print(f\"  KDTree implementation: {new_time:.4f}s\")\n        \n        # Calculate and store speedup\n        speedup = old_time / new_time\n        results['speedup'].append(speedup)\n        print(f\"  Speedup: {speedup:.2f}x\")\n    \n    return results\n\n\ndef plot_results(results, output_dir):\n    \"\"\"Create visualization of benchmark results\"\"\""
+    },
+    "plot_results": {
+      "start_line": 96,
+      "end_line": 153,
+      "parameters": [
+        {
+          "name": "results"
+        },
+        {
+          "name": "output_dir"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "plt.subplots",
+          "line": 99
+        },
+        {
+          "name": "ax1.plot",
+          "line": 102
+        },
+        {
+          "name": "ax1.plot",
+          "line": 103
+        },
+        {
+          "name": "ax1.set_xlabel",
+          "line": 105
+        },
+        {
+          "name": "ax1.set_ylabel",
+          "line": 106
+        },
+        {
+          "name": "ax1.set_title",
+          "line": 107
+        },
+        {
+          "name": "ax1.grid",
+          "line": 108
+        },
+        {
+          "name": "ax1.legend",
+          "line": 109
+        },
+        {
+          "name": "fig.add_axes",
+          "line": 112
+        },
+        {
+          "name": "ax1_inset.semilogy",
+          "line": 113
+        },
+        {
+          "name": "ax1_inset.semilogy",
+          "line": 114
+        },
+        {
+          "name": "ax1_inset.set_title",
+          "line": 115
+        },
+        {
+          "name": "ax2.plot",
+          "line": 118
+        },
+        {
+          "name": "ax2.set_xlabel",
+          "line": 119
+        },
+        {
+          "name": "ax2.set_ylabel",
+          "line": 120
+        },
+        {
+          "name": "ax2.set_title",
+          "line": 121
+        },
+        {
+          "name": "ax2.grid",
+          "line": 122
+        },
+        {
+          "name": "ax2.plot",
+          "line": 126
+        },
+        {
+          "name": "ax2.legend",
+          "line": 128
+        },
+        {
+          "name": "plt.tight_layout",
+          "line": 130
+        },
+        {
+          "name": "....strftime",
+          "line": 137
+        },
+        {
+          "name": "os.path.join",
+          "line": 138
+        },
+        {
+          "name": "plt.savefig",
+          "line": 139
+        },
+        {
+          "name": "os.path.join",
+          "line": 142
+        },
+        {
+          "name": "print",
+          "line": 149
+        },
+        {
+          "name": "os.path.exists",
+          "line": 133
+        },
+        {
+          "name": "os.makedirs",
+          "line": 134
+        },
+        {
+          "name": "open",
+          "line": 143
+        },
+        {
+          "name": "f.write",
+          "line": 144
+        },
+        {
+          "name": "range",
+          "line": 145
+        },
+        {
+          "name": "np.log2",
+          "line": 125
+        },
+        {
+          "name": "datetime.now",
+          "line": 137
+        },
+        {
+          "name": "len",
+          "line": 145
+        },
+        {
+          "name": "f.write",
+          "line": 146
+        }
+      ],
+      "docstring": "Create visualization of benchmark results",
+      "code_snippet": "\n\ndef plot_results(results, output_dir):\n    \"\"\"Create visualization of benchmark results\"\"\"\n    # Create figure with two subplots\n    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))\n    \n    # Plot timing comparison\n    ax1.plot(results['sample_size'], results['old_time'], 'o-', label='O(n\u00b2) implementation')\n    ax1.plot(results['sample_size'], results['new_time'], 'o-', label='KDTree implementation')\n    \n    ax1.set_xlabel('Number of samples')\n    ax1.set_ylabel('Execution time (seconds)')\n    ax1.set_title('Execution Time Comparison')\n    ax1.grid(True)\n    ax1.legend()\n    \n    # Add logarithmic y-scale inset\n    ax1_inset = fig.add_axes([0.24, 0.55, 0.15, 0.25])\n    ax1_inset.semilogy(results['sample_size'], results['old_time'], 'o-')\n    ax1_inset.semilogy(results['sample_size'], results['new_time'], 'o-')\n    ax1_inset.set_title('Log scale')\n    \n    # Plot speedup factors\n    ax2.plot(results['sample_size'], results['speedup'], 'o-', color='green')\n    ax2.set_xlabel('Number of samples')\n    ax2.set_ylabel('Speedup factor (x times faster)')\n    ax2.set_title('Optimization Speedup Factor')\n    ax2.grid(True)\n    \n    # Add theoretical speedup line (n/log(n))\n    theoretical_speedup = [n / np.log2(n) for n in results['sample_size']]\n    ax2.plot(results['sample_size'], theoretical_speedup, '--', color='red', \n             label='Theoretical O(n/log(n))')\n    ax2.legend()\n    \n    plt.tight_layout()\n    \n    # Ensure output directory exists\n    if not os.path.exists(output_dir):\n        os.makedirs(output_dir)\n        \n    # Save figure\n    timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n    output_path = os.path.join(output_dir, f\"topology_analysis_benchmark_{timestamp}.png\")\n    plt.savefig(output_path, dpi=300)\n    \n    # Save raw data\n    data_path = os.path.join(output_dir, f\"topology_analysis_benchmark_{timestamp}.csv\")\n    with open(data_path, 'w') as f:\n        f.write(\"sample_size,old_time,new_time,speedup\\n\")\n        for i in range(len(results['sample_size'])):\n            f.write(f\"{results['sample_size'][i]},{results['old_time'][i]:.6f},\"\n                   f\"{results['new_time'][i]:.6f},{results['speedup'][i]:.6f}\\n\")\n    \n    print(f\"Results saved to {output_path} and {data_path}\")\n    \n    return output_path\n\n\ndef main():\n    parser = argparse.ArgumentParser(description='Benchmark topology analysis optimizations')"
+    },
+    "main": {
+      "start_line": 154,
+      "end_line": 173,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "argparse.ArgumentParser",
+          "line": 155
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 156
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 158
+        },
+        {
+          "name": "parser.parse_args",
+          "line": 160
+        },
+        {
+          "name": "run_benchmark",
+          "line": 166
+        },
+        {
+          "name": "plot_results",
+          "line": 169
+        },
+        {
+          "name": "print",
+          "line": 171
+        },
+        {
+          "name": "int",
+          "line": 163
+        },
+        {
+          "name": "args.sample_sizes.split",
+          "line": 163
+        }
+      ],
+      "code_snippet": "\n\ndef main():\n    parser = argparse.ArgumentParser(description='Benchmark topology analysis optimizations')\n    parser.add_argument('--sample-sizes', type=str, default=\"500,1000,2000,4000,6000,8000,10000\",\n                        help='Comma-separated list of sample sizes to benchmark')\n    parser.add_argument('--output-dir', type=str, default=\"benchmark_results\",\n                        help='Directory to save benchmark results')\n    args = parser.parse_args()\n    \n    # Parse sample sizes\n    sample_sizes = [int(s) for s in args.sample_sizes.split(',')]\n    \n    # Run the benchmark\n    results = run_benchmark(sample_sizes)\n    \n    # Plot and save results\n    output_path = plot_results(results, args.output_dir)\n    \n    print(f\"Benchmark completed and results saved to {output_path}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+    }
+  },
+  "constants": {}
+}

@@ -1,0 +1,652 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\training\\pattern_learning_validator.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 1
+    },
+    {
+      "name": "numpy",
+      "line": 2
+    },
+    {
+      "name": "json",
+      "line": 3
+    },
+    {
+      "name": "typing.Dict",
+      "line": 4
+    },
+    {
+      "name": "typing.List",
+      "line": 4
+    },
+    {
+      "name": "typing.Optional",
+      "line": 4
+    },
+    {
+      "name": "typing.Any",
+      "line": 4
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 5
+    },
+    {
+      "name": "pathlib.Path",
+      "line": 6
+    },
+    {
+      "name": "src.cortex.pattern_orchestrator.PatternOrchestrator",
+      "line": 8
+    },
+    {
+      "name": "src.cortex.semantic_core.SemanticPatternRegistry",
+      "line": 9
+    },
+    {
+      "name": "src.cortex.semantic_core.SemanticPattern",
+      "line": 9
+    },
+    {
+      "name": "src.cortex.semantic_core.SemanticType",
+      "line": 9
+    },
+    {
+      "name": "src.utils.kt_batch_optimizer_v3.KTBatchOptimizer",
+      "line": 10
+    }
+  ],
+  "classes": {
+    "PatternLearningValidator": {
+      "start_line": 12,
+      "end_line": 330,
+      "methods": {
+        "__init__": {
+          "start_line": 21,
+          "end_line": 54,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "test_name",
+              "type": "str"
+            },
+            {
+              "name": "log_dir",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "Path",
+              "line": 23
+            },
+            {
+              "name": "self.log_dir.mkdir",
+              "line": 24
+            },
+            {
+              "name": "PatternOrchestrator",
+              "line": 27
+            },
+            {
+              "name": "SemanticPatternRegistry",
+              "line": 28
+            },
+            {
+              "name": "KTBatchOptimizer",
+              "line": 29
+            },
+            {
+              "name": "self._generate_validation_patterns",
+              "line": 52
+            }
+          ],
+          "code_snippet": "    }\n\n    def __init__(self, test_name: str, log_dir: str = \"logs/validation\"):\n        self.test_name = test_name\n        self.log_dir = Path(log_dir)\n        self.log_dir.mkdir(parents=True, exist_ok=True)\n        \n        # Initialize core components\n        self.pattern_orchestrator = PatternOrchestrator()\n        self.semantic_registry = SemanticPatternRegistry()\n        self.batch_optimizer = KTBatchOptimizer()\n        \n        # Validation metrics\n        self.metrics = {\n            \"pattern_recognition\": {\n                \"total_attempts\": 0,\n                \"successful_matches\": 0,\n                \"novel_pattern_success\": 0,\n                \"cross_domain_success\": 0\n            },\n            \"learning_validation\": {\n                \"pattern_preservation\": [],\n                \"semantic_accuracy\": [],\n                \"transfer_fidelity\": []\n            },\n            \"performance\": {\n                \"processing_times\": [],\n                \"memory_usage\": [],\n                \"batch_efficiency\": []\n            }\n        }\n        \n        # Test patterns for validation\n        self.validation_patterns = self._generate_validation_patterns()\n\n    def _generate_validation_patterns(self) -> Dict[str, List[SemanticPattern]]:\n        \"\"\"Generate test patterns for validation\"\"\"\n        patterns = {"
+        },
+        "_generate_validation_patterns": {
+          "start_line": 54,
+          "end_line": 106,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "range",
+              "line": 63
+            },
+            {
+              "name": "range",
+              "line": 77
+            },
+            {
+              "name": "range",
+              "line": 91
+            },
+            {
+              "name": "....append",
+              "line": 64
+            },
+            {
+              "name": "....append",
+              "line": 78
+            },
+            {
+              "name": "....append",
+              "line": 92
+            },
+            {
+              "name": "SemanticPattern",
+              "line": 64
+            },
+            {
+              "name": "SemanticPattern",
+              "line": 78
+            },
+            {
+              "name": "SemanticPattern",
+              "line": 92
+            },
+            {
+              "name": "np.random.random",
+              "line": 67
+            },
+            {
+              "name": "np.random.random",
+              "line": 68
+            },
+            {
+              "name": "np.random.random",
+              "line": 69
+            },
+            {
+              "name": "np.random.random",
+              "line": 81
+            },
+            {
+              "name": "np.random.random",
+              "line": 82
+            },
+            {
+              "name": "np.random.random",
+              "line": 83
+            },
+            {
+              "name": "np.random.random",
+              "line": 95
+            },
+            {
+              "name": "np.random.random",
+              "line": 96
+            },
+            {
+              "name": "np.random.random",
+              "line": 97
+            },
+            {
+              "name": "np.random.random",
+              "line": 71
+            },
+            {
+              "name": "np.random.random",
+              "line": 85
+            },
+            {
+              "name": "np.random.random",
+              "line": 99
+            }
+          ],
+          "docstring": "Generate test patterns for validation",
+          "code_snippet": "        self.validation_patterns = self._generate_validation_patterns()\n\n    def _generate_validation_patterns(self) -> Dict[str, List[SemanticPattern]]:\n        \"\"\"Generate test patterns for validation\"\"\"\n        patterns = {\n            \"visual\": [],\n            \"linguistic\": [],\n            \"emotional\": []\n        }\n        \n        # Generate visual patterns\n        for i in range(10):\n            patterns[\"visual\"].append(SemanticPattern(\n                pattern_type=SemanticType.DOMINANCE,\n                features={\n                    \"size\": np.random.random(),\n                    \"centrality\": np.random.random(),\n                    \"contrast\": np.random.random()\n                },\n                confidence=0.85 + (np.random.random() * 0.1),\n                source_domain=\"visual\",\n                context={\"test_pattern\": True}\n            ))\n            \n        # Generate linguistic patterns\n        for i in range(10):\n            patterns[\"linguistic\"].append(SemanticPattern(\n                pattern_type=SemanticType.STRUCTURE,\n                features={\n                    \"complexity\": np.random.random(),\n                    \"coherence\": np.random.random(),\n                    \"formality\": np.random.random()\n                },\n                confidence=0.85 + (np.random.random() * 0.1),\n                source_domain=\"linguistic\",\n                context={\"test_pattern\": True}\n            ))\n            \n        # Generate emotional patterns\n        for i in range(10):\n            patterns[\"emotional\"].append(SemanticPattern(\n                pattern_type=SemanticType.INTENSITY,\n                features={\n                    \"strength\": np.random.random(),\n                    \"valence\": np.random.random(),\n                    \"arousal\": np.random.random()\n                },\n                confidence=0.85 + (np.random.random() * 0.1),\n                source_domain=\"emotional\",\n                context={\"test_pattern\": True}\n            ))\n            \n        return patterns\n\n    def _prepare_domain_data(self, pattern: SemanticPattern, target_domain: str) -> Dict[str, Any]:\n        \"\"\"Prepare pattern data for specific domain translation\"\"\"\n        if target_domain == \"visual\":"
+        },
+        "_prepare_domain_data": {
+          "start_line": 106,
+          "end_line": 142,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern",
+              "type": "SemanticPattern"
+            },
+            {
+              "name": "target_domain",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "pattern.features.get",
+              "line": 114
+            },
+            {
+              "name": "pattern.features.get",
+              "line": 115
+            },
+            {
+              "name": "pattern.features.get",
+              "line": 124
+            },
+            {
+              "name": "pattern.features.get",
+              "line": 127
+            },
+            {
+              "name": "pattern.features.get",
+              "line": 125
+            },
+            {
+              "name": "pattern.features.get",
+              "line": 134
+            },
+            {
+              "name": "pattern.features.get",
+              "line": 135
+            },
+            {
+              "name": "pattern.features.get",
+              "line": 136
+            }
+          ],
+          "docstring": "Prepare pattern data for specific domain translation",
+          "code_snippet": "        return patterns\n\n    def _prepare_domain_data(self, pattern: SemanticPattern, target_domain: str) -> Dict[str, Any]:\n        \"\"\"Prepare pattern data for specific domain translation\"\"\"\n        if target_domain == \"visual\":\n            # Visual domain requires detection-style data\n            return {\n                \"bbox\": [0, 0, 100, 100],\n                \"width\": 100,\n                \"height\": 100,\n                \"class_confidence\": pattern.features.get('strength', \n                                                      pattern.features.get('coherence', 0.8)),\n                \"class_id\": 1,\n                \"class_name\": \"pattern_object\"\n            }\n            \n        elif target_domain == \"linguistic\":\n            # Linguistic domain requires text-style data\n            return {\n                \"sentence_data\": \"test pattern\",\n                \"grammar_score\": pattern.features.get('coherence',\n                                                    pattern.features.get('strength', 0.8)),\n                \"sentence_type\": \"pattern\",\n                \"complexity\": pattern.features.get('complexity', 0.5)\n            }\n            \n        elif target_domain == \"emotional\":\n            # Emotional domain requires sentiment-style data\n            return {\n                \"emotion_scores\": {\n                    \"intensity\": pattern.features.get('strength', 0.8),\n                    \"valence\": pattern.features.get('valence', 0.5),\n                    \"arousal\": pattern.features.get('arousal', 0.5)\n                }\n            }\n            \n        return {}\n\n    def _test_cross_domain_transfer(self, pattern: SemanticPattern, target_domain: str) -> Dict[str, Any]:\n        \"\"\"Test cross-domain pattern transfer\"\"\"\n        try:"
+        },
+        "_test_cross_domain_transfer": {
+          "start_line": 142,
+          "end_line": 182,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern",
+              "type": "SemanticPattern"
+            },
+            {
+              "name": "target_domain",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self._prepare_domain_data",
+              "line": 146
+            },
+            {
+              "name": "self.pattern_orchestrator.process_domain_data",
+              "line": 158
+            },
+            {
+              "name": "result.get",
+              "line": 164
+            },
+            {
+              "name": "....get",
+              "line": 165
+            },
+            {
+              "name": "print",
+              "line": 179
+            },
+            {
+              "name": "self._calculate_pattern_similarity",
+              "line": 167
+            },
+            {
+              "name": "str",
+              "line": 179
+            }
+          ],
+          "docstring": "Test cross-domain pattern transfer",
+          "code_snippet": "        return {}\n\n    def _test_cross_domain_transfer(self, pattern: SemanticPattern, target_domain: str) -> Dict[str, Any]:\n        \"\"\"Test cross-domain pattern transfer\"\"\"\n        try:\n            # Prepare domain-specific data without pattern object\n            domain_data = self._prepare_domain_data(pattern, target_domain)\n            \n            # Create the input data for processing\n            input_data = [{\n                \"pattern\": pattern,\n                \"source_domain\": pattern.source_domain,\n                \"target_domain\": target_domain,\n                \"confidence\": pattern.confidence,\n                **domain_data\n            }]\n            \n            # Process through orchestrator\n            result = self.pattern_orchestrator.process_domain_data(\n                input_data,\n                target_domain\n            )\n            \n            # Analyze transfer success\n            if result.get(\"results\") and result[\"results\"]:\n                transferred_pattern = result[\"results\"][0].get(\"semantic_pattern\")\n                if transferred_pattern and \"pattern\" in transferred_pattern:\n                    similarity = self._calculate_pattern_similarity(\n                        pattern.features,\n                        transferred_pattern[\"pattern\"].features\n                    )\n                    return {\n                        \"success\": similarity > 0.7,\n                        \"similarity\": similarity\n                    }\n            \n            return {\"success\": False, \"similarity\": 0.0}\n            \n        except Exception as e:\n            print(f\"Error in cross-domain transfer: {str(e)}\")\n            return {\"success\": False, \"similarity\": 0.0}\n\n    def _calculate_pattern_similarity(self, \n                                   features1: Dict[str, float],\n                                   features2: Dict[str, float]) -> float:"
+        },
+        "_calculate_pattern_similarity": {
+          "start_line": 182,
+          "end_line": 212,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "features1"
+            },
+            {
+              "name": "features2"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "set",
+              "line": 187
+            },
+            {
+              "name": "set",
+              "line": 187
+            },
+            {
+              "name": "max",
+              "line": 202
+            },
+            {
+              "name": "similarities.append",
+              "line": 204
+            },
+            {
+              "name": "np.mean",
+              "line": 206
+            },
+            {
+              "name": "print",
+              "line": 209
+            },
+            {
+              "name": "features1.keys",
+              "line": 187
+            },
+            {
+              "name": "features2.keys",
+              "line": 187
+            },
+            {
+              "name": "similarities.append",
+              "line": 198
+            },
+            {
+              "name": "abs",
+              "line": 202
+            },
+            {
+              "name": "abs",
+              "line": 202
+            },
+            {
+              "name": "abs",
+              "line": 203
+            },
+            {
+              "name": "str",
+              "line": 209
+            }
+          ],
+          "docstring": "Calculate similarity between feature sets",
+          "code_snippet": "            return {\"success\": False, \"similarity\": 0.0}\n\n    def _calculate_pattern_similarity(self, \n                                   features1: Dict[str, float],\n                                   features2: Dict[str, float]) -> float:\n        \"\"\"Calculate similarity between feature sets\"\"\"\n        try:\n            common_features = set(features1.keys()) & set(features2.keys())\n            if not common_features:\n                return 0.0\n                \n            similarities = []\n            for feature in common_features:\n                value1 = features1[feature]\n                value2 = features2[feature]\n                \n                # Handle zero values\n                if value1 == 0 and value2 == 0:\n                    similarities.append(1.0)  # Perfect match for zero values\n                    continue\n                \n                # Use maximum for normalization to avoid division by zero\n                max_val = max(abs(value1), abs(value2), 0.0001)  # Small epsilon to avoid division by zero\n                similarity = 1 - abs(value1 - value2) / max_val\n                similarities.append(similarity)\n                \n            return np.mean(similarities) if similarities else 0.0\n            \n        except Exception as e:\n            print(f\"Error calculating pattern similarity: {str(e)}\")\n            return 0.0\n\n    def _create_novel_variant(self, pattern: SemanticPattern) -> SemanticPattern:\n        \"\"\"Create a novel variant of a pattern\"\"\"\n        # Copy original pattern features"
+        },
+        "_create_novel_variant": {
+          "start_line": 212,
+          "end_line": 229,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern",
+              "type": "SemanticPattern"
+            }
+          ],
+          "return_type": "SemanticPattern",
+          "calls": [
+            {
+              "name": "pattern.features.copy",
+              "line": 215
+            },
+            {
+              "name": "SemanticPattern",
+              "line": 222
+            },
+            {
+              "name": "min",
+              "line": 219
+            },
+            {
+              "name": "max",
+              "line": 219
+            },
+            {
+              "name": "np.random.random",
+              "line": 220
+            }
+          ],
+          "docstring": "Create a novel variant of a pattern",
+          "code_snippet": "            return 0.0\n\n    def _create_novel_variant(self, pattern: SemanticPattern) -> SemanticPattern:\n        \"\"\"Create a novel variant of a pattern\"\"\"\n        # Copy original pattern features\n        features = pattern.features.copy()\n        \n        # Modify features slightly\n        for key in features:\n            features[key] = min(1.0, max(0.0, \n                features[key] + (np.random.random() * 0.2 - 0.1)))\n            \n        return SemanticPattern(\n            pattern_type=pattern.pattern_type,\n            features=features,\n            confidence=pattern.confidence,\n            source_domain=pattern.source_domain,\n            context={\"novel_variant\": True}\n        )\n\n    def test_pattern_recognition(self) -> Dict[str, float]:\n        \"\"\"Test pattern recognition capabilities\"\"\""
+        },
+        "test_pattern_recognition": {
+          "start_line": 230,
+          "end_line": 272,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "print",
+              "line": 232
+            },
+            {
+              "name": "self.validation_patterns.items",
+              "line": 241
+            },
+            {
+              "name": "max",
+              "line": 265
+            },
+            {
+              "name": "print",
+              "line": 242
+            },
+            {
+              "name": "self.semantic_registry.recognize_pattern",
+              "line": 248
+            },
+            {
+              "name": "self._create_novel_variant",
+              "line": 253
+            },
+            {
+              "name": "self.semantic_registry.recognize_pattern",
+              "line": 254
+            },
+            {
+              "name": "np.random.choice",
+              "line": 259
+            },
+            {
+              "name": "self._test_cross_domain_transfer",
+              "line": 260
+            },
+            {
+              "name": "self.validation_patterns.keys",
+              "line": 259
+            }
+          ],
+          "docstring": "Test pattern recognition capabilities",
+          "code_snippet": "        )\n\n    def test_pattern_recognition(self) -> Dict[str, float]:\n        \"\"\"Test pattern recognition capabilities\"\"\"\n        print(\"\\nTesting Pattern Recognition...\")\n        \n        results = {\n            \"success_rate\": 0.0,\n            \"novel_pattern_rate\": 0.0,\n            \"cross_domain_rate\": 0.0\n        }\n        \n        # Test each domain\n        for domain, patterns in self.validation_patterns.items():\n            print(f\"\\nTesting {domain} domain patterns...\")\n            \n            for pattern in patterns:\n                self.metrics[\"pattern_recognition\"][\"total_attempts\"] += 1\n                \n                # Test basic recognition\n                recognition = self.semantic_registry.recognize_pattern(pattern)\n                if recognition[\"stored\"]:\n                    self.metrics[\"pattern_recognition\"][\"successful_matches\"] += 1\n                    \n                # Test novel pattern handling\n                modified_pattern = self._create_novel_variant(pattern)\n                novel_recognition = self.semantic_registry.recognize_pattern(modified_pattern)\n                if novel_recognition[\"stored\"]:\n                    self.metrics[\"pattern_recognition\"][\"novel_pattern_success\"] += 1\n                    \n                # Test cross-domain translation\n                target_domain = np.random.choice([d for d in self.validation_patterns.keys() if d != domain])\n                cross_domain = self._test_cross_domain_transfer(pattern, target_domain)\n                if cross_domain[\"success\"]:\n                    self.metrics[\"pattern_recognition\"][\"cross_domain_success\"] += 1\n        \n        # Calculate success rates\n        total = max(1, self.metrics[\"pattern_recognition\"][\"total_attempts\"])\n        results[\"success_rate\"] = self.metrics[\"pattern_recognition\"][\"successful_matches\"] / total\n        results[\"novel_pattern_rate\"] = self.metrics[\"pattern_recognition\"][\"novel_pattern_success\"] / total\n        results[\"cross_domain_rate\"] = self.metrics[\"pattern_recognition\"][\"cross_domain_success\"] / total\n        \n        return results\n\n    def validate_learning(self) -> Dict[str, Any]:\n        \"\"\"Run complete learning validation\"\"\"\n        print(\"\\nStarting Learning Validation...\")"
+        },
+        "validate_learning": {
+          "start_line": 272,
+          "end_line": 307,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "print",
+              "line": 274
+            },
+            {
+              "name": "self.test_pattern_recognition",
+              "line": 277
+            },
+            {
+              "name": "print",
+              "line": 300
+            },
+            {
+              "name": "print",
+              "line": 301
+            },
+            {
+              "name": "print",
+              "line": 302
+            },
+            {
+              "name": "print",
+              "line": 303
+            },
+            {
+              "name": "np.mean",
+              "line": 283
+            },
+            {
+              "name": "np.mean",
+              "line": 285
+            },
+            {
+              "name": "np.mean",
+              "line": 287
+            },
+            {
+              "name": "np.mean",
+              "line": 291
+            },
+            {
+              "name": "np.mean",
+              "line": 293
+            },
+            {
+              "name": "np.mean",
+              "line": 295
+            }
+          ],
+          "docstring": "Run complete learning validation",
+          "code_snippet": "        return results\n\n    def validate_learning(self) -> Dict[str, Any]:\n        \"\"\"Run complete learning validation\"\"\"\n        print(\"\\nStarting Learning Validation...\")\n        \n        # Test pattern recognition\n        recognition_results = self.test_pattern_recognition()\n        \n        # Calculate overall metrics\n        validation_results = {\n            \"pattern_recognition\": recognition_results,\n            \"learning_effectiveness\": {\n                \"pattern_preservation\": np.mean(self.metrics[\"learning_validation\"][\"pattern_preservation\"]) \n                    if self.metrics[\"learning_validation\"][\"pattern_preservation\"] else 0.0,\n                \"semantic_accuracy\": np.mean(self.metrics[\"learning_validation\"][\"semantic_accuracy\"])\n                    if self.metrics[\"learning_validation\"][\"semantic_accuracy\"] else 0.0,\n                \"transfer_fidelity\": np.mean(self.metrics[\"learning_validation\"][\"transfer_fidelity\"])\n                    if self.metrics[\"learning_validation\"][\"transfer_fidelity\"] else 0.0\n            },\n            \"performance_metrics\": {\n                \"avg_processing_time\": np.mean(self.metrics[\"performance\"][\"processing_times\"])\n                    if self.metrics[\"performance\"][\"processing_times\"] else 0.0,\n                \"memory_efficiency\": np.mean(self.metrics[\"performance\"][\"memory_usage\"])\n                    if self.metrics[\"performance\"][\"memory_usage\"] else 0.0,\n                \"batch_efficiency\": np.mean(self.metrics[\"performance\"][\"batch_efficiency\"])\n                    if self.metrics[\"performance\"][\"batch_efficiency\"] else 0.0\n            }\n        }\n        \n        print(\"\\nValidation Results:\")\n        print(f\"Pattern Recognition Success Rate: {recognition_results['success_rate']:.2%}\")\n        print(f\"Novel Pattern Recognition Rate: {recognition_results['novel_pattern_rate']:.2%}\")\n        print(f\"Cross-Domain Transfer Rate: {recognition_results['cross_domain_rate']:.2%}\")\n        \n        return validation_results\n\n    def save_results(self, results: Dict[str, Any]):\n        \"\"\"Save validation results to file\"\"\"\n        timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")"
+        },
+        "save_results": {
+          "start_line": 307,
+          "end_line": 330,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "results"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....strftime",
+              "line": 309
+            },
+            {
+              "name": "open",
+              "line": 314
+            },
+            {
+              "name": "json.dump",
+              "line": 315
+            },
+            {
+              "name": "open",
+              "line": 327
+            },
+            {
+              "name": "f.write",
+              "line": 328
+            },
+            {
+              "name": "datetime.now",
+              "line": 309
+            },
+            {
+              "name": "....join",
+              "line": 328
+            }
+          ],
+          "docstring": "Save validation results to file",
+          "code_snippet": "        return validation_results\n\n    def save_results(self, results: Dict[str, Any]):\n        \"\"\"Save validation results to file\"\"\"\n        timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n        results_file = self.log_dir / f\"validation_results_{timestamp}.json\"\n        report_file = self.log_dir / f\"validation_report_{timestamp}.txt\"\n\n        # Save JSON results\n        with open(results_file, 'w') as f:\n            json.dump(results, f, indent=2)\n\n        # Generate and save report\n        report_lines = [\n            f\"Validation Report - {timestamp}\",\n            \"=\" * 50,\n            f\"\\nPattern Recognition:\",\n            f\"Success Rate: {results['pattern_recognition']['success_rate']:.2%}\",\n            f\"Novel Pattern Rate: {results['pattern_recognition']['novel_pattern_rate']:.2%}\",\n            f\"Cross-Domain Rate: {results['pattern_recognition']['cross_domain_rate']:.2%}\"\n        ]\n        \n        with open(report_file, 'w') as f:\n            f.write('\\n'.join(report_lines))\n\n\ndef run_validation_test():\n    \"\"\"Run a complete validation test\"\"\""
+        }
+      },
+      "class_variables": [
+        {
+          "name": "DOMAIN_TYPE_MAPPING",
+          "line": 15
+        }
+      ],
+      "bases": [],
+      "docstring": "Validates pattern learning effectiveness across domains"
+    }
+  },
+  "functions": {
+    "run_validation_test": {
+      "start_line": 331,
+      "end_line": 346,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "PatternLearningValidator",
+          "line": 333
+        },
+        {
+          "name": "validator.validate_learning",
+          "line": 334
+        },
+        {
+          "name": "validator.save_results",
+          "line": 335
+        },
+        {
+          "name": "print",
+          "line": 337
+        },
+        {
+          "name": "print",
+          "line": 338
+        },
+        {
+          "name": "print",
+          "line": 339
+        },
+        {
+          "name": "print",
+          "line": 340
+        },
+        {
+          "name": "print",
+          "line": 341
+        },
+        {
+          "name": "print",
+          "line": 342
+        },
+        {
+          "name": "print",
+          "line": 343
+        },
+        {
+          "name": "print",
+          "line": 344
+        }
+      ],
+      "docstring": "Run a complete validation test",
+      "code_snippet": "\n\ndef run_validation_test():\n    \"\"\"Run a complete validation test\"\"\"\n    validator = PatternLearningValidator(\"complete_validation\")\n    results = validator.validate_learning()\n    validator.save_results(results)\n    \n    print(\"\\nComplete Validation Results:\")\n    print(f\"Pattern Recognition Success: {results['pattern_recognition']['success_rate']:.2%}\")\n    print(f\"Novel Pattern Success: {results['pattern_recognition']['novel_pattern_rate']:.2%}\")\n    print(f\"Cross-Domain Success: {results['pattern_recognition']['cross_domain_rate']:.2%}\")\n    print(\"\\nLearning Effectiveness:\")\n    print(f\"Pattern Preservation: {results['learning_effectiveness']['pattern_preservation']:.2%}\")\n    print(f\"Semantic Accuracy: {results['learning_effectiveness']['semantic_accuracy']:.2%}\")\n    print(f\"Transfer Fidelity: {results['learning_effectiveness']['transfer_fidelity']:.2%}\")\n\nif __name__ == \"__main__\":\n    run_validation_test()"
+    }
+  },
+  "constants": {}
+}

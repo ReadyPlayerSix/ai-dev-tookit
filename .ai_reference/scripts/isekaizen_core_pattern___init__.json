@@ -1,0 +1,20 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\pattern\\__init__.py",
+  "imports": [
+    {
+      "name": "recognition.recognize_patterns",
+      "line": 10
+    },
+    {
+      "name": "tracking.track_patterns",
+      "line": 11
+    },
+    {
+      "name": "tracking.PatternTracker",
+      "line": 11
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

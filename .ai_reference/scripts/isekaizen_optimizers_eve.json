@@ -1,0 +1,1596 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\optimizers\\eve.py",
+  "imports": [
+    {
+      "name": "math",
+      "line": 11
+    },
+    {
+      "name": "torch",
+      "line": 12
+    },
+    {
+      "name": "torch.optim.Optimizer",
+      "line": 13
+    },
+    {
+      "name": "typing.List",
+      "line": 14
+    },
+    {
+      "name": "typing.Optional",
+      "line": 14
+    },
+    {
+      "name": "typing.Dict",
+      "line": 14
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 14
+    },
+    {
+      "name": "logging",
+      "line": 15
+    },
+    {
+      "name": "isekaizen.pattern.tracking.PatternRecognitionTracker",
+      "line": 16
+    },
+    {
+      "name": "isekaizen.utils.pattern_map_utils.translate_pattern_map_to_standard_format",
+      "line": 497
+    },
+    {
+      "name": "traceback",
+      "line": 502
+    },
+    {
+      "name": "traceback",
+      "line": 568
+    }
+  ],
+  "classes": {
+    "EVECore": {
+      "start_line": 20,
+      "end_line": 134,
+      "methods": {
+        "__init__": {
+          "start_line": 25,
+          "end_line": 57,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "params"
+            },
+            {
+              "name": "lr"
+            },
+            {
+              "name": "pattern_betas"
+            },
+            {
+              "name": "eps"
+            },
+            {
+              "name": "weight_decay"
+            },
+            {
+              "name": "amsgrad"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "dict",
+              "line": 48
+            },
+            {
+              "name": "....__init__",
+              "line": 55
+            },
+            {
+              "name": "ValueError",
+              "line": 35
+            },
+            {
+              "name": "ValueError",
+              "line": 37
+            },
+            {
+              "name": "ValueError",
+              "line": 39
+            },
+            {
+              "name": "super",
+              "line": 55
+            }
+          ],
+          "code_snippet": "    Adam-style adaptive learning rates.\n    \"\"\"\n    def __init__(\n        self,\n        params,\n        lr=1e-3,\n        pattern_betas=None,\n        eps=1e-8,\n        weight_decay=0,\n        amsgrad=False\n    ):\n        if not 0.0 <= lr:\n            raise ValueError(f\"Invalid learning rate: {lr}\")\n        if not 0.0 <= eps:\n            raise ValueError(f\"Invalid epsilon value: {eps}\")\n        if not 0.0 <= weight_decay:\n            raise ValueError(f\"Invalid weight_decay value: {weight_decay}\")\n\n        self.pattern_betas = pattern_betas or {\n            'default': (0.9, 0.999),\n            'structural': (0.85, 0.995),  # Spatial organization and relationships\n            'statistical': (0.9, 0.999),   # Distribution and variance patterns\n            'temporal': (0.95, 0.995)     # Time-related patterns\n        }\n\n        defaults = dict(\n            lr=lr,\n            eps=eps,\n            weight_decay=weight_decay,\n            amsgrad=amsgrad,\n            pattern_betas=self.pattern_betas\n        )\n        super().__init__(params, defaults)\n\n    def __setstate__(self, state):\n        super().__setstate__(state)\n        for group in self.param_groups:"
+        },
+        "__setstate__": {
+          "start_line": 57,
+          "end_line": 62,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "state"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__setstate__",
+              "line": 58
+            },
+            {
+              "name": "group.setdefault",
+              "line": 60
+            },
+            {
+              "name": "super",
+              "line": 58
+            }
+          ],
+          "code_snippet": "        super().__init__(params, defaults)\n\n    def __setstate__(self, state):\n        super().__setstate__(state)\n        for group in self.param_groups:\n            group.setdefault('amsgrad', False)\n\n    def get_pattern_betas(self, pattern_type: str) -> Tuple[float, float]:\n        \"\"\"Get beta values for a specific pattern type.\"\"\"\n        return self.pattern_betas.get(pattern_type, self.pattern_betas['default'])"
+        },
+        "get_pattern_betas": {
+          "start_line": 62,
+          "end_line": 66,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.pattern_betas.get",
+              "line": 64
+            }
+          ],
+          "docstring": "Get beta values for a specific pattern type.",
+          "code_snippet": "            group.setdefault('amsgrad', False)\n\n    def get_pattern_betas(self, pattern_type: str) -> Tuple[float, float]:\n        \"\"\"Get beta values for a specific pattern type.\"\"\"\n        return self.pattern_betas.get(pattern_type, self.pattern_betas['default'])\n\n    @torch.no_grad()\n    def step(self, closure=None, pattern_weights=None):\n        \"\"\"Performs a single optimization step.\"\"\""
+        },
+        "step": {
+          "start_line": 67,
+          "end_line": 134,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "closure"
+            },
+            {
+              "name": "pattern_weights"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.no_grad",
+              "line": 66
+            },
+            {
+              "name": "torch.enable_grad",
+              "line": 71
+            },
+            {
+              "name": "closure",
+              "line": 72
+            },
+            {
+              "name": "pattern_weights.items",
+              "line": 106
+            },
+            {
+              "name": "....add_",
+              "line": 120
+            },
+            {
+              "name": "....addcmul_",
+              "line": 121
+            },
+            {
+              "name": "p.addcdiv_",
+              "line": 130
+            },
+            {
+              "name": "RuntimeError",
+              "line": 83
+            },
+            {
+              "name": "len",
+              "line": 88
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 90
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 91
+            },
+            {
+              "name": "self.get_pattern_betas",
+              "line": 107
+            },
+            {
+              "name": "grad.add",
+              "line": 117
+            },
+            {
+              "name": "torch.maximum",
+              "line": 124
+            },
+            {
+              "name": "....add_",
+              "line": 125
+            },
+            {
+              "name": "....add_",
+              "line": 127
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 93
+            },
+            {
+              "name": "exp_avg.mul_",
+              "line": 120
+            },
+            {
+              "name": "exp_avg_sq.mul_",
+              "line": 121
+            },
+            {
+              "name": "max_exp_avg_sq.sqrt",
+              "line": 125
+            },
+            {
+              "name": "math.sqrt",
+              "line": 125
+            },
+            {
+              "name": "exp_avg_sq.sqrt",
+              "line": 127
+            },
+            {
+              "name": "math.sqrt",
+              "line": 127
+            }
+          ],
+          "docstring": "Performs a single optimization step.",
+          "code_snippet": "\n    @torch.no_grad()\n    def step(self, closure=None, pattern_weights=None):\n        \"\"\"Performs a single optimization step.\"\"\"\n        loss = None\n        if closure is not None:\n            with torch.enable_grad():\n                loss = closure()\n\n        pattern_weights = pattern_weights or {'default': 1.0}\n\n        for group in self.param_groups:\n            for p in group['params']:\n                if p.grad is None:\n                    continue\n                grad = p.grad\n\n                if grad.is_sparse:\n                    raise RuntimeError('EVE does not support sparse gradients')\n\n                state = self.state[p]\n\n                # State initialization\n                if len(state) == 0:\n                    state['step'] = 0\n                    state['exp_avg'] = torch.zeros_like(p, memory_format=torch.preserve_format)\n                    state['exp_avg_sq'] = torch.zeros_like(p, memory_format=torch.preserve_format)\n                    if group['amsgrad']:\n                        state['max_exp_avg_sq'] = torch.zeros_like(p, memory_format=torch.preserve_format)\n\n                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']\n                if group['amsgrad']:\n                    max_exp_avg_sq = state['max_exp_avg_sq']\n\n                state['step'] += 1\n\n                # Calculate weighted beta values\n                beta1_weighted = 0.0\n                beta2_weighted = 0.0\n                total_weight = 0.0\n\n                for pattern, weight in pattern_weights.items():\n                    beta1, beta2 = self.get_pattern_betas(pattern)\n                    beta1_weighted += beta1 * weight\n                    beta2_weighted += beta2 * weight\n                    total_weight += weight\n\n                beta1 = beta1_weighted / total_weight\n                beta2 = beta2_weighted / total_weight\n\n                # Weight decay\n                if group['weight_decay'] != 0:\n                    grad = grad.add(p, alpha=group['weight_decay'])\n\n                # Update moment estimates\n                exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)\n                exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)\n\n                if group['amsgrad']:\n                    torch.maximum(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)\n                    denom = (max_exp_avg_sq.sqrt() / math.sqrt(1 - beta2 ** state['step'])).add_(group['eps'])\n                else:\n                    denom = (exp_avg_sq.sqrt() / math.sqrt(1 - beta2 ** state['step'])).add_(group['eps'])\n\n                step_size = group['lr'] / (1 - beta1 ** state['step'])\n                p.addcdiv_(exp_avg, denom, value=-step_size)\n\n        return loss\n\nclass EVEPatternMomentum(Optimizer):\n    \"\"\"EVE Pattern-Momentum variant that maintains separate momentum terms for different pattern types.\"\"\"\n    def __init__("
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Optimizer"
+      ],
+      "docstring": "\n    EVE-Core: Base EVE implementation that integrates pattern recognition with\n    Adam-style adaptive learning rates.\n    "
+    },
+    "EVEPatternMomentum": {
+      "start_line": 134,
+      "end_line": 247,
+      "methods": {
+        "__init__": {
+          "start_line": 136,
+          "end_line": 168,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "params"
+            },
+            {
+              "name": "lr"
+            },
+            {
+              "name": "pattern_betas"
+            },
+            {
+              "name": "eps"
+            },
+            {
+              "name": "weight_decay"
+            },
+            {
+              "name": "amsgrad"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "dict",
+              "line": 159
+            },
+            {
+              "name": "....__init__",
+              "line": 166
+            },
+            {
+              "name": "ValueError",
+              "line": 146
+            },
+            {
+              "name": "ValueError",
+              "line": 148
+            },
+            {
+              "name": "ValueError",
+              "line": 150
+            },
+            {
+              "name": "super",
+              "line": 166
+            }
+          ],
+          "code_snippet": "class EVEPatternMomentum(Optimizer):\n    \"\"\"EVE Pattern-Momentum variant that maintains separate momentum terms for different pattern types.\"\"\"\n    def __init__(\n        self,\n        params,\n        lr=1e-3,\n        pattern_betas=None,\n        eps=1e-8,\n        weight_decay=0,\n        amsgrad=False\n    ):\n        if not 0.0 <= lr:\n            raise ValueError(f\"Invalid learning rate: {lr}\")\n        if not 0.0 <= eps:\n            raise ValueError(f\"Invalid epsilon value: {eps}\")\n        if not 0.0 <= weight_decay:\n            raise ValueError(f\"Invalid weight_decay value: {weight_decay}\")\n\n        self.pattern_betas = pattern_betas or {\n            'default': (0.9, 0.999),\n            'structural': (0.85, 0.995),  # Spatial organization and relationships\n            'statistical': (0.9, 0.999),   # Distribution and variance patterns\n            'temporal': (0.95, 0.995)     # Time-related patterns\n        }\n\n        defaults = dict(\n            lr=lr,\n            eps=eps,\n            weight_decay=weight_decay,\n            amsgrad=amsgrad,\n            pattern_betas=self.pattern_betas\n        )\n        super().__init__(params, defaults)\n\n    @torch.no_grad()\n    def step(self, closure=None, pattern_states=None):\n        \"\"\"Performs a single optimization step with pattern-specific momentum.\"\"\""
+        },
+        "step": {
+          "start_line": 169,
+          "end_line": 247,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "closure"
+            },
+            {
+              "name": "pattern_states"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.no_grad",
+              "line": 168
+            },
+            {
+              "name": "torch.enable_grad",
+              "line": 173
+            },
+            {
+              "name": "closure",
+              "line": 174
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 207
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 208
+            },
+            {
+              "name": "pattern_states.items",
+              "line": 213
+            },
+            {
+              "name": "final_exp_avg.div_",
+              "line": 235
+            },
+            {
+              "name": "final_exp_avg_sq.div_",
+              "line": 236
+            },
+            {
+              "name": "....add_",
+              "line": 240
+            },
+            {
+              "name": "p.addcdiv_",
+              "line": 243
+            },
+            {
+              "name": "RuntimeError",
+              "line": 185
+            },
+            {
+              "name": "len",
+              "line": 190
+            },
+            {
+              "name": "pattern_states.keys",
+              "line": 193
+            },
+            {
+              "name": "grad.add",
+              "line": 205
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 210
+            },
+            {
+              "name": "....add_",
+              "line": 224
+            },
+            {
+              "name": "....addcmul_",
+              "line": 225
+            },
+            {
+              "name": "final_exp_avg.add_",
+              "line": 232
+            },
+            {
+              "name": "final_exp_avg_sq.add_",
+              "line": 233
+            },
+            {
+              "name": "final_max_exp_avg_sq.div_",
+              "line": 238
+            },
+            {
+              "name": "torch.maximum",
+              "line": 229
+            },
+            {
+              "name": "final_max_exp_avg_sq.add_",
+              "line": 230
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 195
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 196
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 200
+            },
+            {
+              "name": "exp_avg.mul_",
+              "line": 224
+            },
+            {
+              "name": "exp_avg_sq.mul_",
+              "line": 225
+            },
+            {
+              "name": "final_exp_avg_sq.sqrt",
+              "line": 240
+            },
+            {
+              "name": "math.sqrt",
+              "line": 240
+            }
+          ],
+          "docstring": "Performs a single optimization step with pattern-specific momentum.",
+          "code_snippet": "\n    @torch.no_grad()\n    def step(self, closure=None, pattern_states=None):\n        \"\"\"Performs a single optimization step with pattern-specific momentum.\"\"\"\n        loss = None\n        if closure is not None:\n            with torch.enable_grad():\n                loss = closure()\n\n        pattern_states = pattern_states or {'default': {'weight': 1.0, 'complexity': 0.5}}\n\n        for group in self.param_groups:\n            for p in group['params']:\n                if p.grad is None:\n                    continue\n                grad = p.grad\n\n                if grad.is_sparse:\n                    raise RuntimeError('EVE-PM does not support sparse gradients')\n\n                state = self.state[p]\n\n                # Initialize state dict for each pattern type\n                if len(state) == 0:\n                    state['step'] = 0\n                    state['pattern_moments'] = {}\n                    for pattern in pattern_states.keys():\n                        state['pattern_moments'][pattern] = {\n                            'exp_avg': torch.zeros_like(p, memory_format=torch.preserve_format),\n                            'exp_avg_sq': torch.zeros_like(p, memory_format=torch.preserve_format)\n                        }\n                        if group['amsgrad']:\n                            state['pattern_moments'][pattern]['max_exp_avg_sq'] = \\\n                                torch.zeros_like(p, memory_format=torch.preserve_format)\n\n                state['step'] += 1\n\n                if group['weight_decay'] != 0:\n                    grad = grad.add(p, alpha=group['weight_decay'])\n\n                final_exp_avg = torch.zeros_like(p, memory_format=torch.preserve_format)\n                final_exp_avg_sq = torch.zeros_like(p, memory_format=torch.preserve_format)\n                if group['amsgrad']:\n                    final_max_exp_avg_sq = torch.zeros_like(p, memory_format=torch.preserve_format)\n\n                total_weight = 0.0\n                for pattern, pattern_info in pattern_states.items():\n                    weight = pattern_info['weight']\n                    total_weight += weight\n\n                    # Get pattern-specific moments\n                    moments = state['pattern_moments'][pattern]\n                    beta1, beta2 = self.pattern_betas[pattern]\n\n                    exp_avg = moments['exp_avg']\n                    exp_avg_sq = moments['exp_avg_sq']\n\n                    exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)\n                    exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)\n\n                    if group['amsgrad']:\n                        max_exp_avg_sq = moments['max_exp_avg_sq']\n                        torch.maximum(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)\n                        final_max_exp_avg_sq.add_(max_exp_avg_sq * weight)\n\n                    final_exp_avg.add_(exp_avg * weight)\n                    final_exp_avg_sq.add_(exp_avg_sq * weight)\n\n                final_exp_avg.div_(total_weight)\n                final_exp_avg_sq.div_(total_weight)\n                if group['amsgrad']:\n                    final_max_exp_avg_sq.div_(total_weight)\n\n                denom = (final_exp_avg_sq.sqrt() / math.sqrt(1 - beta2 ** state['step'])).add_(group['eps'])\n                step_size = group['lr'] / (1 - beta1 ** state['step'])\n\n                p.addcdiv_(final_exp_avg, denom, value=-step_size)\n\n        return loss\n\nclass EVERiskAdaptive(Optimizer):\n    \"\"\"EVE Risk-Adaptive variant that adjusts optimization based on pattern risks.\"\"\"\n    def __init__("
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Optimizer"
+      ],
+      "docstring": "EVE Pattern-Momentum variant that maintains separate momentum terms for different pattern types."
+    },
+    "EVERiskAdaptive": {
+      "start_line": 247,
+      "end_line": 359,
+      "methods": {
+        "__init__": {
+          "start_line": 249,
+          "end_line": 284,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "params"
+            },
+            {
+              "name": "lr"
+            },
+            {
+              "name": "pattern_betas"
+            },
+            {
+              "name": "eps"
+            },
+            {
+              "name": "weight_decay"
+            },
+            {
+              "name": "amsgrad"
+            },
+            {
+              "name": "risk_sensitivity"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "dict",
+              "line": 274
+            },
+            {
+              "name": "....__init__",
+              "line": 282
+            },
+            {
+              "name": "ValueError",
+              "line": 260
+            },
+            {
+              "name": "ValueError",
+              "line": 262
+            },
+            {
+              "name": "ValueError",
+              "line": 264
+            },
+            {
+              "name": "super",
+              "line": 282
+            }
+          ],
+          "code_snippet": "class EVERiskAdaptive(Optimizer):\n    \"\"\"EVE Risk-Adaptive variant that adjusts optimization based on pattern risks.\"\"\"\n    def __init__(\n        self,\n        params,\n        lr=1e-3,\n        pattern_betas=None,\n        eps=1e-8,\n        weight_decay=0,\n        amsgrad=False,\n        risk_sensitivity=0.1\n    ):\n        if not 0.0 <= lr:\n            raise ValueError(f\"Invalid learning rate: {lr}\")\n        if not 0.0 <= eps:\n            raise ValueError(f\"Invalid epsilon value: {eps}\")\n        if not 0.0 <= weight_decay:\n            raise ValueError(f\"Invalid weight_decay value: {weight_decay}\")\n\n        self.risk_sensitivity = risk_sensitivity\n        self.pattern_betas = pattern_betas or {\n            'default': (0.9, 0.999),\n            'structural': (0.85, 0.995),  # Spatial organization and relationships\n            'statistical': (0.9, 0.999),   # Distribution and variance patterns\n            'temporal': (0.95, 0.995)     # Time-related patterns\n        }\n\n        defaults = dict(\n            lr=lr,\n            eps=eps,\n            weight_decay=weight_decay,\n            amsgrad=amsgrad,\n            pattern_betas=self.pattern_betas,\n            risk_sensitivity=risk_sensitivity\n        )\n        super().__init__(params, defaults)\n\n    def adjust_betas_for_risk(self, pattern: str, risk: float) -> Tuple[float, float]:\n        \"\"\"Adjust beta values based on risk level.\"\"\"\n        beta1, beta2 = self.pattern_betas[pattern]"
+        },
+        "adjust_betas_for_risk": {
+          "start_line": 284,
+          "end_line": 294,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern",
+              "type": "str"
+            },
+            {
+              "name": "risk",
+              "type": "float"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "min",
+              "line": 289
+            },
+            {
+              "name": "min",
+              "line": 290
+            }
+          ],
+          "docstring": "Adjust beta values based on risk level.",
+          "code_snippet": "        super().__init__(params, defaults)\n\n    def adjust_betas_for_risk(self, pattern: str, risk: float) -> Tuple[float, float]:\n        \"\"\"Adjust beta values based on risk level.\"\"\"\n        beta1, beta2 = self.pattern_betas[pattern]\n        \n        risk_factor = risk * self.risk_sensitivity\n        adjusted_beta1 = min(0.999, beta1 + (1 - beta1) * risk_factor)\n        adjusted_beta2 = min(0.9999, beta2 + (1 - beta2) * risk_factor)\n        \n        return adjusted_beta1, adjusted_beta2\n\n    @torch.no_grad()\n    def step(self, closure=None, pattern_risks=None):\n        \"\"\"Performs a single optimization step with risk-adaptive moment estimation.\"\"\""
+        },
+        "step": {
+          "start_line": 295,
+          "end_line": 359,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "closure"
+            },
+            {
+              "name": "pattern_risks"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.no_grad",
+              "line": 294
+            },
+            {
+              "name": "torch.enable_grad",
+              "line": 299
+            },
+            {
+              "name": "closure",
+              "line": 300
+            },
+            {
+              "name": "sum",
+              "line": 330
+            },
+            {
+              "name": "pattern_risks.items",
+              "line": 332
+            },
+            {
+              "name": "....add_",
+              "line": 345
+            },
+            {
+              "name": "....addcmul_",
+              "line": 346
+            },
+            {
+              "name": "p.addcdiv_",
+              "line": 355
+            },
+            {
+              "name": "RuntimeError",
+              "line": 311
+            },
+            {
+              "name": "len",
+              "line": 315
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 317
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 318
+            },
+            {
+              "name": "pattern_risks.values",
+              "line": 330
+            },
+            {
+              "name": "self.adjust_betas_for_risk",
+              "line": 333
+            },
+            {
+              "name": "grad.add",
+              "line": 343
+            },
+            {
+              "name": "torch.maximum",
+              "line": 349
+            },
+            {
+              "name": "....add_",
+              "line": 350
+            },
+            {
+              "name": "....add_",
+              "line": 352
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 320
+            },
+            {
+              "name": "exp_avg.mul_",
+              "line": 345
+            },
+            {
+              "name": "exp_avg_sq.mul_",
+              "line": 346
+            },
+            {
+              "name": "len",
+              "line": 338
+            },
+            {
+              "name": "max_exp_avg_sq.sqrt",
+              "line": 350
+            },
+            {
+              "name": "math.sqrt",
+              "line": 350
+            },
+            {
+              "name": "exp_avg_sq.sqrt",
+              "line": 352
+            },
+            {
+              "name": "math.sqrt",
+              "line": 352
+            }
+          ],
+          "docstring": "Performs a single optimization step with risk-adaptive moment estimation.",
+          "code_snippet": "\n    @torch.no_grad()\n    def step(self, closure=None, pattern_risks=None):\n        \"\"\"Performs a single optimization step with risk-adaptive moment estimation.\"\"\"\n        loss = None\n        if closure is not None:\n            with torch.enable_grad():\n                loss = closure()\n\n        pattern_risks = pattern_risks or {'default': 0.5}\n\n        for group in self.param_groups:\n            for p in group['params']:\n                if p.grad is None:\n                    continue\n                grad = p.grad\n\n                if grad.is_sparse:\n                    raise RuntimeError('EVE-RA does not support sparse gradients')\n\n                state = self.state[p]\n\n                if len(state) == 0:\n                    state['step'] = 0\n                    state['exp_avg'] = torch.zeros_like(p, memory_format=torch.preserve_format)\n                    state['exp_avg_sq'] = torch.zeros_like(p, memory_format=torch.preserve_format)\n                    if group['amsgrad']:\n                        state['max_exp_avg_sq'] = torch.zeros_like(p, memory_format=torch.preserve_format)\n\n                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']\n                if group['amsgrad']:\n                    max_exp_avg_sq = state['max_exp_avg_sq']\n\n                state['step'] += 1\n\n                beta1_weighted = 0.0\n                beta2_weighted = 0.0\n                total_risk = sum(pattern_risks.values())\n\n                for pattern, risk in pattern_risks.items():\n                    beta1, beta2 = self.adjust_betas_for_risk(\n                        pattern if pattern in self.pattern_betas else 'default',\n                        risk\n                    )\n                    \n                    risk_weight = risk / total_risk if total_risk > 0 else 1.0 / len(pattern_risks)\n                    beta1_weighted += beta1 * risk_weight\n                    beta2_weighted += beta2 * risk_weight\n\n                if group['weight_decay'] != 0:\n                    grad = grad.add(p, alpha=group['weight_decay'])\n\n                exp_avg.mul_(beta1_weighted).add_(grad, alpha=1 - beta1_weighted)\n                exp_avg_sq.mul_(beta2_weighted).addcmul_(grad, grad, value=1 - beta2_weighted)\n\n                if group['amsgrad']:\n                    torch.maximum(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)\n                    denom = (max_exp_avg_sq.sqrt() / math.sqrt(1 - beta2_weighted ** state['step'])).add_(group['eps'])\n                else:\n                    denom = (exp_avg_sq.sqrt() / math.sqrt(1 - beta2_weighted ** state['step'])).add_(group['eps'])\n\n                step_size = group['lr'] / (1 - beta1_weighted ** state['step'])\n                p.addcdiv_(exp_avg, denom, value=-step_size)\n\n        return loss\n\nclass EVENaturalWeights(Optimizer):\n    \"\"\"\nEVE variant that uses natural weight adjustments based on pattern success and risk."
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Optimizer"
+      ],
+      "docstring": "EVE Risk-Adaptive variant that adjusts optimization based on pattern risks."
+    },
+    "EVENaturalWeights": {
+      "start_line": 359,
+      "end_line": 946,
+      "methods": {
+        "__init__": {
+          "start_line": 368,
+          "end_line": 423,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "params"
+            },
+            {
+              "name": "lr"
+            },
+            {
+              "name": "pattern_betas"
+            },
+            {
+              "name": "eps"
+            },
+            {
+              "name": "base_confidence_threshold"
+            },
+            {
+              "name": "pattern_tracker"
+            },
+            {
+              "name": "weight_decay"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "dict",
+              "line": 410
+            },
+            {
+              "name": "....__init__",
+              "line": 416
+            },
+            {
+              "name": "ValueError",
+              "line": 380
+            },
+            {
+              "name": "ValueError",
+              "line": 382
+            },
+            {
+              "name": "PatternRecognitionTracker",
+              "line": 385
+            },
+            {
+              "name": "logger.warning",
+              "line": 391
+            },
+            {
+              "name": "logger.info",
+              "line": 392
+            },
+            {
+              "name": "logger.info",
+              "line": 394
+            },
+            {
+              "name": "super",
+              "line": 416
+            }
+          ],
+          "code_snippet": "passing pattern states to the step() method to work effectively.\n\"\"\"\n    def __init__(\n        self,\n        params,\n        lr=1e-3,\n        pattern_betas=None,\n        eps=1e-8,\n        base_confidence_threshold=0.7,  # Changed from fixed 0.8 to adaptive model\n        pattern_tracker=None,\n        weight_decay=1e-4,  # Added explicit weight decay parameter\n        **kwargs  # Accept additional kwargs for compatibility\n    ):\n        if not 0.0 <= lr:\n            raise ValueError(f\"Invalid learning rate: {lr}\")\n        if not 0.0 <= eps:\n            raise ValueError(f\"Invalid epsilon value: {eps}\")\n\n        # Initialize pattern tracking\n        self.pattern_tracker = pattern_tracker or PatternRecognitionTracker()\n        self.base_confidence_threshold = base_confidence_threshold\n        self.weight_decay = weight_decay\n        \n        # Log initialization state\n        if pattern_tracker is None:\n            logger.warning(\"EVENaturalWeights initialized with default pattern tracker. You must initialize pattern data\")\n            logger.info(\"Minimal pattern tracking will be used if no pattern map is provided\")\n        else:\n            logger.info(\"EVENaturalWeights initialized with provided pattern tracker\")\n        \n        # Track accuracy metrics to detect train-test gap\n        self.train_acc = 0.0\n        self.test_acc = 0.0\n        self.accuracy_gap_history = []\n\n        # Initialize pattern-specific learning dynamics\n        self.pattern_betas = pattern_betas or {\n            'default': (0.9, 0.999),\n            'structural': (0.85, 0.995),  # Spatial organization and relationships\n            'statistical': (0.9, 0.999),   # Distribution and variance patterns\n            'temporal': (0.95, 0.995)     # Time-related patterns\n        }\n\n        # Set up optimizer defaults\n        defaults = dict(\n            lr=lr,\n            eps=eps,\n            weight_decay=weight_decay,  # Added to defaults\n            pattern_betas=self.pattern_betas\n        )\n        super().__init__(params, defaults)\n\n        # Initialize additional tracking\n        self.step_count = 0\n        self.pattern_weights = {}\n        self.dynamic_weight_decays = {}\n\n    def __setstate__(self, state):\n        super().__setstate__(state)\n        for group in self.param_groups:"
+        },
+        "__setstate__": {
+          "start_line": 423,
+          "end_line": 429,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "state"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__setstate__",
+              "line": 424
+            },
+            {
+              "name": "group.setdefault",
+              "line": 426
+            },
+            {
+              "name": "group.setdefault",
+              "line": 427
+            },
+            {
+              "name": "super",
+              "line": 424
+            }
+          ],
+          "code_snippet": "        self.dynamic_weight_decays = {}\n\n    def __setstate__(self, state):\n        super().__setstate__(state)\n        for group in self.param_groups:\n            group.setdefault('pattern_betas', self.pattern_betas)\n            group.setdefault('weight_decay', self.weight_decay)\n\n    def initialize_from_pattern_map(self, pattern_map):\n        \"\"\"\n        Initialize pattern tracker with data from pattern map."
+        },
+        "initialize_from_pattern_map": {
+          "start_line": 429,
+          "end_line": 575,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_map"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "hasattr",
+              "line": 509
+            },
+            {
+              "name": "logger.warning",
+              "line": 442
+            },
+            {
+              "name": "logger.warning",
+              "line": 443
+            },
+            {
+              "name": "logger.info",
+              "line": 468
+            },
+            {
+              "name": "PatternRecognitionTracker",
+              "line": 472
+            },
+            {
+              "name": "logger.info",
+              "line": 473
+            },
+            {
+              "name": "logger.info",
+              "line": 477
+            },
+            {
+              "name": "logger.info",
+              "line": 492
+            },
+            {
+              "name": "self.pattern_tracker.initialize_from_standardized_map",
+              "line": 510
+            },
+            {
+              "name": "hasattr",
+              "line": 516
+            },
+            {
+              "name": "PatternRecognitionTracker",
+              "line": 447
+            },
+            {
+              "name": "logger.error",
+              "line": 488
+            },
+            {
+              "name": "pattern_map.get",
+              "line": 491
+            },
+            {
+              "name": "translate_pattern_map_to_standard_format",
+              "line": 498
+            },
+            {
+              "name": "logger.info",
+              "line": 499
+            },
+            {
+              "name": "logger.info",
+              "line": 512
+            },
+            {
+              "name": "logger.warning",
+              "line": 514
+            },
+            {
+              "name": "self.pattern_tracker.initialize_from_pattern_map",
+              "line": 517
+            },
+            {
+              "name": "logger.info",
+              "line": 527
+            },
+            {
+              "name": "standardized_map.get",
+              "line": 530
+            },
+            {
+              "name": "standardized_map.get",
+              "line": 531
+            },
+            {
+              "name": "standardized_map.get",
+              "line": 532
+            },
+            {
+              "name": "pattern_distribution.items",
+              "line": 540
+            },
+            {
+              "name": "logger.info",
+              "line": 563
+            },
+            {
+              "name": "logger.warning",
+              "line": 483
+            },
+            {
+              "name": "logger.info",
+              "line": 485
+            },
+            {
+              "name": "logger.error",
+              "line": 501
+            },
+            {
+              "name": "logger.error",
+              "line": 503
+            },
+            {
+              "name": "logger.warning",
+              "line": 505
+            },
+            {
+              "name": "logger.info",
+              "line": 519
+            },
+            {
+              "name": "logger.warning",
+              "line": 521
+            },
+            {
+              "name": "logger.error",
+              "line": 535
+            },
+            {
+              "name": "logger.error",
+              "line": 567
+            },
+            {
+              "name": "logger.error",
+              "line": 569
+            },
+            {
+              "name": "len",
+              "line": 477
+            },
+            {
+              "name": "....join",
+              "line": 477
+            },
+            {
+              "name": "traceback.format_exc",
+              "line": 503
+            },
+            {
+              "name": "traceback.format_exc",
+              "line": 569
+            },
+            {
+              "name": "pattern_map.keys",
+              "line": 477
+            },
+            {
+              "name": "pattern_map.keys",
+              "line": 477
+            },
+            {
+              "name": "str",
+              "line": 488
+            },
+            {
+              "name": "len",
+              "line": 499
+            },
+            {
+              "name": "isinstance",
+              "line": 552
+            },
+            {
+              "name": "len",
+              "line": 485
+            },
+            {
+              "name": "standardized_map.keys",
+              "line": 499
+            },
+            {
+              "name": "str",
+              "line": 501
+            },
+            {
+              "name": "isinstance",
+              "line": 555
+            },
+            {
+              "name": "str",
+              "line": 567
+            }
+          ],
+          "docstring": "\n        Initialize pattern tracker with data from pattern map.\n        This is REQUIRED for proper optimizer operation in the first epoch.\n        \n        Args:\n            pattern_map: Pattern map containing pattern data\n            \n        Returns:\n            bool: True if initialization was successful, False otherwise\n        ",
+          "code_snippet": "            group.setdefault('weight_decay', self.weight_decay)\n\n    def initialize_from_pattern_map(self, pattern_map):\n        \"\"\"\n        Initialize pattern tracker with data from pattern map.\n        This is REQUIRED for proper optimizer operation in the first epoch.\n        \n        Args:\n            pattern_map: Pattern map containing pattern data\n            \n        Returns:\n            bool: True if initialization was successful, False otherwise\n        \"\"\"\n        if pattern_map is None:\n            # Instead of failing, initialize with minimal default tracking for basic operation\n            logger.warning(\"No pattern map provided for initialization. Using minimal defaults.\")\n            logger.warning(\"Optimizer will function but with suboptimal performance.\")\n            \n            # Create a basic structure for the pattern tracker to avoid null reference errors\n            if not self.pattern_tracker:\n                self.pattern_tracker = PatternRecognitionTracker()\n                \n            # Initialize with minimal pattern stats for the simplified taxonomy\n            self.pattern_tracker.pattern_stats = {\n                'structural': {\n                    'accuracy_history': [0.5],\n                    'complexity_score': 0.5,\n                    'count': 1\n                },\n                'statistical': {\n                    'accuracy_history': [0.5],\n                    'complexity_score': 0.5,\n                    'count': 1\n                },\n                'temporal': {\n                    'accuracy_history': [0.5],\n                    'complexity_score': 0.5,\n                    'count': 1\n                },\n            }\n            \n            logger.info(\"Initialized pattern tracker with minimal defaults for basic operation\")\n            return False  # Still return False since this isn't a proper initialization\n            \n        if not self.pattern_tracker:\n            self.pattern_tracker = PatternRecognitionTracker()\n            logger.info(\"Created new PatternRecognitionTracker instance\")\n        \n        # Log the pattern map structure for debugging\n        try:\n            logger.info(f\"Pattern map has {len(pattern_map.keys())} top-level keys: {', '.join(pattern_map.keys())}\")\n            \n            # Check if required keys are present\n            required_keys = ['pattern_distribution']\n            for key in required_keys:\n                if key not in pattern_map:\n                    logger.warning(f\"Required key '{key}' missing from pattern map\")\n                else:\n                    logger.info(f\"Found required key '{key}' with {len(pattern_map[key])} items\")\n                    \n        except Exception as e:\n            logger.error(f\"Error while inspecting pattern map: {str(e)}\")\n        \n        # Check if pattern map is already in standardized format\n        if 'format_version' in pattern_map and pattern_map.get('source_format', '') != 'fallback':\n            logger.info(f\"Using pre-standardized pattern map (version {pattern_map['format_version']})\")\n            standardized_map = pattern_map\n        else:\n            # Convert to standardized format if needed\n            try:\n                from isekaizen.utils.pattern_map_utils import translate_pattern_map_to_standard_format\n                standardized_map = translate_pattern_map_to_standard_format(pattern_map)\n                logger.info(f\"Pattern map converted to standardized format with {len(standardized_map.keys())} keys\")\n            except Exception as e:\n                logger.error(f\"Failed to convert pattern map: {str(e)}\")\n                import traceback\n                logger.error(traceback.format_exc())\n                standardized_map = pattern_map  # Fallback to original format\n                logger.warning(\"Using original non-standardized pattern map as fallback\")\n\n        # Initialize using standardized format preferentially\n        success = False\n        if hasattr(self.pattern_tracker, 'initialize_from_standardized_map'):\n            success = self.pattern_tracker.initialize_from_standardized_map(standardized_map)\n            if success:\n                logger.info(\"Pattern tracker successfully initialized from standardized map\")\n            else:\n                logger.warning(\"Failed to initialize pattern tracker from standardized map\")\n                \n        elif hasattr(self.pattern_tracker, 'initialize_from_pattern_map'):\n            success = self.pattern_tracker.initialize_from_pattern_map(standardized_map)\n            if success:\n                logger.info(\"Pattern tracker successfully initialized from pattern map\")\n            else:\n                logger.warning(\"Failed to initialize pattern tracker from pattern map\")\n                \n        # If previous methods failed, try manual initialization\n        if not success:\n            try:\n                # Manual initialization using standardized format\n                logger.info(\"Using manual initialization with standardized format\")\n                \n                # Get pattern distribution and complexities from standardized format\n                pattern_distribution = standardized_map.get('pattern_distribution', {})\n                pattern_complexities = standardized_map.get('pattern_complexities', {})\n                pattern_risks = standardized_map.get('pattern_risks', {})\n                \n                if not pattern_distribution:\n                    logger.error(\"Cannot initialize: pattern_distribution is empty or missing\")\n                    return False\n                    \n                # Initialize pattern stats\n                initialized_patterns = 0\n                for pattern_type, count in pattern_distribution.items():\n                    if pattern_type not in self.pattern_tracker.pattern_stats:\n                        self.pattern_tracker.pattern_stats[pattern_type] = {\n                            'accuracy_history': [0.5],  # Starting with neutral accuracy\n                            'complexity_score': 0.5,\n                            'count': count\n                        }\n                        initialized_patterns += 1\n                    \n                    # Set complexity from standardized map\n                    if pattern_type in pattern_complexities:\n                        complexity_data = pattern_complexities[pattern_type]\n                        if isinstance(complexity_data, dict) and 'avg_complexity' in complexity_data:\n                            complexity = complexity_data['avg_complexity']\n                        else:\n                            complexity = complexity_data if isinstance(complexity_data, (int, float)) else 0.5\n                        \n                        self.pattern_tracker.pattern_stats[pattern_type]['complexity_score'] = complexity\n                    \n                    # Set initial risk if available\n                    if pattern_type in pattern_risks:\n                        self.pattern_tracker.pattern_stats[pattern_type]['risk'] = pattern_risks[pattern_type]\n                        \n                logger.info(f\"Manually initialized {initialized_patterns} pattern types in pattern tracker\")\n                success = initialized_patterns > 0\n                \n            except Exception as e:\n                logger.error(f\"Error during manual pattern initialization: {str(e)}\")\n                import traceback\n                logger.error(traceback.format_exc())\n                success = False\n                \n        # Return success status\n        return success\n    \n    def update_accuracy_metrics(self, train_acc, test_acc):\n        \"\"\"\nUpdate training and testing accuracy metrics."
+        },
+        "update_accuracy_metrics": {
+          "start_line": 575,
+          "end_line": 596,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_acc"
+            },
+            {
+              "name": "test_acc"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.accuracy_gap_history.append",
+              "line": 585
+            },
+            {
+              "name": "hasattr",
+              "line": 593
+            },
+            {
+              "name": "max",
+              "line": 585
+            },
+            {
+              "name": "logger.info",
+              "line": 590
+            },
+            {
+              "name": "self.pattern_tracker.update_epoch_performance",
+              "line": 594
+            }
+          ],
+          "docstring": "\nUpdate training and testing accuracy metrics.\n\n        Args:\n            train_acc: Current training accuracy\n            test_acc: Current testing accuracy\n        ",
+          "code_snippet": "        return success\n    \n    def update_accuracy_metrics(self, train_acc, test_acc):\n        \"\"\"\nUpdate training and testing accuracy metrics.\n\n        Args:\n            train_acc: Current training accuracy\n            test_acc: Current testing accuracy\n        \"\"\"\n        self.train_acc = train_acc\n        self.test_acc = test_acc\n        self.accuracy_gap_history.append(max(0, train_acc - test_acc))\n        \n        # Log significant gaps\n        gap = train_acc - test_acc\n        if gap > 0.05:  # 5% gap threshold\n            logger.info(f\"Significant train-test gap detected: {gap:.2f}% (Train: {train_acc:.2f}%, Test: {test_acc:.2f}%)\")\n            \n        # Update pattern tracker with accuracy metrics if available\n        if hasattr(self.pattern_tracker, 'update_epoch_performance'):\n            self.pattern_tracker.update_epoch_performance(None, test_acc)\n\n    def get_dynamic_confidence_threshold(self, pattern_type: str) -> float:\n        \"\"\"\nCalculate a dynamic confidence threshold based on pattern characteristics "
+        },
+        "get_dynamic_confidence_threshold": {
+          "start_line": 596,
+          "end_line": 629,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "....get",
+              "line": 611
+            },
+            {
+              "name": "pattern_stats.get",
+              "line": 612
+            },
+            {
+              "name": "min",
+              "line": 627
+            },
+            {
+              "name": "len",
+              "line": 619
+            },
+            {
+              "name": "max",
+              "line": 627
+            },
+            {
+              "name": "getattr",
+              "line": 611
+            },
+            {
+              "name": "min",
+              "line": 623
+            }
+          ],
+          "docstring": "\nCalculate a dynamic confidence threshold based on pattern characteristics \nand current training state.\n\n        Args:\n            pattern_type: The pattern type\n            \n        Returns:\n            Dynamic confidence threshold (0-1 range)\n        ",
+          "code_snippet": "            self.pattern_tracker.update_epoch_performance(None, test_acc)\n\n    def get_dynamic_confidence_threshold(self, pattern_type: str) -> float:\n        \"\"\"\nCalculate a dynamic confidence threshold based on pattern characteristics \nand current training state.\n\n        Args:\n            pattern_type: The pattern type\n            \n        Returns:\n            Dynamic confidence threshold (0-1 range)\n        \"\"\"\n        # Start with base threshold\n        threshold = self.base_confidence_threshold\n\n        # Adjust based on pattern complexity if available\n        pattern_stats = getattr(self.pattern_tracker, 'pattern_stats', {}).get(pattern_type, {})\n        complexity = pattern_stats.get('complexity_score', 0.5)\n        \n        # Higher complexity patterns get a lower threshold\n        complexity_adjustment = (complexity - 0.5) * 0.2  # +/- 0.1 based on complexity\n        threshold -= complexity_adjustment\n        \n        # Adjust based on train-test gap (increasing gap = lower threshold)\n        if len(self.accuracy_gap_history) > 0:\n            recent_gap = self.accuracy_gap_history[-1]\n            # If gap is more than 2%, start lowering threshold\n            if recent_gap > 0.02:\n                gap_adjustment = min(0.15, recent_gap)  # Cap at 0.15 to avoid threshold going too low\n                threshold -= gap_adjustment\n\n        # Ensure threshold stays in reasonable range\n        return min(0.95, max(0.4, threshold))\n\n    def calculate_dynamic_weight_decay(self, pattern_type: str) -> float:\n        \"\"\"\nCalculate dynamic weight decay based on pattern behavior and risk."
+        },
+        "calculate_dynamic_weight_decay": {
+          "start_line": 629,
+          "end_line": 692,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "....get",
+              "line": 642
+            },
+            {
+              "name": "....get",
+              "line": 643
+            },
+            {
+              "name": "....get",
+              "line": 644
+            },
+            {
+              "name": "max",
+              "line": 653
+            },
+            {
+              "name": "min",
+              "line": 674
+            },
+            {
+              "name": "len",
+              "line": 646
+            },
+            {
+              "name": "logger.debug",
+              "line": 680
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_risks",
+              "line": 642
+            },
+            {
+              "name": "self.pattern_tracker.get_current_recognition_rates",
+              "line": 643
+            },
+            {
+              "name": "self.pattern_tracker.pattern_stats.get",
+              "line": 644
+            },
+            {
+              "name": "logger.debug",
+              "line": 682
+            },
+            {
+              "name": "logger.debug",
+              "line": 684
+            },
+            {
+              "name": "logger.debug",
+              "line": 686
+            },
+            {
+              "name": "logger.debug",
+              "line": 688
+            }
+          ],
+          "docstring": "\nCalculate dynamic weight decay based on pattern behavior and risk.\n\n        Args:\n            pattern_type: The pattern type\n            \n        Returns:\n            Adjusted weight decay value\n        ",
+          "code_snippet": "        return min(0.95, max(0.4, threshold))\n\n    def calculate_dynamic_weight_decay(self, pattern_type: str) -> float:\n        \"\"\"\nCalculate dynamic weight decay based on pattern behavior and risk.\n\n        Args:\n            pattern_type: The pattern type\n            \n        Returns:\n            Adjusted weight decay value\n        \"\"\"\n        base_decay = self.weight_decay\n        \n        # Get pattern-specific metrics\n        pattern_risk = self.pattern_tracker.get_pattern_risks().get(pattern_type, 0.5)\n        recognition_rate = self.pattern_tracker.get_current_recognition_rates().get(pattern_type, 0.0)\n        accuracy_history = self.pattern_tracker.pattern_stats.get(pattern_type, {}).get('accuracy_history', [])\n        \n        if len(accuracy_history) < 2:\n            return base_decay\n            \n        # Calculate recent accuracy trend\n        recent_change = accuracy_history[-1] - accuracy_history[-2]\n        \n        # Calculate training/test gap if available\n        acc_gap = max(0, self.train_acc - self.test_acc)\n\n        # Adjust decay based on multiple factors:\n        decay_multiplier = 1.0\n        \n        # 1. Higher risk = higher decay\n        decay_multiplier *= (1 + pattern_risk)\n        \n        # 2. Larger acc gap = higher decay\n        if acc_gap > 0.02:  # More than 2% gap\n            decay_multiplier *= (1 + (acc_gap * 5))\n        \n        # 3. If accuracy is improving too quickly (potential memorization)\n        if recent_change > 0.05:  # More than 5% improvement\n            decay_multiplier *= (1 + recent_change * 2)\n        \n        # 4. If recognition rate is very high (potential overfitting)\n        if recognition_rate > 0.95:\n            decay_multiplier *= 1.5\n            \n        # Cap the maximum decay multiplier\n        decay_multiplier = min(decay_multiplier, 5.0)\n        \n        final_decay = base_decay * decay_multiplier\n        \n        # Log the calculation details\n        if decay_multiplier > 1.1:  # Only log significantly adjusted values\n            logger.debug(f\"Dynamic weight decay for {pattern_type}: {base_decay:.6f} -> {final_decay:.6f} (multiplier: {decay_multiplier:.2f})\")\n            if pattern_risk > 0.6:\n                logger.debug(f\"  - High risk factor: {pattern_risk:.2f}\")\n            if acc_gap > 0.05:\n                logger.debug(f\"  - Large train-test gap: {acc_gap:.2f}\")\n            if recent_change > 0.05:\n                logger.debug(f\"  - Rapid accuracy change: {recent_change:.2f}\")\n            if recognition_rate > 0.95:\n                logger.debug(f\"  - Very high recognition rate: {recognition_rate:.2f}\")\n        \n        return final_decay\n\n    def calculate_natural_weight_adjustment(self, pattern_type: str) -> float:\n        \"\"\"\n        Calculate weight adjustment based on unified Risk/Accuracy ratio."
+        },
+        "calculate_natural_weight_adjustment": {
+          "start_line": 692,
+          "end_line": 712,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "self.calculate_unified_risk_accuracy_ratio",
+              "line": 698
+            },
+            {
+              "name": "logger.debug",
+              "line": 708
+            },
+            {
+              "name": "max",
+              "line": 704
+            },
+            {
+              "name": "min",
+              "line": 706
+            },
+            {
+              "name": "min",
+              "line": 704
+            },
+            {
+              "name": "min",
+              "line": 706
+            }
+          ],
+          "docstring": "\n        Calculate weight adjustment based on unified Risk/Accuracy ratio.\n        Direct implementation of the simplified perspective.\n        ",
+          "code_snippet": "        return final_decay\n\n    def calculate_natural_weight_adjustment(self, pattern_type: str) -> float:\n        \"\"\"\n        Calculate weight adjustment based on unified Risk/Accuracy ratio.\n        Direct implementation of the simplified perspective.\n        \"\"\"\n        # Get unified risk/accuracy ratio\n        ratio = self.calculate_unified_risk_accuracy_ratio(pattern_type)\n        \n        # INVERTED LOGIC: Map ratio to adjustment range (0.85-1.15)\n        # Higher risk (ratio > 1.0) means lower adjustment (more careful learning)\n        # Lower risk (ratio < 1.0) means higher adjustment (more confident learning)\n        if ratio > 1.0:  # High risk relative to accuracy\n            adjustment = max(0.85, 1.0 - 0.15 * min(1.0, ratio - 1.0))\n        else:  # Low risk relative to accuracy\n            adjustment = min(1.15, 1.0 + 0.15 * min(1.0, 1.0 - ratio))\n        \n        logger.debug(f\"Pattern {pattern_type}: risk/accuracy ratio {ratio:.3f}, weight adjustment {adjustment:.3f}\")\n        \n        return adjustment\n\n    @torch.no_grad()\n    def step(self, closure=None, pattern_states=None):\n        \"\"\"Performs a single optimization step with natural weight adjustments."
+        },
+        "step": {
+          "start_line": 713,
+          "end_line": 836,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "closure"
+            },
+            {
+              "name": "pattern_states"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.no_grad",
+              "line": 712
+            },
+            {
+              "name": "logger.warning",
+              "line": 743
+            },
+            {
+              "name": "group.get",
+              "line": 751
+            },
+            {
+              "name": "any",
+              "line": 722
+            },
+            {
+              "name": "pattern_states.items",
+              "line": 726
+            },
+            {
+              "name": "logger.debug",
+              "line": 733
+            },
+            {
+              "name": "torch.enable_grad",
+              "line": 739
+            },
+            {
+              "name": "closure",
+              "line": 740
+            },
+            {
+              "name": "pattern_states.items",
+              "line": 780
+            },
+            {
+              "name": "pattern_states.items",
+              "line": 801
+            },
+            {
+              "name": "pattern_states.items",
+              "line": 809
+            },
+            {
+              "name": "....add_",
+              "line": 818
+            },
+            {
+              "name": "....addcmul_",
+              "line": 819
+            },
+            {
+              "name": "....add_",
+              "line": 826
+            },
+            {
+              "name": "p.addcdiv_",
+              "line": 829
+            },
+            {
+              "name": "isinstance",
+              "line": 727
+            },
+            {
+              "name": "logger.warning",
+              "line": 735
+            },
+            {
+              "name": "RuntimeError",
+              "line": 759
+            },
+            {
+              "name": "len",
+              "line": 764
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 766
+            },
+            {
+              "name": "torch.zeros_like",
+              "line": 767
+            },
+            {
+              "name": "self.calculate_natural_weight_adjustment",
+              "line": 785
+            },
+            {
+              "name": "self.calculate_dynamic_weight_decay",
+              "line": 789
+            },
+            {
+              "name": "max",
+              "line": 795
+            },
+            {
+              "name": "self.pattern_betas.get",
+              "line": 803
+            },
+            {
+              "name": "grad.add",
+              "line": 815
+            },
+            {
+              "name": "math.sqrt",
+              "line": 822
+            },
+            {
+              "name": "max",
+              "line": 802
+            },
+            {
+              "name": "max",
+              "line": 810
+            },
+            {
+              "name": "pattern_weight_decays.get",
+              "line": 811
+            },
+            {
+              "name": "exp_avg.mul_",
+              "line": 818
+            },
+            {
+              "name": "exp_avg_sq.mul_",
+              "line": 819
+            },
+            {
+              "name": "pattern_states.values",
+              "line": 722
+            },
+            {
+              "name": "isinstance",
+              "line": 722
+            },
+            {
+              "name": "float",
+              "line": 731
+            },
+            {
+              "name": "exp_avg_sq.sqrt",
+              "line": 826
+            },
+            {
+              "name": "math.sqrt",
+              "line": 826
+            },
+            {
+              "name": "str",
+              "line": 735
+            }
+          ],
+          "docstring": "Performs a single optimization step with natural weight adjustments.\n        \n        Args:\n            closure: Closure for reevaluating the model and returning the loss\n            pattern_states: Dictionary of pattern states with importance values\n                           This is REQUIRED for proper optimization!\n        ",
+          "code_snippet": "\n    @torch.no_grad()\n    def step(self, closure=None, pattern_states=None):\n        \"\"\"Performs a single optimization step with natural weight adjustments.\n        \n        Args:\n            closure: Closure for reevaluating the model and returning the loss\n            pattern_states: Dictionary of pattern states with importance values\n                           This is REQUIRED for proper optimization!\n        \"\"\"\n        # Convert pattern states to standardized format if needed\n        if pattern_states and not any(['importance' in info for info in pattern_states.values() if isinstance(info, dict)]):\n            # Pattern states appear to be in non-standard format, attempt to convert\n            try:\n                standardized_states = {}\n                for pattern_type, value in pattern_states.items():\n                    if isinstance(value, dict):\n                        standardized_states[pattern_type] = value  # Already has structure\n                    else:\n                        # Convert simple value to standard format\n                        standardized_states[pattern_type] = {'importance': float(value)}\n                pattern_states = standardized_states\n                logger.debug(\"Converted pattern states to standardized format\")\n            except Exception as e:\n                logger.warning(f\"Failed to convert pattern states: {str(e)}\")\n                # Continue with original states\n        loss = None\n        if closure is not None:\n            with torch.enable_grad():\n                loss = closure()\n\n        if pattern_states is None:\n            logger.warning(\"EVENaturalWeights step called without pattern states! Using default pattern state.\")\n            pattern_states = {'default': {'importance': 1.0}}\n\n        # Update step count\n        self.step_count += 1\n\n        for group in self.param_groups:\n            # Store original weight decay for restoration\n            original_weight_decay = group.get('weight_decay', 0.0)\n            \n            for p in group['params']:\n                if p.grad is None:\n                    continue\n                grad = p.grad\n\n                if grad.is_sparse:\n                    raise RuntimeError('EVE Natural Weights does not support sparse gradients')\n\n                state = self.state[p]\n\n                # Initialize state if needed\n                if len(state) == 0:\n                    state['step'] = 0\n                    state['exp_avg'] = torch.zeros_like(p, memory_format=torch.preserve_format)\n                    state['exp_avg_sq'] = torch.zeros_like(p, memory_format=torch.preserve_format)\n                    state['pattern_weights'] = {}\n\n                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']\n                \n                # Update step count\n                state['step'] += 1\n\n                # Calculate natural weight adjustments for each pattern\n                total_adjustment = 0.0\n                total_importance = 0.0\n                pattern_weight_decays = {}\n                \n                for pattern_type, pattern_info in pattern_states.items():\n                    importance = pattern_info['importance']\n                    total_importance += importance\n                    \n                    # Calculate weight adjustment based on pattern performance\n                    weight_factor = self.calculate_natural_weight_adjustment(pattern_type)\n                    total_adjustment += weight_factor * importance\n                    \n                    # Calculate dynamic weight decay for this pattern\n                    pattern_weight_decays[pattern_type] = self.calculate_dynamic_weight_decay(pattern_type)\n                    \n                    # Store pattern-specific weight\n                    state['pattern_weights'][pattern_type] = weight_factor\n\n                # Calculate average adjustment\n                avg_adjustment = total_adjustment / max(total_importance, 1e-8)\n\n                # Calculate weighted beta values\n                beta1_weighted = 0.0\n                beta2_weighted = 0.0\n                \n                for pattern_type, pattern_info in pattern_states.items():\n                    importance = pattern_info['importance'] / max(total_importance, 1e-8)\n                    beta1, beta2 = self.pattern_betas.get(pattern_type, self.pattern_betas['default'])\n                    beta1_weighted += beta1 * importance\n                    beta2_weighted += beta2 * importance\n                \n                # Calculate weighted weight decay based on pattern importance\n                weight_decay_weighted = 0.0\n                for pattern_type, pattern_info in pattern_states.items():\n                    importance = pattern_info['importance'] / max(total_importance, 1e-8)\n                    weight_decay_weighted += pattern_weight_decays.get(pattern_type, original_weight_decay) * importance\n                \n                # Apply weight decay before momentum update if needed\n                if weight_decay_weighted > 0:\n                    grad = grad.add(p, alpha=weight_decay_weighted)\n\n                # Update moment estimates with pattern performance weighting\n                exp_avg.mul_(beta1_weighted).add_(grad, alpha=1 - beta1_weighted)\n                exp_avg_sq.mul_(beta2_weighted).addcmul_(grad, grad, value=1 - beta2_weighted)\n\n                # Calculate step size with bias correction\n                step_size = group['lr'] * math.sqrt(1 - beta2_weighted ** state['step'])\n                step_size = step_size / (1 - beta1_weighted ** state['step'])\n\n                # Calculate denominator\n                denom = (exp_avg_sq.sqrt() / math.sqrt(1 - beta2_weighted ** state['step'])).add_(group['eps'])\n                \n                # Apply update with natural weight adjustment\n                p.addcdiv_(exp_avg, denom, value=-step_size * avg_adjustment)\n\n        # Store dynamic weight decays for inspection\n        self.dynamic_weight_decays = pattern_weight_decays\n\n        return loss\n\n    def get_pattern_weights(self) -> Dict[str, float]:\n        \"\"\"Get current pattern-specific weight factors.\"\"\"\n        weights = {}"
+        },
+        "get_pattern_weights": {
+          "start_line": 836,
+          "end_line": 848,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "....items",
+              "line": 843
+            }
+          ],
+          "docstring": "Get current pattern-specific weight factors.",
+          "code_snippet": "        return loss\n\n    def get_pattern_weights(self) -> Dict[str, float]:\n        \"\"\"Get current pattern-specific weight factors.\"\"\"\n        weights = {}\n        for group in self.param_groups:\n            for p in group['params']:\n                state = self.state[p]\n                if 'pattern_weights' in state:\n                    for pattern_type, weight in state['pattern_weights'].items():\n                        weights[pattern_type] = weight\n                    break\n        return weights\n    \n    def update_with_ratios(self, tt_ratio, ra_ratio):\n        \"\"\"\n        Update optimizer based on Train/Test and Risk/Accuracy ratios."
+        },
+        "update_with_ratios": {
+          "start_line": 848,
+          "end_line": 893,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "tt_ratio"
+            },
+            {
+              "name": "ra_ratio"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 864
+            },
+            {
+              "name": "logger.info",
+              "line": 872
+            },
+            {
+              "name": "max",
+              "line": 877
+            },
+            {
+              "name": "logger.info",
+              "line": 878
+            },
+            {
+              "name": "max",
+              "line": 883
+            },
+            {
+              "name": "max",
+              "line": 884
+            },
+            {
+              "name": "logger.info",
+              "line": 885
+            },
+            {
+              "name": "logger.info",
+              "line": 890
+            }
+          ],
+          "docstring": "\n        Update optimizer based on Train/Test and Risk/Accuracy ratios.\n        \n        Args:\n            tt_ratio: Train/Test ratio (> 1 indicates overfitting)\n            ra_ratio: Risk/Accuracy ratio (> 0 indicates pattern issues)\n            \n        Returns:\n            Decision dictionary with action and parameters\n        ",
+          "code_snippet": "        return weights\n    \n    def update_with_ratios(self, tt_ratio, ra_ratio):\n        \"\"\"\n        Update optimizer based on Train/Test and Risk/Accuracy ratios.\n        \n        Args:\n            tt_ratio: Train/Test ratio (> 1 indicates overfitting)\n            ra_ratio: Risk/Accuracy ratio (> 0 indicates pattern issues)\n            \n        Returns:\n            Decision dictionary with action and parameters\n        \"\"\"\n        # Store the ratios\n        self.tt_ratio = tt_ratio\n        self.ra_ratio = ra_ratio\n        \n        # Log the situation\n        logger.info(f\"Optimizer evaluating - Train/Test Ratio: {tt_ratio:.3f}, Risk/Accuracy Ratio: {ra_ratio:.3f}\")\n        \n        # Decision thresholds\n        tt_threshold = 1.05  # Allow a small amount of overfitting\n        ra_threshold = 0.3   # Fraction of patterns getting worse\n        \n        # Case 1: All good - no changes needed\n        if tt_ratio <= tt_threshold and ra_ratio <= ra_threshold:\n            logger.info(\"All metrics good - continuing with current parameters\")\n            return {\"action\": \"none\"}\n        \n        # Case 2: Overfitting but patterns improving - adjust LR\n        elif tt_ratio > tt_threshold and ra_ratio <= ra_threshold:\n            adjustment = max(0.7, 1.0 - (tt_ratio - 1.0) * 0.5)\n            logger.info(f\"Overfitting detected - reducing LR by factor {adjustment:.3f}\")\n            return {\"action\": \"adjust_lr\", \"factor\": adjustment}\n        \n        # Case 3: Serious issues - adjust LR and batch size\n        elif tt_ratio > tt_threshold and ra_ratio > ra_threshold:\n            lr_adjustment = max(0.5, 1.0 - (tt_ratio - 1.0) * 0.7)\n            batch_adjustment = max(0.5, 1.0 - ra_ratio * 0.6)\n            logger.info(f\"Serious issues - reducing LR by {lr_adjustment:.3f} and batch size by {batch_adjustment:.3f}\")\n            return {\"action\": \"adjust_both\", \"lr_factor\": lr_adjustment, \"batch_factor\": batch_adjustment}\n        \n        # Case 4: Patterns need more examples - augment data\n        else:  # tt_ratio <= tt_threshold and ra_ratio > ra_threshold\n            logger.info(f\"Pattern accuracy issues - triggering data augmentation\")\n            return {\"action\": \"augment_data\", \"ratio\": ra_ratio}\n\n    def get_pattern_weight_decays(self) -> Dict[str, float]:\n        \"\"\"Get current pattern-specific weight decay factors.\"\"\"\n        return self.dynamic_weight_decays"
+        },
+        "get_pattern_weight_decays": {
+          "start_line": 893,
+          "end_line": 897,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "Get current pattern-specific weight decay factors.",
+          "code_snippet": "            return {\"action\": \"augment_data\", \"ratio\": ra_ratio}\n\n    def get_pattern_weight_decays(self) -> Dict[str, float]:\n        \"\"\"Get current pattern-specific weight decay factors.\"\"\"\n        return self.dynamic_weight_decays\n        \n    def calculate_unified_risk_accuracy_ratio(self, pattern_type: str) -> float:\n        \"\"\"\n        Calculate a unified risk/accuracy ratio that directly maps between "
+        },
+        "calculate_unified_risk_accuracy_ratio": {
+          "start_line": 897,
+          "end_line": 921,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "pattern_type",
+              "type": "str"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "max",
+              "line": 911
+            },
+            {
+              "name": "max",
+              "line": 917
+            },
+            {
+              "name": "hasattr",
+              "line": 903
+            },
+            {
+              "name": "hasattr",
+              "line": 903
+            },
+            {
+              "name": "....get",
+              "line": 904
+            },
+            {
+              "name": "min",
+              "line": 911
+            },
+            {
+              "name": "max",
+              "line": 914
+            },
+            {
+              "name": "min",
+              "line": 917
+            },
+            {
+              "name": "getattr",
+              "line": 907
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_accuracies",
+              "line": 904
+            }
+          ],
+          "docstring": "\n        Calculate a unified risk/accuracy ratio that directly maps between \n        training accuracy and risk.\n        ",
+          "code_snippet": "        return self.dynamic_weight_decays\n        \n    def calculate_unified_risk_accuracy_ratio(self, pattern_type: str) -> float:\n        \"\"\"\n        Calculate a unified risk/accuracy ratio that directly maps between \n        training accuracy and risk.\n        \"\"\"\n        # Get pattern-specific training accuracy (normalized to 0-1)\n        if hasattr(self, 'pattern_tracker') and hasattr(self.pattern_tracker, 'get_pattern_accuracies'):\n            pattern_accuracy = self.pattern_tracker.get_pattern_accuracies().get(pattern_type, 0.5)\n        else:\n            # Fallback to using overall training accuracy\n            pattern_accuracy = getattr(self, 'train_acc', 50.0) / 100.0\n        \n        # Derive risk directly as inverse of accuracy (with adjustment to avoid extremes)\n        # This ensures risk and accuracy are fundamentally linked\n        pattern_risk = max(0.1, min(0.9, 1.0 - pattern_accuracy))\n        \n        # Calculate risk/accuracy ratio - higher ratio means higher risk relative to accuracy\n        ratio = pattern_risk / max(pattern_accuracy, 0.1)  # Prevent division by zero\n        \n        # Normalize ratio to typical range (0.5-2.0)\n        normalized_ratio = max(0.5, min(2.0, ratio * 1.5))\n        \n        return normalized_ratio\n        \n    def calculate_risk_accuracy_ratios(self, force_update=False):\n        \"\"\"\n        Calculate risk/accuracy ratios using the simplified unified approach."
+        },
+        "calculate_risk_accuracy_ratios": {
+          "start_line": 921,
+          "end_line": 946,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "force_update"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "hasattr",
+              "line": 941
+            },
+            {
+              "name": "hasattr",
+              "line": 930
+            },
+            {
+              "name": "hasattr",
+              "line": 930
+            },
+            {
+              "name": "list",
+              "line": 931
+            },
+            {
+              "name": "self.calculate_unified_risk_accuracy_ratio",
+              "line": 938
+            },
+            {
+              "name": "self.ratio_tracker.store_risk_accuracy_ratios",
+              "line": 942
+            },
+            {
+              "name": "....keys",
+              "line": 931
+            },
+            {
+              "name": "self.pattern_tracker.get_pattern_accuracies",
+              "line": 931
+            }
+          ],
+          "docstring": "\n        Calculate risk/accuracy ratios using the simplified unified approach.\n        ",
+          "code_snippet": "        return normalized_ratio\n        \n    def calculate_risk_accuracy_ratios(self, force_update=False):\n        \"\"\"\n        Calculate risk/accuracy ratios using the simplified unified approach.\n        \"\"\"\n        # Initialize results dictionary\n        risk_acc_ratios = {}\n        \n        # Get all pattern types from the pattern tracker\n        pattern_types = []\n        if hasattr(self, 'pattern_tracker') and hasattr(self.pattern_tracker, 'get_pattern_accuracies'):\n            pattern_types = list(self.pattern_tracker.get_pattern_accuracies().keys())\n        else:\n            # Fallback to default pattern types \n            pattern_types = ['structural', 'statistical', 'temporal']\n        \n        # Calculate ratio for each pattern type\n        for pattern_type in pattern_types:\n            risk_acc_ratios[pattern_type] = self.calculate_unified_risk_accuracy_ratio(pattern_type)\n        \n        # Store in ratio tracker if available\n        if hasattr(self, 'ratio_tracker'):\n            self.ratio_tracker.store_risk_accuracy_ratios(self.epoch, risk_acc_ratios)\n        \n        return risk_acc_ratios"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "Optimizer"
+      ],
+      "docstring": "\nEVE variant that uses natural weight adjustments based on pattern success and risk.\nWeights naturally strengthen or weaken based on pattern performance rather than\nusing artificial decay.\n\nNOTE: This optimizer requires proper initialization of the pattern tracker and\npassing pattern states to the step() method to work effectively.\n"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

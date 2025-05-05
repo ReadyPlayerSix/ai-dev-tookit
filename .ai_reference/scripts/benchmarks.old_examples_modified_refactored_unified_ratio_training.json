@@ -1,0 +1,597 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\examples\\modified\\refactored_unified_ratio_training.py",
+  "imports": [
+    {
+      "name": "os",
+      "line": 20
+    },
+    {
+      "name": "sys",
+      "line": 21
+    },
+    {
+      "name": "time",
+      "line": 22
+    },
+    {
+      "name": "logging",
+      "line": 23
+    },
+    {
+      "name": "argparse",
+      "line": 24
+    },
+    {
+      "name": "torch",
+      "line": 25
+    },
+    {
+      "name": "torch.nn",
+      "line": 26
+    },
+    {
+      "name": "isekaizen.data.loaders.load_cifar10_data",
+      "line": 32
+    },
+    {
+      "name": "isekaizen.pattern.data_loading.load_latest_pattern_map",
+      "line": 33
+    },
+    {
+      "name": "isekaizen.models.architectures.create_model",
+      "line": 34
+    },
+    {
+      "name": "isekaizen.utils.training_utils.get_fibonacci_check_intervals",
+      "line": 35
+    },
+    {
+      "name": "isekaizen.utils.training_utils.calculate_optimal_workers",
+      "line": 35
+    },
+    {
+      "name": "isekaizen.utils.formatting.format_metrics_table",
+      "line": 36
+    },
+    {
+      "name": "isekaizen.utils.formatting.log_section",
+      "line": 36
+    },
+    {
+      "name": "isekaizen.visualization.training_plots.visualize_training_results",
+      "line": 37
+    },
+    {
+      "name": "isekaizen.core.training.callbacks.track_unified_ratio_callback",
+      "line": 38
+    },
+    {
+      "name": "isekaizen.core.training.risk_accuracy_tracker.modify_pattern_risk_accuracy_tracker",
+      "line": 39
+    },
+    {
+      "name": "isekaizen.optimizers.registration.register_unified_ratio_optimizer",
+      "line": 40
+    },
+    {
+      "name": "json",
+      "line": 182
+    },
+    {
+      "name": "examples.optimizer_utils.configure_optimizer",
+      "line": 218
+    },
+    {
+      "name": "examples.optimizer_utils.print_available_optimizers",
+      "line": 218
+    },
+    {
+      "name": "examples.optimizer_configs.get_optimizer_config",
+      "line": 219
+    },
+    {
+      "name": "examples.optimizer_configs.ALL_CONFIGS",
+      "line": 219
+    },
+    {
+      "name": "isekaizen.core.training.unified_ratio_trainer.UnifiedRatioTrainer",
+      "line": 290
+    },
+    {
+      "name": "isekaizen.optimizers.eve_unified_ratio.EVEUnifiedRatio",
+      "line": 235
+    },
+    {
+      "name": "isekaizen.trainer.adaptive_trainer.AdaptiveTrainer",
+      "line": 311
+    },
+    {
+      "name": "traceback",
+      "line": 386
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "parse_args": {
+      "start_line": 54,
+      "end_line": 131,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "argparse.ArgumentParser",
+          "line": 61
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 64
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 66
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 70
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 73
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 77
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 79
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 81
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 83
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 85
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 87
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 91
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 95
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 97
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 99
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 101
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 105
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 107
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 109
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 113
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 115
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 117
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 119
+        },
+        {
+          "name": "parser.parse_args",
+          "line": 122
+        },
+        {
+          "name": "....setLevel",
+          "line": 126
+        },
+        {
+          "name": "....setLevel",
+          "line": 127
+        },
+        {
+          "name": "logging.getLogger",
+          "line": 126
+        },
+        {
+          "name": "logging.getLogger",
+          "line": 127
+        }
+      ],
+      "docstring": "\n    Parse command-line arguments.\n    \n    Returns:\n        argparse.Namespace: Parsed arguments\n    ",
+      "code_snippet": "logging.getLogger('lazy_augmentation').setLevel(logging.WARNING)\n\ndef parse_args():\n    \"\"\"\n    Parse command-line arguments.\n    \n    Returns:\n        argparse.Namespace: Parsed arguments\n    \"\"\"\n    parser = argparse.ArgumentParser(description='Run isekaiZen training with unified risk/accuracy ratio')\n    \n    # Dataset parameters\n    parser.add_argument('--dataset', type=str, default='cifar10', \n                      choices=['cifar10'], help='Dataset to use')\n    parser.add_argument('--input-size', type=int, default=32,\n                      help='Input image size')\n    \n    # Model parameters\n    parser.add_argument('--model', type=str, default='resnet18',\n                      choices=['resnet18', 'resnet34', 'resnet50', 'vgg16', 'mobilenet_v2'],\n                      help='Model architecture to use')\n    parser.add_argument('--pretrained', action='store_true',\n                      help='Use pre-trained model weights')\n    \n    # Training parameters\n    parser.add_argument('--epochs', type=int, default=10,\n                      help='Number of training epochs')\n    parser.add_argument('--batch-size', type=int, default=128,\n                      help='Initial batch size')\n    parser.add_argument('--optimizer', type=str, default='eve_unified',\n                      help='Optimizer to use')\n    parser.add_argument('--lr', type=float, default=0.01,\n                      help='Initial learning rate')\n    parser.add_argument('--momentum', type=float, default=0.9,\n                      help='SGD momentum')\n    parser.add_argument('--weight-decay', type=float, default=5e-4,\n                      help='Weight decay for regularization')\n    \n    # Pattern mapping parameters\n    parser.add_argument('--pattern-map', type=str, default=None,\n                      help='Path to pattern map file (default: auto-detect)')\n    \n    # Advanced parameters\n    parser.add_argument('--adaptive-batch', action='store_true',\n                      help='Enable adaptive batch size')\n    parser.add_argument('--adaptive-lr', action='store_true',\n                      help='Enable adaptive learning rate')\n    parser.add_argument('--model-swapping', action='store_true',\n                      help='Enable dynamic model architecture swapping')\n    parser.add_argument('--use-augmentation', action='store_true',\n                      help='Enable adaptive augmentation')\n    \n    # Output parameters\n    parser.add_argument('--output-dir', type=str, default='./results',\n                      help='Directory to save results')\n    parser.add_argument('--save-model', action='store_true',\n                      help='Save the trained model')\n    parser.add_argument('--verbose', action='store_true',\n                      help='Enable verbose output')\n    \n    # EVE specific parameters\n    parser.add_argument('--weight-adjustment-range', type=str, default='default',\n                      help='Range for EVE weight adjustments (default, wide, narrow)')\n    parser.add_argument('--equilibrium-bounds', action='store_true',\n                      help='Enable equilibrium bounds tracking')\n    parser.add_argument('--debug-bounds', action='store_true',\n                      help='Enable debug output for equilibrium bounds')\n    parser.add_argument('--debug-ratios', action='store_true',\n                      help='Enable debug output for unified ratios')\n    \n    args = parser.parse_args()\n    \n    # If verbose is enabled, set all loggers to INFO level\n    if args.verbose:\n        logging.getLogger().setLevel(logging.INFO)\n        logging.getLogger('isekaizen').setLevel(logging.INFO)\n    \n    return args\n\ndef main():\n    \"\"\"\n    Main execution function."
+    },
+    "main": {
+      "start_line": 131,
+      "end_line": 381,
+      "parameters": [],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "parse_args",
+          "line": 139
+        },
+        {
+          "name": "os.makedirs",
+          "line": 142
+        },
+        {
+          "name": "os.path.join",
+          "line": 145
+        },
+        {
+          "name": "logging.FileHandler",
+          "line": 146
+        },
+        {
+          "name": "file_handler.setFormatter",
+          "line": 147
+        },
+        {
+          "name": "....addHandler",
+          "line": 148
+        },
+        {
+          "name": "log_section",
+          "line": 151
+        },
+        {
+          "name": "logger.info",
+          "line": 152
+        },
+        {
+          "name": "torch.device",
+          "line": 155
+        },
+        {
+          "name": "logger.info",
+          "line": 156
+        },
+        {
+          "name": "log_section",
+          "line": 159
+        },
+        {
+          "name": "logger.info",
+          "line": 167
+        },
+        {
+          "name": "logger.info",
+          "line": 168
+        },
+        {
+          "name": "log_section",
+          "line": 171
+        },
+        {
+          "name": "modify_pattern_risk_accuracy_tracker",
+          "line": 190
+        },
+        {
+          "name": "log_section",
+          "line": 193
+        },
+        {
+          "name": "create_model",
+          "line": 194
+        },
+        {
+          "name": "model.to",
+          "line": 201
+        },
+        {
+          "name": "sum",
+          "line": 204
+        },
+        {
+          "name": "sum",
+          "line": 205
+        },
+        {
+          "name": "logger.info",
+          "line": 206
+        },
+        {
+          "name": "logger.info",
+          "line": 207
+        },
+        {
+          "name": "logger.info",
+          "line": 208
+        },
+        {
+          "name": "nn.CrossEntropyLoss",
+          "line": 211
+        },
+        {
+          "name": "log_section",
+          "line": 214
+        },
+        {
+          "name": "configure_optimizer",
+          "line": 267
+        },
+        {
+          "name": "logger.info",
+          "line": 273
+        },
+        {
+          "name": "log_section",
+          "line": 286
+        },
+        {
+          "name": "log_section",
+          "line": 331
+        },
+        {
+          "name": "trainer.train",
+          "line": 332
+        },
+        {
+          "name": "log_section",
+          "line": 339
+        },
+        {
+          "name": "logger.info",
+          "line": 350
+        },
+        {
+          "name": "log_section",
+          "line": 360
+        },
+        {
+          "name": "os.path.join",
+          "line": 361
+        },
+        {
+          "name": "visualize_training_results",
+          "line": 362
+        },
+        {
+          "name": "logger.info",
+          "line": 363
+        },
+        {
+          "name": "log_section",
+          "line": 378
+        },
+        {
+          "name": "logger.info",
+          "line": 379
+        },
+        {
+          "name": "logging.Formatter",
+          "line": 147
+        },
+        {
+          "name": "load_cifar10_data",
+          "line": 161
+        },
+        {
+          "name": "ValueError",
+          "line": 165
+        },
+        {
+          "name": "logger.info",
+          "line": 174
+        },
+        {
+          "name": "load_latest_pattern_map",
+          "line": 177
+        },
+        {
+          "name": "logger.info",
+          "line": 178
+        },
+        {
+          "name": "os.path.exists",
+          "line": 181
+        },
+        {
+          "name": "logger.info",
+          "line": 185
+        },
+        {
+          "name": "logger.warning",
+          "line": 187
+        },
+        {
+          "name": "logger.info",
+          "line": 275
+        },
+        {
+          "name": "UnifiedRatioTrainer",
+          "line": 292
+        },
+        {
+          "name": "logger.info",
+          "line": 308
+        },
+        {
+          "name": "max",
+          "line": 345
+        },
+        {
+          "name": "history.get",
+          "line": 346
+        },
+        {
+          "name": "format_metrics_table",
+          "line": 350
+        },
+        {
+          "name": "hasattr",
+          "line": 353
+        },
+        {
+          "name": "logger.info",
+          "line": 354
+        },
+        {
+          "name": "enumerate",
+          "line": 355
+        },
+        {
+          "name": "os.path.join",
+          "line": 367
+        },
+        {
+          "name": "torch.save",
+          "line": 368
+        },
+        {
+          "name": "logger.info",
+          "line": 375
+        },
+        {
+          "name": "logging.getLogger",
+          "line": 148
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 155
+        },
+        {
+          "name": "open",
+          "line": 183
+        },
+        {
+          "name": "json.load",
+          "line": 184
+        },
+        {
+          "name": "p.numel",
+          "line": 204
+        },
+        {
+          "name": "p.numel",
+          "line": 205
+        },
+        {
+          "name": "logger.error",
+          "line": 221
+        },
+        {
+          "name": "get_fibonacci_check_intervals",
+          "line": 238
+        },
+        {
+          "name": "register_unified_ratio_optimizer",
+          "line": 250
+        },
+        {
+          "name": "logger.info",
+          "line": 252
+        },
+        {
+          "name": "logger.warning",
+          "line": 310
+        },
+        {
+          "name": "AdaptiveTrainer",
+          "line": 312
+        },
+        {
+          "name": "logger.info",
+          "line": 356
+        },
+        {
+          "name": "len",
+          "line": 168
+        },
+        {
+          "name": "len",
+          "line": 168
+        },
+        {
+          "name": "model.parameters",
+          "line": 204
+        },
+        {
+          "name": "model.parameters",
+          "line": 205
+        },
+        {
+          "name": "logger.error",
+          "line": 254
+        },
+        {
+          "name": "logger.warning",
+          "line": 255
+        },
+        {
+          "name": "model.state_dict",
+          "line": 369
+        },
+        {
+          "name": "optimizer.state_dict",
+          "line": 370
+        },
+        {
+          "name": "len",
+          "line": 185
+        },
+        {
+          "name": "torch.optim.Adam",
+          "line": 227
+        },
+        {
+          "name": "torch.optim.SGD",
+          "line": 229
+        },
+        {
+          "name": "pattern_map.get",
+          "line": 185
+        },
+        {
+          "name": "model.parameters",
+          "line": 227
+        },
+        {
+          "name": "model.parameters",
+          "line": 229
+        },
+        {
+          "name": "hasattr",
+          "line": 372
+        }
+      ],
+      "docstring": "\n    Main execution function.\n    \n    This function implements the main training workflow using the isekaiZen framework,\n    including data loading, model creation, optimizer configuration, and training.\n    ",
+      "code_snippet": "    return args\n\ndef main():\n    \"\"\"\n    Main execution function.\n    \n    This function implements the main training workflow using the isekaiZen framework,\n    including data loading, model creation, optimizer configuration, and training.\n    \"\"\"\n    # Parse command-line arguments\n    args = parse_args()\n    \n    # Create output directory if it doesn't exist\n    os.makedirs(args.output_dir, exist_ok=True)\n    \n    # Set up logging to file\n    log_file = os.path.join(args.output_dir, 'training.log')\n    file_handler = logging.FileHandler(log_file)\n    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))\n    logging.getLogger().addHandler(file_handler)\n    \n    # Log section start\n    log_section(\"isekaiZen Training\")\n    logger.info(f\"Arguments: {args}\")\n    \n    # Select device (GPU if available, otherwise CPU)\n    device = torch.device(\"cuda:0\" if torch.cuda.is_available() else \"cpu\")\n    logger.info(f\"Using device: {device}\")\n    \n    # Load dataset\n    log_section(\"Loading Dataset\")\n    if args.dataset == 'cifar10':\n        trainset, testset = load_cifar10_data(input_size=args.input_size)\n        num_classes = 10\n        input_channels = 3\n    else:\n        raise ValueError(f\"Unsupported dataset: {args.dataset}\")\n    \n    logger.info(f\"Loaded {args.dataset} dataset\")\n    logger.info(f\"Training set size: {len(trainset)}, Test set size: {len(testset)}\")\n    \n    # Load pattern map if available\n    log_section(\"Pattern Map\")\n    if args.pattern_map:\n        pattern_map_path = args.pattern_map\n        logger.info(f\"Using specified pattern map: {pattern_map_path}\")\n    else:\n        # Auto-detect latest pattern map\n        pattern_map_path = load_latest_pattern_map()\n        logger.info(f\"Auto-detected pattern map: {pattern_map_path}\")\n    \n    pattern_map = None\n    if pattern_map_path and os.path.exists(pattern_map_path):\n        import json\n        with open(pattern_map_path, 'r') as f:\n            pattern_map = json.load(f)\n        logger.info(f\"Loaded pattern map with {len(pattern_map.get('pattern_indices', {}))} patterns\")\n    else:\n        logger.warning(\"No pattern map found, will train without pattern-based optimization\")\n    \n    # Modify PatternRiskAccuracyTracker to handle complexity-based risk initialization\n    modify_pattern_risk_accuracy_tracker()\n    \n    # Create model\n    log_section(\"Model Creation\")\n    model = create_model(\n        model_type=args.model,\n        use_pretrained=args.pretrained,\n        num_classes=num_classes,\n        input_channels=input_channels,\n        input_size=args.input_size\n    )\n    model = model.to(device)\n    \n    # Count total parameters\n    total_params = sum(p.numel() for p in model.parameters())\n    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)\n    logger.info(f\"Model: {args.model}\")\n    logger.info(f\"Total parameters: {total_params:,}\")\n    logger.info(f\"Trainable parameters: {trainable_params:,}\")\n    \n    # Define loss function\n    criterion = nn.CrossEntropyLoss()\n    \n    # Configure optimizer\n    log_section(\"Optimizer Configuration\")\n    \n    # Import optimizer configuration utilities (dynamically to avoid circular imports)\n    try:\n        from examples.optimizer_utils import configure_optimizer, print_available_optimizers\n        from examples.optimizer_configs import get_optimizer_config, ALL_CONFIGS\n    except ImportError:\n        logger.error(\"Failed to import optimizer utilities. Using default configuration.\")\n        ALL_CONFIGS = {}\n        \n        def configure_optimizer(model, optimizer_name, **kwargs):\n            \"\"\"Fallback configure_optimizer function.\"\"\"\n            if optimizer_name == 'adam':\n                return torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)\n            else:\n                return torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)\n    \n    # Register the unified ratio optimizer if using it\n    if args.optimizer == 'eve_unified':\n        try:\n            # Import the required optimizer\n            from isekaizen.optimizers.eve_unified_ratio import EVEUnifiedRatio\n            \n            # Calculate Fibonacci check intervals for the entire training\n            fibonacci_intervals = get_fibonacci_check_intervals(args.epochs)\n            \n            # Configure EVE parameters\n            eve_config = {\n                'debug_ratios': args.debug_ratios,\n                'debug_bounds': args.debug_bounds,\n                'weight_adjustment_range': args.weight_adjustment_range,\n                'use_equilibrium_bounds': args.equilibrium_bounds,\n                'fibonacci_intervals': fibonacci_intervals\n            }\n            \n            # Register the optimizer\n            register_unified_ratio_optimizer(ALL_CONFIGS, EVEUnifiedRatio, eve_config)\n            \n            logger.info(\"Registered EVEUnifiedRatio optimizer with custom configuration\")\n        except ImportError as e:\n            logger.error(f\"Failed to import EVEUnifiedRatio: {e}\")\n            logger.warning(\"Falling back to SGD optimizer\")\n            args.optimizer = 'sgd'\n    \n    # Configure the optimizer\n    optimizer_kwargs = {\n        'lr': args.lr,\n        'weight_decay': args.weight_decay\n    }\n    \n    if args.optimizer == 'sgd':\n        optimizer_kwargs['momentum'] = args.momentum\n    \n    optimizer, scheduler = configure_optimizer(\n        model, \n        args.optimizer,\n        **optimizer_kwargs\n    )\n    \n    logger.info(f\"Using optimizer: {optimizer.__class__.__name__}\")\n    if scheduler:\n        logger.info(f\"Using scheduler: {scheduler.__class__.__name__}\")\n    \n    # Configure batch size optimization if enabled\n    batch_optimizer_kwargs = {\n        'min_batch_size': 32,\n        'max_batch_size': 512,\n        'initial_batch_size': args.batch_size,\n        'total_epochs': args.epochs\n    }\n    \n    # Create trainer\n    log_section(\"Training Setup\")\n    \n    # Import UnifiedRatioTrainer if available, otherwise use AdaptiveTrainer\n    try:\n        from isekaizen.core.training.unified_ratio_trainer import UnifiedRatioTrainer\n        \n        trainer = UnifiedRatioTrainer(\n            model=model,\n            criterion=criterion,\n            optimizer=optimizer,\n            optimizer_class=optimizer.__class__,\n            optimizer_kwargs=optimizer_kwargs,\n            scheduler=scheduler,\n            device=device,\n            pattern_map=pattern_map,\n            batch_optimizer_kwargs=batch_optimizer_kwargs,\n            val_dataset=testset,\n            use_augmentation=args.use_augmentation,\n            model_type=args.model,\n            enable_model_swapping=args.model_swapping,\n            **args.__dict__\n        )\n        logger.info(\"Using UnifiedRatioTrainer with enhanced capabilities\")\n    except ImportError:\n        logger.warning(\"UnifiedRatioTrainer not available, falling back to AdaptiveTrainer\")\n        from isekaizen.trainer.adaptive_trainer import AdaptiveTrainer\n        trainer = AdaptiveTrainer(\n            model=model,\n            criterion=criterion,\n            optimizer=optimizer,\n            device=device,\n            pattern_map=pattern_map\n        )\n    \n    # Training configuration\n    train_config = {\n        'epochs': args.epochs,\n        'batch_size': args.batch_size,\n        'adaptive_batch_size': args.adaptive_batch,\n        'enable_model_swapping': args.model_swapping,\n        'callbacks': [track_unified_ratio_callback],\n        'verbose': args.verbose\n    }\n    \n    # Train the model\n    log_section(\"Starting Training\")\n    history = trainer.train(\n        trainset, \n        testset,\n        **train_config\n    )\n    \n    # Log final results\n    log_section(\"Training Results\")\n    final_results = {\n        'Final Train Loss': history['train_loss'][-1],\n        'Final Train Accuracy': history['train_acc'][-1],\n        'Final Validation Loss': history['val_loss'][-1],\n        'Final Validation Accuracy': history['val_acc'][-1],\n        'Best Validation Accuracy': max(history['val_acc']),\n        'Total Training Time (s)': history.get('total_time', 0),\n        'Final Batch Size': history['batch_sizes'][-1],\n    }\n    \n    logger.info(format_metrics_table(final_results, title=\"Final Results\"))\n    \n    # Log model swaps if any\n    if hasattr(trainer, 'model_swap_manager') and trainer.model_swap_manager.model_swaps:\n        logger.info(\"\\nModel Architecture Swaps:\")\n        for i, swap in enumerate(trainer.model_swap_manager.model_swaps):\n            logger.info(f\"  Swap {i+1}: {swap['old_model']} \u2192 {swap['new_model']} \" \n                      f\"(Transferred {swap['transfer_percentage']:.1f}% of parameters)\")\n    \n    # Visualize training results\n    log_section(\"Visualization\")\n    visualization_path = os.path.join(args.output_dir, 'training_visualization.png')\n    visualize_training_results(history, output_path=visualization_path)\n    logger.info(f\"Saved training visualization to: {visualization_path}\")\n    \n    # Save model if requested\n    if args.save_model:\n        model_path = os.path.join(args.output_dir, 'model.pth')\n        torch.save({\n            'model_state_dict': model.state_dict(),\n            'optimizer_state_dict': optimizer.state_dict(),\n            'history': history,\n            'model_type': args.model if not hasattr(trainer, 'model_swap_manager') else trainer.model_swap_manager.current_model_type,\n            'args': args.__dict__\n        }, model_path)\n        logger.info(f\"Saved model checkpoint to: {model_path}\")\n    \n    # Log completion\n    log_section(\"Training Complete\")\n    logger.info(f\"Results saved to: {args.output_dir}\")\n\nif __name__ == \"__main__\":\n    try:\n        main()"
+    }
+  },
+  "constants": {}
+}

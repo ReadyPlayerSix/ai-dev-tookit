@@ -1,0 +1,335 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\training\\training_prep.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 1
+    },
+    {
+      "name": "logging",
+      "line": 2
+    },
+    {
+      "name": "asyncio",
+      "line": 3
+    },
+    {
+      "name": "signal",
+      "line": 4
+    },
+    {
+      "name": "sys",
+      "line": 5
+    },
+    {
+      "name": "time",
+      "line": 6
+    },
+    {
+      "name": "typing.Dict",
+      "line": 7
+    },
+    {
+      "name": "typing.Any",
+      "line": 7
+    },
+    {
+      "name": "typing.Optional",
+      "line": 7
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 8
+    },
+    {
+      "name": "contextlib.contextmanager",
+      "line": 9
+    },
+    {
+      "name": "concurrent.futures.TimeoutError",
+      "line": 10
+    },
+    {
+      "name": "src.utils.scil.core.SpinalCordIntegrationLayer",
+      "line": 12
+    },
+    {
+      "name": "src.utils.scil.core.ComponentType",
+      "line": 12
+    },
+    {
+      "name": "src.cortex.resource_manager.ResourceManager",
+      "line": 13
+    },
+    {
+      "name": "src.utils.kt_batch_optimizer_v3.KTBatchOptimizer",
+      "line": 14
+    },
+    {
+      "name": "gc",
+      "line": 426
+    }
+  ],
+  "classes": {
+    "GracefulKiller": {
+      "start_line": 16,
+      "end_line": 26,
+      "methods": {
+        "__init__": {
+          "start_line": 18,
+          "end_line": 23,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "signal.signal",
+              "line": 20
+            },
+            {
+              "name": "signal.signal",
+              "line": 21
+            }
+          ],
+          "code_snippet": "class GracefulKiller:\n    \"\"\"Handles graceful shutdown on system signals\"\"\"\n    def __init__(self):\n        self.kill_now = False\n        signal.signal(signal.SIGINT, self._exit_gracefully)\n        signal.signal(signal.SIGTERM, self._exit_gracefully)\n\n    def _exit_gracefully(self, *args):\n        self.kill_now = True\n"
+        },
+        "_exit_gracefully": {
+          "start_line": 23,
+          "end_line": 26,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "code_snippet": "        signal.signal(signal.SIGTERM, self._exit_gracefully)\n\n    def _exit_gracefully(self, *args):\n        self.kill_now = True\n\nclass TrainingPreparationSystem:\n    \"\"\"Handles training preparation and verification with enhanced interrupt handling\"\"\"\n    "
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Handles graceful shutdown on system signals"
+    },
+    "TrainingPreparationSystem": {
+      "start_line": 26,
+      "end_line": 410,
+      "methods": {
+        "__init__": {
+          "start_line": 29,
+          "end_line": 60,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "log_dir",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "GracefulKiller",
+              "line": 30
+            },
+            {
+              "name": "SpinalCordIntegrationLayer",
+              "line": 31
+            },
+            {
+              "name": "ResourceManager",
+              "line": 32
+            },
+            {
+              "name": "KTBatchOptimizer",
+              "line": 33
+            },
+            {
+              "name": "torch.device",
+              "line": 34
+            },
+            {
+              "name": "self.setup_logging",
+              "line": 37
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 34
+            }
+          ],
+          "code_snippet": "    \"\"\"Handles training preparation and verification with enhanced interrupt handling\"\"\"\n    \n    def __init__(self, log_dir: str = \"logs/training_prep\"):\n        self.killer = GracefulKiller()\n        self.scil = SpinalCordIntegrationLayer()\n        self.resource_manager = ResourceManager()\n        self.batch_optimizer = KTBatchOptimizer()\n        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        \n        # Configure logging\n        self.setup_logging(log_dir)\n        \n        # Training configuration\n        self.config = {\n            \"target_batch_size\": 221,\n            \"target_memory_util\": 0.9479,\n            \"target_processing_time\": 7.0,\n            \"warmup_iterations\": 5,\n            \"verification_rounds\": 3,\n            \"timeout_seconds\": {\n                \"cuda_warmup\": 30,\n                \"memory_pools\": 30,\n                \"component_registration\": 30,\n                \"batch_optimization\": 45\n            }\n        }\n        \n        self.verification_metrics = {\n            \"cuda_warmup\": False,\n            \"memory_pools_ready\": False,\n            \"component_registration\": False,\n            \"batch_optimization\": False\n        }\n    \n    @contextmanager\n    def timeout_context(self, timeout_seconds: int, operation_name: str):"
+        },
+        "timeout_context": {
+          "start_line": 62,
+          "end_line": 81,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "timeout_seconds",
+              "type": "int"
+            },
+            {
+              "name": "operation_name",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "time.time",
+              "line": 64
+            },
+            {
+              "name": "self.logger.error",
+              "line": 68
+            },
+            {
+              "name": "self._cleanup_gpu",
+              "line": 69
+            },
+            {
+              "name": "self.logger.info",
+              "line": 73
+            },
+            {
+              "name": "self._cleanup_gpu",
+              "line": 74
+            },
+            {
+              "name": "self.logger.error",
+              "line": 77
+            },
+            {
+              "name": "self._cleanup_gpu",
+              "line": 78
+            },
+            {
+              "name": "time.time",
+              "line": 72
+            },
+            {
+              "name": "str",
+              "line": 77
+            }
+          ],
+          "docstring": "Context manager for operation timeouts with clean GPU cleanup",
+          "code_snippet": "    \n    @contextmanager\n    def timeout_context(self, timeout_seconds: int, operation_name: str):\n        \"\"\"Context manager for operation timeouts with clean GPU cleanup\"\"\"\n        start_time = time.time()\n        try:\n            yield\n        except TimeoutError:\n            self.logger.error(f\"{operation_name} timed out after {timeout_seconds} seconds\")\n            self._cleanup_gpu()\n            raise\n        except KeyboardInterrupt:\n            elapsed = time.time() - start_time\n            self.logger.info(f\"{operation_name} interrupted after {elapsed:.2f} seconds\")\n            self._cleanup_gpu()\n            raise\n        except Exception as e:\n            self.logger.error(f\"{operation_name} failed: {str(e)}\")\n            self._cleanup_gpu()\n            raise\n    \n    def _cleanup_gpu(self):\n        \"\"\"Clean up GPU resources\"\"\"\n        if torch.cuda.is_available():"
+        },
+        "_cleanup_gpu": {
+          "start_line": 81,
+          "end_line": 95,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.cuda.is_available",
+              "line": 83
+            },
+            {
+              "name": "gc.get_objects",
+              "line": 86
+            },
+            {
+              "name": "torch.cuda.empty_cache",
+              "line": 89
+            },
+            {
+              "name": "torch.cuda.synchronize",
+              "line": 90
+            },
+            {
+              "name": "self.logger.info",
+              "line": 91
+            },
+            {
+              "name": "torch.is_tensor",
+              "line": 87
+            },
+            {
+              "name": "self.logger.error",
+              "line": 93
+            },
+            {
+              "name": "str",
+              "line": 93
+            }
+          ],
+          "docstring": "Clean up GPU resources",
+          "code_snippet": "            raise\n    \n    def _cleanup_gpu(self):\n        \"\"\"Clean up GPU resources\"\"\"\n        if torch.cuda.is_available():\n            try:\n                # Clear any remaining tensors\n                for obj in gc.get_objects():\n                    if torch.is_tensor(obj):\n                        del obj\n                torch.cuda.empty_cache()\n                torch.cuda.synchronize()\n                self.logger.info(\"GPU resources cleaned up\")\n            except Exception as e:\n                self.logger.error(f\"Error during GPU cleanup: {str(e)}\")\n    \n    def setup_logging(self, log_dir: str):\n        \"\"\"Enhanced logging setup with detailed formatting\"\"\"\n        self.logger = logging.getLogger(__name__)"
+        },
+        "setup_logging": {
+          "start_line": 95,
+          "end_line": 117,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "log_dir",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logging.getLogger",
+              "line": 97
+            },
+            {
+              "name": "self.logger.setLevel",
+              "line": 98
+            },
+            {
+              "name": "logging.Formatter",
+              "line": 101
+            },
+            {
+              "name": "logging.FileHandler",
+              "line": 108
+            },
+            {
+              "name": "fh.setFormatter",
+              "line": 109
+            },
+            {
+              "name": "self.logger.addHandler",
+              "line": 110
+            },
+            {
+              "name": "logging.StreamHandler",
+              "line": 113
+            },
+            {
+              "name": "ch.setFormatter",
+              "line": 114
+            },
+            {
+              "name": "self.logger.addHandler",
+              "line": 115
+            },
+            {
+              "name": "datetime.now",
+              "line": 108
+            }
+          ],
+          "docstring": "Enhanced logging setup with detailed formatting",
+          "code_snippet": "                self.logger.error(f\"Error during GPU cleanup: {str(e)}\")\n    \n    def setup_logging(self, log_dir: str):\n        \"\"\"Enhanced logging setup with detailed formatting\"\"\"\n        self.logger = logging.getLogger(__name__)\n        self.logger.setLevel(logging.INFO)\n        \n        # Create handlers with detailed formatting\n        formatter = logging.Formatter(\n            '%(asctime)s [%(levelname)s] %(message)s\\n'\n            'Location: %(pathname)s:%(lineno)d\\n'\n            'Process: %(process)d Thread: %(thread)d\\n'\n        )\n        \n        # File handler\n        fh = logging.FileHandler(f\"{log_dir}/training_prep_{datetime.now():%Y%m%d_%H%M%S}.log\")\n        fh.setFormatter(formatter)\n        self.logger.addHandler(fh)\n        \n        # Console handler\n        ch = logging.StreamHandler()\n        ch.setFormatter(formatter)\n        self.logger.addHandler(ch)\n    \n    async def verify_cuda_warmup(self) -> bool:\n        \"\"\"Enhanced CUDA warmup verification with timeout and interrupt handling\"\"\"\n        if not torch.cuda.is_available():"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Handles training preparation and verification with enhanced interrupt handling"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

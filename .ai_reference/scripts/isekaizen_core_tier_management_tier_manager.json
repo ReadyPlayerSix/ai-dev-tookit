@@ -1,0 +1,792 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\tier_management\\tier_manager.py",
+  "imports": [
+    {
+      "name": "enum.Enum",
+      "line": 12
+    },
+    {
+      "name": "typing.Dict",
+      "line": 13
+    },
+    {
+      "name": "typing.List",
+      "line": 13
+    },
+    {
+      "name": "typing.Optional",
+      "line": 13
+    },
+    {
+      "name": "typing.Callable",
+      "line": 13
+    },
+    {
+      "name": "typing.Any",
+      "line": 13
+    },
+    {
+      "name": "logging",
+      "line": 14
+    },
+    {
+      "name": "math",
+      "line": 15
+    },
+    {
+      "name": "mathematical_foundation.polling_optimization.calculate_tier_boundaries",
+      "line": 16
+    }
+  ],
+  "classes": {
+    "TierType": {
+      "start_line": 21,
+      "end_line": 27,
+      "methods": {},
+      "class_variables": [
+        {
+          "name": "HIGH",
+          "line": 23
+        },
+        {
+          "name": "MEDIUM",
+          "line": 24
+        },
+        {
+          "name": "LOW",
+          "line": 25
+        }
+      ],
+      "bases": [
+        "Enum"
+      ],
+      "docstring": "Tier types as defined in the mathematical foundation."
+    },
+    "TierBoundaries": {
+      "start_line": 27,
+      "end_line": 99,
+      "methods": {
+        "__init__": {
+          "start_line": 35,
+          "end_line": 49,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "low",
+              "type": "float"
+            },
+            {
+              "name": "medium",
+              "type": "float"
+            },
+            {
+              "name": "high",
+              "type": "float"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.validate_boundaries",
+              "line": 44
+            }
+          ],
+          "docstring": "\n        Initialize tier boundaries.\n        \n        Args:\n            low: Lower boundary (low-medium threshold)\n            medium: Medium boundary (reference point)\n            high: High boundary (medium-high threshold)\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, low: float = 0.2, medium: float = 0.5, high: float = 0.8):\n        \"\"\"\n        Initialize tier boundaries.\n        \n        Args:\n            low: Lower boundary (low-medium threshold)\n            medium: Medium boundary (reference point)\n            high: High boundary (medium-high threshold)\n        \"\"\"\n        self.validate_boundaries(low, medium, high)\n        self.low = low\n        self.medium = medium\n        self.high = high\n    \n    @staticmethod\n    def validate_boundaries(low: float, medium: float, high: float) -> None:\n        \"\"\""
+        },
+        "validate_boundaries": {
+          "start_line": 50,
+          "end_line": 65,
+          "parameters": [
+            {
+              "name": "low",
+              "type": "float"
+            },
+            {
+              "name": "medium",
+              "type": "float"
+            },
+            {
+              "name": "high",
+              "type": "float"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "ValueError",
+              "line": 63
+            }
+          ],
+          "docstring": "\n        Validate that boundaries are in correct order and range.\n        \n        Args:\n            low: Lower boundary (low-medium threshold)\n            medium: Medium boundary (reference point)\n            high: High boundary (medium-high threshold)\n            \n        Raises:\n            ValueError: If boundaries are invalid\n        ",
+          "code_snippet": "    \n    @staticmethod\n    def validate_boundaries(low: float, medium: float, high: float) -> None:\n        \"\"\"\n        Validate that boundaries are in correct order and range.\n        \n        Args:\n            low: Lower boundary (low-medium threshold)\n            medium: Medium boundary (reference point)\n            high: High boundary (medium-high threshold)\n            \n        Raises:\n            ValueError: If boundaries are invalid\n        \"\"\"\n        if not (0 < low < medium < high < 1):\n            raise ValueError(f\"Tier boundaries must be in order and range (0,1): {low}, {medium}, {high}\")\n    \n    @classmethod\n    def from_system_load(cls, system_load: float, component_count: int) -> 'TierBoundaries':\n        \"\"\""
+        },
+        "from_system_load": {
+          "start_line": 66,
+          "end_line": 82,
+          "parameters": [
+            {
+              "name": "cls"
+            },
+            {
+              "name": "system_load",
+              "type": "float"
+            },
+            {
+              "name": "component_count",
+              "type": "int"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "calculate_tier_boundaries",
+              "line": 79
+            },
+            {
+              "name": "cls",
+              "line": 80
+            }
+          ],
+          "docstring": "\n        Calculate tier boundaries based on system load and component count.\n        \n        This implements the formula from Section 3 of the mathematical foundation.\n        \n        Args:\n            system_load: Current system load (0.0-1.0)\n            component_count: Number of components in the system\n            \n        Returns:\n            TierBoundaries: Calculated tier boundaries\n        ",
+          "code_snippet": "    \n    @classmethod\n    def from_system_load(cls, system_load: float, component_count: int) -> 'TierBoundaries':\n        \"\"\"\n        Calculate tier boundaries based on system load and component count.\n        \n        This implements the formula from Section 3 of the mathematical foundation.\n        \n        Args:\n            system_load: Current system load (0.0-1.0)\n            component_count: Number of components in the system\n            \n        Returns:\n            TierBoundaries: Calculated tier boundaries\n        \"\"\"\n        low, medium, high = calculate_tier_boundaries(system_load, component_count)\n        return cls(low, medium, high)\n    \n    def get_tier_for_priority(self, priority: float) -> TierType:\n        \"\"\"\n        Determine the tier for a given priority value."
+        },
+        "get_tier_for_priority": {
+          "start_line": 82,
+          "end_line": 99,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "priority",
+              "type": "float"
+            }
+          ],
+          "return_type": "TierType",
+          "calls": [],
+          "docstring": "\n        Determine the tier for a given priority value.\n        \n        Args:\n            priority: Priority value (0.0-1.0)\n            \n        Returns:\n            TierType: The tier corresponding to the priority value\n        ",
+          "code_snippet": "        return cls(low, medium, high)\n    \n    def get_tier_for_priority(self, priority: float) -> TierType:\n        \"\"\"\n        Determine the tier for a given priority value.\n        \n        Args:\n            priority: Priority value (0.0-1.0)\n            \n        Returns:\n            TierType: The tier corresponding to the priority value\n        \"\"\"\n        if priority >= self.high:\n            return TierType.HIGH\n        elif priority >= self.low:\n            return TierType.MEDIUM\n        else:\n            return TierType.LOW\n\n\nclass TierComponent:\n    \"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Tier boundaries for priority-based classification.\n    \n    This class represents the boundaries between high, medium, and low priority\n    tiers as described in Section 3 of the mathematical foundation.\n    "
+    },
+    "TierComponent": {
+      "start_line": 100,
+      "end_line": 170,
+      "methods": {
+        "__init__": {
+          "start_line": 110,
+          "end_line": 136,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "priority",
+              "type": "float"
+            },
+            {
+              "name": "min_resources",
+              "type": "float"
+            },
+            {
+              "name": "callback"
+            },
+            {
+              "name": "metadata"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.set_priority",
+              "line": 129
+            },
+            {
+              "name": "max",
+              "line": 130
+            }
+          ],
+          "docstring": "\n        Initialize a tier component.\n        \n        Args:\n            name: Component name\n            priority: Priority value (0.0-1.0)\n            min_resources: Minimum resource requirement\n            callback: Function to call when component is executed\n            metadata: Additional component metadata\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self,\n        name: str,\n        priority: float,\n        min_resources: float,\n        callback: Optional[Callable] = None,\n        metadata: Optional[Dict[str, Any]] = None\n    ):\n        \"\"\"\n        Initialize a tier component.\n        \n        Args:\n            name: Component name\n            priority: Priority value (0.0-1.0)\n            min_resources: Minimum resource requirement\n            callback: Function to call when component is executed\n            metadata: Additional component metadata\n        \"\"\"\n        self.name = name\n        self.set_priority(priority)\n        self.min_resources = max(0.0, min_resources)\n        self.callback = callback\n        self.metadata = metadata or {}\n        self.allocated_resources = 0.0\n        self.tier = None  # Will be set by TierManager\n    \n    def set_priority(self, priority: float) -> None:\n        \"\"\"\n        Set component priority."
+        },
+        "set_priority": {
+          "start_line": 136,
+          "end_line": 150,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "priority",
+              "type": "float"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "ValueError",
+              "line": 147
+            }
+          ],
+          "docstring": "\n        Set component priority.\n        \n        Args:\n            priority: Priority value (0.0-1.0)\n            \n        Raises:\n            ValueError: If priority is out of range\n        ",
+          "code_snippet": "        self.tier = None  # Will be set by TierManager\n    \n    def set_priority(self, priority: float) -> None:\n        \"\"\"\n        Set component priority.\n        \n        Args:\n            priority: Priority value (0.0-1.0)\n            \n        Raises:\n            ValueError: If priority is out of range\n        \"\"\"\n        if not (0 <= priority <= 1):\n            raise ValueError(f\"Priority must be in range [0,1]: {priority}\")\n        self.priority = priority\n    \n    def execute(self, *args, **kwargs) -> Any:\n        \"\"\"\n        Execute the component's callback with allocated resources."
+        },
+        "execute": {
+          "start_line": 150,
+          "end_line": 170,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "Any",
+          "calls": [
+            {
+              "name": "self.callback",
+              "line": 168
+            },
+            {
+              "name": "logger.warning",
+              "line": 162
+            }
+          ],
+          "docstring": "\n        Execute the component's callback with allocated resources.\n        \n        Args:\n            *args: Positional arguments for callback\n            **kwargs: Keyword arguments for callback\n            \n        Returns:\n            Any: Result of the callback execution\n        ",
+          "code_snippet": "        self.priority = priority\n    \n    def execute(self, *args, **kwargs) -> Any:\n        \"\"\"\n        Execute the component's callback with allocated resources.\n        \n        Args:\n            *args: Positional arguments for callback\n            **kwargs: Keyword arguments for callback\n            \n        Returns:\n            Any: Result of the callback execution\n        \"\"\"\n        if self.callback is None:\n            logger.warning(f\"Component '{self.name}' has no callback to execute\")\n            return None\n        \n        # Add allocated resources to kwargs\n        kwargs['allocated_resources'] = self.allocated_resources\n        \n        return self.callback(*args, **kwargs)\n\n\nclass TierManager:\n    \"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Component in the tiered architecture.\n    \n    This class represents a component that can be assigned to a tier and\n    receive resources based on its priority. Components have specific\n    resource requirements and can be scheduled for execution based on\n    tier assignment.\n    "
+    },
+    "TierManager": {
+      "start_line": 171,
+      "end_line": 600,
+      "methods": {
+        "__init__": {
+          "start_line": 180,
+          "end_line": 216,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "total_resources",
+              "type": "float"
+            },
+            {
+              "name": "boundaries"
+            },
+            {
+              "name": "system_load",
+              "type": "float"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "max",
+              "line": 194
+            },
+            {
+              "name": "max",
+              "line": 195
+            },
+            {
+              "name": "logger.info",
+              "line": 213
+            },
+            {
+              "name": "logger.info",
+              "line": 214
+            },
+            {
+              "name": "min",
+              "line": 195
+            },
+            {
+              "name": "TierBoundaries",
+              "line": 196
+            }
+          ],
+          "docstring": "\n        Initialize the tier manager.\n        \n        Args:\n            total_resources: Total available resources for allocation\n            boundaries: Tier boundaries for priority classification\n            system_load: Current system load (0.0-1.0)\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self,\n        total_resources: float = 1.0,\n        boundaries: Optional[TierBoundaries] = None,\n        system_load: float = 0.5\n    ):\n        \"\"\"\n        Initialize the tier manager.\n        \n        Args:\n            total_resources: Total available resources for allocation\n            boundaries: Tier boundaries for priority classification\n            system_load: Current system load (0.0-1.0)\n        \"\"\"\n        self.total_resources = max(0.0, total_resources)\n        self.system_load = max(0.0, min(1.0, system_load))\n        self.boundaries = boundaries or TierBoundaries()\n        \n        # Component tracking\n        self.components: Dict[str, TierComponent] = {}\n        \n        # Tier assignments\n        self.high_tier: List[TierComponent] = []\n        self.medium_tier: List[TierComponent] = []\n        self.low_tier: List[TierComponent] = []\n        \n        # Resource allocation tracking\n        self.tier_allocations: Dict[TierType, float] = {\n            TierType.HIGH: 0.0,\n            TierType.MEDIUM: 0.0,\n            TierType.LOW: 0.0\n        }\n        \n        logger.info(f\"Initialized TierManager with {self.total_resources} total resources\")\n        logger.info(f\"Tier boundaries: Low={self.boundaries.low}, Medium={self.boundaries.medium}, High={self.boundaries.high}\")\n    \n    def add_component(self, component: TierComponent) -> None:\n        \"\"\"\n        Add a component to the tier manager."
+        },
+        "add_component": {
+          "start_line": 216,
+          "end_line": 246,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "component",
+              "type": "TierComponent"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.boundaries.get_tier_for_priority",
+              "line": 233
+            },
+            {
+              "name": "logger.info",
+              "line": 244
+            },
+            {
+              "name": "ValueError",
+              "line": 227
+            },
+            {
+              "name": "self.high_tier.append",
+              "line": 238
+            },
+            {
+              "name": "self.medium_tier.append",
+              "line": 240
+            },
+            {
+              "name": "self.low_tier.append",
+              "line": 242
+            }
+          ],
+          "docstring": "\n        Add a component to the tier manager.\n        \n        Args:\n            component: Component to add\n            \n        Raises:\n            ValueError: If component with the same name already exists\n        ",
+          "code_snippet": "        logger.info(f\"Tier boundaries: Low={self.boundaries.low}, Medium={self.boundaries.medium}, High={self.boundaries.high}\")\n    \n    def add_component(self, component: TierComponent) -> None:\n        \"\"\"\n        Add a component to the tier manager.\n        \n        Args:\n            component: Component to add\n            \n        Raises:\n            ValueError: If component with the same name already exists\n        \"\"\"\n        if component.name in self.components:\n            raise ValueError(f\"Component with name '{component.name}' already exists\")\n        \n        # Store component\n        self.components[component.name] = component\n        \n        # Assign to tier based on priority\n        tier = self.boundaries.get_tier_for_priority(component.priority)\n        component.tier = tier\n        \n        # Add to tier list\n        if tier == TierType.HIGH:\n            self.high_tier.append(component)\n        elif tier == TierType.MEDIUM:\n            self.medium_tier.append(component)\n        else:\n            self.low_tier.append(component)\n            \n        logger.info(f\"Added component '{component.name}' with priority {component.priority} to {tier.value} tier\")\n    \n    def remove_component(self, name: str) -> Optional[TierComponent]:\n        \"\"\"\n        Remove a component from the tier manager."
+        },
+        "remove_component": {
+          "start_line": 246,
+          "end_line": 274,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.components.pop",
+              "line": 260
+            },
+            {
+              "name": "logger.info",
+              "line": 270
+            },
+            {
+              "name": "logger.warning",
+              "line": 257
+            },
+            {
+              "name": "self.high_tier.remove",
+              "line": 264
+            },
+            {
+              "name": "self.medium_tier.remove",
+              "line": 266
+            },
+            {
+              "name": "self.low_tier.remove",
+              "line": 268
+            }
+          ],
+          "docstring": "\n        Remove a component from the tier manager.\n        \n        Args:\n            name: Name of the component to remove\n            \n        Returns:\n            Optional[TierComponent]: Removed component or None if not found\n        ",
+          "code_snippet": "        logger.info(f\"Added component '{component.name}' with priority {component.priority} to {tier.value} tier\")\n    \n    def remove_component(self, name: str) -> Optional[TierComponent]:\n        \"\"\"\n        Remove a component from the tier manager.\n        \n        Args:\n            name: Name of the component to remove\n            \n        Returns:\n            Optional[TierComponent]: Removed component or None if not found\n        \"\"\"\n        if name not in self.components:\n            logger.warning(f\"Component '{name}' not found for removal\")\n            return None\n            \n        component = self.components.pop(name)\n        \n        # Remove from tier list\n        if component.tier == TierType.HIGH:\n            self.high_tier.remove(component)\n        elif component.tier == TierType.MEDIUM:\n            self.medium_tier.remove(component)\n        else:\n            self.low_tier.remove(component)\n            \n        logger.info(f\"Removed component '{name}' from {component.tier.value} tier\")\n        \n        return component\n    \n    def update_boundaries(self, system_load: Optional[float] = None) -> None:\n        \"\"\"\n        Update tier boundaries based on current system load."
+        },
+        "update_boundaries": {
+          "start_line": 274,
+          "end_line": 297,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "system_load"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "len",
+              "line": 286
+            },
+            {
+              "name": "TierBoundaries.from_system_load",
+              "line": 287
+            },
+            {
+              "name": "logger.info",
+              "line": 289
+            },
+            {
+              "name": "self._reassign_components",
+              "line": 295
+            },
+            {
+              "name": "max",
+              "line": 283
+            },
+            {
+              "name": "min",
+              "line": 283
+            }
+          ],
+          "docstring": "\n        Update tier boundaries based on current system load.\n        \n        Args:\n            system_load: Current system load (0.0-1.0), use current if None\n        ",
+          "code_snippet": "        return component\n    \n    def update_boundaries(self, system_load: Optional[float] = None) -> None:\n        \"\"\"\n        Update tier boundaries based on current system load.\n        \n        Args:\n            system_load: Current system load (0.0-1.0), use current if None\n        \"\"\"\n        # Update system load if provided\n        if system_load is not None:\n            self.system_load = max(0.0, min(1.0, system_load))\n            \n        # Calculate new boundaries\n        component_count = len(self.components)\n        new_boundaries = TierBoundaries.from_system_load(self.system_load, component_count)\n        \n        logger.info(f\"Updating tier boundaries: {self.boundaries.low:.3f},{self.boundaries.medium:.3f},{self.boundaries.high:.3f} -> {new_boundaries.low:.3f},{new_boundaries.medium:.3f},{new_boundaries.high:.3f}\")\n        \n        # Store new boundaries\n        self.boundaries = new_boundaries\n        \n        # Reassign components to tiers\n        self._reassign_components()\n    \n    def _reassign_components(self) -> None:\n        \"\"\"Reassign all components to tiers based on current boundaries.\"\"\"\n        # Clear tier lists"
+        },
+        "_reassign_components": {
+          "start_line": 297,
+          "end_line": 324,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.components.values",
+              "line": 305
+            },
+            {
+              "name": "self.boundaries.get_tier_for_priority",
+              "line": 307
+            },
+            {
+              "name": "logger.info",
+              "line": 311
+            },
+            {
+              "name": "self.high_tier.append",
+              "line": 318
+            },
+            {
+              "name": "self.medium_tier.append",
+              "line": 320
+            },
+            {
+              "name": "self.low_tier.append",
+              "line": 322
+            }
+          ],
+          "docstring": "Reassign all components to tiers based on current boundaries.",
+          "code_snippet": "        self._reassign_components()\n    \n    def _reassign_components(self) -> None:\n        \"\"\"Reassign all components to tiers based on current boundaries.\"\"\"\n        # Clear tier lists\n        self.high_tier = []\n        self.medium_tier = []\n        self.low_tier = []\n        \n        # Reassign components\n        for component in self.components.values():\n            # Get new tier assignment\n            tier = self.boundaries.get_tier_for_priority(component.priority)\n            \n            # If tier changed, log the change\n            if component.tier != tier:\n                logger.info(f\"Component '{component.name}' moved from {component.tier.value} tier to {tier.value} tier\")\n                \n            # Update component tier\n            component.tier = tier\n            \n            # Add to tier list\n            if tier == TierType.HIGH:\n                self.high_tier.append(component)\n            elif tier == TierType.MEDIUM:\n                self.medium_tier.append(component)\n            else:\n                self.low_tier.append(component)\n    \n    def allocate_resources(self) -> Dict[str, float]:\n        \"\"\"\n        Allocate resources to components based on tier and priority."
+        },
+        "allocate_resources": {
+          "start_line": 324,
+          "end_line": 375,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self._calculate_tier_budgets",
+              "line": 336
+            },
+            {
+              "name": "self.components.values",
+              "line": 339
+            },
+            {
+              "name": "self._allocate_tier_resources",
+              "line": 349
+            },
+            {
+              "name": "self._allocate_tier_resources",
+              "line": 353
+            },
+            {
+              "name": "self._allocate_tier_resources",
+              "line": 358
+            },
+            {
+              "name": "logger.info",
+              "line": 371
+            },
+            {
+              "name": "self.components.values",
+              "line": 368
+            }
+          ],
+          "docstring": "\n        Allocate resources to components based on tier and priority.\n        \n        This implements the resource allocation strategy described in the\n        mathematical foundation, providing hierarchical allocation based on\n        tier assignments and component priorities.\n        \n        Returns:\n            Dict[str, float]: Dictionary mapping component names to allocated resources\n        ",
+          "code_snippet": "                self.low_tier.append(component)\n    \n    def allocate_resources(self) -> Dict[str, float]:\n        \"\"\"\n        Allocate resources to components based on tier and priority.\n        \n        This implements the resource allocation strategy described in the\n        mathematical foundation, providing hierarchical allocation based on\n        tier assignments and component priorities.\n        \n        Returns:\n            Dict[str, float]: Dictionary mapping component names to allocated resources\n        \"\"\"\n        # Calculate tier resource budgets\n        tier_budgets = self._calculate_tier_budgets()\n        \n        # Reset allocations\n        for component in self.components.values():\n            component.allocated_resources = 0.0\n            \n        self.tier_allocations = {\n            TierType.HIGH: 0.0,\n            TierType.MEDIUM: 0.0,\n            TierType.LOW: 0.0\n        }\n        \n        # Allocate resources to high tier first\n        high_allocations = self._allocate_tier_resources(\n            self.high_tier, tier_budgets[TierType.HIGH])\n        \n        # Then medium tier\n        medium_allocations = self._allocate_tier_resources(\n            self.medium_tier, tier_budgets[TierType.MEDIUM])\n        \n        # Finally low tier with remaining resources\n        remaining_resources = self.total_resources - high_allocations - medium_allocations\n        low_allocations = self._allocate_tier_resources(\n            self.low_tier, remaining_resources)\n        \n        # Update tier allocation tracking\n        self.tier_allocations[TierType.HIGH] = high_allocations\n        self.tier_allocations[TierType.MEDIUM] = medium_allocations\n        self.tier_allocations[TierType.LOW] = low_allocations\n        \n        # Create result dictionary\n        result = {component.name: component.allocated_resources \n                 for component in self.components.values()}\n        \n        # Log allocation summary\n        logger.info(f\"Resource allocation: High={high_allocations:.3f}, Medium={medium_allocations:.3f}, Low={low_allocations:.3f}\")\n        \n        return result\n    \n    def _calculate_tier_budgets(self) -> Dict[TierType, float]:\n        \"\"\"\n        Calculate resource budgets for each tier."
+        },
+        "_calculate_tier_budgets": {
+          "start_line": 375,
+          "end_line": 422,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "sum",
+              "line": 391
+            },
+            {
+              "name": "sum",
+              "line": 392
+            },
+            {
+              "name": "sum",
+              "line": 393
+            },
+            {
+              "name": "max",
+              "line": 396
+            },
+            {
+              "name": "max",
+              "line": 413
+            }
+          ],
+          "docstring": "\n        Calculate resource budgets for each tier.\n        \n        This implements the hierarchical resource allocation strategy from\n        the mathematical foundation.\n        \n        Returns:\n            Dict[TierType, float]: Resource budget for each tier\n        ",
+          "code_snippet": "        return result\n    \n    def _calculate_tier_budgets(self) -> Dict[TierType, float]:\n        \"\"\"\n        Calculate resource budgets for each tier.\n        \n        This implements the hierarchical resource allocation strategy from\n        the mathematical foundation.\n        \n        Returns:\n            Dict[TierType, float]: Resource budget for each tier\n        \"\"\"\n        # Start with default allocations\n        high_budget = 0.5 * self.total_resources\n        medium_budget = 0.3 * self.total_resources\n        low_budget = 0.2 * self.total_resources\n        \n        # Calculate minimum requirements for each tier\n        high_min_req = sum(c.min_resources for c in self.high_tier)\n        medium_min_req = sum(c.min_resources for c in self.medium_tier)\n        low_min_req = sum(c.min_resources for c in self.low_tier)\n        \n        # Ensure high tier gets at least its minimum requirement\n        high_budget = max(high_budget, high_min_req)\n        \n        # Adjust other tiers based on high tier allocation\n        remaining = self.total_resources - high_budget\n        \n        if remaining < medium_min_req + low_min_req:\n            # Not enough for both medium and low tiers' minimum requirements\n            # Allocate proportionally to their minimum requirements\n            if medium_min_req + low_min_req > 0:\n                medium_budget = remaining * (medium_min_req / (medium_min_req + low_min_req))\n                low_budget = remaining - medium_budget\n            else:\n                # If both have zero minimum requirements, use default ratios\n                medium_budget = 0.6 * remaining\n                low_budget = 0.4 * remaining\n        else:\n            # Enough for minimum requirements of both tiers\n            medium_budget = max(medium_min_req, 0.6 * remaining)\n            low_budget = remaining - medium_budget\n        \n        # Return tier budgets\n        return {\n            TierType.HIGH: high_budget,\n            TierType.MEDIUM: medium_budget,\n            TierType.LOW: low_budget\n        }\n    \n    def _allocate_tier_resources(self, tier_components: List[TierComponent], budget: float) -> float:\n        \"\"\""
+        },
+        "_allocate_tier_resources": {
+          "start_line": 423,
+          "end_line": 473,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "tier_components"
+            },
+            {
+              "name": "budget",
+              "type": "float"
+            }
+          ],
+          "return_type": "float",
+          "calls": [
+            {
+              "name": "sum",
+              "line": 441
+            },
+            {
+              "name": "enumerate",
+              "line": 451
+            },
+            {
+              "name": "min",
+              "line": 471
+            },
+            {
+              "name": "enumerate",
+              "line": 445
+            },
+            {
+              "name": "sum",
+              "line": 460
+            },
+            {
+              "name": "sum",
+              "line": 471
+            },
+            {
+              "name": "enumerate",
+              "line": 468
+            },
+            {
+              "name": "len",
+              "line": 465
+            }
+          ],
+          "docstring": "\n        Allocate resources to components within a tier.\n        \n        This implements the priority-based allocation logic within tiers.\n        \n        Args:\n            tier_components: List of components in the tier\n            budget: Resource budget for the tier\n            \n        Returns:\n            float: Total resources allocated to the tier\n        ",
+          "code_snippet": "        }\n    \n    def _allocate_tier_resources(self, tier_components: List[TierComponent], budget: float) -> float:\n        \"\"\"\n        Allocate resources to components within a tier.\n        \n        This implements the priority-based allocation logic within tiers.\n        \n        Args:\n            tier_components: List of components in the tier\n            budget: Resource budget for the tier\n            \n        Returns:\n            float: Total resources allocated to the tier\n        \"\"\"\n        if not tier_components:\n            return 0.0\n            \n        # Calculate minimum requirements\n        min_requirements = [c.min_resources for c in tier_components]\n        total_min_req = sum(min_requirements)\n        \n        # If budget is less than total minimum requirements, allocate proportionally\n        if budget < total_min_req and total_min_req > 0:\n            for i, component in enumerate(tier_components):\n                component.allocated_resources = budget * (min_requirements[i] / total_min_req)\n            return budget\n            \n        # Allocate minimum requirements first\n        allocated = total_min_req\n        for i, component in enumerate(tier_components):\n            component.allocated_resources = min_requirements[i]\n            \n        # If there's remaining budget, allocate based on priority\n        if allocated < budget:\n            remaining = budget - allocated\n            \n            # Get priorities\n            priorities = [c.priority for c in tier_components]\n            total_priority = sum(priorities)\n            \n            # If total priority is zero, distribute evenly\n            if total_priority == 0:\n                for component in tier_components:\n                    component.allocated_resources += remaining / len(tier_components)\n            else:\n                # Distribute remaining budget based on priority\n                for i, component in enumerate(tier_components):\n                    component.allocated_resources += remaining * (priorities[i] / total_priority)\n                    \n        return min(budget, sum(c.allocated_resources for c in tier_components))\n    \n    def execute_tier(self, tier_type: TierType, *args, **kwargs) -> Dict[str, Any]:\n        \"\"\"\n        Execute all components in a specific tier."
+        },
+        "execute_tier": {
+          "start_line": 473,
+          "end_line": 506,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "tier_type",
+              "type": "TierType"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "logger.debug",
+              "line": 496
+            },
+            {
+              "name": "component.execute",
+              "line": 499
+            },
+            {
+              "name": "logger.error",
+              "line": 501
+            },
+            {
+              "name": "str",
+              "line": 501
+            }
+          ],
+          "docstring": "\n        Execute all components in a specific tier.\n        \n        Args:\n            tier_type: Tier to execute\n            *args: Positional arguments for component execution\n            **kwargs: Keyword arguments for component execution\n            \n        Returns:\n            Dict[str, Any]: Dictionary mapping component names to execution results\n        ",
+          "code_snippet": "        return min(budget, sum(c.allocated_resources for c in tier_components))\n    \n    def execute_tier(self, tier_type: TierType, *args, **kwargs) -> Dict[str, Any]:\n        \"\"\"\n        Execute all components in a specific tier.\n        \n        Args:\n            tier_type: Tier to execute\n            *args: Positional arguments for component execution\n            **kwargs: Keyword arguments for component execution\n            \n        Returns:\n            Dict[str, Any]: Dictionary mapping component names to execution results\n        \"\"\"\n        # Get components for the specified tier\n        if tier_type == TierType.HIGH:\n            tier_components = self.high_tier\n        elif tier_type == TierType.MEDIUM:\n            tier_components = self.medium_tier\n        else:\n            tier_components = self.low_tier\n            \n        # Execute components and collect results\n        results = {}\n        for component in tier_components:\n            logger.debug(f\"Executing component '{component.name}' in {tier_type.value} tier\")\n            \n            try:\n                results[component.name] = component.execute(*args, **kwargs)\n            except Exception as e:\n                logger.error(f\"Error executing component '{component.name}': {str(e)}\")\n                results[component.name] = None\n                \n        return results\n    \n    def execute_all(self, *args, **kwargs) -> Dict[str, Any]:\n        \"\"\"\n        Execute all components in priority order (high to low tier)."
+        },
+        "execute_all": {
+          "start_line": 506,
+          "end_line": 537,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.allocate_resources",
+              "line": 518
+            },
+            {
+              "name": "self.execute_tier",
+              "line": 524
+            },
+            {
+              "name": "results.update",
+              "line": 525
+            },
+            {
+              "name": "self.execute_tier",
+              "line": 528
+            },
+            {
+              "name": "results.update",
+              "line": 529
+            },
+            {
+              "name": "self.execute_tier",
+              "line": 532
+            },
+            {
+              "name": "results.update",
+              "line": 533
+            }
+          ],
+          "docstring": "\n        Execute all components in priority order (high to low tier).\n        \n        Args:\n            *args: Positional arguments for component execution\n            **kwargs: Keyword arguments for component execution\n            \n        Returns:\n            Dict[str, Any]: Dictionary mapping component names to execution results\n        ",
+          "code_snippet": "        return results\n    \n    def execute_all(self, *args, **kwargs) -> Dict[str, Any]:\n        \"\"\"\n        Execute all components in priority order (high to low tier).\n        \n        Args:\n            *args: Positional arguments for component execution\n            **kwargs: Keyword arguments for component execution\n            \n        Returns:\n            Dict[str, Any]: Dictionary mapping component names to execution results\n        \"\"\"\n        # Allocate resources first\n        self.allocate_resources()\n        \n        # Execute tiers in priority order\n        results = {}\n        \n        # High tier\n        high_results = self.execute_tier(TierType.HIGH, *args, **kwargs)\n        results.update(high_results)\n        \n        # Medium tier\n        medium_results = self.execute_tier(TierType.MEDIUM, *args, **kwargs)\n        results.update(medium_results)\n        \n        # Low tier\n        low_results = self.execute_tier(TierType.LOW, *args, **kwargs)\n        results.update(low_results)\n        \n        return results\n    \n    def get_tier_components(self, tier_type: TierType) -> List[TierComponent]:\n        \"\"\"\n        Get all components in a specific tier."
+        },
+        "get_tier_components": {
+          "start_line": 537,
+          "end_line": 554,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "tier_type",
+              "type": "TierType"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.high_tier.copy",
+              "line": 548
+            },
+            {
+              "name": "self.medium_tier.copy",
+              "line": 550
+            },
+            {
+              "name": "self.low_tier.copy",
+              "line": 552
+            }
+          ],
+          "docstring": "\n        Get all components in a specific tier.\n        \n        Args:\n            tier_type: Tier to get components for\n            \n        Returns:\n            List[TierComponent]: List of components in the specified tier\n        ",
+          "code_snippet": "        return results\n    \n    def get_tier_components(self, tier_type: TierType) -> List[TierComponent]:\n        \"\"\"\n        Get all components in a specific tier.\n        \n        Args:\n            tier_type: Tier to get components for\n            \n        Returns:\n            List[TierComponent]: List of components in the specified tier\n        \"\"\"\n        if tier_type == TierType.HIGH:\n            return self.high_tier.copy()\n        elif tier_type == TierType.MEDIUM:\n            return self.medium_tier.copy()\n        else:\n            return self.low_tier.copy()\n    \n    def update_component_priority(self, name: str, priority: float) -> None:\n        \"\"\"\n        Update the priority of a component and reassign tier if needed."
+        },
+        "update_component_priority": {
+          "start_line": 554,
+          "end_line": 600,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "priority",
+              "type": "float"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "component.set_priority",
+              "line": 572
+            },
+            {
+              "name": "self.boundaries.get_tier_for_priority",
+              "line": 575
+            },
+            {
+              "name": "ValueError",
+              "line": 566
+            },
+            {
+              "name": "logger.info",
+              "line": 598
+            },
+            {
+              "name": "self.high_tier.remove",
+              "line": 581
+            },
+            {
+              "name": "self.high_tier.append",
+              "line": 589
+            },
+            {
+              "name": "self.medium_tier.remove",
+              "line": 583
+            },
+            {
+              "name": "self.low_tier.remove",
+              "line": 585
+            },
+            {
+              "name": "self.medium_tier.append",
+              "line": 591
+            },
+            {
+              "name": "self.low_tier.append",
+              "line": 593
+            }
+          ],
+          "docstring": "\n        Update the priority of a component and reassign tier if needed.\n        \n        Args:\n            name: Name of the component to update\n            priority: New priority value (0.0-1.0)\n            \n        Raises:\n            ValueError: If component not found or priority is invalid\n        ",
+          "code_snippet": "            return self.low_tier.copy()\n    \n    def update_component_priority(self, name: str, priority: float) -> None:\n        \"\"\"\n        Update the priority of a component and reassign tier if needed.\n        \n        Args:\n            name: Name of the component to update\n            priority: New priority value (0.0-1.0)\n            \n        Raises:\n            ValueError: If component not found or priority is invalid\n        \"\"\"\n        if name not in self.components:\n            raise ValueError(f\"Component '{name}' not found\")\n            \n        component = self.components[name]\n        old_tier = component.tier\n        \n        # Update priority\n        component.set_priority(priority)\n        \n        # Reassign tier\n        new_tier = self.boundaries.get_tier_for_priority(priority)\n        \n        # If tier changed, update tier assignments\n        if old_tier != new_tier:\n            # Remove from old tier list\n            if old_tier == TierType.HIGH:\n                self.high_tier.remove(component)\n            elif old_tier == TierType.MEDIUM:\n                self.medium_tier.remove(component)\n            else:\n                self.low_tier.remove(component)\n                \n            # Add to new tier list\n            if new_tier == TierType.HIGH:\n                self.high_tier.append(component)\n            elif new_tier == TierType.MEDIUM:\n                self.medium_tier.append(component)\n            else:\n                self.low_tier.append(component)\n                \n            # Update component tier\n            component.tier = new_tier\n            \n            logger.info(f\"Component '{name}' moved from {old_tier.value} tier to {new_tier.value} tier due to priority update\")"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Manager for the tiered architecture.\n    \n    This class implements the tiered hub architecture described in the isekaiZen\n    mathematical foundation, providing hierarchical resource allocation and\n    priority-based scheduling.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

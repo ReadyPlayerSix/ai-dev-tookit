@@ -1,0 +1,12 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\trainer\\optimized\\__init__.py",
+  "imports": [
+    {
+      "name": "optimized_trainer.OptimizedTrainer",
+      "line": 11
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}

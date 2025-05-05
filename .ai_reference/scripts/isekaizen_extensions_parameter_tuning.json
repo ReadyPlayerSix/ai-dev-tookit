@@ -1,0 +1,210 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\extensions\\parameter_tuning.py",
+  "imports": [
+    {
+      "name": "abc.ABC",
+      "line": 15
+    },
+    {
+      "name": "abc.abstractmethod",
+      "line": 15
+    },
+    {
+      "name": "typing.Dict",
+      "line": 16
+    },
+    {
+      "name": "typing.Any",
+      "line": 16
+    },
+    {
+      "name": "typing.List",
+      "line": 16
+    },
+    {
+      "name": "typing.Optional",
+      "line": 16
+    },
+    {
+      "name": "numpy",
+      "line": 17
+    }
+  ],
+  "classes": {
+    "ParameterTuner": {
+      "start_line": 19,
+      "end_line": 53,
+      "methods": {
+        "tune_parameters": {
+          "start_line": 28,
+          "end_line": 40,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "historical_data"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "\n        Tune framework parameters based on historical performance data.\n        \n        Args:\n            historical_data: Performance history data\n                \n        Returns:\n            dict: Updated parameter values\n        ",
+          "code_snippet": "    \n    @abstractmethod\n    def tune_parameters(self, historical_data: Dict[str, List]) -> Dict[str, Any]:\n        \"\"\"\n        Tune framework parameters based on historical performance data.\n        \n        Args:\n            historical_data: Performance history data\n                \n        Returns:\n            dict: Updated parameter values\n        \"\"\"\n        pass\n    \n    @abstractmethod\n    def predict_optimal_parameters(self, current_state: Dict[str, Any]) -> Dict[str, Any]:\n        \"\"\""
+        },
+        "predict_optimal_parameters": {
+          "start_line": 41,
+          "end_line": 53,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "current_state"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "\n        Predict optimal parameters for the current state using machine learning.\n        \n        Args:\n            current_state: Current system state information\n                \n        Returns:\n            dict: Predicted optimal parameter values\n        ",
+          "code_snippet": "    \n    @abstractmethod\n    def predict_optimal_parameters(self, current_state: Dict[str, Any]) -> Dict[str, Any]:\n        \"\"\"\n        Predict optimal parameters for the current state using machine learning.\n        \n        Args:\n            current_state: Current system state information\n                \n        Returns:\n            dict: Predicted optimal parameter values\n        \"\"\"\n        pass\n\n\nclass CognitiveEfficiencyTuner(ParameterTuner):\n    \"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "ABC"
+      ],
+      "docstring": "\n    Interface for adaptive parameter tuning based on historical performance.\n    \n    This implements the machine learning integration described in Section 1 of\n    the Future Mathematical Extensions in the foundation document.\n    "
+    },
+    "CognitiveEfficiencyTuner": {
+      "start_line": 54,
+      "end_line": 99,
+      "methods": {
+        "__init__": {
+          "start_line": 62,
+          "end_line": 67,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "Initialize the tuner with default settings.",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self):\n        \"\"\"Initialize the tuner with default settings.\"\"\"\n        self.training_data = []\n        self.model = None\n    \n    def tune_parameters(self, historical_data: Dict[str, List]) -> Dict[str, Any]:\n        \"\"\"\n        Tune cognitive efficiency parameters based on historical data."
+        },
+        "tune_parameters": {
+          "start_line": 67,
+          "end_line": 85,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "historical_data"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "\n        Tune cognitive efficiency parameters based on historical data.\n        \n        Args:\n            historical_data: Performance history data\n                \n        Returns:\n            dict: Updated cognitive efficiency parameters\n        ",
+          "code_snippet": "        self.model = None\n    \n    def tune_parameters(self, historical_data: Dict[str, List]) -> Dict[str, Any]:\n        \"\"\"\n        Tune cognitive efficiency parameters based on historical data.\n        \n        Args:\n            historical_data: Performance history data\n                \n        Returns:\n            dict: Updated cognitive efficiency parameters\n        \"\"\"\n        # This is a placeholder implementation\n        # In the future, this will use machine learning to tune parameters\n        return {\n            'L_C': 8.0,  # Critical cognitive threshold\n            'SIGMA': 0.8,  # Cognitive transition sharpness\n            'ALPHA_W': 0.15,  # Weight precision impact \n            'ALPHA_PAR': 0.22,  # Parallel processing overhead\n        }\n    \n    def predict_optimal_parameters(self, current_state: Dict[str, Any]) -> Dict[str, Any]:\n        \"\"\""
+        },
+        "predict_optimal_parameters": {
+          "start_line": 86,
+          "end_line": 99,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "current_state"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [
+            {
+              "name": "self.tune_parameters",
+              "line": 97
+            }
+          ],
+          "docstring": "\n        Predict optimal cognitive efficiency parameters for current state.\n        \n        Args:\n            current_state: Current system state information\n                \n        Returns:\n            dict: Predicted optimal cognitive efficiency parameters\n        ",
+          "code_snippet": "        }\n    \n    def predict_optimal_parameters(self, current_state: Dict[str, Any]) -> Dict[str, Any]:\n        \"\"\"\n        Predict optimal cognitive efficiency parameters for current state.\n        \n        Args:\n            current_state: Current system state information\n                \n        Returns:\n            dict: Predicted optimal cognitive efficiency parameters\n        \"\"\"\n        # This is a placeholder implementation\n        return self.tune_parameters(None)\n\n\nclass WorkloadSpecificOptimizer(ABC):\n    \"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "ParameterTuner"
+      ],
+      "docstring": "\n    Placeholder implementation for tuning cognitive efficiency factors.\n    \n    This class will be implemented in future versions to dynamically adjust the\n    cognitive efficiency calculation parameters based on performance data.\n    "
+    },
+    "WorkloadSpecificOptimizer": {
+      "start_line": 100,
+      "end_line": 146,
+      "methods": {
+        "detect_workload_type": {
+          "start_line": 110,
+          "end_line": 122,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "data_sample",
+              "type": "Any"
+            }
+          ],
+          "return_type": "str",
+          "calls": [],
+          "docstring": "\n        Detect the type of workload from a data sample.\n        \n        Args:\n            data_sample: Sample of the workload data\n                \n        Returns:\n            str: Detected workload type\n        ",
+          "code_snippet": "    \n    @abstractmethod\n    def detect_workload_type(self, data_sample: Any) -> str:\n        \"\"\"\n        Detect the type of workload from a data sample.\n        \n        Args:\n            data_sample: Sample of the workload data\n                \n        Returns:\n            str: Detected workload type\n        \"\"\"\n        pass\n    \n    @abstractmethod\n    def get_optimal_parameters(self, workload_type: str) -> Dict[str, Any]:\n        \"\"\""
+        },
+        "get_optimal_parameters": {
+          "start_line": 123,
+          "end_line": 135,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "workload_type",
+              "type": "str"
+            }
+          ],
+          "return_type": "complex_type",
+          "calls": [],
+          "docstring": "\n        Get optimal parameters for a specific workload type.\n        \n        Args:\n            workload_type: Type of workload\n                \n        Returns:\n            dict: Optimal parameters for the workload\n        ",
+          "code_snippet": "    \n    @abstractmethod\n    def get_optimal_parameters(self, workload_type: str) -> Dict[str, Any]:\n        \"\"\"\n        Get optimal parameters for a specific workload type.\n        \n        Args:\n            workload_type: Type of workload\n                \n        Returns:\n            dict: Optimal parameters for the workload\n        \"\"\"\n        pass\n    \n    @abstractmethod\n    def train_from_history(self, workload_type: str, historical_data: Dict[str, List]) -> None:\n        \"\"\""
+        },
+        "train_from_history": {
+          "start_line": 136,
+          "end_line": 146,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "workload_type",
+              "type": "str"
+            },
+            {
+              "name": "historical_data"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Train the optimizer using historical performance data for a workload type.\n        \n        Args:\n            workload_type: Type of workload\n            historical_data: Performance history data\n        ",
+          "code_snippet": "    \n    @abstractmethod\n    def train_from_history(self, workload_type: str, historical_data: Dict[str, List]) -> None:\n        \"\"\"\n        Train the optimizer using historical performance data for a workload type.\n        \n        Args:\n            workload_type: Type of workload\n            historical_data: Performance history data\n        \"\"\"\n        pass\n\n\n# List of extension points available for future implementation\nEXTENSION_POINTS = {"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "ABC"
+      ],
+      "docstring": "\n    Interface for workload-specific optimization strategies.\n    \n    This defines an interface for workload-specific optimizers that will be \n    implemented in future versions of the framework. These optimizers will use\n    machine learning to adapt the framework to specific workload characteristics.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {
+    "EXTENSION_POINTS": {
+      "line": 148
+    }
+  }
+}

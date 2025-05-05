@@ -1,0 +1,230 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\pattern\\batch_underfitting_optimizer.py",
+  "imports": [
+    {
+      "name": "logging",
+      "line": 8
+    },
+    {
+      "name": "typing.Dict",
+      "line": 9
+    },
+    {
+      "name": "typing.Any",
+      "line": 9
+    },
+    {
+      "name": "typing.Optional",
+      "line": 9
+    },
+    {
+      "name": "isekaizen.core.optimizer.risk_aware_optimizer.RiskAwarePatternIsekaiZen",
+      "line": 11
+    }
+  ],
+  "classes": {
+    "UnderFittingProtectedOptimizer": {
+      "start_line": 15,
+      "end_line": 197,
+      "methods": {
+        "__init__": {
+          "start_line": 23,
+          "end_line": 74,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "total_epochs"
+            },
+            {
+              "name": "max_epoch_time"
+            },
+            {
+              "name": "run_diagnostics"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "exploration_rate"
+            },
+            {
+              "name": "risk_aversion"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 52
+            },
+            {
+              "name": "logger.info",
+              "line": 72
+            },
+            {
+              "name": "super",
+              "line": 52
+            }
+          ],
+          "docstring": "\n        Initialize the underfitting-protected optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            exploration_rate: Rate of random exploration\n            risk_aversion: Factor determining how cautious the optimizer is (0.0-1.0)\n            **kwargs: Additional parameters\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(\n        self, \n        model,\n        device=None,\n        total_epochs=50,\n        max_epoch_time=None,\n        run_diagnostics=True,\n        pattern_map=None,\n        exploration_rate=0.1,\n        risk_aversion=0.5,\n        **kwargs\n    ):\n        \"\"\"\n        Initialize the underfitting-protected optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            exploration_rate: Rate of random exploration\n            risk_aversion: Factor determining how cautious the optimizer is (0.0-1.0)\n            **kwargs: Additional parameters\n        \"\"\"\n        # Class-switching logic has been completely removed\n            \n        # Initialize base optimizer\n        super().__init__(\n            model=model,\n            device=device,\n            total_epochs=total_epochs,\n            max_epoch_time=max_epoch_time,\n            run_diagnostics=run_diagnostics,\n            pattern_map=pattern_map,\n            exploration_rate=exploration_rate,\n            risk_aversion=risk_aversion,\n            **kwargs\n        )\n        \n        # Track validation and training metrics\n        self.train_acc = 0.0\n        self.val_acc = 0.0\n        self.prev_batch_size = None\n        \n        # Flag to prevent batch size decrease\n        self.prevent_batch_size_decrease = False\n        \n        logger.info(\"Underfitting-protected batch optimizer initialized\")\n    \n    def update_batch_size(self, train_loss, val_loss, pattern_metrics=None, verbose=False):\n        \"\"\"\n        Update the batch size based on training metrics."
+        },
+        "update_batch_size": {
+          "start_line": 74,
+          "end_line": 132,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_loss"
+            },
+            {
+              "name": "val_loss"
+            },
+            {
+              "name": "pattern_metrics"
+            },
+            {
+              "name": "verbose"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....get_optimal_batch_size",
+              "line": 114
+            },
+            {
+              "name": "max",
+              "line": 128
+            },
+            {
+              "name": "logger.info",
+              "line": 104
+            },
+            {
+              "name": "min",
+              "line": 128
+            },
+            {
+              "name": "logger.info",
+              "line": 108
+            },
+            {
+              "name": "super",
+              "line": 114
+            },
+            {
+              "name": "logger.info",
+              "line": 122
+            }
+          ],
+          "docstring": "\n        Update the batch size based on training metrics.\n        \n        This method overrides the base batch optimizer to add protection against\n        decreasing batch size when validation accuracy > training accuracy.\n        \n        Args:\n            train_loss: Training loss from the current epoch\n            val_loss: Validation loss from the current epoch\n            pattern_metrics: Additional pattern-specific metrics\n            verbose: Whether to print verbose output\n            \n        Returns:\n            Updated batch size\n        ",
+          "code_snippet": "        logger.info(\"Underfitting-protected batch optimizer initialized\")\n    \n    def update_batch_size(self, train_loss, val_loss, pattern_metrics=None, verbose=False):\n        \"\"\"\n        Update the batch size based on training metrics.\n        \n        This method overrides the base batch optimizer to add protection against\n        decreasing batch size when validation accuracy > training accuracy.\n        \n        Args:\n            train_loss: Training loss from the current epoch\n            val_loss: Validation loss from the current epoch\n            pattern_metrics: Additional pattern-specific metrics\n            verbose: Whether to print verbose output\n            \n        Returns:\n            Updated batch size\n        \"\"\"\n        # Store previous batch size\n        self.prev_batch_size = self.batch_history[-1] if self.batch_history else None\n        \n        # Extract training and validation accuracies if available\n        if pattern_metrics:\n            if 'train_acc' in pattern_metrics:\n                self.train_acc = pattern_metrics['train_acc']\n            if 'val_acc' in pattern_metrics:\n                self.val_acc = pattern_metrics['val_acc']\n        \n        # Check for underfitting condition\n        is_underfitting = self.val_acc > self.train_acc\n        \n        if is_underfitting:\n            logger.info(f\"Underfitting detected: Val acc ({self.val_acc:.2f}%) > Train acc ({self.train_acc:.2f}%)\")\n            self.prevent_batch_size_decrease = True\n            \n            if verbose:\n                logger.info(\"Preventing batch size decrease due to underfitting\")\n        else:\n            # Reset prevention flag\n            self.prevent_batch_size_decrease = False\n        \n        # Calculate base batch size from parent class\n        base_batch_size = super().get_optimal_batch_size()\n        \n        # If we're preventing decrease and the new batch is smaller, maintain or increase\n        if self.prevent_batch_size_decrease and self.prev_batch_size is not None and base_batch_size < self.prev_batch_size:\n            # Keep the previous batch size to prevent decrease\n            final_batch_size = self.prev_batch_size\n            \n            if verbose:\n                logger.info(f\"Maintaining batch size at {final_batch_size} to avoid underfitting\")\n        else:\n            # Otherwise use the calculated batch size\n            final_batch_size = base_batch_size\n        \n        # Ensure batch size is within bounds\n        final_batch_size = max(self.min_batch, min(self.max_batch, final_batch_size))\n        \n        return final_batch_size\n    \n    def get_optimal_batch_size(self):\n        \"\"\"\n        Get the optimal batch size with underfitting protection."
+        },
+        "get_optimal_batch_size": {
+          "start_line": 132,
+          "end_line": 178,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "max",
+              "line": 171
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 174
+            },
+            {
+              "name": "logger.info",
+              "line": 145
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 146
+            },
+            {
+              "name": "logger.info",
+              "line": 154
+            },
+            {
+              "name": "....get_optimal_batch_size",
+              "line": 157
+            },
+            {
+              "name": "....get_optimal_batch_size",
+              "line": 168
+            },
+            {
+              "name": "max",
+              "line": 171
+            },
+            {
+              "name": "min",
+              "line": 171
+            },
+            {
+              "name": "logger.info",
+              "line": 161
+            },
+            {
+              "name": "super",
+              "line": 157
+            },
+            {
+              "name": "super",
+              "line": 168
+            }
+          ],
+          "docstring": "\n        Get the optimal batch size with underfitting protection.\n        \n        Returns:\n            Optimal batch size\n        ",
+          "code_snippet": "        return final_batch_size\n    \n    def get_optimal_batch_size(self):\n        \"\"\"\n        Get the optimal batch size with underfitting protection.\n        \n        Returns:\n            Optimal batch size\n        \"\"\"\n        # Increment epoch counter\n        self.epoch += 1\n        \n        # First epoch uses middle of range\n        if self.epoch == 1 or not self.batch_history:\n            base_batch = (self.min_batch + self.max_batch) // 2\n            logger.info(f\"First epoch: Using middle of batch range: {base_batch}\")\n            self.batch_history.append(base_batch)\n            return base_batch\n        \n        # Simple underfitting check using validation and training accuracy\n        is_underfitting = self.val_acc > self.train_acc\n        prev_batch_size = self.batch_history[-1]\n        \n        if is_underfitting:\n            logger.info(f\"Underfitting detected: Val acc ({self.val_acc:.2f}%) > Train acc ({self.train_acc:.2f}%)\")\n            \n            # Underfitting - NEVER decrease batch size, consider increasing it\n            base_batch_size = super().get_optimal_batch_size()\n            \n            # If optimizer wants to decrease batch size, maintain current size instead\n            if base_batch_size < prev_batch_size:\n                logger.info(f\"Preventing batch size decrease from {prev_batch_size} to {base_batch_size} due to underfitting\")\n                final_batch_size = prev_batch_size\n            else:\n                # Allow increases during underfitting\n                final_batch_size = base_batch_size\n        else:\n            # Normal optimization when not underfitting\n            final_batch_size = super().get_optimal_batch_size()\n        \n        # Ensure batch size is within bounds and at least 2 for BatchNorm\n        final_batch_size = max(max(self.min_batch, 2), min(self.max_batch, final_batch_size))\n        \n        # Store batch for history\n        self.batch_history.append(final_batch_size)\n        \n        return final_batch_size\n    \n    def update_accuracy_metrics(self, train_acc, val_acc):\n        \"\"\"\n        Update accuracy metrics."
+        },
+        "update_accuracy_metrics": {
+          "start_line": 178,
+          "end_line": 197,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_acc"
+            },
+            {
+              "name": "val_acc"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.info",
+              "line": 191
+            }
+          ],
+          "docstring": "\n        Update accuracy metrics.\n        \n        Args:\n            train_acc: Training accuracy\n            val_acc: Validation accuracy\n        ",
+          "code_snippet": "        return final_batch_size\n    \n    def update_accuracy_metrics(self, train_acc, val_acc):\n        \"\"\"\n        Update accuracy metrics.\n        \n        Args:\n            train_acc: Training accuracy\n            val_acc: Validation accuracy\n        \"\"\"\n        self.train_acc = train_acc\n        self.val_acc = val_acc\n        \n        # Simple underfitting check: val_acc > train_acc\n        if val_acc > train_acc:\n            logger.info(f\"Underfitting detected: Val acc ({val_acc:.2f}%) > Train acc ({train_acc:.2f}%)\")\n            self.prevent_batch_size_decrease = True\n        elif train_acc > val_acc + 1.0:  # Clear overfitting case\n            # Only disable prevention when clearly overfitting\n            self.prevent_batch_size_decrease = False"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "RiskAwarePatternIsekaiZen"
+      ],
+      "docstring": "\n    Batch optimizer that prevents decreasing batch size during underfitting.\n    \n    This optimizer extends the RiskAwarePatternIsekaiZen with protection against\n    decreasing batch size when the model is underfitting (validation accuracy > training accuracy).\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

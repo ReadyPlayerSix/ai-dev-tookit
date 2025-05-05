@@ -1,0 +1,14 @@
+cd D:/projects/isekaizen/machine-learning-optimizer 
+
+Hi Claude. Please thoroughly study:
+ 1. isekaiZen Complete Reference.txt
+ 2. CRITICAL DEVELOPMENT PRINCIPLES.txt
+
+Once you have a full understanding then please:
+ 1. Ensure you have proper direct accesses to needed file system.
+ 2. Ensure your 'librarian' system is functional
+ 3. Ensure you remember to update the above .txt files noted above as needed
+ 4. Ensure you remember to update your 'librarian' as needed
+
+When you're ready I can tell you what needs immediate attention.
+

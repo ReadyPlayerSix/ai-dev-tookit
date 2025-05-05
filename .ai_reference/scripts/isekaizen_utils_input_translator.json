@@ -1,0 +1,178 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\input_translator.py",
+  "imports": [
+    {
+      "name": "typing.Dict",
+      "line": 7
+    },
+    {
+      "name": "typing.Any",
+      "line": 7
+    },
+    {
+      "name": "types.DomainType",
+      "line": 8
+    },
+    {
+      "name": "types.CortexFlowMetadata",
+      "line": 8
+    },
+    {
+      "name": "types.Pattern",
+      "line": 8
+    },
+    {
+      "name": "types.PatternType",
+      "line": 8
+    },
+    {
+      "name": "numpy",
+      "line": 9
+    }
+  ],
+  "classes": {
+    "InputTranslator": {
+      "start_line": 11,
+      "end_line": 92,
+      "methods": {
+        "translate_raw_input": {
+          "start_line": 17,
+          "end_line": 47,
+          "parameters": [
+            {
+              "name": "domain",
+              "type": "DomainType"
+            },
+            {
+              "name": "input_data"
+            },
+            {
+              "name": "flow_metadata",
+              "type": "CortexFlowMetadata"
+            }
+          ],
+          "return_type": "Pattern",
+          "calls": [
+            {
+              "name": "InputTranslator._translate_visual_input",
+              "line": 31
+            },
+            {
+              "name": "InputTranslator._translate_linguistic_input",
+              "line": 33
+            },
+            {
+              "name": "InputTranslator._translate_emotional_input",
+              "line": 35
+            },
+            {
+              "name": "Pattern",
+              "line": 38
+            },
+            {
+              "name": "np.array",
+              "line": 39
+            }
+          ],
+          "docstring": "\n        Translate raw input from a specific domain into a pattern.\n        \n        Args:\n            domain: The domain type (visual, linguistic, emotional)\n            input_data: Raw input data\n            flow_metadata: Metadata for tracking the pattern through the system\n            \n        Returns:\n            Pattern object\n        ",
+          "code_snippet": "    \n    @staticmethod\n    def translate_raw_input(domain: DomainType, input_data: Dict[str, Any], flow_metadata: CortexFlowMetadata) -> Pattern:\n        \"\"\"\n        Translate raw input from a specific domain into a pattern.\n        \n        Args:\n            domain: The domain type (visual, linguistic, emotional)\n            input_data: Raw input data\n            flow_metadata: Metadata for tracking the pattern through the system\n            \n        Returns:\n            Pattern object\n        \"\"\"\n        # Extract basic properties based on domain\n        if domain == DomainType.VISUAL:\n            return InputTranslator._translate_visual_input(input_data, flow_metadata)\n        elif domain == DomainType.LINGUISTIC:\n            return InputTranslator._translate_linguistic_input(input_data, flow_metadata)\n        elif domain == DomainType.EMOTIONAL:\n            return InputTranslator._translate_emotional_input(input_data, flow_metadata)\n        else:\n            # Default pattern\n            return Pattern(\n                signature=np.array([0.5]),\n                weight=0.5,\n                pattern_type=PatternType.OPPORTUNITY,\n                complexity=0.5,\n                domain=domain,\n                confidence=0.5,\n                domain_data=input_data\n            )\n    \n    @staticmethod\n    def _translate_visual_input(input_data: Dict[str, Any], flow_metadata: CortexFlowMetadata) -> Pattern:"
+        },
+        "_translate_visual_input": {
+          "start_line": 49,
+          "end_line": 62,
+          "parameters": [
+            {
+              "name": "input_data"
+            },
+            {
+              "name": "flow_metadata",
+              "type": "CortexFlowMetadata"
+            }
+          ],
+          "return_type": "Pattern",
+          "calls": [
+            {
+              "name": "input_data.get",
+              "line": 51
+            },
+            {
+              "name": "Pattern",
+              "line": 53
+            },
+            {
+              "name": "np.array",
+              "line": 54
+            }
+          ],
+          "docstring": "Translate visual input to pattern",
+          "code_snippet": "    \n    @staticmethod\n    def _translate_visual_input(input_data: Dict[str, Any], flow_metadata: CortexFlowMetadata) -> Pattern:\n        \"\"\"Translate visual input to pattern\"\"\"\n        confidence = input_data.get('confidence', 0.5)\n        \n        return Pattern(\n            signature=np.array([confidence]),\n            weight=confidence,\n            pattern_type=PatternType.OPPORTUNITY if confidence > 0.7 else PatternType.RISK,\n            complexity=0.5 + (confidence * 0.5),\n            domain=DomainType.VISUAL,\n            confidence=confidence,\n            domain_data=input_data\n        )\n    \n    @staticmethod\n    def _translate_linguistic_input(input_data: Dict[str, Any], flow_metadata: CortexFlowMetadata) -> Pattern:"
+        },
+        "_translate_linguistic_input": {
+          "start_line": 64,
+          "end_line": 77,
+          "parameters": [
+            {
+              "name": "input_data"
+            },
+            {
+              "name": "flow_metadata",
+              "type": "CortexFlowMetadata"
+            }
+          ],
+          "return_type": "Pattern",
+          "calls": [
+            {
+              "name": "input_data.get",
+              "line": 66
+            },
+            {
+              "name": "Pattern",
+              "line": 68
+            },
+            {
+              "name": "np.array",
+              "line": 69
+            }
+          ],
+          "docstring": "Translate linguistic input to pattern",
+          "code_snippet": "    \n    @staticmethod\n    def _translate_linguistic_input(input_data: Dict[str, Any], flow_metadata: CortexFlowMetadata) -> Pattern:\n        \"\"\"Translate linguistic input to pattern\"\"\"\n        confidence = input_data.get('confidence', 0.5)\n        \n        return Pattern(\n            signature=np.array([confidence]),\n            weight=confidence,\n            pattern_type=PatternType.OPPORTUNITY if confidence > 0.7 else PatternType.RISK,\n            complexity=0.5 + (confidence * 0.5),\n            domain=DomainType.LINGUISTIC,\n            confidence=confidence,\n            domain_data=input_data\n        )\n    \n    @staticmethod\n    def _translate_emotional_input(input_data: Dict[str, Any], flow_metadata: CortexFlowMetadata) -> Pattern:"
+        },
+        "_translate_emotional_input": {
+          "start_line": 79,
+          "end_line": 92,
+          "parameters": [
+            {
+              "name": "input_data"
+            },
+            {
+              "name": "flow_metadata",
+              "type": "CortexFlowMetadata"
+            }
+          ],
+          "return_type": "Pattern",
+          "calls": [
+            {
+              "name": "input_data.get",
+              "line": 81
+            },
+            {
+              "name": "Pattern",
+              "line": 83
+            },
+            {
+              "name": "np.array",
+              "line": 84
+            }
+          ],
+          "docstring": "Translate emotional input to pattern",
+          "code_snippet": "    \n    @staticmethod\n    def _translate_emotional_input(input_data: Dict[str, Any], flow_metadata: CortexFlowMetadata) -> Pattern:\n        \"\"\"Translate emotional input to pattern\"\"\"\n        confidence = input_data.get('confidence', 0.5)\n        \n        return Pattern(\n            signature=np.array([confidence]),\n            weight=confidence,\n            pattern_type=PatternType.OPPORTUNITY if confidence > 0.7 else PatternType.RISK,\n            complexity=0.5 + (confidence * 0.5),\n            domain=DomainType.EMOTIONAL,\n            confidence=confidence,\n            domain_data=input_data\n        )"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Translates raw input from different domains into pattern objects.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

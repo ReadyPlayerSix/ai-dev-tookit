@@ -1,0 +1,289 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\config.py",
+  "imports": [
+    {
+      "name": "dataclasses.dataclass",
+      "line": 11
+    },
+    {
+      "name": "dataclasses.field",
+      "line": 11
+    },
+    {
+      "name": "typing.Dict",
+      "line": 12
+    },
+    {
+      "name": "typing.Any",
+      "line": 12
+    },
+    {
+      "name": "typing.Optional",
+      "line": 12
+    },
+    {
+      "name": "typing.List",
+      "line": 12
+    },
+    {
+      "name": "typing.Union",
+      "line": 12
+    },
+    {
+      "name": "exceptions.ConfigurationError",
+      "line": 14
+    }
+  ],
+  "classes": {
+    "EVEConfig": {
+      "start_line": 17,
+      "end_line": 42,
+      "methods": {
+        "validate": {
+          "start_line": 28,
+          "end_line": 42,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "ConfigurationError",
+              "line": 31
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 34
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 37
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 40
+            }
+          ],
+          "docstring": "Validate configuration values.",
+          "code_snippet": "    warmup_initial_lr_factor: float = 0.2\n    \n    def validate(self):\n        \"\"\"Validate configuration values.\"\"\"\n        if self.weight_adjustment_range not in [\"default\", \"narrow\", \"wide\"]:\n            raise ConfigurationError(f\"Invalid weight_adjustment_range: {self.weight_adjustment_range}\")\n        \n        if self.lr_check_interval < 1:\n            raise ConfigurationError(f\"Invalid lr_check_interval: {self.lr_check_interval}\")\n        \n        if self.warmup_epochs < 0:\n            raise ConfigurationError(f\"Invalid warmup_epochs: {self.warmup_epochs}\")\n        \n        if self.warmup_initial_lr_factor <= 0 or self.warmup_initial_lr_factor >= 1:\n            raise ConfigurationError(f\"Invalid warmup_initial_lr_factor: {self.warmup_initial_lr_factor}\")\n\n@dataclass\nclass TrainingConfig:\n    \"\"\"Configuration for training.\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Configuration for EVE optimizer."
+    },
+    "TrainingConfig": {
+      "start_line": 43,
+      "end_line": 71,
+      "methods": {
+        "validate": {
+          "start_line": 54,
+          "end_line": 71,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "ConfigurationError",
+              "line": 57
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 60
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 63
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 66
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 69
+            }
+          ],
+          "docstring": "Validate configuration values.",
+          "code_snippet": "    patience: int = 10\n    \n    def validate(self):\n        \"\"\"Validate configuration values.\"\"\"\n        if self.batch_size < 1:\n            raise ConfigurationError(f\"Invalid batch_size: {self.batch_size}\")\n        \n        if self.epochs < 1:\n            raise ConfigurationError(f\"Invalid epochs: {self.epochs}\")\n        \n        if self.min_batch_size < 1:\n            raise ConfigurationError(f\"Invalid min_batch_size: {self.min_batch_size}\")\n        \n        if self.max_batch_size < self.min_batch_size:\n            raise ConfigurationError(f\"max_batch_size must be greater than or equal to min_batch_size\")\n        \n        if self.patience < 1:\n            raise ConfigurationError(f\"Invalid patience: {self.patience}\")\n\n@dataclass\nclass ModelConfig:\n    \"\"\"Configuration for model creation.\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Configuration for training."
+    },
+    "ModelConfig": {
+      "start_line": 72,
+      "end_line": 101,
+      "methods": {
+        "validate": {
+          "start_line": 80,
+          "end_line": 101,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "ConfigurationError",
+              "line": 90
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 93
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 96
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 99
+            }
+          ],
+          "docstring": "Validate configuration values.",
+          "code_snippet": "    input_size: int = 32\n    \n    def validate(self):\n        \"\"\"Validate configuration values.\"\"\"\n        valid_models = [\n            \"resnet18\", \"resnet34\", \"resnet50\", \n            \"vgg16\", \"vgg19\", \n            \"mobilenet_v2\", \"mobilenet_v3_small\", \"mobilenet_v3_large\",\n            \"efficientnet_b0\", \"efficientnet_b1\", \"efficientnet_b2\", \"efficientnet_b3\"\n        ]\n        \n        if self.model_type not in valid_models:\n            raise ConfigurationError(f\"Invalid model_type: {self.model_type}\")\n        \n        if self.num_classes < 1:\n            raise ConfigurationError(f\"Invalid num_classes: {self.num_classes}\")\n        \n        if self.input_channels < 1:\n            raise ConfigurationError(f\"Invalid input_channels: {self.input_channels}\")\n        \n        if self.input_size < 1:\n            raise ConfigurationError(f\"Invalid input_size: {self.input_size}\")\n\n@dataclass\nclass DataConfig:\n    \"\"\"Configuration for data loading.\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Configuration for model creation."
+    },
+    "DataConfig": {
+      "start_line": 102,
+      "end_line": 119,
+      "methods": {
+        "validate": {
+          "start_line": 109,
+          "end_line": 119,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "ConfigurationError",
+              "line": 114
+            },
+            {
+              "name": "ConfigurationError",
+              "line": 117
+            }
+          ],
+          "docstring": "Validate configuration values.",
+          "code_snippet": "    augmentation_factor: float = 0.0  # 0.0 means no augmentation\n    \n    def validate(self):\n        \"\"\"Validate configuration values.\"\"\"\n        valid_datasets = [\"cifar10\", \"cifar100\", \"imagenet\", \"custom\"]\n        \n        if self.dataset not in valid_datasets:\n            raise ConfigurationError(f\"Invalid dataset: {self.dataset}\")\n        \n        if self.augmentation_factor < 0.0:\n            raise ConfigurationError(f\"Invalid augmentation_factor: {self.augmentation_factor}\")\n\n@dataclass\nclass IsekaiZenConfig:\n    \"\"\"Main configuration for isekaiZen.\"\"\""
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Configuration for data loading."
+    },
+    "IsekaiZenConfig": {
+      "start_line": 120,
+      "end_line": 162,
+      "methods": {
+        "validate": {
+          "start_line": 127,
+          "end_line": 134,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "self.eve.validate",
+              "line": 129
+            },
+            {
+              "name": "self.training.validate",
+              "line": 130
+            },
+            {
+              "name": "self.model.validate",
+              "line": 131
+            },
+            {
+              "name": "self.data.validate",
+              "line": 132
+            }
+          ],
+          "docstring": "Validate all configuration sections.",
+          "code_snippet": "    data: DataConfig = field(default_factory=DataConfig)\n    \n    def validate(self):\n        \"\"\"Validate all configuration sections.\"\"\"\n        self.eve.validate()\n        self.training.validate()\n        self.model.validate()\n        self.data.validate()\n        \n    @classmethod\n    def from_dict(cls, config_dict: Dict[str, Any]) -> 'IsekaiZenConfig':\n        \"\"\""
+        },
+        "from_dict": {
+          "start_line": 135,
+          "end_line": 162,
+          "parameters": [
+            {
+              "name": "cls"
+            },
+            {
+              "name": "config_dict"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "EVEConfig",
+              "line": 145
+            },
+            {
+              "name": "TrainingConfig",
+              "line": 146
+            },
+            {
+              "name": "ModelConfig",
+              "line": 147
+            },
+            {
+              "name": "DataConfig",
+              "line": 148
+            },
+            {
+              "name": "cls",
+              "line": 150
+            },
+            {
+              "name": "config.validate",
+              "line": 158
+            },
+            {
+              "name": "config_dict.get",
+              "line": 145
+            },
+            {
+              "name": "config_dict.get",
+              "line": 146
+            },
+            {
+              "name": "config_dict.get",
+              "line": 147
+            },
+            {
+              "name": "config_dict.get",
+              "line": 148
+            }
+          ],
+          "docstring": "\n        Create configuration from dictionary.\n        \n        Args:\n            config_dict: Dictionary with configuration values\n            \n        Returns:\n            IsekaiZenConfig: Validated configuration object\n        ",
+          "code_snippet": "        \n    @classmethod\n    def from_dict(cls, config_dict: Dict[str, Any]) -> 'IsekaiZenConfig':\n        \"\"\"\n        Create configuration from dictionary.\n        \n        Args:\n            config_dict: Dictionary with configuration values\n            \n        Returns:\n            IsekaiZenConfig: Validated configuration object\n        \"\"\"\n        eve_config = EVEConfig(**config_dict.get('eve', {}))\n        training_config = TrainingConfig(**config_dict.get('training', {}))\n        model_config = ModelConfig(**config_dict.get('model', {}))\n        data_config = DataConfig(**config_dict.get('data', {}))\n        \n        config = cls(\n            eve=eve_config,\n            training=training_config,\n            model=model_config,\n            data=data_config\n        )\n        \n        # Validate the configuration\n        config.validate()\n        \n        return config"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Main configuration for isekaiZen."
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

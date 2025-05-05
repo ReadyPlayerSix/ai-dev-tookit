@@ -1,0 +1,179 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\arg_parsing.py",
+  "imports": [
+    {
+      "name": "argparse",
+      "line": 5
+    },
+    {
+      "name": "logging",
+      "line": 6
+    },
+    {
+      "name": "typing.Any",
+      "line": 7
+    },
+    {
+      "name": "typing.Optional",
+      "line": 7
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "add_batch_args": {
+      "start_line": 11,
+      "end_line": 38,
+      "parameters": [
+        {
+          "name": "parser"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "parser.add_argument",
+          "line": 25
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 27
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 31
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 33
+        }
+      ],
+      "docstring": "\n    Add standardized batch-related arguments to a parser.\n    \n    This ensures consistent argument handling across all optimizer scripts.\n    Replaces the older min_batch and max_batch arguments with diagnostic control parameters.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    ",
+      "code_snippet": "logger = logging.getLogger(__name__)\n\ndef add_batch_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \"\"\"\n    Add standardized batch-related arguments to a parser.\n    \n    This ensures consistent argument handling across all optimizer scripts.\n    Replaces the older min_batch and max_batch arguments with diagnostic control parameters.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    \"\"\"\n    # Add diagnostics control parameters\n    parser.add_argument(\"--skip-diagnostics\", action=\"store_true\",\n                      help=\"Skip automatic batch size diagnostics (not recommended)\")\n    parser.add_argument(\"--diagnostics-only\", action=\"store_true\",\n                      help=\"Run only the batch size diagnostics and exit\")\n    \n    # Add hidden override parameters for testing and backward compatibility\n    parser.add_argument(\"--override-batch-min\", type=int, default=None,\n                      help=argparse.SUPPRESS)  # Hidden option for testing\n    parser.add_argument(\"--override-batch-max\", type=int, default=None,\n                      help=argparse.SUPPRESS)  # Hidden option for testing\n                      \n    return parser\n\ndef add_standard_training_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \"\"\"\n    Add standardized training arguments to a parser."
+    },
+    "add_standard_training_args": {
+      "start_line": 38,
+      "end_line": 64,
+      "parameters": [
+        {
+          "name": "parser"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "parser.add_argument",
+          "line": 51
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 53
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 55
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 57
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 59
+        }
+      ],
+      "docstring": "\n    Add standardized training arguments to a parser.\n    \n    This ensures consistent argument handling across all training scripts.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    ",
+      "code_snippet": "    return parser\n\ndef add_standard_training_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \"\"\"\n    Add standardized training arguments to a parser.\n    \n    This ensures consistent argument handling across all training scripts.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    \"\"\"\n    # Add standard training parameters\n    parser.add_argument(\"--epochs\", type=int, default=50, \n                      help=\"Number of epochs for training (default: 50)\")\n    parser.add_argument(\"--learning-rate\", type=float, default=0.01,\n                      help=\"Learning rate (default: 0.01)\")\n    parser.add_argument(\"--momentum\", type=float, default=0.9,\n                      help=\"SGD momentum (default: 0.9)\")\n    parser.add_argument(\"--weight-decay\", type=float, default=5e-4,\n                      help=\"Weight decay (default: 5e-4)\")\n    parser.add_argument(\"--device\", type=str, default=None,\n                      help=\"Device to use (default: auto-detect)\")\n    \n    return parser\n\ndef add_isek_optimizer_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \"\"\"\n    Add IsekaiZen optimizer arguments to a parser."
+    },
+    "add_isek_optimizer_args": {
+      "start_line": 64,
+      "end_line": 89,
+      "parameters": [
+        {
+          "name": "parser"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "add_batch_args",
+          "line": 77
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 80
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 82
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 84
+        }
+      ],
+      "docstring": "\n    Add IsekaiZen optimizer arguments to a parser.\n    \n    This ensures consistent argument handling across all IsekaiZen optimizer scripts.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    ",
+      "code_snippet": "    return parser\n\ndef add_isek_optimizer_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \"\"\"\n    Add IsekaiZen optimizer arguments to a parser.\n    \n    This ensures consistent argument handling across all IsekaiZen optimizer scripts.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    \"\"\"\n    # Add batch arguments first\n    parser = add_batch_args(parser)\n    \n    # Add common optimizer parameters\n    parser.add_argument(\"--accuracy-window\", type=int, default=3,\n                      help=\"Number of epochs to consider for accuracy improvement (default: 3)\")\n    parser.add_argument(\"--accuracy-threshold\", type=float, default=0.1,\n                      help=\"Threshold for accuracy improvement to trigger batch size change (default: 0.1)\")\n    parser.add_argument(\"--exploration-rate\", type=float, default=0.1,\n                      help=\"Rate of random batch size exploration (default: 0.1)\")\n    \n    return parser\n\ndef add_pattern_aware_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \"\"\"\n    Add pattern-aware optimizer arguments to a parser."
+    },
+    "add_pattern_aware_args": {
+      "start_line": 89,
+      "end_line": 112,
+      "parameters": [
+        {
+          "name": "parser"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "add_isek_optimizer_args",
+          "line": 102
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 105
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 107
+        }
+      ],
+      "docstring": "\n    Add pattern-aware optimizer arguments to a parser.\n    \n    This ensures consistent argument handling for pattern-aware optimizers.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    ",
+      "code_snippet": "    return parser\n\ndef add_pattern_aware_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \"\"\"\n    Add pattern-aware optimizer arguments to a parser.\n    \n    This ensures consistent argument handling for pattern-aware optimizers.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    \"\"\"\n    # Add standard IsekaiZen arguments first\n    parser = add_isek_optimizer_args(parser)\n    \n    # Add pattern-specific arguments\n    parser.add_argument(\"--pattern-map\", type=str, default=None,\n                      help=\"Path to pattern map file (default: auto-detect)\")\n    parser.add_argument(\"--pattern-recognition-weight\", type=float, default=0.4,\n                      help=\"Weight for pattern recognition in batch selection (default: 0.4)\")\n    \n    return parser\n\ndef add_risk_aware_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \"\"\"\n    Add risk-aware optimizer arguments to a parser."
+    },
+    "add_risk_aware_args": {
+      "start_line": 112,
+      "end_line": 139,
+      "parameters": [
+        {
+          "name": "parser"
+        }
+      ],
+      "return_type": null,
+      "calls": [
+        {
+          "name": "add_pattern_aware_args",
+          "line": 125
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 128
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 130
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 132
+        },
+        {
+          "name": "parser.add_argument",
+          "line": 134
+        }
+      ],
+      "docstring": "\n    Add risk-aware optimizer arguments to a parser.\n    \n    This ensures consistent argument handling for risk-aware optimizers.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    ",
+      "code_snippet": "    return parser\n\ndef add_risk_aware_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \"\"\"\n    Add risk-aware optimizer arguments to a parser.\n    \n    This ensures consistent argument handling for risk-aware optimizers.\n    \n    Args:\n        parser: ArgumentParser instance to add arguments to\n        \n    Returns:\n        Updated ArgumentParser instance\n    \"\"\"\n    # Add pattern-aware arguments first (includes IsekaiZen and batch args)\n    parser = add_pattern_aware_args(parser)\n    \n    # Add risk-specific arguments\n    parser.add_argument(\"--risk-assessment-weight\", type=float, default=0.4,\n                      help=\"Weight for risk assessment in batch selection (default: 0.4)\")\n    parser.add_argument(\"--risk-aversion\", type=float, default=0.5,\n                      help=\"Risk aversion factor (0.0-1.0, higher is more conservative) (default: 0.5)\")\n    parser.add_argument(\"--enable-rpg\", action=\"store_true\",\n                      help=\"Enable Resonance Pattern Guidance\")\n    parser.add_argument(\"--enable-cortex-flow\", action=\"store_true\",\n                      help=\"Enable Cortex Flow for enhanced optimization\")\n    \n    return parser"
+    }
+  },
+  "constants": {}
+}

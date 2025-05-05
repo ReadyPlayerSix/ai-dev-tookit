@@ -1,0 +1,99 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\training\\validate_training.py",
+  "imports": [
+    {
+      "name": "asyncio",
+      "line": 1
+    },
+    {
+      "name": "logging",
+      "line": 2
+    },
+    {
+      "name": "pathlib.Path",
+      "line": 3
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 4
+    },
+    {
+      "name": "torch",
+      "line": 5
+    },
+    {
+      "name": "sys",
+      "line": 6
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 7
+    },
+    {
+      "name": "overnight_training.OvernightTraining",
+      "line": 9
+    }
+  ],
+  "classes": {},
+  "functions": {
+    "verify_system_requirements": {
+      "start_line": 63,
+      "end_line": 96,
+      "parameters": [],
+      "return_type": "complex_type",
+      "calls": [
+        {
+          "name": "Path",
+          "line": 84
+        },
+        {
+          "name": "torch.cuda.is_available",
+          "line": 69
+        },
+        {
+          "name": "issues.append",
+          "line": 71
+        },
+        {
+          "name": "print",
+          "line": 80
+        },
+        {
+          "name": "print",
+          "line": 81
+        },
+        {
+          "name": "print",
+          "line": 90
+        },
+        {
+          "name": "issues.append",
+          "line": 77
+        },
+        {
+          "name": "issues.append",
+          "line": 89
+        },
+        {
+          "name": "issues.append",
+          "line": 92
+        },
+        {
+          "name": "torch.cuda.get_device_properties",
+          "line": 74
+        },
+        {
+          "name": "log_dir.disk_usage",
+          "line": 86
+        },
+        {
+          "name": "torch.cuda.get_device_name",
+          "line": 80
+        }
+      ],
+      "docstring": "Verify system meets minimum requirements for training",
+      "code_snippet": "            torch.cuda.empty_cache()\n\ndef verify_system_requirements() -> Tuple[bool, list]:\n    \"\"\"Verify system meets minimum requirements for training\"\"\"\n    requirements_met = True\n    issues = []\n    \n    # Check CUDA availability\n    if not torch.cuda.is_available():\n        requirements_met = False\n        issues.append(\"CUDA is not available\")\n    else:\n        # Check GPU memory\n        gpu_memory = torch.cuda.get_device_properties(0).total_memory / (1024**2)\n        if gpu_memory < 12000:  # Less than 12GB\n            requirements_met = False\n            issues.append(f\"Insufficient GPU memory: {gpu_memory:.0f}MB (12GB required)\")\n            \n        # Log GPU info\n        print(f\"GPU: {torch.cuda.get_device_name(0)}\")\n        print(f\"Available memory: {gpu_memory:.0f}MB\")\n    \n    # Check disk space\n    log_dir = Path(\"logs/training_validation\")\n    try:\n        free_space = log_dir.disk_usage(log_dir).free / (1024**3)  # GB\n        if free_space < 1.0:  # Less than 1GB\n            requirements_met = False\n            issues.append(f\"Insufficient disk space: {free_space:.1f}GB free\")\n        print(f\"Available disk space: {free_space:.1f}GB\")\n    except:\n        issues.append(\"Could not verify disk space\")\n    \n    return requirements_met, issues\n\nasync def main():\n    print(\"\\nNeural Network Cortex System - Training Validation\")\n    print(\"=\" * 50)"
+    }
+  },
+  "constants": {}
+}

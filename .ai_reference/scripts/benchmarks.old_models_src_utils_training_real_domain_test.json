@@ -1,0 +1,266 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\benchmarks.old\\models\\src\\utils\\training\\real_domain_test.py",
+  "imports": [
+    {
+      "name": "sys",
+      "line": 1
+    },
+    {
+      "name": "pathlib.Path",
+      "line": 2
+    },
+    {
+      "name": "os",
+      "line": 3
+    },
+    {
+      "name": "asyncio",
+      "line": 9
+    },
+    {
+      "name": "pathlib.Path",
+      "line": 10
+    },
+    {
+      "name": "torch",
+      "line": 11
+    },
+    {
+      "name": "logging",
+      "line": 12
+    },
+    {
+      "name": "datetime.datetime",
+      "line": 13
+    },
+    {
+      "name": "json",
+      "line": 14
+    },
+    {
+      "name": "typing.Dict",
+      "line": 15
+    },
+    {
+      "name": "typing.Any",
+      "line": 15
+    },
+    {
+      "name": "typing.List",
+      "line": 15
+    },
+    {
+      "name": "src.specialists.vision.VisionSpecialist",
+      "line": 17
+    },
+    {
+      "name": "src.specialists.text.TextSpecialist",
+      "line": 18
+    },
+    {
+      "name": "src.specialists.sentiment.SentimentSpecialist",
+      "line": 19
+    },
+    {
+      "name": "src.cortex.coordinator.CortexCoordinator",
+      "line": 20
+    },
+    {
+      "name": "src.cortex.coordinator.ProcessingConfig",
+      "line": 20
+    },
+    {
+      "name": "src.cortex.coordinator.DomainType",
+      "line": 20
+    }
+  ],
+  "classes": {
+    "RealDomainTest": {
+      "start_line": 22,
+      "end_line": 236,
+      "methods": {
+        "__init__": {
+          "start_line": 25,
+          "end_line": 50,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "log_dir",
+              "type": "str"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "Path",
+              "line": 26
+            },
+            {
+              "name": "self.log_dir.mkdir",
+              "line": 27
+            },
+            {
+              "name": "CortexCoordinator",
+              "line": 30
+            },
+            {
+              "name": "VisionSpecialist",
+              "line": 37
+            },
+            {
+              "name": "TextSpecialist",
+              "line": 38
+            },
+            {
+              "name": "SentimentSpecialist",
+              "line": 39
+            },
+            {
+              "name": "self._setup_logging",
+              "line": 42
+            },
+            {
+              "name": "ProcessingConfig",
+              "line": 30
+            }
+          ],
+          "code_snippet": "    \"\"\"Tests Cortex system with real domain data instead of artificial patterns\"\"\"\n    \n    def __init__(self, log_dir: str = \"logs/domain_tests\"):\n        self.log_dir = Path(log_dir)\n        self.log_dir.mkdir(parents=True, exist_ok=True)\n        \n        # Initialize core components\n        self.coordinator = CortexCoordinator(ProcessingConfig(\n            use_semantic_core=True,\n            enable_rpg=True,\n            batch_processing=True\n        ))\n        \n        # Initialize specialists\n        self.vision_specialist = VisionSpecialist()\n        self.text_specialist = TextSpecialist()\n        self.sentiment_specialist = SentimentSpecialist()\n        \n        # Setup logging\n        self._setup_logging()\n        \n        # Track discovered patterns\n        self.discovered_patterns = {\n            DomainType.VISUAL: [],\n            DomainType.LINGUISTIC: [],\n            DomainType.EMOTIONAL: []\n        }\n        \n    def _setup_logging(self):\n        \"\"\"Configure logging with timestamp\"\"\""
+        },
+        "_setup_logging": {
+          "start_line": 51,
+          "end_line": 66,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....strftime",
+              "line": 53
+            },
+            {
+              "name": "logging.basicConfig",
+              "line": 56
+            },
+            {
+              "name": "logging.getLogger",
+              "line": 64
+            },
+            {
+              "name": "datetime.now",
+              "line": 53
+            },
+            {
+              "name": "logging.FileHandler",
+              "line": 60
+            },
+            {
+              "name": "logging.StreamHandler",
+              "line": 61
+            }
+          ],
+          "docstring": "Configure logging with timestamp",
+          "code_snippet": "        }\n        \n    def _setup_logging(self):\n        \"\"\"Configure logging with timestamp\"\"\"\n        timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n        log_file = self.log_dir / f\"domain_test_{timestamp}.log\"\n        \n        logging.basicConfig(\n            level=logging.INFO,\n            format='%(asctime)s - %(levelname)s - %(message)s',\n            handlers=[\n                logging.FileHandler(log_file),\n                logging.StreamHandler()\n            ]\n        )\n        self.logger = logging.getLogger(__name__)\n        \n    async def process_image(self, image_path: str) -> Dict[str, Any]:\n        \"\"\"Process a single image through vision specialist\"\"\"\n        self.logger.info(f\"Processing image: {image_path}\")"
+        },
+        "_save_results": {
+          "start_line": 189,
+          "end_line": 236,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "results"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....strftime",
+              "line": 191
+            },
+            {
+              "name": "self.discovered_patterns.items",
+              "line": 207
+            },
+            {
+              "name": "report_lines.extend",
+              "line": 228
+            },
+            {
+              "name": "open",
+              "line": 195
+            },
+            {
+              "name": "json.dump",
+              "line": 196
+            },
+            {
+              "name": "report_lines.extend",
+              "line": 208
+            },
+            {
+              "name": "open",
+              "line": 233
+            },
+            {
+              "name": "f.write",
+              "line": 234
+            },
+            {
+              "name": "datetime.now",
+              "line": 191
+            },
+            {
+              "name": "pattern.get",
+              "line": 217
+            },
+            {
+              "name": "sorted",
+              "line": 220
+            },
+            {
+              "name": "report_lines.append",
+              "line": 225
+            },
+            {
+              "name": "....join",
+              "line": 234
+            },
+            {
+              "name": "type_counts.get",
+              "line": 218
+            },
+            {
+              "name": "type_counts.items",
+              "line": 221
+            },
+            {
+              "name": "len",
+              "line": 230
+            },
+            {
+              "name": "domain.value.upper",
+              "line": 209
+            },
+            {
+              "name": "len",
+              "line": 210
+            }
+          ],
+          "docstring": "Save test results and generate report",
+          "code_snippet": "        return test_results\n    \n    def _save_results(self, results: Dict[str, Any]):\n        \"\"\"Save test results and generate report\"\"\"\n        timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n        \n        # Save full results\n        results_file = self.log_dir / f\"test_results_{timestamp}.json\"\n        with open(results_file, 'w') as f:\n            json.dump(results, f, indent=2)\n            \n        # Generate and save report\n        report_file = self.log_dir / f\"test_report_{timestamp}.txt\"\n        \n        report_lines = [\n            f\"Domain Processing Test Report - {timestamp}\",\n            \"=\" * 50,\n            \"\\nPatterns Discovered:\",\n        ]\n        \n        for domain, patterns in self.discovered_patterns.items():\n            report_lines.extend([\n                f\"\\n{domain.value.upper()}:\",\n                f\"Total Patterns: {len(patterns)}\",\n                \"Top Pattern Types:\",\n            ])\n            \n            # Count pattern types\n            type_counts = {}\n            for pattern in patterns:\n                pattern_type = pattern.get(\"pattern_type\", \"unknown\")\n                type_counts[pattern_type] = type_counts.get(pattern_type, 0) + 1\n                \n            for pattern_type, count in sorted(\n                type_counts.items(), \n                key=lambda x: x[1], \n                reverse=True\n            )[:3]:\n                report_lines.append(f\"- {pattern_type}: {count}\")\n                \n        # Add cross-domain insights\n        report_lines.extend([\n            \"\\nCross-Domain Insights:\",\n            f\"Total Cross-Domain Patterns: {len(results['cross_domain_patterns'])}\",\n        ])\n        \n        with open(report_file, 'w') as f:\n            f.write('\\n'.join(report_lines))\n\n# Example usage\nasync def main():\n    # Sample data for testing"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Tests Cortex system with real domain data instead of artificial patterns"
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

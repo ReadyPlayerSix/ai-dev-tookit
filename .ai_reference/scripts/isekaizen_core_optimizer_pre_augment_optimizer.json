@@ -1,0 +1,351 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\core\\optimizer\\pre_augment_optimizer.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 23
+    },
+    {
+      "name": "logging",
+      "line": 24
+    },
+    {
+      "name": "time",
+      "line": 25
+    },
+    {
+      "name": "math",
+      "line": 26
+    },
+    {
+      "name": "typing.Dict",
+      "line": 27
+    },
+    {
+      "name": "typing.List",
+      "line": 27
+    },
+    {
+      "name": "typing.Any",
+      "line": 27
+    },
+    {
+      "name": "typing.Optional",
+      "line": 27
+    },
+    {
+      "name": "typing.Tuple",
+      "line": 27
+    },
+    {
+      "name": "typing.Set",
+      "line": 27
+    },
+    {
+      "name": "isekaizen.core.optimizer.risk_aware_optimizer.RiskAwarePatternIsekaiZen",
+      "line": 29
+    },
+    {
+      "name": "isekaizen.core.optimizer.risk_aware_optimizer.RiskLevel",
+      "line": 29
+    },
+    {
+      "name": "multiprocessing",
+      "line": 84
+    }
+  ],
+  "classes": {
+    "PreAugmentOptimizer": {
+      "start_line": 33,
+      "end_line": 302,
+      "methods": {
+        "_calculate_hardware_min_batch": {
+          "start_line": 46,
+          "end_line": 94,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "torch.cuda.is_available",
+              "line": 60
+            },
+            {
+              "name": "torch.cuda.get_device_properties",
+              "line": 64
+            },
+            {
+              "name": "logger.debug",
+              "line": 68
+            },
+            {
+              "name": "max",
+              "line": 72
+            },
+            {
+              "name": "logger.info",
+              "line": 74
+            },
+            {
+              "name": "multiprocessing.cpu_count",
+              "line": 85
+            },
+            {
+              "name": "max",
+              "line": 87
+            },
+            {
+              "name": "logger.info",
+              "line": 88
+            },
+            {
+              "name": "logger.warning",
+              "line": 78
+            },
+            {
+              "name": "str",
+              "line": 78
+            }
+          ],
+          "docstring": "\n        Calculate minimum effective batch size based on hardware characteristics.\n        \n        This method determines a minimum batch size that ensures efficient use of\n        the available parallel processing capabilities. Rather than using arbitrary\n        values, it scales the minimum batch size based on the hardware's intrinsic\n        parallelism capabilities.\n        \n        Returns:\n            int: Calculated minimum batch size for efficient computation\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def _calculate_hardware_min_batch(self):\n        \"\"\"\n        Calculate minimum effective batch size based on hardware characteristics.\n        \n        This method determines a minimum batch size that ensures efficient use of\n        the available parallel processing capabilities. Rather than using arbitrary\n        values, it scales the minimum batch size based on the hardware's intrinsic\n        parallelism capabilities.\n        \n        Returns:\n            int: Calculated minimum batch size for efficient computation\n        \"\"\"\n        device = self.device\n        \n        if device.type == \"cuda\" and torch.cuda.is_available():\n            # Get properties of the specified or default GPU\n            device_index = device.index if device.index is not None else 0\n            try:\n                device_props = torch.cuda.get_device_properties(device_index)\n                \n                # Get the number of Streaming Multiprocessors (SMs)\n                sm_count = device_props.multi_processor_count\n                logger.debug(f\"GPU has {sm_count} streaming multiprocessors\")\n                \n                # Calculate minimum batch size that ensures reasonable SM utilization\n                # We want at least 1 sample per 4 SMs to ensure reasonable parallelism\n                min_batch = max(1, sm_count // 4)\n                \n                logger.info(f\"Calculated hardware-based minimum batch size: {min_batch} based on {sm_count} streaming multiprocessors\")\n                return min_batch\n                \n            except Exception as e:\n                logger.warning(f\"Error calculating GPU-based min batch size: {str(e)}\")\n                # Fallback to a safe default for GPU\n                return 4\n        else:\n            # For CPU, base it on core count\n            try:\n                import multiprocessing\n                cpu_count = multiprocessing.cpu_count()\n                # CPUs benefit from smaller min batch sizes due to different parallelism model\n                min_batch = max(1, cpu_count // 8)\n                logger.info(f\"Calculated hardware-based minimum batch size: {min_batch} based on {cpu_count} CPU cores\")\n                return min_batch\n            except:\n                # Absolute fallback\n                return 1\n    \n    def __init__(\n        self, \n        model,"
+        },
+        "__init__": {
+          "start_line": 94,
+          "end_line": 162,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "model"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "total_epochs"
+            },
+            {
+              "name": "max_epoch_time"
+            },
+            {
+              "name": "run_diagnostics"
+            },
+            {
+              "name": "pattern_map"
+            },
+            {
+              "name": "risk_aversion"
+            },
+            {
+              "name": "min_batch_size"
+            },
+            {
+              "name": "max_batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "....__init__",
+              "line": 123
+            },
+            {
+              "name": "logger.info",
+              "line": 159
+            },
+            {
+              "name": "logger.info",
+              "line": 160
+            },
+            {
+              "name": "self._calculate_hardware_min_batch",
+              "line": 141
+            },
+            {
+              "name": "logger.info",
+              "line": 142
+            },
+            {
+              "name": "super",
+              "line": 123
+            }
+          ],
+          "docstring": "\n        Initialize the pre-augment optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            risk_aversion: Factor determining how cautious the optimizer is (0.0-1.0)\n            min_batch_size: Minimum batch size (None for auto-detect)\n            max_batch_size: Maximum batch size (None for auto-detect)\n            **kwargs: Additional parameters for the base optimizer\n        ",
+          "code_snippet": "                return 1\n    \n    def __init__(\n        self, \n        model,\n        device=None,\n        total_epochs=50,\n        max_epoch_time=None,\n        run_diagnostics=True,\n        pattern_map=None,\n        risk_aversion=0.5,\n        min_batch_size=None,\n        max_batch_size=None,\n        **kwargs\n    ):\n        \"\"\"\n        Initialize the pre-augment optimizer.\n        \n        Args:\n            model: PyTorch model to optimize\n            device: Computation device\n            total_epochs: Total number of epochs for training\n            max_epoch_time: Maximum time per epoch in seconds (None = no limit)\n            run_diagnostics: Whether to run initial diagnostics\n            pattern_map: Pattern map containing pattern information\n            risk_aversion: Factor determining how cautious the optimizer is (0.0-1.0)\n            min_batch_size: Minimum batch size (None for auto-detect)\n            max_batch_size: Maximum batch size (None for auto-detect)\n            **kwargs: Additional parameters for the base optimizer\n        \"\"\"\n        # Initialize base optimizer with exploration rate explicitly set to 0\n        super().__init__(\n            model=model,\n            device=device,\n            total_epochs=total_epochs,\n            max_epoch_time=max_epoch_time,\n            run_diagnostics=run_diagnostics,\n            pattern_map=pattern_map,\n            risk_aversion=risk_aversion,\n            exploration_rate=0.0,  # Explicitly disable exploration\n            **kwargs\n        )\n        \n        # Set batch size limits with consolidated logic\n        # If min_batch_size was explicitly provided, use it\n        if min_batch_size is not None:\n            self.min_batch = min_batch_size\n        else:\n            # Calculate minimum batch size based on hardware characteristics\n            self.min_batch = self._calculate_hardware_min_batch()\n            logger.info(f\"Using hardware-aware minimum batch size: {self.min_batch}\")\n        \n        if max_batch_size is not None:\n            self.max_batch = max_batch_size\n            \n        # Store these for access by the trainer\n        self.min_batch_size = self.min_batch\n        self.max_batch_size = self.max_batch\n            \n        # Initialize tracking metrics\n        self.train_acc = None\n        self.val_acc = None\n        self.train_test_gap = None\n        \n        # Flag to prevent batch size decrease during underfitting\n        self.prevent_batch_size_decrease = False\n            \n        logger.info(f\"PreAugmentOptimizer initialized with batch size range: [{self.min_batch}, {self.max_batch}]\")\n        logger.info(\"Pattern-based batch size adjustments disabled (pre-augmented mode)\")\n    \n    def adjust_batch_size_for_patterns(self, calculated_batch):\n        \"\"\"\n        Completely remove pattern-based adjustments."
+        },
+        "adjust_batch_size_for_patterns": {
+          "start_line": 162,
+          "end_line": 178,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "calculated_batch"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Completely remove pattern-based adjustments.\n        \n        This overrides the parent class implementation to ensure NO pattern-based\n        adjustments are applied, returning the input batch size unmodified.\n        \n        Args:\n            calculated_batch: Batch size calculated so far\n            \n        Returns:\n            The same batch size, unchanged\n        ",
+          "code_snippet": "        logger.info(\"Pattern-based batch size adjustments disabled (pre-augmented mode)\")\n    \n    def adjust_batch_size_for_patterns(self, calculated_batch):\n        \"\"\"\n        Completely remove pattern-based adjustments.\n        \n        This overrides the parent class implementation to ensure NO pattern-based\n        adjustments are applied, returning the input batch size unmodified.\n        \n        Args:\n            calculated_batch: Batch size calculated so far\n            \n        Returns:\n            The same batch size, unchanged\n        \"\"\"\n        # No tracking, no adjustment - return input unchanged\n        return calculated_batch\n\n    def adjust_batch_size_for_risk(self, calculated_batch):\n        \"\"\"\n        Completely remove risk-based adjustments."
+        },
+        "adjust_batch_size_for_risk": {
+          "start_line": 178,
+          "end_line": 194,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "calculated_batch"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Completely remove risk-based adjustments.\n        \n        This overrides the parent class implementation to ensure NO risk-based\n        adjustments are applied, returning the input batch size unmodified.\n        \n        Args:\n            calculated_batch: Batch size calculated so far\n            \n        Returns:\n            The same batch size, unchanged\n        ",
+          "code_snippet": "        return calculated_batch\n\n    def adjust_batch_size_for_risk(self, calculated_batch):\n        \"\"\"\n        Completely remove risk-based adjustments.\n        \n        This overrides the parent class implementation to ensure NO risk-based\n        adjustments are applied, returning the input batch size unmodified.\n        \n        Args:\n            calculated_batch: Batch size calculated so far\n            \n        Returns:\n            The same batch size, unchanged\n        \"\"\"\n        # No tracking, no adjustment - return input unchanged\n        return calculated_batch\n\n    def adjust_batch_size_for_stability(self, calculated_batch):\n        \"\"\"\n        Completely remove stability-based adjustments."
+        },
+        "adjust_batch_size_for_stability": {
+          "start_line": 194,
+          "end_line": 210,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "calculated_batch"
+            }
+          ],
+          "return_type": null,
+          "calls": [],
+          "docstring": "\n        Completely remove stability-based adjustments.\n        \n        This overrides the parent class implementation to ensure NO stability-based\n        adjustments are applied, returning the input batch size unmodified.\n        \n        Args:\n            calculated_batch: Batch size calculated so far\n            \n        Returns:\n            The same batch size, unchanged\n        ",
+          "code_snippet": "        return calculated_batch\n\n    def adjust_batch_size_for_stability(self, calculated_batch):\n        \"\"\"\n        Completely remove stability-based adjustments.\n        \n        This overrides the parent class implementation to ensure NO stability-based\n        adjustments are applied, returning the input batch size unmodified.\n        \n        Args:\n            calculated_batch: Batch size calculated so far\n            \n        Returns:\n            The same batch size, unchanged\n        \"\"\"\n        # No tracking, no adjustment - return input unchanged\n        return calculated_batch\n        \n    def update_batch_size(self, train_loss, val_loss, pattern_metrics=None, verbose=False):\n        \"\"\"\n        Update the batch size based on training metrics."
+        },
+        "update_batch_size": {
+          "start_line": 210,
+          "end_line": 256,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "train_loss"
+            },
+            {
+              "name": "val_loss"
+            },
+            {
+              "name": "pattern_metrics"
+            },
+            {
+              "name": "verbose"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "logger.debug",
+              "line": 249
+            },
+            {
+              "name": "self.get_optimal_batch_size",
+              "line": 254
+            },
+            {
+              "name": "logger.info",
+              "line": 240
+            },
+            {
+              "name": "logger.info",
+              "line": 243
+            }
+          ],
+          "docstring": "\n        Update the batch size based on training metrics.\n        \n        This method is required by UnifiedRatioTrainer. In PreAugmentOptimizer,\n        it simply returns the current batch size without modifications since pattern-based\n        adjustments are disabled in pre-augmented mode.\n        \n        Args:\n            train_loss: Training loss from the current epoch\n            val_loss: Validation loss from the current epoch\n            pattern_metrics: Additional pattern-specific metrics\n            verbose: Whether to print verbose output\n            \n        Returns:\n            Current batch size (unchanged in pre-augmented mode)\n        ",
+          "code_snippet": "        return calculated_batch\n        \n    def update_batch_size(self, train_loss, val_loss, pattern_metrics=None, verbose=False):\n        \"\"\"\n        Update the batch size based on training metrics.\n        \n        This method is required by UnifiedRatioTrainer. In PreAugmentOptimizer,\n        it simply returns the current batch size without modifications since pattern-based\n        adjustments are disabled in pre-augmented mode.\n        \n        Args:\n            train_loss: Training loss from the current epoch\n            val_loss: Validation loss from the current epoch\n            pattern_metrics: Additional pattern-specific metrics\n            verbose: Whether to print verbose output\n            \n        Returns:\n            Current batch size (unchanged in pre-augmented mode)\n        \"\"\"\n        # Extract training and validation accuracies if available\n        if pattern_metrics:\n            if 'train_acc' in pattern_metrics:\n                self.train_acc = pattern_metrics['train_acc']\n            if 'val_acc' in pattern_metrics:\n                self.val_acc = pattern_metrics['val_acc']\n                \n        # Calculate train-test gap for underfitting detection\n        if self.train_acc is not None and self.val_acc is not None:\n            self.train_test_gap = self.train_acc - self.val_acc\n            \n            # Check for underfitting\n            if self.train_test_gap < 0:\n                logger.info(f\"Underfitting detected: Val acc ({self.val_acc:.2f}%) > Train acc ({self.train_acc:.2f}%)\")\n                self.prevent_batch_size_decrease = True\n                if verbose:\n                    logger.info(\"Preventing batch size decrease due to underfitting\")\n        \n        # In pre-augmented mode, we don't modify batch size here\n        # Just return the current batch size from history\n        if self.batch_history:\n            current_batch = self.batch_history[-1]\n            logger.debug(f\"PreAugmentOptimizer: Maintaining batch size at {current_batch} (pattern adjustments disabled)\")\n            return current_batch\n\n        else:\n            # If no history yet, get optimal batch size\n            return self.get_optimal_batch_size()\n\n    def get_optimal_batch_size(self):\n        \"\"\"\n        Get the initial batch size for training."
+        },
+        "get_optimal_batch_size": {
+          "start_line": 256,
+          "end_line": 302,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "any",
+              "line": 273
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 289
+            },
+            {
+              "name": "len",
+              "line": 297
+            },
+            {
+              "name": "self.batch_history.append",
+              "line": 298
+            },
+            {
+              "name": "round",
+              "line": 281
+            },
+            {
+              "name": "max",
+              "line": 282
+            },
+            {
+              "name": "logger.info",
+              "line": 283
+            },
+            {
+              "name": "max",
+              "line": 285
+            },
+            {
+              "name": "logger.info",
+              "line": 286
+            },
+            {
+              "name": "isinstance",
+              "line": 273
+            },
+            {
+              "name": "math.log2",
+              "line": 281
+            },
+            {
+              "name": "min",
+              "line": 282
+            },
+            {
+              "name": "min",
+              "line": 285
+            },
+            {
+              "name": "self.model.modules",
+              "line": 274
+            }
+          ],
+          "docstring": "\n        Get the initial batch size for training.\n        \n        This simplified implementation only handles the initial batch size calculation.\n        Batch size adjustments are ONLY handled by UnifiedRatioTrainer based on\n        overfitting and stagnation detection.\n        \n        Returns:\n            Initial batch size for training or current batch size for subsequent epochs\n        ",
+          "code_snippet": "            return self.get_optimal_batch_size()\n\n    def get_optimal_batch_size(self):\n        \"\"\"\n        Get the initial batch size for training.\n        \n        This simplified implementation only handles the initial batch size calculation.\n        Batch size adjustments are ONLY handled by UnifiedRatioTrainer based on\n        overfitting and stagnation detection.\n        \n        Returns:\n            Initial batch size for training or current batch size for subsequent epochs\n        \"\"\"\n        # Increment epoch counter\n        self.epoch += 1\n        \n        # First epoch - calculate initial batch size\n        if self.epoch == 1 or not self.batch_history:\n            # Detect BatchNorm for better batch size selection\n            has_batch_norm = any(isinstance(m, (torch.nn.BatchNorm1d, torch.nn.BatchNorm2d, torch.nn.BatchNorm3d)) \n                                 for m in self.model.modules())\n            \n            # Use 1/3 of max batch size as starting point\n            initial_point = self.min_batch + (self.max_batch - self.min_batch) // 3\n            \n            # For BatchNorm models, use power-of-2 batch size\n            if has_batch_norm:\n                power = round(math.log2(initial_point))\n                initial_batch = max(self.min_batch, min(self.max_batch, 2 ** power))\n                logger.info(f\"First epoch: Using power-of-2 batch size {initial_batch}\")\n            else:\n                initial_batch = max(self.min_batch, min(self.max_batch, initial_point))\n                logger.info(f\"First epoch: Using initial batch size {initial_batch}\")\n            \n            # Store and return\n            self.batch_history.append(initial_batch)\n            return initial_batch\n        \n        # For subsequent epochs, just return the current batch size\n        # Let the UnifiedRatioTrainer handle ALL adjustments\n        current_batch = self.batch_history[-1]\n        \n        # Only append to history if this is the first call for this epoch\n        if len(self.batch_history) <= self.epoch:\n            self.batch_history.append(current_batch)\n        \n        return current_batch"
+        }
+      },
+      "class_variables": [],
+      "bases": [
+        "RiskAwarePatternIsekaiZen"
+      ],
+      "docstring": "\n    Optimizer for pre-augmented training that tracks patterns\n    but only adjusts batch size based on overfitting and stagnation.\n    \n    This optimizer extends RiskAwarePatternIsekaiZen but disables all\n    pattern-based and exploration-based batch size adjustments, ensuring\n    that batch sizes only change due to overfitting and stagnation detection.\n    \n    Attributes:\n        All attributes inherited from RiskAwarePatternIsekaiZen\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

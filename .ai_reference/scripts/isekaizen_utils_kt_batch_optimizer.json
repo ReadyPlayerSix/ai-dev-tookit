@@ -1,0 +1,205 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\isekaizen\\utils\\kt_batch_optimizer.py",
+  "imports": [
+    {
+      "name": "torch",
+      "line": 7
+    },
+    {
+      "name": "numpy",
+      "line": 8
+    },
+    {
+      "name": "math",
+      "line": 9
+    },
+    {
+      "name": "dataclasses.dataclass",
+      "line": 10
+    }
+  ],
+  "classes": {
+    "KTParameters": {
+      "start_line": 13,
+      "end_line": 19,
+      "methods": {},
+      "class_variables": [],
+      "bases": [],
+      "docstring": "Parameters from validated K(t) framework"
+    },
+    "KTBatchOptimizer": {
+      "start_line": 19,
+      "end_line": 122,
+      "methods": {
+        "__init__": {
+          "start_line": 24,
+          "end_line": 47,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "device"
+            },
+            {
+              "name": "parameters"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "max",
+              "line": 44
+            },
+            {
+              "name": "min",
+              "line": 45
+            },
+            {
+              "name": "torch.device",
+              "line": 32
+            },
+            {
+              "name": "KTParameters",
+              "line": 33
+            },
+            {
+              "name": "self._estimate_min_batch",
+              "line": 44
+            },
+            {
+              "name": "self._estimate_max_batch",
+              "line": 45
+            },
+            {
+              "name": "torch.cuda.is_available",
+              "line": 32
+            }
+          ],
+          "docstring": "\n        Initialize the batch optimizer.\n        \n        Args:\n            device: Computation device\n            parameters: K(t) framework parameters\n        ",
+          "code_snippet": "    \"\"\"\n    \n    def __init__(self, device=None, parameters=None):\n        \"\"\"\n        Initialize the batch optimizer.\n        \n        Args:\n            device: Computation device\n            parameters: K(t) framework parameters\n        \"\"\"\n        self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n        self.parameters = parameters or KTParameters()\n        \n        # GPU capabilities (adjusted for RTX 4070 SUPER)\n        self.gpu_memory = 12288  # MB for RTX 4070 SUPER\n        self.compute_capacity = 20.0  # TFLOPS for RTX 4070 SUPER\n        \n        # Estimated resource requirements\n        self.memory_per_example = 5  # MB per example (for CIFAR-10)\n        self.compute_per_example = 0.5  # GFLOPS per example\n        \n        # Batch range limits\n        self.min_batch = max(4, self._estimate_min_batch())\n        self.max_batch = min(self._estimate_max_batch(), 256)\n    \n    def _estimate_min_batch(self):\n        \"\"\"Estimate minimum useful batch size\"\"\"\n        return max(1, int(0.01 * self.compute_capacity / self.compute_per_example))"
+        },
+        "_estimate_min_batch": {
+          "start_line": 47,
+          "end_line": 51,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "max",
+              "line": 49
+            },
+            {
+              "name": "int",
+              "line": 49
+            }
+          ],
+          "docstring": "Estimate minimum useful batch size",
+          "code_snippet": "        self.max_batch = min(self._estimate_max_batch(), 256)\n    \n    def _estimate_min_batch(self):\n        \"\"\"Estimate minimum useful batch size\"\"\"\n        return max(1, int(0.01 * self.compute_capacity / self.compute_per_example))\n    \n    def _estimate_max_batch(self):\n        \"\"\"Estimate maximum possible batch size based on memory\"\"\"\n        return max(16, int(0.8 * self.gpu_memory / self.memory_per_example))"
+        },
+        "_estimate_max_batch": {
+          "start_line": 51,
+          "end_line": 55,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "max",
+              "line": 53
+            },
+            {
+              "name": "int",
+              "line": 53
+            }
+          ],
+          "docstring": "Estimate maximum possible batch size based on memory",
+          "code_snippet": "        return max(1, int(0.01 * self.compute_capacity / self.compute_per_example))\n    \n    def _estimate_max_batch(self):\n        \"\"\"Estimate maximum possible batch size based on memory\"\"\"\n        return max(16, int(0.8 * self.gpu_memory / self.memory_per_example))\n    \n    def _calculate_efficiency(self, batch_size):\n        \"\"\"Calculate processing efficiency for a batch size\"\"\"\n        # Simplified K(t) model"
+        },
+        "_calculate_efficiency": {
+          "start_line": 55,
+          "end_line": 82,
+          "parameters": [
+            {
+              "name": "self"
+            },
+            {
+              "name": "batch_size"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "abs",
+              "line": 62
+            },
+            {
+              "name": "min",
+              "line": 80
+            },
+            {
+              "name": "max",
+              "line": 80
+            },
+            {
+              "name": "math.exp",
+              "line": 70
+            }
+          ],
+          "docstring": "Calculate processing efficiency for a batch size",
+          "code_snippet": "        return max(16, int(0.8 * self.gpu_memory / self.memory_per_example))\n    \n    def _calculate_efficiency(self, batch_size):\n        \"\"\"Calculate processing efficiency for a batch size\"\"\"\n        # Simplified K(t) model\n        baseline = 0.5\n        optimal_point = 64  # Theoretical optimal for RTX 4070 SUPER\n        \n        # Calculate deviation from optimal\n        deviation = abs(batch_size - optimal_point) / optimal_point\n        \n        # Apply K(t) model\n        Lc = self.parameters.Lc\n        eff_coefficient = self.parameters.efficiency_coefficient\n        \n        # Simplified modeling\n        cognitive_load = batch_size / optimal_point\n        efficiency = baseline + eff_coefficient * (1 - math.exp(-Lc / (1 + deviation**2)))\n        \n        # Apply diminishing returns for very large batches\n        if batch_size > 1.5 * optimal_point:\n            efficiency *= (1.5 * optimal_point / batch_size)**0.2\n        \n        # Apply penalties for very small batches\n        if batch_size < 0.25 * optimal_point:\n            efficiency *= (batch_size / (0.25 * optimal_point))**0.3\n        \n        return min(0.99, max(0.1, efficiency)), cognitive_load\n    \n    def optimize_batch_size(self):\n        \"\"\"\n        Find the optimal batch size for current conditions."
+        },
+        "optimize_batch_size": {
+          "start_line": 82,
+          "end_line": 122,
+          "parameters": [
+            {
+              "name": "self"
+            }
+          ],
+          "return_type": null,
+          "calls": [
+            {
+              "name": "range",
+              "line": 95
+            },
+            {
+              "name": "int",
+              "line": 95
+            },
+            {
+              "name": "self._calculate_efficiency",
+              "line": 101
+            },
+            {
+              "name": "math.log2",
+              "line": 95
+            },
+            {
+              "name": "int",
+              "line": 95
+            },
+            {
+              "name": "math.log2",
+              "line": 95
+            }
+          ],
+          "docstring": "\n        Find the optimal batch size for current conditions.\n        \n        Returns:\n            Dictionary with optimization results\n        ",
+          "code_snippet": "        return min(0.99, max(0.1, efficiency)), cognitive_load\n    \n    def optimize_batch_size(self):\n        \"\"\"\n        Find the optimal batch size for current conditions.\n        \n        Returns:\n            Dictionary with optimization results\n        \"\"\"\n        # Search through possible batch sizes\n        batch_results = {}\n        best_efficiency = 0.0\n        optimal_batch_size = self.min_batch\n        \n        # Search through powers of 2 for efficiency\n        for power in range(int(math.log2(self.min_batch)), int(math.log2(self.max_batch))+1):\n            batch_size = 2**power\n            \n            if batch_size < self.min_batch or batch_size > self.max_batch:\n                continue\n                \n            efficiency, cognitive_load = self._calculate_efficiency(batch_size)\n            memory_usage = batch_size * self.memory_per_example\n            \n            batch_results[batch_size] = {\n                \"efficiency\": efficiency,\n                \"cognitive_load\": cognitive_load,\n                \"estimated_memory\": memory_usage\n            }\n            \n            if efficiency > best_efficiency:\n                best_efficiency = efficiency\n                optimal_batch_size = batch_size\n        \n        # Return results\n        return {\n            \"batch_results\": batch_results,\n            \"optimal_batch_size\": optimal_batch_size,\n            \"peak_efficiency\": best_efficiency,\n            \"optimal_metrics\": batch_results[optimal_batch_size],\n            \"batch_range\": (self.min_batch, self.max_batch)\n        }"
+        }
+      },
+      "class_variables": [],
+      "bases": [],
+      "docstring": "\n    Batch size optimizer based on the K(t) framework.\n    "
+    }
+  },
+  "functions": {},
+  "constants": {}
+}

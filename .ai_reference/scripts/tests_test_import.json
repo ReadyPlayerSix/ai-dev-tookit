@@ -1,0 +1,12 @@
+{
+  "path": "D:\\Projects\\isekaiZen\\machine-learning-optimizer\\tests\\test_import.py",
+  "imports": [
+    {
+      "name": "isekaizen.core.training.trainer.UnifiedRatioTrainer",
+      "line": 6
+    }
+  ],
+  "classes": {},
+  "functions": {},
+  "constants": {}
+}
