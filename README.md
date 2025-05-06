@@ -11,7 +11,7 @@ A comprehensive Model Context Protocol (MCP) server combining file system tools,
 The AI Dev Toolkit enhances AI assistants like Claude with powerful capabilities:
 
 1. **File System Tools**: Read, write, and navigate the file system
-2. **AI Librarian**: Persistent code comprehension system that maintains context across conversations
+2. **AI Librarian**: Persistent code comprehension system that maintains project context
 3. **Project Starter**: Project generation and scaffolding
 4. **Think Tool**: Structured reasoning for complex problems
 5. **Context Compression**: Store and retrieve conversation history (Coming Soon)
