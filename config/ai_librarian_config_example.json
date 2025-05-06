@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem"
+      ]
+    },
+    "ai-librarian": {
+      "command": "python",
+      "args": [
+        "D:/Projects/isekaiZen/ai-dev-toolkit/ai-librarian-server/server.py",
+        "D:/Projects/isekaiZen/ai-dev-toolkit",
+        "D:/Projects/isekaiZen/machine-learning-optimizer"
+      ]
+    }
+  }
+}

@@ -1,303 +1,125 @@
-# AI Dev Toolkit - MCP Server
+# AI Dev Toolkit
 
-## ⚠️ DEVELOPMENT STATUS: PRE-ALPHA ⚠️
+The AI Dev Toolkit is an all-in-one solution for managing Model Context Protocol (MCP) servers and enhancing AI assistants like Claude with advanced development capabilities.
 
-This project is currently in early development and **not ready for production use**. Tools are being actively developed and may change significantly before the first release.
+## What is AI Dev Toolkit?
 
-A comprehensive Model Context Protocol (MCP) server combining file system tools, AI Librarian, code comprehension, project scaffolding, and the Think Tool.
+AI Dev Toolkit serves two primary functions:
 
-## Overview
+1. **MCP Server Manager**: A user-friendly interface for configuring, enabling, and managing MCP servers
+2. **Development Tools Suite**: A collection of powerful MCP servers for software development tasks
 
-The AI Dev Toolkit enhances AI assistants like Claude with powerful capabilities:
+## Key Features
 
-1. **File System Tools**: Read, write, and navigate the file system
-2. **AI Librarian**: Persistent code comprehension system that maintains project context
-3. **Project Starter**: Project generation and scaffolding
-4. **Think Tool**: Structured reasoning for complex problems
-5. **Context Compression**: Store and retrieve conversation history (Coming Soon)
+### MCP Server Management
 
-## Quick Start
+- **Simplified Configuration**: Easy-to-use GUI for managing MCP servers
+- **One-Click Setup**: Automatically configure Claude Desktop to use your selected MCP servers
+- **External Integration**: Add and manage third-party MCP servers from GitHub or other sources
+- **Project Management**: Configure which directories each MCP server can access
 
-### Prerequisites
+### Built-in MCP Servers
 
-- Python 3.8 or higher
-- Claude Desktop (or other MCP-compatible AI assistant)
-- Administrator privileges (for Claude Desktop integration on Windows)
+- **AI Librarian**: Persistent code comprehension system that analyzes project codebases
+- **Project Starter**: Tools for project generation and scaffolding
+- **File System Tools**: Secure file operations with configurable access controls
+- **Think Tool**: A scratchpad for structured reasoning
+
+## Getting Started
 
 ### Installation
 
+#### NPM Installation (Recommended)
+
 ```bash
-# Clone the repository
-git clone https://github.com/[your-github-username]/ai-dev-toolkit.git
+npm install -g ai-dev-toolkit
+```
+
+#### Direct Python Installation
+
+```bash
 cd ai-dev-toolkit
-
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the installation script (coming soon)
-python install.py
+python scripts/install.py
 ```
 
-> **Note**: The installation script is still in development. Currently, you'll need to manually start the server using the provided scripts.
-
-### Using the GUI Configuration Tool
-
-The AI Dev Toolkit includes a graphical configuration tool that makes it easy to integrate with Claude Desktop:
-
-1. Run `launch_gui.bat` (Windows) or `python launch_gui.py` (all platforms)
-2. The GUI will:
-   - Detect your Claude Desktop installation automatically
-   - Allow you to select which toolkit features to enable
-   - Let you manage project directories that Claude can access
-   - Help you create new projects
-   - Monitor the MCP server status
-
-![AI Dev Toolkit GUI](docs/images/gui-screenshot.png)
-
-> **Note**: The GUI handles all Claude Desktop configuration automatically, so you don't need to manually edit configuration files.
-
-### Connect to Claude Desktop (Windows)
-
-If you prefer not to use the GUI, we also provide a simple script to automatically connect the toolkit to Claude Desktop:
-
-1. Run `connect_to_claude.bat` (requires administrator privileges)
-2. The script will:
-   - Find your Claude Desktop installation
-   - Update the configuration to include the MCP server
-   - Restart Claude Desktop if needed
-
-For manual configuration:
-1. Open Claude Desktop
-2. Go to Settings > MCP Servers
-3. Click "Add Server" 
-4. Enter the following details:
-   - Name: AI Dev Toolkit
-   - URL: http://localhost:8000
-5. Click "Save"
-6. Grant permissions when prompted
-
-### Start the Server
-
-The server will start automatically when Claude Desktop launches, but you can also start it manually:
+#### GUI Installation
 
 ```bash
-# Start the server
-python src/server.py
+python scripts/launchers/launch_gui.py
 ```
 
-Or use the GUI to monitor and restart the server as needed.
+### Quick Setup
 
-### Using the Tools
+1. **Launch the GUI**: Run the AI Dev Toolkit configuration interface
+2. **Select MCP Servers**: Choose which built-in servers you want to enable
+3. **Configure Access**: Add project directories you want the servers to access
+4. **Apply Changes**: Click "Apply" to update your Claude Desktop configuration
+5. **Restart Claude**: Restart Claude Desktop to apply your changes
 
-In Claude Desktop, you can access the tools by typing:
+## Using AI Dev Toolkit
+
+### AI Librarian
+
+Initialize the AI Librarian for your project to enable persistent code understanding:
+
 ```
-@AI Dev Toolkit
+initialize_librarian("path/to/your/project")
 ```
 
-## Available Tools
+The AI Librarian:
+- Analyzes your codebase structure
+- Builds a component registry
+- Tracks code changes in real-time
+- Maintains context across conversations
+- Enables smarter code-aware responses
 
-### File System Tools
+See `docs/ai_librarian_guide.md` for more information.
 
-- `read_file`: Read file contents
-- `write_file`: Write to a file
-- `edit_file`: Make line-based edits
-- `create_directory`: Create a directory
-- `list_directory`: List directory contents
-- `directory_tree`: View directory structure
-- `move_file`: Move or rename files
-- `search_files`: Find files matching a pattern
-- `get_file_info`: Get file metadata
+### Project Starter
 
-### AI Librarian Tools
+Create new projects with intelligent scaffolding:
 
-- `initialize_librarian`: Set up the AI Librarian
-- `query_component`: Find component details
-- `find_implementation`: Locate code implementations
-- `generate_librarian`: Generate the librarian files
+```
+create_project_plan("Create a React application with authentication")
+```
 
-### Project Starter Tools
-
-- `create_project_plan`: Generate a project plan
-- `generate_project_structure`: Create directory structure
-- `create_starter_files`: Generate starter code
-- `setup_github_repo`: GitHub setup instructions
+The Project Starter:
+- Creates detailed project plans
+- Generates project structures
+- Scaffolds components based on specifications
+- Follows best practices for various frameworks
 
 ### Think Tool
 
-- `think`: A scratchpad for reasoning through problems
-
-### Coming Soon
-
-- **Context Compression**: Store and retrieve conversation history in an AI-optimized format
-- **RAG Integration**: Connect to vector databases and knowledge bases for enhanced context
-
-## Examples
-
-### Using the AI Librarian
+Structured reasoning for complex problems:
 
 ```
-# First, initialize the AI Librarian for a project (creates persistent context)
-initialize_librarian("D:/Projects/my-project")
-
-# Now Claude will maintain awareness of your codebase across conversations
-# You can query components directly
-query_component("D:/Projects/my-project", "MyClass")
-
-# Search for implementations
-find_implementation("D:/Projects/my-project", "connect_database")
-
-# The AI Librarian automatically monitors your codebase for changes
-# No manual updates needed - Claude always stays in sync with your code
+think("How should I architect a microservice with three components?")
 ```
 
-### Creating a New Project
+## Configuration
 
-```
-# Create a project plan
-create_project_plan(
-    project_name="TaskMaster",
-    project_description="A task management application",
-    project_type="web",
-    key_features=["User authentication", "Task creation and management", "Categories and tags"]
-)
+The configuration interface allows you to:
 
-# Generate the project structure
-generate_project_structure(
-    structure_text="taskmaster/\n├── src/\n│   ├── components/\n...",
-    output_directory="D:/Projects/taskmaster"
-)
+1. **Enable/Disable Servers**: Choose which MCP servers to activate
+2. **Configure Access**: Manage which directories each server can access
+3. **Add External Servers**: Integrate third-party MCP servers from GitHub or other sources
+4. **Save Profiles**: Create and switch between different configurations
 
-# Create starter files
-create_starter_files(
-    project_directory="D:/Projects/taskmaster",
-    project_name="TaskMaster",
-    project_type="web"
-)
-```
+## Documentation
 
-## Context Compression (Coming Soon)
-
-The Context Compression tool will:
-
-- Store conversation history in a format optimized for AI language models
-- Save compressed context in `.ai_reference` as JSON files
-- Allow continuity between sessions without manual context copying
-- Prioritize project-relevant information
-
-Benefits:
-- Dramatically improved context retention between sessions
-- Better understanding of project history
-- More consistent assistance
-
-## RAG Integration (Future)
-
-Future versions will include:
-- Connection to vector databases
-- Document embedding and retrieval
-- Semantic search across project documentation
-- Integration with knowledge management systems
-
-## Development
-
-### Project Structure
-
-```
-ai-dev-toolkit/
-├── .ai_reference/       # AI Librarian self-reference system
-├── docs/                # Documentation
-│   ├── project-plan.md   # Project plan and design document
-│   ├── architecture/     # System architecture documentation
-│   └── images/           # Documentation images
-├── gui/                 # GUI configuration tool
-│   └── configurator.py   # Main GUI implementation
-├── src/
-│   ├── server.py         # Main MCP server implementation
-│   ├── librarian/        # AI Librarian components
-│   ├── mcp/              # MCP protocol components
-│   └── utils/            # Utility functions
-├── scripts/
-│   ├── connect_to_claude.bat       # Claude Desktop connection script
-│   ├── run_project_generator.bat   # Project generation runner
-│   ├── project-generator-script.py  # Project generation implementation
-│   ├── run_librarian_generator.bat # AI Librarian update script
-│   └── context-compressor.py       # Context compression tool
-├── tests/                # Test cases
-├── launch_gui.bat        # GUI launcher for Windows
-├── launch_gui.py         # GUI launcher for all platforms
-├── gui_installer.py      # GUI installation script
-├── requirements.txt      # Project dependencies
-├── install.py            # Installation script
-└── README.md             # This file
-```
-
-### Running Tests
-
-```bash
-# Run tests
-python -m pytest tests/
-```
-
-## Development Roadmap & Timeline
-
-| Feature | Status | Expected Completion |
-|---------|--------|---------------------|
-| File System Tools | In Progress | Q2 2025 |
-| AI Librarian | Planning | Q2 2025 |
-| Project Starter | Concept | Q3 2025 |
-| Think Tool | Concept | Q3 2025 |
-| GUI Configuration Tool | In Progress | Q2 2025 |
-| Context Compression | Planned | Q4 2025 |
-| RAG Integration | Future | 2026 |
-
-### How Tools Connect to Claude
-
-This project uses the Model Context Protocol (MCP) to connect tools to Claude:
-
-1. The MCP server runs locally on your machine
-2. Claude Desktop connects to the server via localhost
-3. Once connected, Claude can "see" and invoke the available tools
-4. Tools execute on your local machine and return results to Claude
-5. Claude interprets the results and communicates them back to you
-
-![MCP Architecture](docs/mcp-architecture.png)
-
-> **Note**: The architecture diagram will be added in a future update.
-
-## Troubleshooting
-
-### GUI Issues
-
-If the GUI fails to start:
-1. Make sure Python and Tkinter are properly installed
-2. Try running the GUI installer: `python gui_installer.py`
-3. Check if you have permissions to write to the Claude Desktop configuration
-
-### Claude Desktop Connection
-
-If the automatic connection script fails:
-
-1. Check if Claude Desktop is running and close it
-2. Try running the script with administrator privileges
-3. Manually edit the Claude config at: `%APPDATA%\Claude\config.json`
-4. Ensure the server is running before connecting Claude
-
-### Server Issues
-
-If the server fails to start:
-
-1. Check if another process is using port 8000
-2. Verify Python version is 3.8 or higher
-3. Make sure all dependencies are installed
-4. Check logs for specific error messages
+- `docs/project_structure.md` - Project structure documentation
+- `docs/ai_librarian_guide.md` - AI Librarian usage guide
+- `docs/tools_reference.md` - Complete reference for all available tools
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit pull requests.
+Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to contribute to the project.
+
+## Security
+
+We take security seriously. Please review our [Security Policy](SECURITY.md) for information about reporting vulnerabilities.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the terms of the [LICENSE](LICENSE) file.

@@ -1,0 +1,3 @@
+@echo off
+echo Starting AI Librarian MCP Server...
+python server.py %*
