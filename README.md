@@ -44,9 +44,25 @@ python install.py
 
 > **Note**: The installation script is still in development. Currently, you'll need to manually start the server using the provided scripts.
 
+### Using the GUI Configuration Tool
+
+The AI Dev Toolkit includes a graphical configuration tool that makes it easy to integrate with Claude Desktop:
+
+1. Run `launch_gui.bat` (Windows) or `python launch_gui.py` (all platforms)
+2. The GUI will:
+   - Detect your Claude Desktop installation automatically
+   - Allow you to select which toolkit features to enable
+   - Let you manage project directories that Claude can access
+   - Help you create new projects
+   - Monitor the MCP server status
+
+![AI Dev Toolkit GUI](docs/images/gui-screenshot.png)
+
+> **Note**: The GUI handles all Claude Desktop configuration automatically, so you don't need to manually edit configuration files.
+
 ### Connect to Claude Desktop (Windows)
 
-We provide a simple script to automatically connect the toolkit to Claude Desktop:
+If you prefer not to use the GUI, we also provide a simple script to automatically connect the toolkit to Claude Desktop:
 
 1. Run `connect_to_claude.bat` (requires administrator privileges)
 2. The script will:
@@ -66,10 +82,14 @@ For manual configuration:
 
 ### Start the Server
 
+The server will start automatically when Claude Desktop launches, but you can also start it manually:
+
 ```bash
 # Start the server
 python src/server.py
 ```
+
+Or use the GUI to monitor and restart the server as needed.
 
 ### Using the Tools
 
@@ -192,6 +212,8 @@ ai-dev-toolkit/
 │   ├── project-plan.md   # Project plan and design document
 │   ├── architecture/     # System architecture documentation
 │   └── images/           # Documentation images
+├── gui/                 # GUI configuration tool
+│   └── configurator.py   # Main GUI implementation
 ├── src/
 │   ├── server.py         # Main MCP server implementation
 │   ├── librarian/        # AI Librarian components
@@ -204,8 +226,11 @@ ai-dev-toolkit/
 │   ├── run_librarian_generator.bat # AI Librarian update script
 │   └── context-compressor.py       # Context compression tool
 ├── tests/                # Test cases
+├── launch_gui.bat        # GUI launcher for Windows
+├── launch_gui.py         # GUI launcher for all platforms
+├── gui_installer.py      # GUI installation script
 ├── requirements.txt      # Project dependencies
-├── install.py           # Installation script
+├── install.py            # Installation script
 └── README.md             # This file
 ```
 
@@ -224,6 +249,7 @@ python -m pytest tests/
 | AI Librarian | Planning | Q2 2025 |
 | Project Starter | Concept | Q3 2025 |
 | Think Tool | Concept | Q3 2025 |
+| GUI Configuration Tool | In Progress | Q2 2025 |
 | Context Compression | Planned | Q4 2025 |
 | RAG Integration | Future | 2026 |
 
@@ -242,6 +268,13 @@ This project uses the Model Context Protocol (MCP) to connect tools to Claude:
 > **Note**: The architecture diagram will be added in a future update.
 
 ## Troubleshooting
+
+### GUI Issues
+
+If the GUI fails to start:
+1. Make sure Python and Tkinter are properly installed
+2. Try running the GUI installer: `python gui_installer.py`
+3. Check if you have permissions to write to the Claude Desktop configuration
 
 ### Claude Desktop Connection
 

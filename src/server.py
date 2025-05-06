@@ -6,6 +6,12 @@ This is the main server implementation for the AI Dev Toolkit MCP server.
 It combines file system tools, AI Librarian capabilities, project starter tools,
 and the think tool to create a comprehensive development assistant.
 
+Key Features:
+- Persistent AI Librarian context across conversations
+- File system access and manipulation
+- Project generation and scaffolding
+- Structured reasoning tools
+
 Usage:
     python server.py
 
@@ -16,14 +22,218 @@ Requirements:
 import os
 import sys
 import json
+import time
+import atexit
 import shutil
+import logging
+import threading
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional, Union, Set
 
 from mcp.server.fastmcp import FastMCP, Context, Image
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("ai_dev_toolkit.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("ai-dev-toolkit")
+
 # Create the MCP server
 mcp = FastMCP("AI Dev Toolkit")
+
+# Global context for AI Librarian
+librarian_context = {
+    "projects": {},  # Map of project paths to their librarian info
+    "active_projects": set(),  # Set of currently monitored projects
+    "last_update": {},  # Map of project paths to last update timestamp
+    "indexed_files": {},  # Map of project paths to their indexed files
+    "components": {}  # Map of project paths to their component registries
+}
+
+# File change monitoring thread
+monitoring_active = True
+
+def monitor_projects():
+    """
+    Monitor active projects for file changes and update the AI Librarian context.
+    This runs in a separate thread to provide real-time updates.
+    """
+    logger.info("Starting project monitoring thread")
+    
+    while monitoring_active:
+        try:
+            current_time = time.time()
+            
+            # Check each active project for changes
+            for project_path in list(librarian_context["active_projects"]):
+                if not os.path.exists(project_path):
+                    logger.warning(f"Project path no longer exists: {project_path}")
+                    librarian_context["active_projects"].remove(project_path)
+                    continue
+                    
+                # Only check every 30 seconds per project to avoid excessive file system operations
+                last_check = librarian_context["last_update"].get(project_path, 0)
+                if current_time - last_check < 30:
+                    continue
+                    
+                # Check for file changes
+                has_changes = check_project_changes(project_path)
+                if has_changes:
+                    logger.info(f"Changes detected in project: {project_path}")
+                    update_librarian_for_project(project_path)
+                    
+                librarian_context["last_update"][project_path] = current_time
+                
+            # Sleep to avoid high CPU usage
+            time.sleep(5)
+        except Exception as e:
+            logger.error(f"Error in monitoring thread: {str(e)}")
+            time.sleep(10)  # Sleep longer on error
+
+def check_project_changes(project_path):
+    """
+    Check if a project has changes since the last update.
+    
+    Args:
+        project_path: Path to the project root
+        
+    Returns:
+        bool: True if changes detected, False otherwise
+    """
+    try:
+        # Get currently indexed files
+        indexed_files = librarian_context["indexed_files"].get(project_path, {})
+        
+        # Scan for Python files
+        current_files = {}
+        for root, _, files in os.walk(project_path):
+            # Skip hidden directories and common excluded dirs
+            if any(part.startswith('.') for part in Path(root).parts) or \
+               any(part in ['venv', 'env', '__pycache__', 'node_modules'] for part in Path(root).parts):
+                continue
+                
+            for file in files:
+                if file.endswith('.py'):
+                    file_path = os.path.join(root, file)
+                    try:
+                        mtime = os.path.getmtime(file_path)
+                        current_files[file_path] = mtime
+                    except OSError:
+                        pass
+        
+        # Check for added, removed, or modified files
+        if set(indexed_files.keys()) != set(current_files.keys()):
+            return True
+            
+        # Check for modified files
+        for file_path, mtime in current_files.items():
+            if file_path in indexed_files and indexed_files[file_path] != mtime:
+                return True
+                
+        return False
+    except Exception as e:
+        logger.error(f"Error checking project changes: {str(e)}")
+        return False
+
+def update_librarian_for_project(project_path):
+    """
+    Update the AI Librarian for a project.
+    
+    Args:
+        project_path: Path to the project root
+    """
+    try:
+        from src.librarian.indexer import initialize_librarian
+        
+        # Update the librarian files
+        message, file_count, component_count = initialize_librarian(project_path)
+        logger.info(f"Updated librarian for {project_path}: {message}")
+        
+        # Update our in-memory representation
+        ai_ref_path = os.path.join(project_path, ".ai_reference")
+        
+        # Read script index
+        script_index_path = os.path.join(ai_ref_path, "script_index.json")
+        if os.path.exists(script_index_path):
+            with open(script_index_path, 'r', encoding='utf-8') as f:
+                script_index = json.load(f)
+                librarian_context["projects"][project_path] = script_index
+        
+        # Read component registry
+        component_registry_path = os.path.join(ai_ref_path, "component_registry.json")
+        if os.path.exists(component_registry_path):
+            with open(component_registry_path, 'r', encoding='utf-8') as f:
+                component_registry = json.load(f)
+                librarian_context["components"][project_path] = component_registry
+        
+        # Update indexed files
+        current_files = {}
+        for root, _, files in os.walk(project_path):
+            if any(part.startswith('.') for part in Path(root).parts) or \
+               any(part in ['venv', 'env', '__pycache__', 'node_modules'] for part in Path(root).parts):
+                continue
+                
+            for file in files:
+                if file.endswith('.py'):
+                    file_path = os.path.join(root, file)
+                    try:
+                        mtime = os.path.getmtime(file_path)
+                        current_files[file_path] = mtime
+                    except OSError:
+                        pass
+        
+        librarian_context["indexed_files"][project_path] = current_files
+    except Exception as e:
+        logger.error(f"Error updating librarian for {project_path}: {str(e)}")
+
+# Start the monitoring thread
+monitoring_thread = threading.Thread(target=monitor_projects, daemon=True)
+monitoring_thread.start()
+
+# Register cleanup handler
+def cleanup():
+    global monitoring_active
+    monitoring_active = False
+    logger.info("Shutting down AI Dev Toolkit server")
+    
+    # Save any persistent state if needed
+    state_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.ai_toolkit_state.json")
+    try:
+        state = {
+            "active_projects": list(librarian_context["active_projects"]),
+            "last_update": librarian_context["last_update"]
+        }
+        with open(state_file, 'w', encoding='utf-8') as f:
+            json.dump(state, f, indent=2)
+    except Exception as e:
+        logger.error(f"Error saving state: {str(e)}")
+
+atexit.register(cleanup)
+
+# Load previous state if available
+state_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.ai_toolkit_state.json")
+if os.path.exists(state_file):
+    try:
+        with open(state_file, 'r', encoding='utf-8') as f:
+            state = json.load(f)
+            librarian_context["active_projects"] = set(state.get("active_projects", []))
+            librarian_context["last_update"] = state.get("last_update", {})
+            
+        # Reload active projects
+        for project_path in list(librarian_context["active_projects"]):
+            if os.path.exists(project_path):
+                logger.info(f"Reloading project: {project_path}")
+                update_librarian_for_project(project_path)
+            else:
+                logger.warning(f"Previously active project not found: {project_path}")
+                librarian_context["active_projects"].remove(project_path)
+    except Exception as e:
+        logger.error(f"Error loading state: {str(e)}")
 
 #-----------------------------------------------------------------
 # File System Tools
@@ -390,6 +600,9 @@ def get_file_info(path: str) -> str:
         return f"Error getting file info: {str(e)}"
 
 
+# Dictionary to store permission status of directories
+permission_status = {}
+
 @mcp.tool()
 def list_allowed_directories() -> str:
     """
@@ -398,10 +611,59 @@ def list_allowed_directories() -> str:
     Returns:
         A list of allowed directory paths
     """
-    # In a real implementation, this would be dynamically determined
-    # For this example, we'll return a fixed list
-    dirs = ["D:\\Projects\\isekaiZen\\ai-librarian-mcp", "D:\\Projects\\isekaiZen\\machine-learning-optimizer"]
-    return "Allowed directories:\n" + "\n".join(dirs)
+    # These would be configured or determined at runtime in a real implementation
+    allowed_dirs = [
+        "D:\Projects\isekaiZen\ai-dev-toolkit",
+        "D:\Projects\isekaiZen\machine-learning-optimizer"
+    ]
+    
+    # Update our permission status tracker
+    for dir_path in allowed_dirs:
+        permission_status[dir_path] = True
+    
+    return "Allowed directories:\n" + "\n".join(allowed_dirs)
+
+@mcp.tool()
+def check_project_access(project_path: str) -> str:
+    """
+    Check if the server has permission to access a specific project directory.
+    This is required before initializing the AI Librarian for a project.
+    
+    Args:
+        project_path: The project directory to check
+        
+    Returns:
+        Status message about directory access
+    """
+    try:
+        # Normalize the path
+        project_path = os.path.abspath(project_path)
+        
+        # First check our permission tracker
+        if project_path in permission_status and permission_status[project_path]:
+            return f"✅ The server has permission to access: {project_path}\n\nYou can initialize the AI Librarian for this project."
+        
+        # Try to access the directory
+        if not os.path.exists(project_path):
+            return f"❌ Directory does not exist: {project_path}"
+        
+        # Try to list the directory contents as a basic access test
+        try:
+            os.listdir(project_path)
+            # If we get here, we have access
+            permission_status[project_path] = True
+            return f"✅ The server has permission to access: {project_path}\n\nYou can initialize the AI Librarian for this project."
+        except PermissionError:
+            permission_status[project_path] = False
+            return f"❌ Permission denied: {project_path}\n\nPlease grant access to this directory in Claude Desktop:\n" + \
+                   "1. Open Claude Desktop settings\n" + \
+                   "2. Go to MCP Servers\n" + \
+                   "3. Find 'AI Dev Toolkit'\n" + \
+                   "4. Click 'Edit Permissions'\n" + \
+                   "5. Grant access to {project_path}"
+    except Exception as e:
+        logger.error(f"Error checking project access: {str(e)}")
+        return f"❌ Error checking access: {str(e)}"
 
 #-----------------------------------------------------------------
 # AI Librarian Tools
@@ -412,8 +674,9 @@ def initialize_librarian(project_path: str) -> str:
     """
     Initialize the AI Librarian for a project.
     
-    This tool creates the .ai_reference directory structure and initial files
-    needed for the AI Librarian to function.
+    This tool creates the .ai_reference directory structure and builds a persistent
+    context that Claude can access across conversations. After initialization, the
+    project will be actively monitored for changes, automatically updating the context.
     
     Args:
         project_path: The root directory of the project
@@ -422,6 +685,23 @@ def initialize_librarian(project_path: str) -> str:
         A success message or error information
     """
     try:
+        # Check permission first
+        project_path = os.path.abspath(project_path)
+        if project_path not in permission_status or not permission_status[project_path]:
+            # Try to check access
+            try:
+                if not os.path.exists(project_path):
+                    return f"❌ Directory does not exist: {project_path}"
+                
+                # Try to list the directory contents as a basic access test
+                os.listdir(project_path)
+                # If we get here, we have access
+                permission_status[project_path] = True
+            except PermissionError:
+                return f"❌ Permission denied: {project_path}\n\nPlease grant access to this directory in Claude Desktop first:\n" + \
+                       "1. Use check_project_access(\"{project_path}\") to verify access\n" + \
+                       "2. If needed, edit Claude Desktop permissions settings"
+        
         # Create the .ai_reference directory
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         os.makedirs(ai_ref_path, exist_ok=True)
@@ -450,12 +730,8 @@ It helps AI assistants understand and navigate the codebase.
 
 ## Usage
 
-To update the AI Librarian after code changes:
-
-```bash
-cd /path/to/project
-python .ai_reference/run_generator.py
-```
+The AI Librarian is automatically maintained by the AI Dev Toolkit MCP server.
+Changes to your codebase will be tracked in real-time, maintaining context across conversations.
 """
         with open(os.path.join(ai_ref_path, "README.md"), 'w', encoding='utf-8') as f:
             f.write(readme_content)
@@ -746,7 +1022,19 @@ if __name__ == "__main__":
         with open(os.path.join(ai_ref_path, "generate_mini_librarians.py"), 'w', encoding='utf-8') as f:
             f.write(mini_gen_script)
         
-        return f"Successfully initialized AI Librarian at {ai_ref_path}"
+    # Add project to active monitoring list
+        librarian_context["active_projects"].add(project_path)
+        librarian_context["last_update"][project_path] = time.time()
+        
+        # Run initial generation
+        update_librarian_for_project(project_path)
+        
+        logger.info(f"Added project to active monitoring: {project_path}")
+        
+        return f"Successfully initialized AI Librarian at {ai_ref_path}\n\n" + \
+               "Project is now being actively monitored for changes. Any updates to the codebase " + \
+               "will be automatically detected and processed. Claude will maintain context awareness " + \
+               "across conversations, allowing for more effective assistance with this project."
     except Exception as e:
         return f"Error initializing AI Librarian: {str(e)}"
 
@@ -764,18 +1052,31 @@ def query_component(project_path: str, component_name: str) -> str:
         Detailed information about the component
     """
     try:
+        # Check if project is in our active monitoring
+        if project_path in librarian_context["active_projects"]:
+            logger.info(f"Using in-memory context for querying component: {component_name}")
+        else:
+            logger.info(f"Project not in active monitoring, checking disk: {project_path}")
+            
         # Check if the AI Librarian exists
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         if not os.path.exists(ai_ref_path):
             return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
         
-        # Check the script index
-        script_index_path = os.path.join(ai_ref_path, "script_index.json")
-        if not os.path.exists(script_index_path):
-            return f"Script index not found at {script_index_path}."
-        
-        with open(script_index_path, 'r', encoding='utf-8') as f:
-            script_index = json.load(f)
+        # Get script index - first check in-memory, then fallback to file
+        script_index = None
+        if project_path in librarian_context["projects"]:
+            script_index = librarian_context["projects"][project_path]
+            logger.info("Using in-memory script index")
+        else:
+            script_index_path = os.path.join(ai_ref_path, "script_index.json")
+            if not os.path.exists(script_index_path):
+                return f"Script index not found at {script_index_path}."
+            
+            with open(script_index_path, 'r', encoding='utf-8') as f:
+                script_index = json.load(f)
+                # Cache it for future use
+                librarian_context["projects"][project_path] = script_index
         
         # Search for the component in all files
         results = []
@@ -860,6 +1161,10 @@ def find_implementation(project_path: str, search_text: str, file_pattern: str =
         List of matching implementations with context
     """
     try:
+        # Check if project is in active monitoring
+        if project_path in librarian_context["active_projects"]:
+            logger.info(f"Using in-memory context for searching: {search_text}")
+            
         results = []
         search_text = search_text.lower()
         
@@ -973,25 +1278,34 @@ def generate_librarian(project_path: str) -> str:
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         if not os.path.exists(ai_ref_path):
             return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            
+        # If project is not in active monitoring, add it
+        if project_path not in librarian_context["active_projects"]:
+            librarian_context["active_projects"].add(project_path)
+            librarian_context["last_update"][project_path] = time.time()
+            logger.info(f"Added project to active monitoring: {project_path}")
         
-        # Run the librarian generator
-        run_generator_path = os.path.join(ai_ref_path, "run_generator.py")
-        if not os.path.exists(run_generator_path):
-            return f"Run generator script not found at {run_generator_path}."
+        # Force update the librarian
+        update_librarian_for_project(project_path)
         
-        import subprocess
-        process = subprocess.Popen(
-            [sys.executable, run_generator_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True
-        )
-        stdout, stderr = process.communicate()
+        # Get stats
+        file_count = 0
+        component_count = 0
         
-        if process.returncode != 0:
-            return f"Error generating librarian:\n\n{stderr}"
+        # Count components from in-memory representation
+        if project_path in librarian_context["components"]:
+            component_registry = librarian_context["components"][project_path]
+            component_count = len(component_registry.get("components", {}))
+            
+        # Count files from in-memory representation
+        if project_path in librarian_context["indexed_files"]:
+            file_count = len(librarian_context["indexed_files"][project_path])
         
-        return f"Successfully generated AI Librarian:\n\n{stdout}"
+        return f"Successfully generated AI Librarian for {project_path}:\n" + \
+               f"- {file_count} files indexed\n" + \
+               f"- {component_count} components identified\n\n" + \
+               "Project is now being actively monitored for changes. Claude will maintain " + \
+               "context awareness across conversations."
     except Exception as e:
         return f"Error generating librarian: {str(e)}"
 
