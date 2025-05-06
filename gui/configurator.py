@@ -16,6 +16,9 @@ class AIDevToolkitGUI:
         self.root.geometry("900x650")
         self.root.resizable(True, True)
         
+        # Set version
+        self.version = "0.1.0"
+        
         # Set theme and styles
         self.style = ttk.Style()
         self.style.theme_use('clam')
@@ -58,9 +61,6 @@ class AIDevToolkitGUI:
         self.detect_claude_desktop()
         self.load_config()
         self.check_server_status()
-        
-        # Add version
-        self.version = "0.1.0"
     
     def create_widgets(self):
         # Main notebook (tabbed interface)

@@ -155,4 +155,4 @@ cython_debug/
 .ai_reference/diagnostics/
 
 # Generated files by the project generator
-ai-dev-toolkit-mcp/
+ai-dev-toolkit-mcp/.ai_reference/
