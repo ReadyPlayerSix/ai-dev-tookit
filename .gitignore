@@ -150,9 +150,13 @@ cython_debug/
 # VS Code
 .vscode/
 
-# AI reference context files
-.ai_reference/context/
-.ai_reference/diagnostics/
-
-# Generated files by the project generator
+# AI Dev Toolkit specific
+# AI Librarian generated files (these are project-specific and should not be in version control)
+.ai_reference/
 ai-dev-toolkit-mcp/.ai_reference/
+
+# Test directory (contains test data that shouldn't be public)
+test_directory/
+
+# Temporary files
+gitStatus.txt

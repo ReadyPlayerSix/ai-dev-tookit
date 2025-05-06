@@ -1,0 +1,24 @@
+# Core dependencies for the AI Dev Toolkit
+mcp[cli]>=0.1.5
+fastapi>=0.104.0
+uvicorn>=0.24.0
+
+# GUI dependencies
+tkinter
+pillow>=10.0.0
+
+# Testing dependencies
+pytest>=7.0.0
+
+# Code quality tools
+black>=23.10.0
+flake8>=6.1.0
+isort>=5.12.0
+ruff>=0.1.0
+
+# Documentation
+mkdocs>=1.5.3
+mkdocs-material>=9.4.6
+
+# Development dependencies
+ipython>=8.16.0
