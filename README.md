@@ -1,4 +1,4 @@
-# AI Dev Toolkit
+# AI Dev Toolkit (PRE-ALPHA)
 
 The AI Dev Toolkit is an all-in-one solution for managing Model Context Protocol (MCP) servers and enhancing AI assistants like Claude with advanced development capabilities.
 
@@ -8,6 +8,12 @@ AI Dev Toolkit serves two primary functions:
 
 1. **MCP Server Manager**: A user-friendly interface for configuring, enabling, and managing MCP servers
 2. **Development Tools Suite**: A collection of powerful MCP servers for software development tasks
+
+## Development Status
+
+**⚠️ PRE-ALPHA STATUS ⚠️**
+
+This project is currently in pre-alpha development. Many features are still being implemented and tested. Use at your own risk as functionality may change significantly between versions.
 
 ## Key Features
 

@@ -1,0 +1,31 @@
+{
+  "name": "@isekaizen/ai-dev-toolkit",
+  "version": "0.1.0",
+  "description": "AI Developer Toolkit MCP Server - File system tools, AI Librarian, project scaffolding, and thinking tools",
+  "bin": {
+    "ai-dev-toolkit": "./bin/server.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/isekaizen/ai-dev-toolkit.git"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "development",
+    "toolkit",
+    "claude"
+  ],
+  "author": "isekaiZen",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node bin/check-dependencies.js"
+  }
+}
