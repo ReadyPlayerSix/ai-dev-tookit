@@ -53,6 +53,31 @@ class AILibrarianServer:
         self.mcp.tool()(query_component)
         self.mcp.tool()(find_implementation)
         
+        # Auto-update AI Librarian when server starts
+        self.update_ai_librarian()
+    
+    def update_ai_librarian(self):
+        """Update AI Librarian for all registered project directories"""
+        try:
+            # Get allowed directories from environment variables if available
+            allowed_dirs = []
+            if "AI_LIBRARIAN_ALLOWED_DIRS" in os.environ:
+                allowed_dirs_str = os.environ["AI_LIBRARIAN_ALLOWED_DIRS"]
+                if allowed_dirs_str:
+                    allowed_dirs = allowed_dirs_str.split(",")
+            
+            # Update each directory
+            for dir_path in allowed_dirs:
+                if os.path.exists(dir_path) and os.path.isdir(dir_path):
+                    print(f"Auto-updating AI Librarian for {dir_path}")
+                    try:
+                        result = generate_librarian(dir_path)
+                        print(f"AI Librarian update result: {result[:100]}...")
+                    except Exception as e:
+                        print(f"Error updating AI Librarian for {dir_path}: {str(e)}")
+        except Exception as e:
+            print(f"Error in auto-update of AI Librarian: {str(e)}")
+        
         # Register AI task tools
         self.mcp.tool()(add_ai_task)
         self.mcp.tool()(list_ai_tasks)

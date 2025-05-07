@@ -36,40 +36,25 @@ def main():
         print(f"  pip install {' '.join(missing)}")
         return 1
     
+    # Add the parent directory to the Python path so 'aitoolkit' can be found
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(script_dir)
+    
+    # This is the key fix - add the parent directory to Python's path
+    # so the 'aitoolkit' module can be found
+    if parent_dir not in sys.path:
+        print(f"Adding {parent_dir} to Python path")
+        sys.path.insert(0, parent_dir)
+    
     try:
-        # Import the GUI class from the new package structure
-        from aitoolkit.gui import AIDevToolkitGUI
+        # Import the GUI class after fixing the path
+        from aitoolkit.gui.configurator import AIDevToolkitGUI
         
         # Create and run the GUI
         root = tk.Tk()
         app = AIDevToolkitGUI(root)
         root.mainloop()
-    
-    except ImportError as ie:
-        print(f"Import error: {str(ie)}")
-        traceback.print_exc()
-        print("\nFallback to direct file import...")
         
-        # Get script directory
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        parent_dir = os.path.dirname(script_dir)
-        
-        # Add parent directory to path
-        if parent_dir not in sys.path:
-            sys.path.insert(0, parent_dir)
-        
-        try:
-            # Try to import directly from the file
-            from aitoolkit.gui.configurator import AIDevToolkitGUI
-            
-            root = tk.Tk()
-            app = AIDevToolkitGUI(root)
-            root.mainloop()
-        except Exception as e:
-            print(f"Error launching GUI: {str(e)}")
-            traceback.print_exc()
-            return 1
-    
     except Exception as e:
         print(f"Error launching GUI: {str(e)}")
         traceback.print_exc()
