@@ -1,131 +1,137 @@
-# AI Dev Toolkit (PRE-ALPHA)
+# AI Dev Toolkit
 
-The AI Dev Toolkit is an all-in-one solution for managing Model Context Protocol (MCP) servers and enhancing AI assistants like Claude with advanced development capabilities.
+A comprehensive Model Context Protocol (MCP) server designed to enhance AI assistants like Claude with powerful development capabilities.
 
-## What is AI Dev Toolkit?
+## Overview
 
-AI Dev Toolkit serves two primary functions:
+The AI Dev Toolkit provides an MCP server that extends Claude with file system access, code comprehension, project management, and reasoning tools. It creates a seamless development experience by maintaining context across conversations and providing deep understanding of your codebase.
 
-1. **MCP Server Manager**: A user-friendly interface for configuring, enabling, and managing MCP servers
-2. **Development Tools Suite**: A collection of powerful MCP servers for software development tasks
+### Key Features
 
-## Development Status
+- **File System Tools**: Secure access to read, write, and manage files with appropriate permissions
+- **AI Librarian**: Persistent code comprehension system that analyzes and understands your codebase
+- **Project Starter**: Templates and scaffolding for new development projects
+- **Think Tool**: Structured reasoning tools for complex problem-solving
 
-**⚠️ PRE-ALPHA STATUS ⚠️**
+## Installation
 
-This project is currently in pre-alpha development. Many features are still being implemented and tested. Use at your own risk as functionality may change significantly between versions.
+### Prerequisites
 
-## Key Features
+- Python 3.8 or higher
+- `uv` package manager (recommended) or `pip`
+- Claude Desktop (for best experience)
 
-### MCP Server Management
-
-- **Simplified Configuration**: Easy-to-use GUI for managing MCP servers
-- **One-Click Setup**: Automatically configure Claude Desktop to use your selected MCP servers
-- **External Integration**: Add and manage third-party MCP servers from GitHub or other sources
-- **Project Management**: Configure which directories each MCP server can access
-
-### Built-in MCP Servers
-
-- **AI Librarian**: Persistent code comprehension system that analyzes project codebases
-- **Project Starter**: Tools for project generation and scaffolding
-- **File System Tools**: Secure file operations with configurable access controls
-- **Think Tool**: A scratchpad for structured reasoning
-
-## Getting Started
-
-### Installation
-
-#### NPM Installation (Recommended)
+### Quick Install
 
 ```bash
-npm install -g ai-dev-toolkit
+# Using uv (recommended)
+uv add "isekaizen-ai-dev-toolkit[cli]"
+
+# Using pip
+pip install "isekaizen-ai-dev-toolkit[cli]"
 ```
 
-#### Direct Python Installation
+### Claude Desktop Integration
+
+The AI Dev Toolkit comes with a convenient GUI for Claude Desktop configuration:
+
+1. Launch the GUI configurator:
+   ```bash
+   uv run ai-dev-toolkit-gui
+   ```
+
+2. The configurator will:
+   - Detect your Claude Desktop installation
+   - Allow selection of enabled tools
+   - Configure project directories
+   - Set up the MCP server
+
+## Usage
+
+### Starting the Server
 
 ```bash
-cd ai-dev-toolkit
-python scripts/install.py
+# Start the server with default settings
+uv run ai-dev-toolkit
+
+# Start with specific directories
+uv run ai-dev-toolkit /path/to/project1 /path/to/project2
 ```
 
-#### GUI Installation
+### Using Claude with AI Librarian
 
-```bash
-python scripts/launchers/launch_gui.py
+1. Initialize a project:
+   ```
+   initialize_librarian("path/to/your/project")
+   ```
+
+2. Claude will analyze your codebase and maintain context across conversations.
+
+3. Use the AI Librarian tools:
+   ```
+   query_component("path/to/project", "ComponentName")
+   find_implementation("path/to/project", "search text")
+   ```
+
+### Project Management
+
+Create new projects with the proper structure:
+
+```
+create_project_plan("Project Name", "Description", "web|cli|library|api", ["Feature 1", "Feature 2"])
 ```
 
-### Quick Setup
+### File Operations
 
-1. **Launch the GUI**: Run the AI Dev Toolkit configuration interface
-2. **Select MCP Servers**: Choose which built-in servers you want to enable
-3. **Configure Access**: Add project directories you want the servers to access
-4. **Apply Changes**: Click "Apply" to update your Claude Desktop configuration
-5. **Restart Claude**: Restart Claude Desktop to apply your changes
+Securely access and modify files:
 
-## Using AI Dev Toolkit
+```
+read_file("path/to/file.txt")
+write_file("path/to/file.txt", "content")
+list_directory("path/to/directory")
+search_files("path/to/directory", "search term")
+```
+
+## Components
+
+### MCP Server
+
+The MCP server follows the Model Context Protocol standard, providing a structured interface for AI assistants to access development tools and resources.
 
 ### AI Librarian
 
-Initialize the AI Librarian for your project to enable persistent code understanding:
+The AI Librarian maintains a comprehensive index of your codebase, creating:
 
-```
-initialize_librarian("path/to/your/project")
-```
-
-The AI Librarian:
-- Analyzes your codebase structure
-- Builds a component registry
-- Tracks code changes in real-time
-- Maintains context across conversations
-- Enables smarter code-aware responses
-
-See `docs/ai_librarian_guide.md` for more information.
+- Mini-librarians for individual files
+- Component registry for classes and functions
+- Contextual linking between components
+- Real-time monitoring for code changes
 
 ### Project Starter
 
-Create new projects with intelligent scaffolding:
+Templates and generators for various project types, providing:
 
-```
-create_project_plan("Create a React application with authentication")
-```
-
-The Project Starter:
-- Creates detailed project plans
-- Generates project structures
-- Scaffolds components based on specifications
-- Follows best practices for various frameworks
+- Standard directory structures
+- Starter files
+- GitHub repository setup
+- Common development workflows
 
 ### Think Tool
 
-Structured reasoning for complex problems:
+A structured reasoning interface for complex problems:
 
 ```
-think("How should I architect a microservice with three components?")
+think("This is a complex problem. Let me break it down step by step...")
 ```
 
-## Configuration
+## Development
 
-The configuration interface allows you to:
+This project is currently in PRE-ALPHA status. Several features are implemented, while others are planned for future releases.
 
-1. **Enable/Disable Servers**: Choose which MCP servers to activate
-2. **Configure Access**: Manage which directories each server can access
-3. **Add External Servers**: Integrate third-party MCP servers from GitHub or other sources
-4. **Save Profiles**: Create and switch between different configurations
+### Contributing
 
-## Documentation
-
-- `docs/project_structure.md` - Project structure documentation
-- `docs/ai_librarian_guide.md` - AI Librarian usage guide
-- `docs/tools_reference.md` - Complete reference for all available tools
-
-## Contributing
-
-Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to contribute to the project.
-
-## Security
-
-We take security seriously. Please review our [Security Policy](SECURITY.md) for information about reporting vulnerabilities.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This project is licensed under the terms of the [LICENSE](LICENSE) file.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
