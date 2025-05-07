@@ -719,7 +719,7 @@ When you enable project directories, you are granting Claude permission to read 
                     if "args" in config and isinstance(config["args"], list):
                         # Skip the first two arguments which are flags and package name for filesystem server
                         # For AI Librarian, all args after the script path are directories
-                        start_index = 2 if "@modelcontextprotocol/server-filesystem" in str(config["args"]) else 1
+                        start_index = 2 if "@isekaizen/ai-dev-toolkit" in str(config["args"]) else 1
                         arg_dirs = config["args"][start_index:] if len(config["args"]) > start_index else []
                         
                         # Ensure arg_dirs is a list
@@ -951,7 +951,7 @@ When you enable project directories, you are granting Claude permission to read 
                     # NPM package configuration (standard for all users)
                     toolkit_config = {
                         "command": "npx",
-                        "args": ["-y", "@modelcontextprotocol/server-filesystem"]
+                        "args": ["-y", "@isekaizen/ai-dev-toolkit"]
                     }
                     
                     # Add project directories to args if enabled
