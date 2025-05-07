@@ -254,7 +254,7 @@ class AIDevToolkitGUI:
         
         # AI Librarian Server checkbox
         ai_librarian_server_check = ttk.Checkbutton(server_selection_frame, 
-                                                 text="AI Librarian Server - Code understanding and context maintenance", 
+                                                 text="AI Librarian Server - Code analysis with self-verification and persistent memory", 
                                                  variable=self.ai_librarian_server_enabled,
                                                  style='Server.TCheckbutton',
                                                  command=self.update_server_status)
@@ -286,7 +286,7 @@ class AIDevToolkitGUI:
         
         # AI Librarian checkbox
         self.ai_librarian_check = ttk.Checkbutton(tool_frame, 
-                                               text="AI Librarian - Persistent code comprehension system", 
+                                               text="AI Librarian - Codebase understanding with startup verification for Claude", 
                                                variable=self.ai_librarian_enabled,
                                                command=self.update_server_status)
         self.ai_librarian_check.pack(anchor=tk.W, pady=2)
@@ -417,7 +417,7 @@ class AIDevToolkitGUI:
         description = """The AI Dev Toolkit enhances Claude with powerful capabilities:
 
 1. File System Tools: Read, write, and navigate the file system
-2. AI Librarian: Persistent code comprehension system that maintains context across conversations
+2. AI Librarian: Helps Claude understand your codebase with self-checks to ensure proper functionality
 3. Project Starter: Project generation and scaffolding
 4. Think Tool: Structured reasoning for complex problems
 5. Context Compression: Store and retrieve conversation history (Coming Soon)"""
@@ -1007,7 +1007,7 @@ When you enable project directories, you are granting Claude permission to read 
                             # Create a simple README.md file
                             readme_path = os.path.join(ai_ref_path, "README.md")
                             with open(readme_path, 'w', encoding='utf-8') as f:
-                                f.write("# AI Librarian\n\nThis directory contains the AI Librarian context for this project.")
+                                f.write("# AI Librarian\n\nThis directory contains the AI Librarian context for this project.\n\n## Features\n\n- Analyzes code structure and tracks components\n- Runs startup checks to verify tool functionality\n- Maintains context memory across conversations with Claude\n- Monitors project in real-time to detect code changes")
                         except Exception as e:
                             print(f"Error creating .ai_reference directory: {str(e)}")
             
@@ -1412,7 +1412,7 @@ When you enable project directories, you are granting Claude permission to read 
                 # Create a simple README.md file
                 readme_path = os.path.join(ai_ref_path, "README.md")
                 with open(readme_path, 'w', encoding='utf-8') as f:
-                    f.write("# AI Librarian\n\nThis directory contains the AI Librarian context for this project.")
+                    f.write("# AI Librarian\n\nThis directory contains the AI Librarian context for this project.\n\n## Features\n\n- Analyzes code structure and tracks components\n- Runs startup checks to verify tool functionality\n- Maintains context memory across conversations with Claude\n- Monitors project in real-time to detect code changes")
             
             # Hide the create project frame
             self.create_project_frame.pack_forget()
