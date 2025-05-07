@@ -677,10 +677,14 @@ Diagnostic files help troubleshoot issues with code understanding and navigation
         
         logger.info(f"Added project to active monitoring: {project_path}")
         
+        # Run diagnostic checks to verify librarian functionality
+        diagnostic_results = run_librarian_diagnostics(project_path)
+        
         return f"Successfully initialized AI Librarian at {ai_ref_path}\n\n" + \
                "Project is now being actively monitored for changes. Any updates to the codebase " + \
                "will be automatically detected and processed. Claude will maintain context awareness " + \
-               "across conversations, allowing for more effective assistance with this project."
+               "across conversations, allowing for more effective assistance with this project.\n\n" + \
+               diagnostic_results
     except Exception as e:
         return f"Error initializing AI Librarian: {str(e)}"
 
@@ -944,13 +948,137 @@ def generate_librarian(project_path: str) -> str:
         if project_path in librarian_context["indexed_files"]:
             file_count = len(librarian_context["indexed_files"][project_path])
         
+        # Run diagnostic checks to verify librarian functionality
+        diagnostic_results = run_librarian_diagnostics(project_path)
+        
         return f"Successfully generated AI Librarian for {project_path}:\n" + \
                f"- {file_count} files indexed\n" + \
                f"- {component_count} components identified\n\n" + \
                "Project is now being actively monitored for changes. Claude will maintain " + \
-               "context awareness across conversations."
+               "context awareness across conversations.\n\n" + \
+               diagnostic_results
     except Exception as e:
         return f"Error generating librarian: {str(e)}"
+
+#-----------------------------------------------------------------
+# Diagnostic Tools
+#-----------------------------------------------------------------
+
+def run_librarian_diagnostics(project_path: str) -> str:
+    """
+    Run diagnostic checks on the AI Librarian to verify proper functionality.
+    
+    Args:
+        project_path: The root directory of the project
+        
+    Returns:
+        A diagnostic report message
+    """
+    try:
+        logger.info(f"Running diagnostic checks for AI Librarian in {project_path}")
+        results = ["🔍 AI Librarian Diagnostic Report:"]
+        
+        # 1. Check AI Reference Directory
+        ai_ref_path = os.path.join(project_path, ".ai_reference")
+        if os.path.exists(ai_ref_path):
+            results.append("✓ .ai_reference directory exists")
+        else:
+            results.append("✗ .ai_reference directory not found")
+            return "\n".join(results)
+        
+        # 2. Check Script Index
+        script_index_path = os.path.join(ai_ref_path, "script_index.json")
+        script_index = None
+        
+        if os.path.exists(script_index_path):
+            try:
+                with open(script_index_path, 'r', encoding='utf-8') as f:
+                    script_index = json.load(f)
+                results.append(f"✓ Script index found with {len(script_index.get('files', {}))} files")
+            except Exception as e:
+                results.append(f"✗ Error reading script index: {str(e)}")
+                script_index = None
+        else:
+            results.append("✗ Script index not found")
+        
+        # 3. Check Component Registry
+        component_registry_path = os.path.join(ai_ref_path, "component_registry.json")
+        component_registry = None
+        
+        if os.path.exists(component_registry_path):
+            try:
+                with open(component_registry_path, 'r', encoding='utf-8') as f:
+                    component_registry = json.load(f)
+                component_count = len(component_registry.get('components', {}))
+                results.append(f"✓ Component registry found with {component_count} components")
+            except Exception as e:
+                results.append(f"✗ Error reading component registry: {str(e)}")
+                component_registry = None
+        else:
+            results.append("✗ Component registry not found")
+        
+        # 4. Test Component Query - Try to find a random component if registry exists
+        if component_registry and component_registry.get('components'):
+            try:
+                # Get a random component from the registry
+                components = list(component_registry.get('components', {}).keys())
+                if components:
+                    test_component = components[0]  # Take the first component for testing
+                    results.append(f"✓ Test component found: {test_component}")
+                    
+                    # Try a basic find_implementation search
+                    search_text = test_component
+                    search_result = find_implementation(project_path, search_text)
+                    if search_text in search_result and "No matches found" not in search_result:
+                        results.append(f"✓ Component search successful")
+                    else:
+                        results.append(f"⚠ Component search did not return expected results")
+                else:
+                    results.append(f"⚠ No components found in registry to test")
+            except Exception as e:
+                results.append(f"✗ Error testing component query: {str(e)}")
+        else:
+            results.append("⚠ Skipping component query test - no components available")
+        
+        # 5. Verify scripts directory
+        scripts_dir = os.path.join(ai_ref_path, "scripts")
+        if os.path.exists(scripts_dir):
+            script_files = [f for f in os.listdir(scripts_dir) if f.endswith('.json')]
+            results.append(f"✓ Scripts directory contains {len(script_files)} mini-librarian files")
+        else:
+            results.append("✗ Scripts directory not found")
+            
+        # 6. Check active monitoring status
+        if project_path in librarian_context["active_projects"]:
+            results.append("✓ Project is actively monitored for changes")
+        else:
+            results.append("✗ Project is not in active monitoring list")
+        
+        # 7. Summary
+        success_count = len([line for line in results if line.startswith("✓")])
+        warning_count = len([line for line in results if line.startswith("⚠")])
+        error_count = len([line for line in results if line.startswith("✗")])
+        
+        results.append(f"\nDiagnostic Summary: {success_count} checks passed, {warning_count} warnings, {error_count} errors")
+        
+        if error_count > 0:
+            results.append("⚠ Some diagnostics failed. The librarian may have limited functionality.")
+        else:
+            results.append("✅ AI Librarian is fully operational!")
+        
+        # Save diagnostic report
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        report_path = os.path.join(ai_ref_path, "diagnostics", f"diagnostic-report-{timestamp}.txt")
+        try:
+            with open(report_path, 'w', encoding='utf-8') as f:
+                f.write("\n".join(results))
+        except Exception as e:
+            results.append(f"Error saving diagnostic report: {str(e)}")
+        
+        return "\n".join(results)
+    except Exception as e:
+        logger.error(f"Error during diagnostics: {str(e)}")
+        return f"Error running diagnostics: {str(e)}"
 
 #-----------------------------------------------------------------
 # ToDo List Tools
