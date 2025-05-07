@@ -22,8 +22,21 @@ import atexit
 import logging
 import threading
 import ast
+import os.path
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union, Set, Tuple
+
+# Add the current directory to sys.path to ensure local imports work
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
+# Get the parent directory to import from aitoolkit
+parent_dir = os.path.dirname(os.path.dirname(current_dir))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+from aitoolkit.librarian.todos import TodoManager
 
 from mcp.server.fastmcp import FastMCP, Context
 
@@ -150,8 +163,11 @@ def update_librarian_for_project(project_path):
         project_path: Path to the project root
     """
     try:
+        # Import the local indexer module
+        from aitoolkit.librarian.indexer import initialize_librarian as initialize_librarian_import
+        
         # Update the librarian files
-        message, file_count, component_count = initialize_librarian_internal(project_path)
+        message, file_count, component_count = initialize_librarian_import(project_path)
         logger.info(f"Updated librarian for {project_path}: {message}")
         
         # Update our in-memory representation
@@ -502,7 +518,11 @@ def generate_component_registry(files_info: Dict[str, Dict], output_file: str) -
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(registry, f, indent=2)
 
-def initialize_librarian_internal(project_path: str) -> Tuple[str, int, int]:
+# This function was moved to indexer.py and is now imported as needed
+# Keeping this commented block for reference
+'''
+# The following block is commented out since it's been moved to indexer.py
+def _initialize_librarian_internal(project_path: str) -> Tuple[str, int, int]:
     """
     Internal implementation of librarian initialization.
     
@@ -560,6 +580,7 @@ def initialize_librarian_internal(project_path: str) -> Tuple[str, int, int]:
     )
     
     return f"AI Librarian generated for {len(files_info)} files", len(files_info), component_count
+'''
 
 @mcp.tool()
 def initialize_librarian(project_path: str) -> str:
@@ -643,6 +664,9 @@ Diagnostic files help troubleshoot issues with code understanding and navigation
 """
         with open(os.path.join(diagnostics_path, "README.md"), 'w', encoding='utf-8') as f:
             f.write(diag_readme)
+        
+        # Import the indexer module here to avoid circular imports
+        from indexer import initialize_librarian as indexer_initialize_librarian
         
         # Add project to active monitoring list
         librarian_context["active_projects"].add(project_path)
@@ -929,6 +953,257 @@ def generate_librarian(project_path: str) -> str:
         return f"Error generating librarian: {str(e)}"
 
 #-----------------------------------------------------------------
+# ToDo List Tools
+#-----------------------------------------------------------------
+
+@mcp.tool()
+def add_todo(project_path: str, title: str, description: str = "", priority: str = "medium", tags: str = "") -> str:
+    """
+    Add a new to-do item to the project's persistent to-do list.
+    
+    The to-do list is stored with the project's AI Librarian data and persists across
+    conversations, allowing tasks to be remembered and tracked over time.
+    
+    Args:
+        project_path: The root directory of the project
+        title: Title of the to-do item
+        description: Detailed description of the task
+        priority: Priority level (low, medium, high)
+        tags: Comma-separated list of tags
+        
+    Returns:
+        Success message with the ID of the created to-do item
+    """
+    try:
+        # Check if the AI Librarian exists
+        ai_ref_path = os.path.join(project_path, ".ai_reference")
+        if not os.path.exists(ai_ref_path):
+            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+        
+        # Create the todo manager
+        todo_manager = TodoManager(project_path)
+        
+        # Parse tags
+        tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+        
+        # Add the to-do item
+        todo_id = todo_manager.add_todo(
+            title=title,
+            description=description,
+            priority=priority,
+            tags=tag_list
+        )
+        
+        return f"✅ To-do item added with ID: {todo_id}\n\nTitle: {title}\nPriority: {priority}"
+    except Exception as e:
+        return f"Error adding to-do item: {str(e)}"
+
+@mcp.tool()
+def list_todos(project_path: str, status: str = "active", priority: str = None, tag: str = None) -> str:
+    """
+    List to-do items for the project with optional filtering.
+    
+    Args:
+        project_path: The root directory of the project
+        status: Filter by status (active, completed, etc.)
+        priority: Filter by priority (low, medium, high)
+        tag: Filter by a specific tag
+        
+    Returns:
+        Formatted list of matching to-do items
+    """
+    try:
+        # Check if the AI Librarian exists
+        ai_ref_path = os.path.join(project_path, ".ai_reference")
+        if not os.path.exists(ai_ref_path):
+            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+        
+        # Create the todo manager
+        todo_manager = TodoManager(project_path)
+        
+        # Get the to-do items
+        todos = todo_manager.get_todos(status=status, priority=priority, tag=tag)
+        
+        if not todos:
+            return f"No to-do items found with the specified filters.\n\nStatus: {status}\nPriority: {priority or 'any'}\nTag: {tag or 'any'}"
+        
+        # Format the results
+        formatted_results = [f"Found {len(todos)} to-do item(s):\n"]
+        
+        for todo in todos:
+            formatted_results.append(f"ID: {todo['id']}")
+            formatted_results.append(f"Title: {todo['title']}")
+            formatted_results.append(f"Status: {todo['status']}")
+            formatted_results.append(f"Priority: {todo['priority']}")
+            if todo.get('tags'):
+                formatted_results.append(f"Tags: {', '.join(todo['tags'])}")
+            if todo.get('description'):
+                formatted_results.append(f"Description: {todo['description']}")
+            
+            # Show subtasks if any
+            if todo.get('subtasks'):
+                formatted_results.append("Subtasks:")
+                for subtask in todo['subtasks']:
+                    status_marker = "✓" if subtask['status'] == "completed" else "☐"
+                    formatted_results.append(f"  {status_marker} {subtask['title']}")
+            
+            formatted_results.append("")
+        
+        return "\n".join(formatted_results)
+    except Exception as e:
+        return f"Error listing to-do items: {str(e)}"
+
+@mcp.tool()
+def update_todo_status(project_path: str, todo_id: str, status: str) -> str:
+    """
+    Update the status of a to-do item.
+    
+    Args:
+        project_path: The root directory of the project
+        todo_id: ID of the to-do item to update
+        status: New status (active, completed, etc.)
+        
+    Returns:
+        Success message or error information
+    """
+    try:
+        # Check if the AI Librarian exists
+        ai_ref_path = os.path.join(project_path, ".ai_reference")
+        if not os.path.exists(ai_ref_path):
+            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+        
+        # Create the todo manager
+        todo_manager = TodoManager(project_path)
+        
+        # Update the to-do item
+        success = todo_manager.update_todo(todo_id, status=status)
+        
+        if success:
+            return f"✅ Updated status of to-do item {todo_id} to '{status}'"
+        else:
+            return f"❌ To-do item with ID {todo_id} not found"
+    except Exception as e:
+        return f"Error updating to-do item: {str(e)}"
+
+@mcp.tool()
+def add_subtask(project_path: str, todo_id: str, title: str) -> str:
+    """
+    Add a subtask to an existing to-do item.
+    
+    Args:
+        project_path: The root directory of the project
+        todo_id: ID of the parent to-do item
+        title: Title of the subtask
+        
+    Returns:
+        Success message or error information
+    """
+    try:
+        # Check if the AI Librarian exists
+        ai_ref_path = os.path.join(project_path, ".ai_reference")
+        if not os.path.exists(ai_ref_path):
+            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+        
+        # Create the todo manager
+        todo_manager = TodoManager(project_path)
+        
+        # Add the subtask
+        subtask_id = todo_manager.add_subtask(todo_id, title)
+        
+        if subtask_id:
+            return f"✅ Added subtask to to-do item {todo_id}\n\nSubtask: {title}"
+        else:
+            return f"❌ To-do item with ID {todo_id} not found"
+    except Exception as e:
+        return f"Error adding subtask: {str(e)}"
+
+@mcp.tool()
+def search_todos(project_path: str, query: str) -> str:
+    """
+    Search for to-do items by text in title or description.
+    
+    Args:
+        project_path: The root directory of the project
+        query: Search text
+        
+    Returns:
+        Formatted list of matching to-do items
+    """
+    try:
+        # Check if the AI Librarian exists
+        ai_ref_path = os.path.join(project_path, ".ai_reference")
+        if not os.path.exists(ai_ref_path):
+            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+        
+        # Create the todo manager
+        todo_manager = TodoManager(project_path)
+        
+        # Search for to-do items
+        todos = todo_manager.search_todos(query)
+        
+        if not todos:
+            return f"No to-do items found matching '{query}'"
+        
+        # Format the results
+        formatted_results = [f"Found {len(todos)} to-do item(s) matching '{query}':\n"]
+        
+        for todo in todos:
+            formatted_results.append(f"ID: {todo['id']}")
+            formatted_results.append(f"Title: {todo['title']}")
+            formatted_results.append(f"Status: {todo['status']}")
+            formatted_results.append(f"Priority: {todo['priority']}")
+            if todo.get('description'):
+                formatted_results.append(f"Description: {todo['description']}")
+            formatted_results.append("")
+        
+        return "\n".join(formatted_results)
+    except Exception as e:
+        return f"Error searching to-do items: {str(e)}"
+
+@mcp.tool()
+def infer_todos(project_path: str, text: str) -> str:
+    """
+    Analyze text and extract potential to-do items, adding them to the list.
+    
+    This tool looks for common patterns that indicate tasks or reminders in conversation
+    text and automatically adds them to the to-do list.
+    
+    Args:
+        project_path: The root directory of the project
+        text: Text to analyze for potential to-do items
+        
+    Returns:
+        Message about extracted to-do items
+    """
+    try:
+        # Check if the AI Librarian exists
+        ai_ref_path = os.path.join(project_path, ".ai_reference")
+        if not os.path.exists(ai_ref_path):
+            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+        
+        # Create the todo manager
+        todo_manager = TodoManager(project_path)
+        
+        # Infer to-do items
+        todo_item = todo_manager.infer_todo_item(text)
+        
+        if not todo_item:
+            return "No potential to-do items found in the text."
+        
+        # Add the inferred to-do item
+        todo_id = todo_manager.add_todo(
+            title=todo_item['title'],
+            description=todo_item['description'],
+            priority="medium"
+        )
+        
+        return f"✅ Extracted and added to-do item with ID: {todo_id}\n\n" + \
+               f"Title: {todo_item['title']}\n" + \
+               (f"Description: {todo_item['description']}\n" if todo_item['description'] else "")
+    except Exception as e:
+        return f"Error inferring to-do items: {str(e)}"
+
+#-----------------------------------------------------------------
 # Prompts
 #-----------------------------------------------------------------
 
@@ -943,8 +1218,33 @@ def ai_librarian_help() -> str:
     1. Initialize: `initialize_librarian("path/to/project")`
     2. Query a component: `query_component("path/to/project", "ComponentName")`
     3. Find implementations: `find_implementation("path/to/project", "search text")`
+    4. Manage to-dos: `add_todo("path/to/project", "Task title")` and `list_todos("path/to/project")`
     
-    This creates metadata that persists across conversations, so I can better understand your code.
+    This creates metadata that persists across conversations, so I can better understand your code
+    and remember tasks that need to be completed.
+    """
+
+@mcp.prompt()
+def todo_list_help() -> str:
+    """
+    Provide help with the to-do list functionality and respond to casual inquiries.
+    """
+    return """
+    When you ask me questions like "what's next?", "what's on the agenda?", "what are we working on?", 
+    "I forgot what we were doing", or similar phrases, I'll interpret these as requests to show your 
+    active to-do items.
+    
+    I'll prioritize items by importance and relevance to the current conversation.
+    
+    You can also explicitly use these commands:
+    
+    - `list_todos("path/to/project")` - Show all active tasks
+    - `add_todo("path/to/project", "Task title")` - Add a new task
+    - `update_todo_status("path/to/project", "todo-id", "completed")` - Mark a task as done
+    - `search_todos("path/to/project", "keyword")` - Find specific tasks
+    
+    I'll also automatically detect when you mention new tasks during our conversation and can add them 
+    to your to-do list if you'd like.
     """
 
 #-----------------------------------------------------------------

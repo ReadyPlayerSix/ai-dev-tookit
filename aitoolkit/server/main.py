@@ -170,10 +170,10 @@ def update_librarian_for_project(project_path):
         project_path: Path to the project root
     """
     try:
-        from src.librarian.indexer import initialize_librarian
+        from aitoolkit.librarian.indexer import initialize_librarian as initialize_librarian_import
         
         # Update the librarian files
-        message, file_count, component_count = initialize_librarian(project_path)
+        message, file_count, component_count = initialize_librarian_import(project_path)
         logger.info(f"Updated librarian for {project_path}: {message}")
         
         # Update our in-memory representation
