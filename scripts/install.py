@@ -98,7 +98,8 @@ def configure_claude_desktop():
 def get_script_directory():
     """Get the directory where the server.py script is located."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    server_path = os.path.join(script_dir, "src", "server.py")
+    parent_dir = os.path.dirname(script_dir)
+    server_path = os.path.join(parent_dir, "aitoolkit", "librarian", "server.py")
     if os.path.exists(server_path):
         return server_path
     else:
@@ -108,7 +109,8 @@ def get_script_directory():
 def create_run_script():
     """Create a run script for the server."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    server_path = os.path.join(script_dir, "src", "server.py")
+    parent_dir = os.path.dirname(script_dir)
+    server_path = os.path.join(parent_dir, "aitoolkit", "librarian", "server.py")
     
     if os.name == 'nt':  # Windows
         bat_path = os.path.join(script_dir, "run_server.bat")

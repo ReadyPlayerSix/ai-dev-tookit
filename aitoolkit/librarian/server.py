@@ -24,7 +24,7 @@ import threading
 import ast
 import os.path
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Union, Set, Tuple
+from typing import List, Dict, Any, Optional, Union, Set, Tuple, cast
 
 # Add the current directory to sys.path to ensure local imports work
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -36,7 +36,10 @@ parent_dir = os.path.dirname(os.path.dirname(current_dir))
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
+# Import dependencies with absolute paths to ensure consistency
 from aitoolkit.librarian.todos import TodoManager
+from aitoolkit.librarian.sanity_check import run_sanity_check
+from aitoolkit.librarian.enhanced_indexer import initialize_enhanced_librarian
 
 from mcp.server.fastmcp import FastMCP, Context
 
@@ -163,11 +166,9 @@ def update_librarian_for_project(project_path):
         project_path: Path to the project root
     """
     try:
-        # Import the local indexer module
-        from aitoolkit.librarian.indexer import initialize_librarian as initialize_librarian_import
-        
-        # Update the librarian files
-        message, file_count, component_count = initialize_librarian_import(project_path)
+        # Use the already imported enhanced_indexer module (imported at the top)
+        # Update the librarian files using the imported function
+        message, file_count, component_count = initialize_enhanced_librarian(project_path)
         logger.info(f"Updated librarian for {project_path}: {message}")
         
         # Update our in-memory representation
@@ -282,14 +283,14 @@ def initialize_allowed_directories():
 ALLOWED_DIRECTORIES = initialize_allowed_directories()
 
 @mcp.tool()
-def list_allowed_directories() -> str:
+def list_allowed_directories() -> List[str]:
     """
     Returns the list of directories that this server is allowed to access.
     
     Returns:
         A list of allowed directory paths
     """
-    return "Allowed directories:\n" + "\n".join(ALLOWED_DIRECTORIES)
+    return ALLOWED_DIRECTORIES
 
 @mcp.tool()
 def check_project_access(project_path: str) -> str:
@@ -665,14 +666,11 @@ Diagnostic files help troubleshoot issues with code understanding and navigation
         with open(os.path.join(diagnostics_path, "README.md"), 'w', encoding='utf-8') as f:
             f.write(diag_readme)
         
-        # Import the indexer module here to avoid circular imports
-        from indexer import initialize_librarian as indexer_initialize_librarian
-        
         # Add project to active monitoring list
         librarian_context["active_projects"].add(project_path)
         librarian_context["last_update"][project_path] = time.time()
         
-        # Run initial generation
+        # Run initial generation - using the imported initialize_enhanced_librarian
         update_librarian_for_project(project_path)
         
         logger.info(f"Added project to active monitoring: {project_path}")
@@ -689,7 +687,7 @@ Diagnostic files help troubleshoot issues with code understanding and navigation
         return f"Error initializing AI Librarian: {str(e)}"
 
 @mcp.tool()
-def query_component(project_path: str, component_name: str) -> str:
+def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
     """
     Query information about a specific component in the project.
     
@@ -710,7 +708,10 @@ def query_component(project_path: str, component_name: str) -> str:
         # Check if the AI Librarian exists
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         if not os.path.exists(ai_ref_path):
-            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            return {
+                "status": "error",
+                "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            }
         
         # Get script index - first check in-memory, then fallback to file
         script_index = None
@@ -776,27 +777,28 @@ def query_component(project_path: str, component_name: str) -> str:
                             })
         
         if not results:
-            return f"Component '{component_name}' not found in the project."
+            return {
+                "status": "error",
+                "message": f"Component '{component_name}' not found in the project."
+            }
         
-        # Format the results
-        formatted_results = []
-        for result in results:
-            formatted_results.append(f"File: {result['file_path']}")
-            if "component_type" in result:
-                formatted_results.append(f"Type: {result['component_type']}")
-                formatted_results.append(f"Lines: {result['line_range']}")
-                formatted_results.append("\nCode:")
-                formatted_results.append(f"```python\n{result['code']}\n```")
-            else:
-                formatted_results.append(f"Error: {result['error']}")
-            formatted_results.append("\n")
-        
-        return "\n".join(formatted_results)
+        # Return structured results
+        return {
+            "status": "success",
+            "component_name": component_name,
+            "found": True,
+            "results": results,
+            "count": len(results)
+        }
     except Exception as e:
-        return f"Error querying component: {str(e)}"
+        logger.error(f"Error querying component: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error querying component: {str(e)}"
+        }
 
 @mcp.tool()
-def find_implementation(project_path: str, search_text: str, file_pattern: str = None) -> str:
+def find_implementation(project_path: str, search_text: str, file_pattern: str = None) -> Dict[str, Any]:
     """
     Find implementations containing the specified search text.
     
@@ -889,25 +891,28 @@ def find_implementation(project_path: str, search_text: str, file_pattern: str =
                             "error": str(e)
                         })
         
-        # Format the results
+        # Return structured results
         if not results:
-            return f"No matches found for '{search_text}'"
+            return {
+                "status": "success",
+                "found": False,
+                "message": f"No matches found for '{search_text}'"
+            }
         
-        formatted_results = []
-        for result in results:
-            formatted_results.append(f"File: {result['file']}")
-            if "matches" in result:
-                for i, match in enumerate(result["matches"]):
-                    if i > 0:
-                        formatted_results.append("---")
-                    formatted_results.append(match)
-            else:
-                formatted_results.append(f"Error: {result['error']}")
-            formatted_results.append("\n")
-        
-        return "\n".join(formatted_results)
+        return {
+            "status": "success",
+            "found": True,
+            "search_text": search_text,
+            "file_pattern": file_pattern,
+            "results": results,
+            "count": len(results)
+        }
     except Exception as e:
-        return f"Error finding implementation: {str(e)}"
+        logger.error(f"Error finding implementation: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error finding implementation: {str(e)}"
+        }
 
 @mcp.tool()
 def generate_librarian(project_path: str) -> str:
@@ -924,7 +929,10 @@ def generate_librarian(project_path: str) -> str:
         # Check if the AI Librarian exists
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         if not os.path.exists(ai_ref_path):
-            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            return {
+                "status": "error",
+                "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            }
             
         # If project is not in active monitoring, add it
         if project_path not in librarian_context["active_projects"]:
@@ -1080,12 +1088,46 @@ def run_librarian_diagnostics(project_path: str) -> str:
         logger.error(f"Error during diagnostics: {str(e)}")
         return f"Error running diagnostics: {str(e)}"
 
-#-----------------------------------------------------------------
-# ToDo List Tools
-#-----------------------------------------------------------------
+@mcp.tool()
+def sanity_check(project_path: str) -> str:
+    """
+    Run a comprehensive code quality check on the project.
+    
+    This tool performs a series of checks on the codebase to identify potential issues,
+    inconsistencies, and path problems. It helps maintain code quality and catch
+    configuration problems before they cause issues.
+    
+    Checks include:
+    - Critical path verification
+    - Import validation
+    - Path reference analysis
+    - Deprecated function detection
+    - Duplicate functionality identification
+    - Misplaced files detection
+    - Static analysis with pylint (if available)
+    
+    Args:
+        project_path: The root directory of the project to check
+        
+    Returns:
+        A detailed report of the sanity check results
+    """
+    try:
+        # Check if project is accessible
+        if project_path not in permission_status or not permission_status[project_path]:
+            access_check = check_project_access(project_path)
+            if "Permission denied" in access_check or "Error checking access" in access_check:
+                return access_check
+        
+        # Use the run_sanity_check function imported at the top of the file
+        # This avoids circular imports and ensures the function is properly registered
+        return run_sanity_check(project_path)
+    except Exception as e:
+        return f"Error running sanity check: {str(e)}"
+
 
 @mcp.tool()
-def add_todo(project_path: str, title: str, description: str = "", priority: str = "medium", tags: str = "") -> str:
+def add_todo(project_path: str, title: str, description: str = "", priority: str = "medium", tags: str = "") -> Dict[str, str]:
     """
     Add a new to-do item to the project's persistent to-do list.
     
@@ -1106,7 +1148,10 @@ def add_todo(project_path: str, title: str, description: str = "", priority: str
         # Check if the AI Librarian exists
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         if not os.path.exists(ai_ref_path):
-            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            return {
+                "status": "error",
+                "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            }
         
         # Create the todo manager
         todo_manager = TodoManager(project_path)
@@ -1122,12 +1167,22 @@ def add_todo(project_path: str, title: str, description: str = "", priority: str
             tags=tag_list
         )
         
-        return f"✅ To-do item added with ID: {todo_id}\n\nTitle: {title}\nPriority: {priority}"
+        return {
+            "status": "success",
+            "todo_id": todo_id,
+            "title": title,
+            "priority": priority,
+            "message": f"To-do item added with ID: {todo_id}"
+        }
     except Exception as e:
-        return f"Error adding to-do item: {str(e)}"
+        logger.error(f"Error adding to-do item: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error adding to-do item: {str(e)}"
+        }
 
 @mcp.tool()
-def list_todos(project_path: str, status: str = "active", priority: str = None, tag: str = None) -> str:
+def list_todos(project_path: str, status: str = "active", priority: str = None, tag: str = None) -> Dict[str, Any]:
     """
     List to-do items for the project with optional filtering.
     
@@ -1144,7 +1199,10 @@ def list_todos(project_path: str, status: str = "active", priority: str = None, 
         # Check if the AI Librarian exists
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         if not os.path.exists(ai_ref_path):
-            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            return {
+                "status": "error",
+                "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            }
         
         # Create the todo manager
         todo_manager = TodoManager(project_path)
@@ -1153,36 +1211,38 @@ def list_todos(project_path: str, status: str = "active", priority: str = None, 
         todos = todo_manager.get_todos(status=status, priority=priority, tag=tag)
         
         if not todos:
-            return f"No to-do items found with the specified filters.\n\nStatus: {status}\nPriority: {priority or 'any'}\nTag: {tag or 'any'}"
+            return {
+                "status": "success",
+                "found": False,
+                "message": f"No to-do items found with the specified filters.",
+                "filters": {
+                    "status": status,
+                    "priority": priority or "any",
+                    "tag": tag or "any"
+                }
+            }
         
-        # Format the results
-        formatted_results = [f"Found {len(todos)} to-do item(s):\n"]
-        
-        for todo in todos:
-            formatted_results.append(f"ID: {todo['id']}")
-            formatted_results.append(f"Title: {todo['title']}")
-            formatted_results.append(f"Status: {todo['status']}")
-            formatted_results.append(f"Priority: {todo['priority']}")
-            if todo.get('tags'):
-                formatted_results.append(f"Tags: {', '.join(todo['tags'])}")
-            if todo.get('description'):
-                formatted_results.append(f"Description: {todo['description']}")
-            
-            # Show subtasks if any
-            if todo.get('subtasks'):
-                formatted_results.append("Subtasks:")
-                for subtask in todo['subtasks']:
-                    status_marker = "✓" if subtask['status'] == "completed" else "☐"
-                    formatted_results.append(f"  {status_marker} {subtask['title']}")
-            
-            formatted_results.append("")
-        
-        return "\n".join(formatted_results)
+        # Return structured results
+        return {
+            "status": "success",
+            "found": True,
+            "count": len(todos),
+            "todos": todos,
+            "filters": {
+                "status": status,
+                "priority": priority or "any",
+                "tag": tag or "any"
+            }
+        }
     except Exception as e:
-        return f"Error listing to-do items: {str(e)}"
+        logger.error(f"Error listing to-do items: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error listing to-do items: {str(e)}"
+        }
 
 @mcp.tool()
-def update_todo_status(project_path: str, todo_id: str, status: str) -> str:
+def update_todo_status(project_path: str, todo_id: str, status: str) -> Dict[str, Any]:
     """
     Update the status of a to-do item.
     
@@ -1198,7 +1258,10 @@ def update_todo_status(project_path: str, todo_id: str, status: str) -> str:
         # Check if the AI Librarian exists
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         if not os.path.exists(ai_ref_path):
-            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            return {
+                "status": "error",
+                "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            }
         
         # Create the todo manager
         todo_manager = TodoManager(project_path)
@@ -1207,14 +1270,26 @@ def update_todo_status(project_path: str, todo_id: str, status: str) -> str:
         success = todo_manager.update_todo(todo_id, status=status)
         
         if success:
-            return f"✅ Updated status of to-do item {todo_id} to '{status}'"
+            return {
+                "status": "success",
+                "todo_id": todo_id,
+                "updated_status": status,
+                "message": f"Updated status of to-do item {todo_id} to '{status}'"
+            }
         else:
-            return f"❌ To-do item with ID {todo_id} not found"
+            return {
+                "status": "error",
+                "message": f"To-do item with ID {todo_id} not found"
+            }
     except Exception as e:
-        return f"Error updating to-do item: {str(e)}"
+        logger.error(f"Error updating to-do item: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error updating to-do item: {str(e)}"
+        }
 
 @mcp.tool()
-def add_subtask(project_path: str, todo_id: str, title: str) -> str:
+def add_subtask(project_path: str, todo_id: str, title: str) -> Dict[str, Any]:
     """
     Add a subtask to an existing to-do item.
     
@@ -1230,7 +1305,10 @@ def add_subtask(project_path: str, todo_id: str, title: str) -> str:
         # Check if the AI Librarian exists
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         if not os.path.exists(ai_ref_path):
-            return f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            return {
+                "status": "error",
+                "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
+            }
         
         # Create the todo manager
         todo_manager = TodoManager(project_path)
@@ -1239,14 +1317,27 @@ def add_subtask(project_path: str, todo_id: str, title: str) -> str:
         subtask_id = todo_manager.add_subtask(todo_id, title)
         
         if subtask_id:
-            return f"✅ Added subtask to to-do item {todo_id}\n\nSubtask: {title}"
+            return {
+                "status": "success",
+                "todo_id": todo_id,
+                "subtask_id": subtask_id,
+                "title": title,
+                "message": f"Added subtask to to-do item {todo_id}"
+            }
         else:
-            return f"❌ To-do item with ID {todo_id} not found"
+            return {
+                "status": "error",
+                "message": f"To-do item with ID {todo_id} not found"
+            }
     except Exception as e:
-        return f"Error adding subtask: {str(e)}"
+        logger.error(f"Error adding subtask: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error adding subtask: {str(e)}"
+        }
 
 @mcp.tool()
-def search_todos(project_path: str, query: str) -> str:
+def search_todos(project_path: str, query: str) -> Dict[str, Any]:
     """
     Search for to-do items by text in title or description.
     
@@ -1270,26 +1361,30 @@ def search_todos(project_path: str, query: str) -> str:
         todos = todo_manager.search_todos(query)
         
         if not todos:
-            return f"No to-do items found matching '{query}'"
+            return {
+                "status": "success",
+                "found": False,
+                "query": query,
+                "message": f"No to-do items found matching '{query}'"
+            }
         
-        # Format the results
-        formatted_results = [f"Found {len(todos)} to-do item(s) matching '{query}':\n"]
-        
-        for todo in todos:
-            formatted_results.append(f"ID: {todo['id']}")
-            formatted_results.append(f"Title: {todo['title']}")
-            formatted_results.append(f"Status: {todo['status']}")
-            formatted_results.append(f"Priority: {todo['priority']}")
-            if todo.get('description'):
-                formatted_results.append(f"Description: {todo['description']}")
-            formatted_results.append("")
-        
-        return "\n".join(formatted_results)
+        # Return structured results
+        return {
+            "status": "success",
+            "found": True,
+            "query": query,
+            "count": len(todos),
+            "todos": todos
+        }
     except Exception as e:
-        return f"Error searching to-do items: {str(e)}"
+        logger.error(f"Error searching to-do items: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error searching to-do items: {str(e)}"
+        }
 
 @mcp.tool()
-def infer_todos(project_path: str, text: str) -> str:
+def infer_todos(project_path: str, text: str) -> Dict[str, Any]:
     """
     Analyze text and extract potential to-do items, adding them to the list.
     
@@ -1316,7 +1411,11 @@ def infer_todos(project_path: str, text: str) -> str:
         todo_item = todo_manager.infer_todo_item(text)
         
         if not todo_item:
-            return "No potential to-do items found in the text."
+            return {
+                "status": "success",
+                "found": False,
+                "message": "No potential to-do items found in the text."
+            }
         
         # Add the inferred to-do item
         todo_id = todo_manager.add_todo(
@@ -1325,11 +1424,20 @@ def infer_todos(project_path: str, text: str) -> str:
             priority="medium"
         )
         
-        return f"✅ Extracted and added to-do item with ID: {todo_id}\n\n" + \
-               f"Title: {todo_item['title']}\n" + \
-               (f"Description: {todo_item['description']}\n" if todo_item['description'] else "")
+        return {
+            "status": "success",
+            "found": True,
+            "todo_id": todo_id,
+            "title": todo_item['title'],
+            "description": todo_item.get('description', ''),
+            "message": f"Extracted and added to-do item with ID: {todo_id}"
+        }
     except Exception as e:
-        return f"Error inferring to-do items: {str(e)}"
+        logger.error(f"Error inferring to-do items: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error inferring to-do items: {str(e)}"
+        }
 
 #-----------------------------------------------------------------
 # Prompts

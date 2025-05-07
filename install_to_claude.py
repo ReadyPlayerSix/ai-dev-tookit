@@ -80,7 +80,7 @@ def install_to_claude_desktop():
     # Configure the server
     config["mcpServers"]["ai-librarian"] = {
         "command": "python",
-        "args": ["-m", "ai_dev_toolkit.src.mcp.server"],
+        "args": [str(current_dir / "aitoolkit" / "librarian" / "server.py")],
         "env": {
             "AI_LIBRARIAN_ALLOWED_DIRS": ",".join(all_dirs)
         }

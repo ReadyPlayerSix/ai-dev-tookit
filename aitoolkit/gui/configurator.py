@@ -8,12 +8,19 @@ import threading
 import time
 from pathlib import Path
 import webbrowser
+import traceback
+import re
+import datetime
 
 class AIDevToolkitGUI:
     def __init__(self, root):
+        # Git tracking variables
+        self.changes_since_commit = 0
+        self.last_commit_time = None
+        self.commit_history = []
         self.root = root
         self.root.title("AI Dev Toolkit Control Panel")
-        self.root.geometry("900x650")
+        self.root.geometry("850x950")  # Optimized size with appropriate width and height
         self.root.resizable(True, True)
         
         # Set version
@@ -40,6 +47,7 @@ class AIDevToolkitGUI:
         self.style.configure('Warning.Status.TLabel', background='#fff3cd', foreground='#856404')
         self.style.configure('Disabled.TCheckbutton', foreground='#aaaaaa')
         self.style.configure('Info.TLabel', background='#edf9ff', foreground='#0c5460', padding=10)
+        self.style.configure('ComingSoon.TLabel', foreground='#0056b3', font=('Segoe UI', 9, 'italic', 'bold'))
         self.style.map('TCheckbutton', 
                       foreground=[('disabled', '#aaaaaa')])
         
@@ -49,24 +57,24 @@ class AIDevToolkitGUI:
         # Variables
         self.claude_desktop_path = tk.StringVar()
         self.config_path = tk.StringVar()
-        # Server enabled is determined by tool selection
         self.project_dirs = []
         self.project_enabled = {}  # Map of project path to enabled status
         self.server_status = tk.StringVar(value="Stopped")
         self.server_process = None
         self.server_log = tk.StringVar(value="")
         
-        # Server configuration type
+        # Server configuration type - for official MCP servers
         self.server_config_type = tk.StringVar(value="npm")  # Default to npm package (recommended)
         
-        # Servers enabled
-        self.ai_librarian_server_enabled = tk.BooleanVar(value=False)
+        # AI Dev Toolkit Servers enabled/disabled
+        self.ai_librarian_server_enabled = tk.BooleanVar(value=True)
+        self.file_system_server_enabled = tk.BooleanVar(value=True)
         
         # Tool selection variables
         self.file_system_tools_enabled = tk.BooleanVar(value=True)
-        self.project_starter_tools_enabled = tk.BooleanVar(value=True)
-        self.think_tool_enabled = tk.BooleanVar(value=True)
         self.ai_librarian_enabled = tk.BooleanVar(value=True)
+        self.project_starter_tools_enabled = tk.BooleanVar(value=False)  # Coming soon
+        self.think_tool_enabled = tk.BooleanVar(value=False)  # Coming soon
         self.context_compression_enabled = tk.BooleanVar(value=False)
         
         # Build UI
@@ -76,6 +84,7 @@ class AIDevToolkitGUI:
         self.detect_claude_desktop()
         self.load_config()
         self.check_server_status()
+        self.check_git_status()
     
     def create_widgets(self):
         # Main notebook (tabbed interface)
@@ -97,6 +106,24 @@ class AIDevToolkitGUI:
         # About tab (fourth)
         self.about_frame = ttk.Frame(self.notebook, padding="20 20 20 20", style='TFrame')
         self.notebook.add(self.about_frame, text="About")
+        
+        # Create a static bottom button frame (shared across all tabs)
+        self.bottom_button_frame = ttk.Frame(self.root)
+        self.bottom_button_frame.pack(fill=tk.X, pady=(10, 10), padx=10)
+        
+        # Add buttons to the static bottom frame
+        ttk.Button(self.bottom_button_frame, text="Apply and Exit", command=self.apply_and_exit).pack(side=tk.RIGHT, padx=(5, 0))
+        ttk.Button(self.bottom_button_frame, text="Apply Changes", command=self.apply_claude_config).pack(side=tk.RIGHT, padx=(5, 0))
+        ttk.Button(self.bottom_button_frame, text="Discard Changes and Exit", command=self.discard_and_exit).pack(side=tk.RIGHT, padx=(5, 0))
+        
+        # Add Git commit button
+        self.commit_btn = ttk.Button(self.bottom_button_frame, text="Git Commit Changes", command=self.show_commit_dialog)
+        self.commit_btn.pack(side=tk.LEFT, padx=(0, 5))
+        
+        # Add Git status label
+        self.git_status_var = tk.StringVar(value="No changes to commit")
+        self.git_status_label = ttk.Label(self.bottom_button_frame, textvariable=self.git_status_var, font=("Segoe UI", 9))
+        self.git_status_label.pack(side=tk.LEFT)
         
         # Setup each tab
         self.setup_dashboard()
@@ -129,6 +156,10 @@ class AIDevToolkitGUI:
                                            style='Stopped.Status.TLabel')
         self.server_status_label.grid(row=1, column=0, sticky="w", pady=2)
         
+        # Git status
+        self.dashboard_git_status = ttk.Label(status_frame, text="Git: No uncommitted changes", style='Status.TLabel')
+        self.dashboard_git_status.grid(row=2, column=0, sticky="w", pady=2)
+        
         # Quick actions
         actions_frame = ttk.LabelFrame(self.dashboard_frame, text="Quick Actions", padding="10 10 10 10")
         actions_frame.grid(row=2, column=0, sticky="nsew", pady=(0, 15), padx=(0, 10))
@@ -145,6 +176,10 @@ class AIDevToolkitGUI:
         
         ttk.Button(actions_frame, text="Open Claude Desktop Location", 
                  command=self.open_claude_directory).pack(
+            fill=tk.X, pady=5, padx=5)
+        
+        ttk.Button(actions_frame, text="Git Commit Changes", 
+                 command=self.show_commit_dialog).pack(
             fill=tk.X, pady=5, padx=5)
         
         # Active projects
@@ -206,15 +241,84 @@ class AIDevToolkitGUI:
         
         safety_label = ttk.Label(safety_frame, 
                                text="Note: This application edits Claude Desktop's configuration file. Claude itself does not have direct access to edit these files.",
-                               wraplength=600, style='Info.TLabel')
+                               wraplength=750, style='Info.TLabel')
         safety_label.pack(fill=tk.X)
         
-        # MCP Server section
-        server_config_frame = ttk.LabelFrame(self.claude_frame, text="MCP Server Configuration", padding="10 10 10 10")
-        server_config_frame.pack(fill=tk.X, pady=(0, 15))
+        # AI Dev Toolkit Servers section
+        server_selection_frame = ttk.LabelFrame(self.claude_frame, text="AI Dev Toolkit Servers", padding="10 10 10 10")
+        server_selection_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        # Note about server selection
+        server_note = ttk.Label(server_selection_frame, 
+                              text="The following MCP servers are available for Claude Desktop:",
+                              wraplength=750)
+        server_note.pack(anchor=tk.W, pady=(0, 10))
+        
+        # File System Server checkbox 
+        file_system_server_check = ttk.Checkbutton(server_selection_frame, 
+                                                text="File System Tools Server - Read, write, and navigate the file system",
+                                                variable=self.file_system_server_enabled,
+                                                style='Server.TCheckbutton',
+                                                command=self.update_server_status)
+        file_system_server_check.pack(anchor=tk.W, pady=5)
+        
+        # AI Librarian Server checkbox
+        ai_librarian_server_check = ttk.Checkbutton(server_selection_frame, 
+                                                 text="AI Librarian Server - Code analysis with self-verification and persistent memory", 
+                                                 variable=self.ai_librarian_server_enabled,
+                                                 style='Server.TCheckbutton',
+                                                 command=self.update_server_status)
+        ai_librarian_server_check.pack(anchor=tk.W, pady=5)
+        
+        # Project Starter Server checkbox (Coming Soon)
+        project_starter_frame = ttk.Frame(server_selection_frame)
+        project_starter_frame.pack(fill=tk.X, anchor=tk.W, pady=5)
+        project_starter_check = ttk.Checkbutton(project_starter_frame, 
+                                              text="Project Starter Server - Project generation and scaffolding", 
+                                              state='disabled',
+                                              style='Server.TCheckbutton')
+        project_starter_check.pack(side=tk.LEFT)
+        
+        # Coming Soon label for Project Starter - with more visible styling
+        project_starter_coming_soon = ttk.Label(project_starter_frame, 
+                                            text="(Coming Soon)",
+                                            style='ComingSoon.TLabel')
+        project_starter_coming_soon.pack(side=tk.LEFT, padx=5)
+        
+        # Think Tool Server checkbox (Coming Soon)
+        think_tool_frame = ttk.Frame(server_selection_frame)
+        think_tool_frame.pack(fill=tk.X, anchor=tk.W, pady=5)
+        think_tool_check = ttk.Checkbutton(think_tool_frame, 
+                                         text="Think Tool Server - Structured reasoning for complex problems", 
+                                         state='disabled',
+                                         style='Server.TCheckbutton')
+        think_tool_check.pack(side=tk.LEFT)
+        
+        # Coming Soon label for Think Tool - with more visible styling
+        think_tool_coming_soon = ttk.Label(think_tool_frame, 
+                                       text="(Coming Soon)",
+                                       style='ComingSoon.TLabel')
+        think_tool_coming_soon.pack(side=tk.LEFT, padx=5)
+        
+        # Note about Claude Desktop compatibility
+        claude_compat_note = ttk.Label(server_selection_frame, 
+                                    text="Note: These servers are currently compatible with Claude Desktop only.",
+                                    wraplength=750, style='Info.TLabel')
+        claude_compat_note.pack(fill=tk.X, pady=(10, 0))
+        
+        # Official MCP Servers section
+        mcp_servers_frame = ttk.LabelFrame(self.claude_frame, text="Official MCP Servers", padding="10 10 10 10")
+        mcp_servers_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        # Note about official MCP servers
+        mcp_servers_note = ttk.Label(mcp_servers_frame, 
+                                   text="There are many official MCP servers available from the Model Context Protocol repository. " +
+                                   "Visit the link below to explore them.",
+                                   wraplength=750)
+        mcp_servers_note.pack(anchor=tk.W, pady=(0, 10))
         
         # Server configuration type
-        server_type_frame = ttk.Frame(server_config_frame, style='TFrame')
+        server_type_frame = ttk.Frame(mcp_servers_frame, style='TFrame')
         server_type_frame.pack(fill=tk.X, pady=(0, 10))
         
         ttk.Label(server_type_frame, text="Server Configuration Type:", style='TLabel').pack(side=tk.LEFT, padx=(0, 10))
@@ -228,92 +332,31 @@ class AIDevToolkitGUI:
                        command=self.update_server_config_type).pack(side=tk.LEFT)
         
         # Server status (automatic based on tools)
-        self.server_config_status_label = ttk.Label(server_config_frame, text="MCP Server configuration is determined by selected tools", style='TLabel')
+        self.server_config_status_label = ttk.Label(mcp_servers_frame, text="MCP Server configuration is determined by selected servers", style='TLabel')
         self.server_config_status_label.pack(anchor=tk.W, pady=(5, 5))
         
         # NPM configuration note
-        self.npm_config_note = ttk.Label(server_config_frame, 
+        self.npm_config_note = ttk.Label(mcp_servers_frame, 
                                        text="Using NPM Package: This approach is recommended for most users and works with standard Claude Desktop configuration.",
-                                       wraplength=600, style='Info.TLabel')
+                                       wraplength=750, style='Info.TLabel')
         self.npm_config_note.pack(fill=tk.X, pady=(0, 5))
         
         # uv configuration note - hidden initially
-        self.uv_config_note = ttk.Label(server_config_frame, 
+        self.uv_config_note = ttk.Label(mcp_servers_frame, 
                                        text="Using Python with uv: This approach requires uv to be installed and is recommended for development. All paths must be absolute.",
-                                       wraplength=600, style='Info.TLabel')
+                                       wraplength=750, style='Info.TLabel')
         
-        # Server selection section
-        server_selection_frame = ttk.LabelFrame(self.claude_frame, text="MCP Servers", padding="10 10 10 10")
-        server_selection_frame.pack(fill=tk.X, pady=(0, 15))
+        # GitHub link for MCP servers
+        mcp_servers_link = ttk.Label(mcp_servers_frame, 
+                                   text="Official MCP Servers Repository", 
+                                   foreground="blue", cursor="hand2")
+        mcp_servers_link.pack(anchor=tk.W, pady=2)
+        mcp_servers_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/modelcontextprotocol/servers"))
         
-        # Note about server selection
-        server_note = ttk.Label(server_selection_frame, 
-                              text="Select which MCP servers to enable:",
-                              wraplength=600)
-        server_note.pack(anchor=tk.W, pady=(0, 10))
-        
-        # AI Librarian Server checkbox
-        ai_librarian_server_check = ttk.Checkbutton(server_selection_frame, 
-                                                 text="AI Librarian Server - Code analysis with self-verification and persistent memory", 
-                                                 variable=self.ai_librarian_server_enabled,
-                                                 style='Server.TCheckbutton',
-                                                 command=self.update_server_status)
-        ai_librarian_server_check.pack(anchor=tk.W, pady=5)
-        
-        # Tool selection section
-        tool_frame = ttk.LabelFrame(self.claude_frame, text="Available Tools", padding="10 10 10 10")
-        tool_frame.pack(fill=tk.X, pady=(0, 15))
-        
-        # Note about tool selection
-        tool_note = ttk.Label(tool_frame, 
-                            text="Select which tools will be available to Claude:",
-                            wraplength=600)
-        tool_note.pack(anchor=tk.W, pady=(0, 10))
-        
-        # File System Tools checkbox
-        file_system_check = ttk.Checkbutton(tool_frame, 
-                                          text="File System Tools - Read, write, and navigate the file system", 
-                                          variable=self.file_system_tools_enabled,
-                                          command=self.update_tool_dependencies)
-        file_system_check.pack(anchor=tk.W, pady=2)
-        
-        # Project Starter Tools checkbox
-        self.project_starter_check = ttk.Checkbutton(tool_frame, 
-                                                  text="Project Starter Tools - Project generation and scaffolding", 
-                                                  variable=self.project_starter_tools_enabled,
-                                                  command=self.update_server_status)
-        self.project_starter_check.pack(anchor=tk.W, pady=2)
-        
-        # AI Librarian checkbox
-        self.ai_librarian_check = ttk.Checkbutton(tool_frame, 
-                                               text="AI Librarian - Codebase understanding with startup verification for Claude", 
-                                               variable=self.ai_librarian_enabled,
-                                               command=self.update_server_status)
-        self.ai_librarian_check.pack(anchor=tk.W, pady=2)
-        
-        # Think Tool checkbox
-        think_tool_check = ttk.Checkbutton(tool_frame, 
-                                         text="Think Tool - Structured reasoning for complex problems", 
-                                         variable=self.think_tool_enabled,
-                                         command=self.update_server_status)
-        think_tool_check.pack(anchor=tk.W, pady=2)
-        
-        # Context Compression checkbox
-        self.context_compression_check = ttk.Checkbutton(tool_frame, 
-                                                      text="Context Compression - Store and retrieve conversation history (Recommended for longer project conversations)", 
-                                                      variable=self.context_compression_enabled,
-                                                      command=self.update_server_status)
-        self.context_compression_check.pack(anchor=tk.W, pady=2)
-        
-        # Bottom buttons
-        button_frame = ttk.Frame(self.claude_frame)
-        button_frame.pack(fill=tk.X, pady=(10, 0))
-        
-        ttk.Button(button_frame, text="Apply and Exit", command=self.apply_and_exit).pack(side=tk.RIGHT, padx=(5, 0))
-        ttk.Button(button_frame, text="Apply Changes", command=self.apply_claude_config).pack(side=tk.RIGHT, padx=(5, 0))
-        ttk.Button(button_frame, text="Discard Changes and Exit", command=self.discard_and_exit).pack(side=tk.RIGHT, padx=(5, 0))
-        ttk.Button(button_frame, text="Add Project Directories", 
-                 command=lambda: self.notebook.select(self.project_frame)).pack(side=tk.RIGHT, padx=(5, 0))
+        # Button for adding project directories
+        add_proj_btn = ttk.Button(self.claude_frame, text="Add Project Directories", 
+                                  command=lambda: self.notebook.select(self.project_frame))
+        add_proj_btn.pack(side=tk.LEFT, pady=(10, 0))
     
     #-----------------------------------------------------
     # Project Management Tab
@@ -334,6 +377,7 @@ class AIDevToolkitGUI:
         ttk.Button(proj_controls, text="Add Project", command=self.add_directory).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(proj_controls, text="Remove Project", command=self.remove_directory).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(proj_controls, text="Create Project", command=self.toggle_create_project_area).pack(side=tk.LEFT)
+        ttk.Button(proj_controls, text="Reload Directories", command=self.reload_directories).pack(side=tk.LEFT, padx=(5, 0))
         
         # Project list with checkboxes
         self.projects_container = ttk.Frame(projects_frame)
@@ -342,7 +386,7 @@ class AIDevToolkitGUI:
         # Message area for project updates - always visible
         self.project_message_var = tk.StringVar()
         self.project_message_label = ttk.Label(projects_frame, textvariable=self.project_message_var, 
-                                             style='Info.TLabel', wraplength=600)
+                                             style='Info.TLabel', wraplength=750)
         self.project_message_label.pack(fill=tk.X, pady=(10, 0))
         
         # Initially set a default message
@@ -386,16 +430,7 @@ class AIDevToolkitGUI:
                  command=lambda: self.create_project_frame.pack_forget()).pack(side=tk.RIGHT, padx=(5, 0))
         ttk.Button(button_row, text="Create Project", 
                  command=self.create_new_project).pack(side=tk.RIGHT)
-        
-        # Bottom actions frame
-        actions_frame = ttk.Frame(self.project_frame)
-        actions_frame.pack(fill=tk.X, pady=(10, 0))
-        
-        ttk.Button(actions_frame, text="Apply Changes", 
-                 command=self.apply_project_changes).pack(side=tk.RIGHT)
-        ttk.Button(actions_frame, text="Discard Changes", 
-                 command=self.load_config).pack(side=tk.RIGHT, padx=(0, 5))
-    
+                 
     #-----------------------------------------------------
     # About Tab  
     #-----------------------------------------------------
@@ -418,8 +453,8 @@ class AIDevToolkitGUI:
 
 1. File System Tools: Read, write, and navigate the file system
 2. AI Librarian: Helps Claude understand your codebase with self-checks to ensure proper functionality
-3. Project Starter: Project generation and scaffolding
-4. Think Tool: Structured reasoning for complex problems
+3. Project Starter: Project generation and scaffolding (Coming Soon)
+4. Think Tool: Structured reasoning for complex problems (Coming Soon)
 5. Context Compression: Store and retrieve conversation history (Coming Soon)"""
         
         ttk.Label(desc_frame, text=description, wraplength=800, justify=tk.LEFT).pack(anchor=tk.W)
@@ -453,7 +488,13 @@ When you enable project directories, you are granting Claude permission to read 
                               foreground="blue", cursor="hand2")
         github_link.pack(anchor=tk.W, pady=2)
         github_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/isekaizen/ai-dev-toolkit"))
-    
+        
+        # MCP Servers link 
+        servers_link = ttk.Label(links_frame, text="Official MCP Servers Repository", 
+                               foreground="blue", cursor="hand2")
+        servers_link.pack(anchor=tk.W, pady=2)
+        servers_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/modelcontextprotocol/servers"))
+
     #-----------------------------------------------------
     # Claude Desktop Functions
     #-----------------------------------------------------
@@ -550,7 +591,7 @@ When you enable project directories, you are granting Claude permission to read 
             # Claude Desktop not found, configuration is inaccessible
         
         print("\nDetection completed.")
-    
+        
     def browse_config(self):
         """Open file dialog to locate config file"""
         filename = filedialog.askopenfilename(
@@ -560,7 +601,6 @@ When you enable project directories, you are granting Claude permission to read 
         if filename:
             self.config_path.set(filename)
             self.load_config()
-            # Update tool selection based on loaded configuration
     
     def update_server_config_type(self):
         """Update server configuration type"""
@@ -592,27 +632,17 @@ When you enable project directories, you are granting Claude permission to read 
             with open(config_path, 'r', encoding='utf-8') as f:
                 config_text = f.read().strip()
                 
-                # Show the exact character position
-                if len(config_text) > 275:
-                    print(f"Character at position 275: '{config_text[275]}' (ASCII {ord(config_text[275])})")
-                    print(f"Context around position 275: '{config_text[270:280]}'")
-                
-                # Fix common JSON issues - especially trailing commas which are causing the problem
-                import re
-                # Remove trailing commas before closing braces or brackets
+                # Fix common JSON issues - especially trailing commas
                 fixed_text = re.sub(r',\s*([\]\}])', r'\1', config_text)
                 
                 try:
                     config = json.loads(fixed_text)
-                    print("Successfully fixed JSON by removing trailing commas!")
+                    print("Successfully parsed JSON configuration")
                 except json.JSONDecodeError as je:
-                    print(f"Fixing still failed: {str(je)}")
+                    print(f"JSON parsing failed: {str(je)}")
                     # Create a minimal valid config as last resort
                     config = {"mcpServers": {}}
                     print("Using minimal default config")
-            
-            # Check if our MCP server is enabled
-            print(f"Config keys: {list(config.keys())}")
             
             # Handle both camelCase and snake_case for backward compatibility
             mcpServers = {}
@@ -637,7 +667,7 @@ When you enable project directories, you are granting Claude permission to read 
             print(f"Final MCP servers dict: {len(mcpServers)} entries")
             
             # Check for our servers in various possible names
-            toolkit_server_names = ["AI Dev Toolkit", "aidevtoolkit", "ai-dev-toolkit"]
+            toolkit_server_names = ["AI Dev Toolkit", "aidevtoolkit", "ai-dev-toolkit", "file-system-tools"]
             librarian_server_names = ["AI Librarian", "ailibrarian", "ai-librarian"]
             
             # Flags for found servers
@@ -650,14 +680,16 @@ When you enable project directories, you are granting Claude permission to read 
                 if name in mcpServers:
                     toolkit_server_found = True
                     toolkit_server_config = mcpServers[name]
+                    self.file_system_server_enabled.set(True)
+                    self.file_system_tools_enabled.set(True)
                     break
                     
             # Check for AI Librarian server
             for name in librarian_server_names:
                 if name in mcpServers:
                     librarian_server_found = True
-                    # Update AI Librarian enabled status
                     self.ai_librarian_server_enabled.set(True)
+                    self.ai_librarian_enabled.set(True)
                     break
                     
             # Set combined server status
@@ -684,50 +716,47 @@ When you enable project directories, you are granting Claude permission to read 
                 self.update_server_config_type()
                 
                 # Get project directories
-                if server_config is not None:  # Add null check for server_config
-                    if "allowed_directories" in server_config:
-                        dirs = server_config["allowed_directories"]
-                        self.project_dirs = dirs if dirs is not None else []
-                    elif "allowedDirectories" in server_config:
-                        dirs = server_config["allowedDirectories"]
-                        self.project_dirs = dirs if dirs is not None else []
-                    else:
-                        self.project_dirs = []
-                else:
-                    self.project_dirs = []
+                project_dirs = []
+                if server_config is not None:
+                    # Check for directories in args (NPM style)
+                    if "args" in server_config and isinstance(server_config["args"], list):
+                        # Skip the first two arguments which are flags and package name
+                        dirs = server_config["args"][2:] if len(server_config["args"]) > 2 else []
+                        # Ensure dirs is a list
+                        if dirs is not None:
+                            for dir_path in dirs:
+                                # Skip any paths that start with dash (flags)
+                                if isinstance(dir_path, str) and not dir_path.startswith('-'):
+                                    # Handle escaped backslashes in the config JSON
+                                    normalized_path = dir_path.replace('\\\\', '\\')
+                                    normalized_path = os.path.normpath(normalized_path)
+                                    project_dirs.append(normalized_path)
+                    
+                    # Check for directories in env variables (Python/uv style)
+                    if "env" in server_config and isinstance(server_config["env"], dict):
+                        env = server_config["env"]
+                        if "AI_DEV_TOOLKIT_ALLOWED_DIRS" in env:
+                            dirs_str = env["AI_DEV_TOOLKIT_ALLOWED_DIRS"]
+                            if dirs_str:
+                                dirs = dirs_str.split(',')
+                                for dir_path in dirs:
+                                    # Handle escaped backslashes in the config JSON
+                                    normalized_path = dir_path.replace('\\\\', '\\')
+                                    normalized_path = os.path.normpath(normalized_path)
+                                    project_dirs.append(normalized_path)
                 
+                # Update project_dirs with found directories
+                self.project_dirs = project_dirs
                 print(f"Loaded {len(self.project_dirs)} project directories")
-                
-                # Get enabled tools
-                enabled_tools = []
-                if server_config is not None:  # Add null check for server_config
-                    if "enabled_tools" in server_config:
-                        tools = server_config["enabled_tools"]
-                        enabled_tools = tools if tools is not None else []
-                    elif "enabledTools" in server_config:
-                        tools = server_config["enabledTools"]
-                        enabled_tools = tools if tools is not None else []
-                
-                print(f"Loaded enabled tools: {enabled_tools}")
-                
-                # Set tool checkboxes based on enabled tools
-                self.file_system_tools_enabled.set("file_system" in enabled_tools)
-                self.project_starter_tools_enabled.set("project_starter" in enabled_tools)
-                self.ai_librarian_enabled.set("ai_librarian" in enabled_tools)
-                self.think_tool_enabled.set("think" in enabled_tools)
-                self.context_compression_enabled.set("context_compression" in enabled_tools)
             else:
                 print("AI Dev Toolkit server not found in config")
                 # Set defaults for a new installation
                 self.project_dirs = []
                 self.file_system_tools_enabled.set(True)
-                self.project_starter_tools_enabled.set(True)
                 self.ai_librarian_enabled.set(True)
-                self.think_tool_enabled.set(True)
+                self.project_starter_tools_enabled.set(False)  # Default to False (Coming Soon)
+                self.think_tool_enabled.set(False)  # Default to False (Coming Soon)
                 self.context_compression_enabled.set(False)
-            
-            # Server is automatically enabled if any tools are enabled
-            self.update_server_status()
             
             # Initialize project enabled status
             for path in self.project_dirs:
@@ -740,11 +769,15 @@ When you enable project directories, you are granting Claude permission to read 
             # Reset changes flag
             self.has_changes = False
             
-        except json.JSONDecodeError as je:
-            print(f"JSON decode error: {str(je)}")
-            messagebox.showerror("Error", f"Failed to parse config file: {str(je)}\n\nThe file may be corrupted or not in JSON format.")
+            # Track this change
+            self.track_change()
+            
+            # Track the change for Git
+            self.track_change()
+            
         except Exception as e:
             print(f"Error loading config: {str(e)}")
+            traceback.print_exc()
             messagebox.showerror("Error", f"Failed to load config: {str(e)}")
     
     def update_server_status(self):
@@ -769,75 +802,233 @@ When you enable project directories, you are granting Claude permission to read 
         else:
             self.server_config_status_label.config(text="MCP Servers will be disabled (no tools or servers selected)")
     
-    def update_tool_dependencies(self):
-        """Update tool dependencies based on file system tools status"""
-        self.has_changes = True
-        if self.file_system_tools_enabled.get():
-            # If file system tools are enabled, enable dependent tools
-            self.project_starter_check.configure(state=tk.NORMAL)
-            self.ai_librarian_check.configure(state=tk.NORMAL)
-            self.context_compression_check.configure(state=tk.NORMAL)
-        else:
-            # If file system tools are disabled, disable dependent tools
-            self.project_starter_tools_enabled.set(False)
-            self.ai_librarian_enabled.set(False)
+    #-----------------------------------------------------
+    # Git Integration Functions
+    #-----------------------------------------------------
+    def check_git_status(self):
+        """Check Git status of the repository"""
+        try:
+            # Get repository root (assuming we're in the repository)
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            repo_dir = os.path.dirname(os.path.dirname(script_dir))
             
-            self.project_starter_check.configure(state=tk.DISABLED)
-            self.ai_librarian_check.configure(state=tk.DISABLED)
+            # Check if this is a Git repository
+            if not os.path.isdir(os.path.join(repo_dir, ".git")):
+                self.git_status_var.set("Not a Git repository")
+                self.dashboard_git_status.config(text="Git: Not a Git repository")
+                return
             
-            # Context compression can still be enabled independently
-            self.context_compression_check.configure(state=tk.NORMAL)
+            # Get git status
+            process = subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=repo_dir,
+                capture_output=True,
+                text=True,
+                check=False
+            )
             
-        # Update server status
-        self.update_server_status()
-    
-    def add_directory(self):
-        """Open directory selection dialog to add a project directory"""
-        directory = filedialog.askdirectory(title="Select Project Directory")
-        if directory:
-            directory = os.path.normpath(directory)
-            if directory not in self.project_dirs:
-                self.project_dirs.append(directory)
-                self.project_enabled[directory] = True
-                self.update_directory_list()
-                self.update_projects_list()
-                self.has_changes = True
+            # Count changed files
+            changed_files = [line for line in process.stdout.splitlines() if line.strip()]
+            num_changed = len(changed_files)
+            
+            if num_changed > 0:
+                self.git_status_var.set(f"{num_changed} uncommitted changes")
+                self.dashboard_git_status.config(text=f"Git: {num_changed} uncommitted changes")
+                self.git_status_label.configure(foreground="#e74c3c")
+                self.dashboard_git_status.configure(foreground="#e74c3c")
                 
-                # Show message if AI Librarian is enabled
-                if self.ai_librarian_enabled.get():
-                    ai_ref_path = os.path.join(directory, ".ai_reference")
-                    if not os.path.exists(ai_ref_path):
-                        self.show_project_message(f"An .ai_reference directory will be created in '{directory}' when you apply changes.")
+                # Check if it's been a while since last commit
+                if self.last_commit_time:
+                    now = datetime.datetime.now()
+                    time_diff = now - self.last_commit_time
+                    if time_diff.total_seconds() > 3600:  # More than an hour
+                        self.show_commit_reminder()
+            else:
+                self.git_status_var.set("No changes to commit")
+                self.dashboard_git_status.config(text="Git: No uncommitted changes")
+                self.git_status_label.configure(foreground="#2ecc71")
+                self.dashboard_git_status.configure(foreground="#2ecc71")
+            
+            # Schedule next check
+            self.root.after(60000, self.check_git_status)  # Check every minute
+            
+        except Exception as e:
+            print(f"Error checking Git status: {str(e)}")
+            self.git_status_var.set("Git status unavailable")
+            self.dashboard_git_status.config(text="Git: Status unavailable")
     
-    def remove_directory(self):
-        """Remove selected directory from the list"""
-        # Get the selected project from the projects list
-        selected_project = None
-        for widget in self.projects_container.winfo_children():
-            if isinstance(widget, ttk.Frame):
-                checkbox = widget.winfo_children()[0]
-                if checkbox.instate(['focus']):
-                    project_path = widget.winfo_children()[1].cget("text")
-                    selected_project = project_path
-                    break
+    def show_commit_dialog(self):
+        """Show Git commit dialog"""
+        # Create dialog window
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Git Commit")
+        dialog.geometry("500x350")
+        dialog.transient(self.root)
+        dialog.grab_set()
         
-        if selected_project and selected_project in self.project_dirs:
-            self.project_dirs.remove(selected_project)
-            if selected_project in self.project_enabled:
-                del self.project_enabled[selected_project]
-            self.update_directory_list()
-            self.update_projects_list()
-            self.has_changes = True
-            self.show_project_message(f"Removed directory: {selected_project}")
+        # Get repository root
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_dir = os.path.dirname(os.path.dirname(script_dir))
+        
+        # Header
+        ttk.Label(dialog, text="Commit Changes", font=("Segoe UI", 14, "bold")).pack(pady=(10, 5))
+        
+        # Status section
+        status_frame = ttk.LabelFrame(dialog, text="Changed Files", padding="10 10 10 10")
+        status_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Add a scrollable text widget for status
+        status_text = tk.Text(status_frame, height=8, width=50)
+        status_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        status_scrollbar = ttk.Scrollbar(status_frame, orient=tk.VERTICAL, command=status_text.yview)
+        status_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        status_text.config(yscrollcommand=status_scrollbar.set)
+        
+        # Get changed files
+        try:
+            process = subprocess.run(
+                ["git", "status", "-s"],
+                cwd=repo_dir,
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            
+            if process.stdout.strip():
+                status_text.insert(tk.END, process.stdout)
+            else:
+                status_text.insert(tk.END, "No changes to commit.")
+        except Exception as e:
+            status_text.insert(tk.END, f"Error getting Git status: {str(e)}")
+        
+        status_text.config(state=tk.DISABLED)
+        
+        # Commit message section
+        message_frame = ttk.LabelFrame(dialog, text="Commit Message", padding="10 10 10 10")
+        message_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
+        
+        commit_msg = tk.Text(message_frame, height=3, width=50)
+        commit_msg.pack(fill=tk.X)
+        
+        # Add some suggested commit messages
+        suggested_messages = [
+            "Update GUI configurator",
+            "Fix initialization issues",
+            "Improve error handling",
+            "Add new feature",
+            "Refactor code"
+        ]
+        
+        # Suggestions frame
+        suggestions_frame = ttk.Frame(message_frame)
+        suggestions_frame.pack(fill=tk.X, pady=(5, 0))
+        
+        ttk.Label(suggestions_frame, text="Suggestions:").pack(side=tk.LEFT)
+        
+        # Add suggestion buttons
+        for msg in suggested_messages:
+            ttk.Button(suggestions_frame, text=msg, 
+                      command=lambda m=msg: commit_msg.insert(tk.END, m)).pack(side=tk.LEFT, padx=5)
+        
+        # Buttons
+        button_frame = ttk.Frame(dialog)
+        button_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
+        
+        ttk.Button(button_frame, text="Cancel", 
+                  command=dialog.destroy).pack(side=tk.RIGHT, padx=5)
+        
+        # Commit function
+        def do_commit():
+            msg = commit_msg.get("1.0", tk.END).strip()
+            if not msg:
+                messagebox.showerror("Error", "Please enter a commit message")
+                return
+            
+            try:
+                # Add all changes
+                add_process = subprocess.run(
+                    ["git", "add", "."],
+                    cwd=repo_dir,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                
+                # Commit changes
+                commit_process = subprocess.run(
+                    ["git", "commit", "-m", msg],
+                    cwd=repo_dir,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                
+                # Update commit tracking
+                self.last_commit_time = datetime.datetime.now()
+                self.changes_since_commit = 0
+                self.commit_history.append((self.last_commit_time, msg))
+                
+                # Update status
+                self.check_git_status()
+                
+                # Show success and close dialog
+                messagebox.showinfo("Success", "Changes committed successfully!")
+                dialog.destroy()
+                
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to commit changes: {str(e)}")
+        
+        ttk.Button(button_frame, text="Commit Changes", 
+                  command=do_commit).pack(side=tk.RIGHT)
+        
+        # Focus on commit message
+        commit_msg.focus_set()
     
-    def update_directory_list(self):
-        """Update directory lists in Claude Desktop tab"""
-        # Update active projects list on dashboard
-        self.active_projects_listbox.delete(0, tk.END)
+    def track_change(self):
+        """Track that a change has been made"""
+        self.changes_since_commit += 1
+        self.has_changes = True
         
-        for directory in self.project_dirs:
-            if self.project_enabled.get(directory, True):
-                self.active_projects_listbox.insert(tk.END, directory)
+        # If there are substantial changes, show the commit reminder
+        if self.changes_since_commit >= 10:  # Threshold for reminder
+            self.show_commit_reminder()
+    
+    def show_commit_reminder(self):
+        """Show a reminder to commit changes"""
+        # Only show if we haven't shown recently
+        if hasattr(self, 'last_reminder_time'):
+            now = datetime.datetime.now()
+            if (now - self.last_reminder_time).total_seconds() < 1800:  # 30 minutes
+                return
+        
+        self.last_reminder_time = datetime.datetime.now()
+        
+        # Create a reminder popup
+        reminder = tk.Toplevel(self.root)
+        reminder.title("Git Commit Reminder")
+        reminder.geometry("400x200")
+        reminder.transient(self.root)
+        
+        # Header
+        ttk.Label(reminder, text="Git Commit Reminder", font=("Segoe UI", 14, "bold")).pack(pady=(10, 5))
+        
+        # Message
+        message = """You have made several changes since your last commit.
+        
+Regular commits help track your progress and prevent data loss.
+        
+Would you like to commit your changes now?"""
+        ttk.Label(reminder, text=message, wraplength=350).pack(pady=10)
+        
+        # Buttons
+        button_frame = ttk.Frame(reminder)
+        button_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
+        
+        ttk.Button(button_frame, text="Remind Me Later", 
+                  command=reminder.destroy).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(button_frame, text="Commit Now", 
+                  command=lambda: [reminder.destroy(), self.show_commit_dialog()]).pack(side=tk.RIGHT)
     
     def apply_claude_config(self):
         """Save changes to the config file"""
@@ -854,30 +1045,17 @@ When you enable project directories, you are granting Claude permission to read 
                     config_text = f.read().strip()
                     
                 # Try to fix common JSON issues - especially trailing commas
-                import re
                 fixed_text = re.sub(r',\s*([\]\}])', r'\1', config_text)
                 
                 try:
                     existing_config = json.loads(fixed_text)
                     print("Successfully fixed and loaded JSON")
                 except json.JSONDecodeError:
-                    # If that doesn't work, try a more aggressive approach
-                    try:
-                        # Try json5 library if available (handles many JSON syntax issues)
-                        import json5
-                        existing_config = json5.loads(config_text)
-                        print("Used json5 to parse JSON")
-                    except (ImportError, Exception) as e:
-                        print(f"Could not parse existing config: {str(e)}")
-                        # Continue with default empty config
-                        if messagebox.askyesno("Error", "Cannot read existing configuration due to syntax errors. Continue with a new configuration? (This will preserve your settings file by creating a backup)"): 
-                            # Create backup of the original file
-                            import shutil
-                            backup_path = config_path + ".backup"
-                            shutil.copyfile(config_path, backup_path)
-                            print(f"Created backup at {backup_path}")
-                        else:
-                            return
+                    # Create backup of the original file
+                    import shutil
+                    backup_path = config_path + ".backup"
+                    shutil.copyfile(config_path, backup_path)
+                    print(f"Created backup at {backup_path}")
             except Exception as e:
                 print(f"Error reading config: {str(e)}")
             
@@ -895,107 +1073,112 @@ When you enable project directories, you are granting Claude permission to read 
             enabled_tools = []
             if self.file_system_tools_enabled.get():
                 enabled_tools.append("file_system")
-            if self.project_starter_tools_enabled.get():
-                enabled_tools.append("project_starter")
             if self.ai_librarian_enabled.get():
                 enabled_tools.append("ai_librarian")
-            if self.think_tool_enabled.get():
-                enabled_tools.append("think")
             if self.context_compression_enabled.get():
                 enabled_tools.append("context_compression")
             
             # Determine server status based on tools and servers
-            server_enabled = len(enabled_tools) > 0 or self.ai_librarian_server_enabled.get()
+            server_enabled = len(enabled_tools) > 0 or self.ai_librarian_server_enabled.get() or self.file_system_server_enabled.get()
             
             # Filter project directories to only include enabled ones
             enabled_directories = [path for path in self.project_dirs if self.project_enabled.get(path, True)]
             
-            # For Windows paths in the config file, make sure backslashes are properly escaped
-            enabled_directories_escaped = [path.replace('\\', '\\\\') for path in enabled_directories]
-            
             # Get absolute path to this script's directory for Python configuration
             script_dir = os.path.dirname(os.path.abspath(__file__))
-            repo_dir = os.path.dirname(script_dir)
+            repo_dir = os.path.dirname(os.path.dirname(script_dir))
             
             # Remove existing AI Dev Toolkit and AI Librarian servers if present
-            toolkit_server_names = ["AI Dev Toolkit", "aidevtoolkit", "ai-dev-toolkit"]
+            toolkit_server_names = ["AI Dev Toolkit", "aidevtoolkit", "ai-dev-toolkit", "file-system-tools"]
             librarian_server_names = ["AI Librarian", "ailibrarian", "ai-librarian"]
             
             for name in toolkit_server_names + librarian_server_names:
                 if name in existing_config["mcpServers"]:
                     del existing_config["mcpServers"][name]
             
-            # AI Dev Toolkit Server Configuration
-            if len(enabled_tools) > 0:
-                toolkit_server_name = "ai-dev-toolkit"
+            # File System Tools Server Configuration
+            print("\nProcessing File System Tools Server...")
+            print(f"File System Server enabled: {self.file_system_server_enabled.get()}")
+            if self.file_system_server_enabled.get():
+                toolkit_server_name = "file-system-tools"
                 
-                if self.server_config_type.get() == "npm":
-                    # NPM package configuration
-                    toolkit_config = {
-                        "command": "npx",
-                        "args": ["-y", "@isekaizen/ai-dev-toolkit"]
-                    }
-                    
-                    # Add project directories to args if enabled
-                    if enabled_directories_escaped:
-                        toolkit_config["args"].extend(enabled_directories_escaped)
-                else:  # uv
-                    # Python with uv configuration
-                    toolkit_config = {
-                        "command": "uv",
-                        "args": [
-                            "run", 
-                            "--directory", 
-                            repo_dir,  # Use absolute path to repo
-                            "src/server.py"
-                        ],
-                        "env": {
-                            "PYTHONPATH": repo_dir
-                        }
-                    }
-                    
-                    # Add environment variables for tool configuration
-                    if enabled_tools:
-                        toolkit_config["env"]["AI_DEV_TOOLKIT_ENABLED_TOOLS"] = ",".join(enabled_tools)
-                        
-                    if enabled_directories_escaped:
-                        toolkit_config["env"]["AI_DEV_TOOLKIT_ALLOWED_DIRS"] = ",".join(enabled_directories_escaped)
+                # Path to the FileSystem Tools server
+                filesystem_server_path = os.path.join(repo_dir, "src", "mcp", "filesystem_server.py")
+                print(f"File System Tools server path: {filesystem_server_path}")
                 
-                # Add the AI Dev Toolkit server
+                # Verify the file exists
+                if not os.path.exists(filesystem_server_path):
+                    print(f"WARNING: FileSystem server script not found at {filesystem_server_path}")
+                    messagebox.showwarning("Warning", f"FileSystem server script not found at {filesystem_server_path}\n\nConfiguration will still be saved, but may not work correctly.")
+                
+                # Create configuration
+                toolkit_config = {
+                    "command": "python",
+                    "args": [
+                        filesystem_server_path
+                    ],
+                    "env": {}
+                }
+                
+                # Add directories as environment variable (same as AI Librarian)
+                if enabled_directories:
+                    toolkit_config["env"]["AI_DEV_TOOLKIT_ALLOWED_DIRS"] = ",".join(enabled_directories)
+                    # Also add with consistent variable name
+                    toolkit_config["env"]["AI_LIBRARIAN_ALLOWED_DIRS"] = ",".join(enabled_directories)
+                
+                # Add the File System Tools server
+                print(f"Adding server '{toolkit_server_name}' to configuration")
                 existing_config["mcpServers"][toolkit_server_name] = toolkit_config
+                print(f"Server configuration: {json.dumps(toolkit_config, indent=2)}")
             
             # AI Librarian Server Configuration
+            print("\nProcessing AI Librarian Server...")
+            print(f"AI Librarian Server enabled: {self.ai_librarian_server_enabled.get()}")
             if self.ai_librarian_server_enabled.get():
                 librarian_server_name = "ai-librarian"
                 
-                # Find the AI Librarian server script dynamically
-                librarian_server_path = self.find_server_script(repo_dir)
+                # Path to the AI Librarian server
+                librarian_server_path = os.path.join(repo_dir, "aitoolkit", "librarian", "server.py")
+                print(f"AI Librarian server path: {librarian_server_path}")
                 
-                # If not found, use the most likely path
-                if not librarian_server_path or not os.path.exists(librarian_server_path):
-                    librarian_server_path = os.path.join(repo_dir, "aitoolkit", "librarian", "server.py")
+                # Verify the file exists
+                if not os.path.exists(librarian_server_path):
+                    print(f"WARNING: AI Librarian server script not found at {librarian_server_path}")
+                    messagebox.showwarning("Warning", f"AI Librarian server script not found at {librarian_server_path}\n\nConfiguration will still be saved, but may not work correctly.")
                 
                 # Create configuration
                 librarian_config = {
                     "command": "python",
                     "args": [
                         librarian_server_path
-                    ]
+                    ],
+                    "env": {}
                 }
                 
-                # Add directories
-                if enabled_directories_escaped:
-                    for dir_path in enabled_directories_escaped:
-                        librarian_config["args"].append(dir_path)
+                # Add directories as environment variables
+                if enabled_directories:
+                    librarian_config["env"]["AI_LIBRARIAN_ALLOWED_DIRS"] = ",".join(enabled_directories)
                 
                 # Add the AI Librarian server
+                print(f"Adding server '{librarian_server_name}' to configuration")
                 existing_config["mcpServers"][librarian_server_name] = librarian_config
+                print(f"Server configuration: {json.dumps(librarian_config, indent=2)}")
 
             # Write config back with careful handling of JSON format
-            with open(config_path, 'w', encoding='utf-8') as f:
-                # Use a compact JSON format to avoid any formatting issues
-                json_str = json.dumps(existing_config, indent=2, ensure_ascii=False, separators=(',', ': '))
-                f.write(json_str)
+            print("\nSaving configuration to file...")
+            print(f"Config path: {config_path}")
+            print(f"Final MCP servers: {list(existing_config['mcpServers'].keys())}")
+            try:
+                with open(config_path, 'w', encoding='utf-8') as f:
+                    # Use a compact JSON format to avoid any formatting issues
+                    json_str = json.dumps(existing_config, indent=2, ensure_ascii=False)
+                    f.write(json_str)
+                    print("Successfully wrote configuration to file")
+            except Exception as e:
+                print(f"Error writing config: {str(e)}")
+                traceback.print_exc()
+                messagebox.showerror("Error", f"Failed to save config: {str(e)}")
+                return
             
             # Create .ai_reference directories for enabled projects if AI Librarian is enabled
             if server_enabled and self.ai_librarian_enabled.get():
@@ -1014,13 +1197,23 @@ When you enable project directories, you are granting Claude permission to read 
             # Reset changes flag
             self.has_changes = False
             
+            # Gather info about what was configured
+            enabled_servers = []
+            if "file-system-tools" in existing_config["mcpServers"]:
+                enabled_servers.append("File System Tools")
+            if "ai-librarian" in existing_config["mcpServers"]:
+                enabled_servers.append("AI Librarian")
+            
             # Show confirmation with configuration type
-            config_type = "NPM package" if self.server_config_type.get() == "npm" else "Python with uv"
+            servers_text = ", ".join(enabled_servers) if enabled_servers else "No servers"
             messagebox.showinfo("Success", 
-                              f"Configuration updated successfully using {config_type}.\n\n"
+                              f"Configuration saved successfully!\n\n" +
+                              f"Enabled servers: {servers_text}\n\n" +
+                              f"Project directories: {len(enabled_directories)}\n\n" +
                               "Please restart Claude Desktop for changes to take effect.")
             
         except Exception as e:
+            traceback.print_exc()
             messagebox.showerror("Error", f"Failed to save config: {str(e)}")
     
     def apply_and_exit(self):
@@ -1057,15 +1250,16 @@ When you enable project directories, you are granting Claude permission to read 
     def check_server_status(self):
         """Check if the MCP server is running"""
         # Simple check - in a production app we'd do proper process detection
-        # This is just a placeholder implementation
         if self.server_process and self.server_process.poll() is None:
             self.server_status.set("Running")
-            self.server_status_value_label.configure(style='Running.Status.TLabel') if hasattr(self, 'server_status_value_label') else None
+            if hasattr(self, 'server_status_value_label'):
+                self.server_status_value_label.configure(style='Running.Status.TLabel')
             self.server_status_label.configure(style='Running.Status.TLabel')
             self.server_status_label.configure(text="MCP Server: Running")
         else:
             self.server_status.set("Stopped")
-            self.server_status_value_label.configure(style='Stopped.Status.TLabel') if hasattr(self, 'server_status_value_label') else None
+            if hasattr(self, 'server_status_value_label'):
+                self.server_status_value_label.configure(style='Stopped.Status.TLabel')
             self.server_status_label.configure(style='Stopped.Status.TLabel')
             self.server_status_label.configure(text="MCP Server: Stopped")
         
@@ -1078,54 +1272,6 @@ When you enable project directories, you are granting Claude permission to read 
         # Wait a moment to ensure the server is fully stopped
         self.root.after(1000, self.start_server)
     
-    def find_server_script(self, base_dir):
-        """Find the server script regardless of reorganization
-        
-        Args:
-            base_dir: Base directory to start the search from
-            
-        Returns:
-            Path to the server script or None if not found
-        """
-        # Try the expected path based on current directory structure
-        librarian_path = os.path.join(base_dir, "aitoolkit", "librarian", "server.py")
-        if os.path.exists(librarian_path):
-            print(f"Found librarian server at expected path: {librarian_path}")
-            return librarian_path
-            
-        # Alternative expected path (old directory structure)
-        alt_path = os.path.join(base_dir, "src", "server.py")
-        if os.path.exists(alt_path):
-            print(f"Found server at alternative path: {alt_path}")
-            return alt_path
-        
-        # Old AI Librarian path
-        old_lib_path = os.path.join(base_dir, "ai-librarian-server", "server.py")
-        if os.path.exists(old_lib_path):
-            print(f"Found librarian at old path: {old_lib_path}")
-            return old_lib_path
-            
-        # Fall back to searching for it
-        print("Searching for server script...")
-        for root, dirs, files in os.walk(base_dir):
-            if "server.py" in files and ("librarian" in os.path.basename(root).lower() or 
-                                         os.path.basename(root) == "src"):
-                path = os.path.join(root, "server.py")
-                print(f"Found server script in: {path}")
-                return path
-               
-        # Last resort - just look for any server.py
-        print("Last resort search for any server.py...")
-        for root, dirs, files in os.walk(base_dir):
-            if "server.py" in files:
-                path = os.path.join(root, "server.py")
-                print(f"Found server script: {path}")
-                return path
-                
-        # No server script found
-        print("No server script found!")
-        return None
-    
     def start_server(self):
         """Start the MCP server"""
         if self.server_process and self.server_process.poll() is None:
@@ -1133,79 +1279,45 @@ When you enable project directories, you are granting Claude permission to read 
             return
         
         try:
-            # Get the server script path with dynamic discovery
+            # Get the server script path
             script_dir = os.path.dirname(os.path.abspath(__file__))
-            repo_dir = os.path.dirname(script_dir)
-            
-            # Find the server script dynamically
-            server_script = self.find_server_script(repo_dir)
+            repo_dir = os.path.dirname(os.path.dirname(script_dir))
+            server_script = os.path.normpath(os.path.join(repo_dir, "src", "mcp", "server.py"))
             
             # Check if the file exists
-            if not server_script or not os.path.exists(server_script):
-                messagebox.showerror("Error", f"Server script not found in {repo_dir}\n\nPlease specify the server path manually or reinstall the AI Dev Toolkit.")
+            if not os.path.exists(server_script):
+                messagebox.showerror("Error", f"Server script not found at {server_script}\n\nMake sure you have installed the AI Dev Toolkit correctly.")
                 return
             
             # Print status information for debugging
             print(f"Starting server from: {server_script}")
             
-            # Command based on configuration type
-            if self.server_config_type.get() == "npm":
-                try:
-                    # Check which server script we're trying to run
-                    if "librarian" in server_script.lower():
-                        # AI Librarian server should be run directly with Python
-                        print("Starting AI Librarian server directly with Python...")
-                        self.server_process = subprocess.Popen(
-                            [sys.executable, server_script],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            universal_newlines=True,
-                            bufsize=1
-                        )
-                    else:
-                        # Try to run using npx for standard server
-                        print("Starting server using npm package...")
-                        self.server_process = subprocess.Popen(
-                            ["npx", "@modelcontextprotocol/server-filesystem"],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            universal_newlines=True,
-                            bufsize=1
-                        )
-                except Exception as npm_err:
-                    print(f"Error starting npm package: {str(npm_err)}")
-                    # Fall back to Python directly
-                    print(f"Falling back to Python directly: {sys.executable}")
-                    self.server_process = subprocess.Popen(
-                        [sys.executable, server_script],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        universal_newlines=True,
-                        bufsize=1
-                    )
-            else:  # uv
-                try:
-                    # Try to run using uv
-                    print("Starting server using uv...")
-                    self.server_process = subprocess.Popen(
-                        ["uv", "run", server_script],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        universal_newlines=True,
-                        bufsize=1,
-                        env={"PYTHONPATH": repo_dir, **os.environ}
-                    )
-                except Exception as uv_err:
-                    print(f"Error starting with uv: {str(uv_err)}")
-                    # Fall back to Python directly
-                    print(f"Falling back to Python directly: {sys.executable}")
-                    self.server_process = subprocess.Popen(
-                        [sys.executable, server_script],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        universal_newlines=True,
-                        bufsize=1
-                    )
+            # Path to the FileSystem Tools server
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            repo_dir = os.path.dirname(os.path.dirname(script_dir))
+            filesystem_server_path = os.path.join(repo_dir, "src", "mcp", "filesystem_server.py")
+            
+            # Check if the file exists
+            if not os.path.exists(filesystem_server_path):
+                print(f"WARNING: FileSystem server not found at {filesystem_server_path}")
+            else:
+                print(f"Found FileSystem server at {filesystem_server_path}")
+            
+            try:
+                # Always use direct Python execution for consistency with Claude config
+                print("Starting server using Python directly...")
+                self.server_process = subprocess.Popen(
+                    [sys.executable, filesystem_server_path],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    universal_newlines=True,
+                    bufsize=1,
+                    env={"AI_DEV_TOOLKIT_ALLOWED_DIRS": ",".join(self.project_dirs), **os.environ}
+                )
+            except Exception as e:
+                print(f"Error starting server: {str(e)}")
+                messagebox.showerror("Error", f"Failed to start server: {str(e)}")
+                return
             
             # Start reading the output
             self.start_log_reader()
@@ -1300,6 +1412,11 @@ When you enable project directories, you are granting Claude permission to read 
         canvas.create_window((0, 0), window=scrollable_frame, anchor=tk.NW)
         canvas.configure(yscrollcommand=scrollbar.set)
         
+        # Debug information
+        print(f"Updating project list with {len(self.project_dirs)} directories")
+        for dir in self.project_dirs:
+            print(f"  Project: {dir}")
+        
         # Add the project entries
         for i, directory in enumerate(self.project_dirs):
             project_frame = ttk.Frame(scrollable_frame)
@@ -1350,6 +1467,70 @@ When you enable project directories, you are granting Claude permission to read 
         # Update message if no projects
         if not self.project_dirs:
             self.show_project_message("No project directories added. Add directories that Claude should have access to.")
+    
+    def reload_directories(self):
+        """Reload project directories"""
+        # Recheck each directory
+        for directory in list(self.project_dirs):
+            if not os.path.exists(directory):
+                self.project_dirs.remove(directory)
+                if directory in self.project_enabled:
+                    del self.project_enabled[directory]
+                self.show_project_message(f"Removed non-existent directory: {directory}")
+        
+        # Update lists
+        self.update_directory_list()
+        self.update_projects_list()
+        self.has_changes = True
+    
+    def add_directory(self):
+        """Open directory selection dialog to add a project directory"""
+        directory = filedialog.askdirectory(title="Select Project Directory")
+        if directory:
+            # Normalize path to ensure consistent format
+            directory = os.path.normpath(directory)
+            if directory not in self.project_dirs:
+                self.project_dirs.append(directory)
+                self.project_enabled[directory] = True
+                self.update_directory_list()
+                self.update_projects_list()
+                self.has_changes = True
+                
+                # Show message if AI Librarian is enabled
+                if self.ai_librarian_enabled.get():
+                    ai_ref_path = os.path.join(directory, ".ai_reference")
+                    if not os.path.exists(ai_ref_path):
+                        self.show_project_message(f"An .ai_reference directory will be created in '{directory}' when you apply changes.")
+    
+    def remove_directory(self):
+        """Remove selected directory from the list"""
+        # Get the selected project from the projects list
+        selected_project = None
+        for widget in self.projects_container.winfo_children():
+            if isinstance(widget, ttk.Frame):
+                checkbox = widget.winfo_children()[0]
+                if checkbox.instate(['focus']):
+                    project_path = widget.winfo_children()[1].cget("text")
+                    selected_project = project_path
+                    break
+        
+        if selected_project and selected_project in self.project_dirs:
+            self.project_dirs.remove(selected_project)
+            if selected_project in self.project_enabled:
+                del self.project_enabled[selected_project]
+            self.update_directory_list()
+            self.update_projects_list()
+            self.has_changes = True
+            self.show_project_message(f"Removed directory: {selected_project}")
+    
+    def update_directory_list(self):
+        """Update directory lists in Claude Desktop tab"""
+        # Update active projects list on dashboard
+        self.active_projects_listbox.delete(0, tk.END)
+        
+        for directory in self.project_dirs:
+            if self.project_enabled.get(directory, True):
+                self.active_projects_listbox.insert(tk.END, directory)
     
     def toggle_create_project_area(self):
         """Toggle the visibility of the create project area"""
@@ -1441,18 +1622,3 @@ When you enable project directories, you are granting Claude permission to read 
         """Show a message in the project tab"""
         self.project_message_var.set(message)
         self.project_message_label.pack(fill=tk.X, pady=(10, 0))
-        
-    def hide_project_message(self):
-        """Hide the project message - this is intentionally empty as messages should remain visible
-        until the list is cleared or another message replaces it"""
-        pass
-    
-    def apply_project_changes(self):
-        """Apply project changes to Claude Desktop configuration"""
-        self.apply_claude_config()
-
-# Main entry point
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = AIDevToolkitGUI(root)
-    root.mainloop()

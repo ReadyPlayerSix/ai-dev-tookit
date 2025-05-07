@@ -13,7 +13,7 @@ from pathlib import Path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Add the librarian directory to the path
-sys.path.insert(0, os.path.join(current_dir, 'src', 'librarian'))
+sys.path.insert(0, os.path.join(os.path.dirname(current_dir), 'aitoolkit', 'librarian'))
 
 # Import the enhanced indexer
 try:
