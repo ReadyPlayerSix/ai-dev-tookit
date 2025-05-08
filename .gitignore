@@ -154,4 +154,9 @@ reload_directories_method.py
 # Local configuration
 *.local.json
 *.local.yaml
-*.local.yml
+*.local.yml.ai_reference/
+aitoolkit/.ai_reference/
+aitoolkit/test_file.txt
+test_directory/
+gitStatus.txt
+.ai_reference/
