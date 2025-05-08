@@ -1,52 +1,119 @@
 # AI Dev Toolkit
 
-A comprehensive toolkit for AI-assisted development that enhances Claude's capabilities.
+A comprehensive toolkit that enhances Claude's capabilities with persistent context, filesystem access, and development tools.
 
-## Features
+## 🌟 Overview
 
-- **AI Librarian**: Maintains persistent context of your codebase across conversations
-- **File System Tools**: Securely access and manipulate files through Claude
-- **GUI Configurator**: Easy setup for Claude Desktop integration
-- **Project Templates**: Quickly set up new projects with best practices
+AI Dev Toolkit integrates with Claude Desktop to provide AI-assisted development capabilities beyond what's available out of the box. The toolkit creates a bridge between your projects and Claude, allowing it to understand your codebase, assist with development tasks, and maintain context across conversations.
 
-## Components
+## 🚀 Features
 
 ### AI Librarian
-- Indexes your project code and maintains a comprehensive understanding of components
-- Tracks file changes to keep context up to date
-- Enables precise code search and navigation
-- Preserves context across multiple conversations
+- **Code Understanding**: Maintains a comprehensive index of your codebase
+- **Persistent Context**: Remembers code structure across conversations
+- **Component Tracking**: Identifies functions, classes, and modules
+- **Smart Search**: Find implementations and references quickly
+- **Real-time Updates**: Monitors project changes automatically
 
 ### File System Tools
-- Read and write files with proper encoding detection
-- List directory contents with clear formatting
-- Search for files matching specific patterns
-- Generate directory trees for visual structure understanding
-- Get detailed file information
+- **Secure File Access**: Controlled access to your project files
+- **Directory Management**: List, search, and navigate directories
+- **File Operations**: Read from and write to files with proper encoding detection
+- **Directory Visualization**: Generate tree views of project structure
+- **File Analysis**: Detailed information about files and their contents
 
 ### GUI Configurator
-- Configure Claude Desktop integration with a user-friendly interface
-- Enable/disable specific toolkit features
-- Set file access permissions
-- Manage project settings
+- **Easy Setup**: Intuitive interface for toolkit configuration
+- **Claude Desktop Integration**: Seamless installation to Claude Desktop
+- **Customization**: Enable/disable specific features as needed
+- **Directory Management**: Set allowed directories for AI access
+- **Visual Feedback**: See active components and configuration status
 
-## Getting Started
+## 🛠️ Installation
 
-1. Clone this repository
-2. Run `python install_to_claude.py` to set up the toolkit with Claude Desktop
-3. Launch Claude Desktop and start using the enhanced capabilities
-
-## Configuration
-
-The toolkit can be configured through:
-- The GUI configurator: `python aitoolkit/launch_gui.py`
-- Direct configuration file editing (see [Configuration Guide](docs/configuration.md))
-
-## Requirements
-
-- Python 3.8+
+### Prerequisites
+- Python 3.8 or higher
 - Claude Desktop (latest version)
+- Git (for cloning the repository)
 
-## License
+### Quick Install
+```bash
+# Clone the repository
+git clone https://github.com/isekaizen/ai-dev-toolkit.git
+cd ai-dev-toolkit
 
-MIT
+# Install dependencies
+pip install -r requirements.txt
+
+# Install to Claude Desktop
+python install_to_claude.py
+```
+
+## 📊 Usage
+
+### Basic Usage
+1. Launch Claude Desktop after installation
+2. AI Dev Toolkit servers will be available automatically
+3. Start a conversation with Claude
+4. Claude can now access your projects and maintain context
+
+### AI Librarian
+```
+# Initialize AI Librarian for a project
+/initialize_librarian /path/to/your/project
+
+# Search for code implementations
+Find implementations of the login function
+```
+
+### File System Operations
+```
+# List files in a directory
+Show me the files in /path/to/directory
+
+# Read file content
+Show me the content of /path/to/file.py
+
+# Search for files
+Find all Python files containing "authentication"
+```
+
+## ⚙️ Configuration
+
+### GUI Configuration
+The toolkit includes a graphical configuration tool:
+```bash
+python aitoolkit/launch_gui.py
+```
+
+### Manual Configuration
+Claude Desktop configuration file is typically located at:
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+
+## 🔍 Troubleshooting
+
+Common issues and solutions:
+- **Toolkit Not Appearing in Claude**: Ensure configuration was saved correctly
+- **Permission Errors**: Check allowed directories settings
+- **Connection Issues**: Verify Claude Desktop is properly configured
+
+## 🤝 Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📚 Documentation
+
+- [Configuration Guide](docs/configuration.md)
+- [AI Librarian Documentation](docs/librarian.md)
+- [File System Tools Reference](docs/filesystem.md)
+
+## 🙏 Acknowledgements
+
+- Special thanks to the Claude team for making this integration possible
+- All contributors who have helped improve the toolkit
