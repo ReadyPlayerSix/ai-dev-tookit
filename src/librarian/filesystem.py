@@ -719,6 +719,33 @@ def directory_tree_tool(path: str, max_depth: int = 5) -> str:
         return f"Error: {str(e)}"
 
 
+def edit_file_tool(path: str, old_text: str, new_text: str, encoding: str = "utf-8") -> str:
+    """
+    MCP Tool: Edit a file by replacing specific text with new content.
+    
+    This tool allows for targeted modifications to files without rewriting the entire content,
+    which is useful for making small changes or updates to configuration files, code, or documentation.
+    
+    Args:
+        path: Path to the file to edit
+        old_text: The text segment to be replaced (must match exactly)
+        new_text: The new text to replace with
+        encoding: File encoding (default: utf-8)
+        
+    Returns:
+        Success message with diff or error information
+    """
+    try:
+        success, result = edit_file(path, old_text, new_text, encoding)
+        
+        if success:
+            return f"Successfully edited file: {path}\n\n{result}"
+        else:
+            return f"Error: {result}"
+    except Exception as e:
+        return f"Error editing file: {str(e)}"
+
+
 def list_allowed_directories_tool() -> str:
     """
     MCP Tool: List directories that are allowed to be accessed.
@@ -733,6 +760,96 @@ def list_allowed_directories_tool() -> str:
     return "Allowed directories:\n" + "\n".join(allowed_dirs)
 
 
+def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8",
+           allowed_directories: Optional[List[str]] = None) -> Tuple[bool, str]:
+    """
+    Edit a file by replacing a specific text segment with new text.
+    
+    Args:
+        path: Path to the file
+        old_text: Text to be replaced
+        new_text: New text to replace with
+        encoding: File encoding (default: utf-8)
+        allowed_directories: Optional list of allowed directories (uses defaults if None)
+        
+    Returns:
+        Tuple of (success flag, message or diff)
+        
+    Raises:
+        FileNotFoundError: If file doesn't exist
+        PermissionError: If file can't be modified
+        ValueError: If path is outside allowed directories or old_text not found
+    """
+    # Use default allowed directories if none provided
+    if allowed_directories is None:
+        allowed_directories = get_allowed_directories()
+    
+    # Validate path
+    if not validate_path(path, allowed_directories):
+        raise ValueError(f"Access denied - path outside allowed directories: {path} not in {', '.join(allowed_directories)}")
+    
+    # Check if file exists
+    if not os.path.isfile(path):
+        raise FileNotFoundError(f"File not found: {path}")
+    
+    # Check if we have read and write permission
+    if not os.access(path, os.R_OK | os.W_OK):
+        raise PermissionError(f"Permission denied: Cannot modify {path}")
+    
+    # Read the current content of the file
+    try:
+        with open(path, 'r', encoding=encoding) as f:
+            content = f.read()
+    except UnicodeDecodeError:
+        raise ValueError(f"Cannot edit binary file or file with encoding different from {encoding}")
+    
+    # Check if the old_text exists in the content
+    if old_text not in content:
+        raise ValueError(f"The specified text segment was not found in the file")
+    
+    # Replace the text
+    new_content = content.replace(old_text, new_text)
+    
+    # Calculate a simple diff for the response
+    old_lines = old_text.splitlines()
+    new_lines = new_text.splitlines()
+    
+    # Generate a unified diff-like output
+    diff = ["Changes to be made:"]
+    diff.append(f"--- {path} (original)")
+    diff.append(f"+++ {path} (modified)")
+    
+    # Add the changed lines
+    diff.append(f"@@ -1,{len(old_lines)} +1,{len(new_lines)} @@")
+    for line in old_lines:
+        diff.append(f"- {line}")
+    for line in new_lines:
+        diff.append(f"+ {line}")
+    
+    # Write the modified content to the file using atomic write pattern
+    try:
+        dir_name = os.path.dirname(path) or "."
+        with tempfile.NamedTemporaryFile(mode='w', encoding=encoding, 
+                                         dir=dir_name, delete=False) as temp_file:
+            temp_file.write(new_content)
+            temp_path = temp_file.name
+        
+        # Rename the temporary file to the target path (atomic operation)
+        shutil.move(temp_path, path)
+        
+        return True, "\n".join(diff)
+        
+    except Exception as e:
+        # Clean up the temporary file if it exists
+        if 'temp_path' in locals() and os.path.exists(temp_path):
+            try:
+                os.unlink(temp_path)
+            except:
+                pass
+        
+        return False, f"Error editing file: {str(e)}"
+
+
 # Register these functions as MCP tools when setting up the server
 def register_filesystem_tools(mcp_server) -> None:
     """Register filesystem tools with the MCP server"""
@@ -744,3 +861,4 @@ def register_filesystem_tools(mcp_server) -> None:
     mcp_server.tool()(get_file_info_tool)
     mcp_server.tool()(directory_tree_tool)
     mcp_server.tool()(list_allowed_directories_tool)
+    mcp_server.tool()(edit_file_tool)

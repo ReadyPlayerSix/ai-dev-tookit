@@ -1,0 +1,114 @@
+# AI Librarian Tool Relationship Map
+# Version 1.0
+# Created: 2025-05-08
+
+## TOOL RELATIONSHIPS
+
+read_file <--> read_multiple_files
+  - Relationship: Alternatives (1:n file ratio)
+  - Conversion: When n>1 files needed, switch to read_multiple_files
+  - Connection: Same core functionality with different scaling
+  - Preference: read_multiple_files when analyzing related components
+  
+write_file <--> edit_file <--> enhanced_edit_file
+  - Relationship: Precision hierarchy
+  - Progression: write_file (full) → edit_file (partial) → enhanced_edit_file (critical partial)
+  - Selection: Based on change scope and criticality
+  - Fallback: Can fallback from enhanced to standard if performance critical
+  
+move_file <--> write_file+delete
+  - Relationship: Atomic vs. composite operation
+  - Advantage: move_file maintains file attributes and has lower failure risk
+  - Alternative: write_file + delete when needing content modifications during move
+  
+search_files <--> find_implementation <--> query_component
+  - Relationship: Specificity hierarchy
+  - Progression: search_files (broad) → find_implementation (context) → query_component (specific)
+  - Selection: Based on how precisely the target is known
+  - Efficiency: More specific = better performance and relevance
+  
+initialize_librarian <--> generate_librarian
+  - Relationship: Setup vs. update
+  - Sequence: initialize_librarian first, generate_librarian for refreshes
+  - Dependency: generate_librarian requires prior initialize_librarian
+  - Frequency: initialize_librarian (once), generate_librarian (periodic)
+  
+sanity_check <--> Other Modification Tools
+  - Relationship: Validation after modification
+  - Sequence: Modifications first, sanity_check after
+  - Purpose: Verifies correctness of changes
+  - Timing: After significant modifications
+
+## COMMON TOOL SEQUENCES
+
+1. Setup & Exploration Sequence
+   initialize_librarian → query_component(main) → find_implementation(key functions)
+   
+2. Understanding & Modification Sequence
+   query_component → read_file → edit_file → sanity_check
+   
+3. Research & Analysis Sequence
+   search_files → read_multiple_files → find_implementation
+   
+4. Refactoring Sequence
+   find_implementation → move_file → enhanced_edit_file → sanity_check
+   
+5. New Component Sequence
+   read_multiple_files(related) → write_file(new) → edit_file(integrate) → sanity_check
+
+## TOOL COMPLEMENTARITY MATRIX
+
+           | read* | write* | edit* | move* | search* | find* | query* | init* | gen* | sanity* |
+-----------+-------+--------+-------+-------+---------+-------+--------+-------+-------+---------|
+read*      |   —   |   L    |   H   |   L   |    M    |   H   |    H   |   L   |   L   |    M    |
+write*     |   L   |   —    |   M   |   H   |    L    |   L   |    L   |   M   |   M   |    H    |
+edit*      |   H   |   M    |   —   |   M   |    L    |   M   |    M   |   L   |   L   |    H    |
+move*      |   L   |   H    |   M   |   —   |    L    |   L   |    L   |   L   |   L   |    M    |
+search*    |   M   |   L    |   L   |   L   |    —    |   H   |    M   |   L   |   L   |    L    |
+find*      |   H   |   L    |   M   |   L   |    H    |   —   |    H   |   L   |   L   |    M    |
+query*     |   H   |   L    |   M   |   L   |    M    |   H   |    —   |   M   |   M   |    L    |
+init*      |   L   |   M    |   L   |   L   |    L    |   L   |    M   |   —   |   H   |    M    |
+gen*       |   L   |   M    |   L   |   L   |    L    |   L   |    M   |   H   |   —   |    M    |
+sanity*    |   M   |   H    |   H   |   M   |    L    |   M   |    L   |   M   |   M   |    —    |
+
+Legend: H=High Complementarity, M=Medium Complementarity, L=Low Complementarity
+
+## TOOL INTEROPERABILITY PATTERNS
+
+1. Discovery → Understanding Pattern
+   {search_files, find_implementation} → {read_file, read_multiple_files, query_component}
+   
+2. Analysis → Modification Pattern
+   {read_file, read_multiple_files, query_component} → {write_file, edit_file, enhanced_edit_file, move_file}
+   
+3. Modification → Validation Pattern
+   {write_file, edit_file, enhanced_edit_file, move_file} → {sanity_check}
+   
+4. Project Lifecycle Pattern
+   initialize_librarian → {all tools} → generate_librarian → {all tools} → ...
+
+## CONTEXTUAL DECISION RULES
+
+R1: When tools have roughly equal applicability, prefer tools with:
+    1. More specific targeting
+    2. Lower context impact
+    3. Better safety guarantees
+    4. Faster execution time (in that order)
+    
+R2: Select tools based on operation scope:
+    - Project scope → initialize_librarian, generate_librarian, sanity_check
+    - Directory scope → search_files, move_file
+    - File scope → read_file, write_file
+    - Content scope → edit_file, enhanced_edit_file, find_implementation
+    - Component scope → query_component
+    
+R3: Match tool capabilities to information needs:
+    - Need content details → read_file, read_multiple_files
+    - Need location information → search_files, find_implementation
+    - Need component structure → query_component
+    - Need quality assessment → sanity_check
+    
+R4: Balance precision and efficiency:
+    - More precise = generally slower but safer
+    - Less precise = generally faster but riskier
+    - Critical operations justify precision cost

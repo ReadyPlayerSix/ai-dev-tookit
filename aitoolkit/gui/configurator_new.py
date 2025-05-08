@@ -61,9 +61,10 @@ class AIDevToolkitGUI:
         # Server configuration type - for official MCP servers
         self.server_config_type = tk.StringVar(value="npm")  # Default to npm package (recommended)
         
-        # AI Dev Toolkit Servers enabled/disabled
+        # AI Dev Toolkit Server enabled/disabled
         self.ai_librarian_server_enabled = tk.BooleanVar(value=True)
-        self.file_system_server_enabled = tk.BooleanVar(value=True)
+        # Keeping this for backward compatibility, but it's now linked to the integrated server
+        self.file_system_server_enabled = self.ai_librarian_server_enabled
         
         # Build UI
         self.create_widgets()
@@ -222,25 +223,36 @@ class AIDevToolkitGUI:
         
         # Note about server selection
         server_note = ttk.Label(server_selection_frame, 
-                              text="The following MCP servers are available for Claude Desktop:",
+                              text="The following MCP server is available for Claude Desktop:",
                               wraplength=750)
         server_note.pack(anchor=tk.W, pady=(0, 10))
         
-        # File System Server checkbox 
-        file_system_server_check = ttk.Checkbutton(server_selection_frame, 
-                                                text="File System Tools Server - Read, write, and navigate the file system",
-                                                variable=self.file_system_server_enabled,
-                                                style='Server.TCheckbutton',
-                                                command=self.update_server_status)
-        file_system_server_check.pack(anchor=tk.W, pady=5)
+        # AI Dev Toolkit Integrated Server checkbox
+        integrated_server_check = ttk.Checkbutton(server_selection_frame, 
+                                               text="AI Dev Toolkit Integrated Server", 
+                                               variable=self.ai_librarian_server_enabled,
+                                               style='Server.TCheckbutton',
+                                               command=self.update_server_status)
+        integrated_server_check.pack(anchor=tk.W, pady=5)
         
-        # AI Librarian Server checkbox
-        ai_librarian_server_check = ttk.Checkbutton(server_selection_frame, 
-                                                 text="AI Librarian Server - Code analysis with self-verification and persistent memory", 
-                                                 variable=self.ai_librarian_server_enabled,
-                                                 style='Server.TCheckbutton',
-                                                 command=self.update_server_status)
-        ai_librarian_server_check.pack(anchor=tk.W, pady=5)
+        # Description of the integrated server
+        integrated_description = ttk.Label(server_selection_frame, 
+                                        text="The integrated server combines multiple capabilities:",
+                                        wraplength=750)
+        integrated_description.pack(anchor=tk.W, padx=(20, 0), pady=(0, 5))
+        
+        # List the integrated server features
+        features_frame = ttk.Frame(server_selection_frame)
+        features_frame.pack(fill=tk.X, padx=(30, 0))
+        
+        ttk.Label(features_frame, text="• File System Tools - Read, write, and navigate the file system", 
+                 wraplength=700).pack(anchor=tk.W, pady=2)
+        ttk.Label(features_frame, text="• AI Librarian - Code analysis with self-verification and persistent memory", 
+                 wraplength=700).pack(anchor=tk.W, pady=2)
+        ttk.Label(features_frame, text="• Task Management - Track and organize development tasks", 
+                 wraplength=700).pack(anchor=tk.W, pady=2)
+        ttk.Label(features_frame, text="• Enhanced Code Analysis - Find related files, references, and component details", 
+                 wraplength=700).pack(anchor=tk.W, pady=2)
         
         # Project Starter Server checkbox (Coming Soon)
         project_starter_frame = ttk.Frame(server_selection_frame)
@@ -421,13 +433,14 @@ class AIDevToolkitGUI:
         desc_frame = ttk.LabelFrame(self.about_frame, text="Description", padding="10 10 10 10")
         desc_frame.pack(fill=tk.X, pady=(0, 20))
         
-        description = """The AI Dev Toolkit enhances Claude with powerful capabilities:
+        description = """The AI Dev Toolkit enhances Claude with powerful capabilities through its integrated MCP server:
 
-1. File System Tools: Read, write, and navigate the file system
+1. File System Tools: Read, write, and navigate the file system securely
 2. AI Librarian: Helps Claude understand your codebase with self-checks to ensure proper functionality
-3. Project Starter: Project generation and scaffolding (Coming Soon)
-4. Think Tool: Structured reasoning for complex problems (Coming Soon)
-5. Context Compression: Store and retrieve conversation history (Coming Soon)"""
+3. Task Management: Track development tasks across conversations
+4. Enhanced Code Analysis: Find related files, references, and detailed component information
+5. Project Starter: Project generation and scaffolding (Coming Soon)
+6. Think Tool: Structured reasoning for complex problems (Coming Soon)"""
         
         ttk.Label(desc_frame, text=description, wraplength=800, justify=tk.LEFT).pack(anchor=tk.W)
         

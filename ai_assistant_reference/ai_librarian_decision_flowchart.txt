@@ -1,0 +1,138 @@
+# AI Librarian Decision Flowcharts
+# Optimized for Claude's internal reasoning
+# Version 1.0
+# Created: 2025-05-08
+
+## MAIN DECISION FLOWCHART
+
+START
+│
+├─► NEED: Project Setup/Analysis?
+│    │
+│    ├─► Yes, First Time → initialize_librarian
+│    │
+│    ├─► Yes, Update Existing → generate_librarian
+│    │
+│    └─► Yes, Validate Quality → sanity_check
+│
+├─► NEED: Read Content?
+│    │
+│    ├─► Single File → read_file
+│    │
+│    └─► Multiple Related Files → read_multiple_files
+│
+├─► NEED: Find/Search Content?
+│    │
+│    ├─► Know Component Name → query_component
+│    │
+│    ├─► Need Code Implementation → find_implementation
+│    │
+│    └─► General Text/Pattern → search_files
+│
+└─► NEED: Modify Content?
+     │
+     ├─► Create New/Replace → write_file
+     │
+     ├─► Move/Rename → move_file
+     │
+     └─► Partial Change?
+          │
+          ├─► Critical File → enhanced_edit_file
+          │
+          └─► Simple Change → edit_file
+
+## CONTEXTUAL DECISION FACTORS
+
+1. ProjectContext
+   - No .ai_reference directory ➤ initialize_librarian
+   - Has .ai_reference directory ➤ generate_librarian
+   - Multiple changes made ➤ sanity_check
+
+2. FileOperationContext
+   - Deep understanding needed ➤ read_file instead of search_files
+   - Comparing implementations ➤ read_multiple_files instead of repeated read_file
+   - Refactoring structure ➤ move_file instead of write_file + delete
+   - Structural + content changes ➤ move_file then edit_file
+
+3. EditSeverityContext
+   - Critical system file ➤ enhanced_edit_file
+   - Configuration file ➤ enhanced_edit_file
+   - Simple comment/docstring ➤ edit_file
+   - Complete rewrite ➤ write_file
+
+4. SearchContext
+   - Know exact component ➤ query_component
+   - Looking for usage patterns ➤ find_implementation
+   - General codebase exploration ➤ search_files
+
+## DECISION HEURISTICS
+
+H1: FileReadCountHeuristic
+   - If ReadOperations(SameContext) > 2 ➤ read_multiple_files
+   - If ContextuallyRelated(Files) ➤ read_multiple_files
+
+H2: EditSafetyHeuristic
+   - If Importance(File) > 7 ➤ enhanced_edit_file
+   - If IsCriticalPath(File) ➤ enhanced_edit_file
+   - If IsConfiguration(File) ➤ enhanced_edit_file
+
+H3: SearchEfficiencyHeuristic
+   - If KnownComponent ➤ query_component (100% match)
+   - If CodePattern ➤ find_implementation (context + pattern)
+   - If TextPattern ➤ search_files (broad + fast)
+
+H4: CodeModificationWorkflow
+   - read (understand) → edit (modify) → validate (verify)
+   - search/find → read → edit → validate
+
+H5: ContextPreservationHeuristic
+   - Use tools that preserve context when possible
+   - Batch operations to minimize context switches
+   - Query specific components before broad searches
+
+## OPERATION COMBINATIONS
+
+C1: RefactoringCombination
+   - search_files → identify locations
+   - read_multiple_files → understand dependencies
+   - move_file → restructure
+   - enhanced_edit_file → update references
+
+C2: BugFixCombination
+   - find_implementation → locate issues
+   - read_file → understand context
+   - edit_file → fix problems
+   - sanity_check → verify fix
+
+C3: ComponentExplorationCombination
+   - query_component → get details
+   - find_implementation → find usages
+   - read_multiple_files → understand interactions
+
+C4: NewFeatureCombination
+   - read_multiple_files → understand related components
+   - write_file → create new files
+   - enhanced_edit_file → hook into existing system
+   - sanity_check → validate integration
+
+## EFFICIENCY OPTIMIZATION
+
+O1: MinimizeContextSwitching
+   - Batch similar operations
+   - Prefer tools that handle multiple items
+   - Process in logical order to reduce revisits
+
+O2: PreferPrecisionOverBreadth
+   - Use most specific tool for the job
+   - Narrow search scope when possible
+   - Target known components directly
+
+O3: AvoidRedundantOperations
+   - Cache results when possible
+   - Combine related searches
+   - Use targeted tools over broad ones
+
+O4: SafetyVersusEfficiency
+   - Enhanced safety for critical files
+   - Standard operations for routine changes
+   - Balance validation with operational speed

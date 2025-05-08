@@ -58,7 +58,22 @@ def create_default_files(base_dir: str) -> None:
             json.dump({
                 "version": "0.2.0",
                 "last_updated": datetime.now().isoformat(),
-                "components": []
+                "components": [],
+                "professional_standards": {
+                    "id": "standard-01",
+                    "title": "Professional Development Standards",
+                    "description": [
+                        "When working with this codebase I commit to:",
+                        "1. ALWAYS respect the existing project structure",
+                        "2. Make minimal, targeted changes to fix specific issues",
+                        "3. Understand the codebase properly before suggesting modifications",
+                        "4. Follow established patterns and naming conventions",
+                        "5. Focus on maintainability and clarity",
+                        "6. NO creating new file implementations when modifying existing ones would suffice",
+                        "7. NO bypassing or working around proper development practices for quick results"
+                    ],
+                    "enforced": True
+                }
             }, f, indent=2)
     
     # Create script index
@@ -86,6 +101,18 @@ like Claude maintain context about your project across conversations.
 - `scripts/`: Mini-librarians for individual scripts/files
 - `diagnostics/`: Analysis of your codebase
 - `todos/`: AI-optimized task tracking system
+
+## Professional Standards Commitment
+
+The AI assistants working with this project are committed to the following standards:
+
+1. ALWAYS respect the existing project structure
+2. Make minimal, targeted changes to fix specific issues
+3. Understand the codebase properly before suggesting modifications
+4. Follow established patterns and naming conventions
+5. Focus on maintainability and clarity
+6. NO creating new file implementations when modifying existing ones would suffice
+7. NO bypassing or working around proper development practices for quick results
 
 ## AI-Optimized Todo System
 

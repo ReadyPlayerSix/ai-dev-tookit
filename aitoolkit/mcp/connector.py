@@ -1,75 +1,125 @@
 """
-MCP connector for AI Dev Toolkit.
+MCP Connector Module
 
-This module provides connectors for integrating with the Model Context Protocol (MCP).
+This module provides compatibility classes for connecting with the MCP protocol.
+It serves as a backup when the official MCP package isn't available.
 """
 
 import os
-import json
-import asyncio
-from typing import Dict, List, Any, Optional, Union
+import sys
+import logging
+import inspect
+from typing import Dict, Any, Callable, List, Optional, Union, Set, Tuple
 
-class MCPConnector:
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Context class for MCP
+class Context:
+    """Context object providing access to request info and helper methods."""
+    
+    def __init__(self, request_context=None):
+        self.request_context = request_context or {}
+        
+    def info(self, message):
+        """Log an informational message."""
+        logger.info(message)
+        
+    def warning(self, message):
+        """Log a warning message."""
+        logger.warning(message)
+        
+    def error(self, message):
+        """Log an error message."""
+        logger.error(message)
+        
+    async def report_progress(self, current, total):
+        """Report progress on a long-running operation."""
+        logger.info(f"Progress: {current}/{total}")
+        
+    async def read_resource(self, resource_uri):
+        """Read a resource by URI."""
+        logger.info(f"Reading resource: {resource_uri}")
+        return None, None
+
+# FastMCP class that provides a simplified interface
+class FastMCP:
     """
-    MCP connector that handles protocol-specific interactions.
+    Simple implementation of FastMCP that can be used as a fallback
+    when the real MCP package isn't available.
     """
     
-    def __init__(self, server_name: str, version: str = "0.1.0"):
-        """
-        Initialize the MCP connector.
+    def __init__(self, name, capabilities=None, dependencies=None, lifespan=None):
+        self.name = name
+        self.capabilities = capabilities or {}
+        self.dependencies = dependencies or []
+        self.lifespan = lifespan
+        self.tools = {}
+        self.resources = {}
+        self.prompts = {}
         
-        Args:
-            server_name: The name of the MCP server
-            version: The server version
-        """
-        self.server_name = server_name
-        self.version = version
-        self.capabilities = {
-            "resources": {},
-            "tools": {},
-            "prompts": {}
-        }
-    
-    def register_capability(self, capability: str, options: Dict[str, Any] = None) -> None:
-        """
-        Register a capability for the MCP server.
+    def tool(self, **kwargs):
+        """Decorator for registering a tool."""
+        def decorator(func):
+            name = kwargs.get('name', func.__name__)
+            self.tools[name] = {
+                'func': func,
+                'kwargs': kwargs,
+                'signature': inspect.signature(func)
+            }
+            return func
+        return decorator
         
-        Args:
-            capability: The capability name (resources, tools, prompts)
-            options: Optional capability-specific options
-        """
-        if capability not in self.capabilities:
-            self.capabilities[capability] = {}
+    def resource(self, pattern):
+        """Decorator for registering a resource."""
+        def decorator(func):
+            self.resources[pattern] = {
+                'func': func,
+                'signature': inspect.signature(func)
+            }
+            return func
+        return decorator
         
-        if options:
-            self.capabilities[capability].update(options)
-    
-    def get_initialization_options(self) -> Dict[str, Any]:
-        """
-        Get initialization options for the MCP server.
+    def prompt(self, **kwargs):
+        """Decorator for registering a prompt."""
+        def decorator(func):
+            name = kwargs.get('name', func.__name__)
+            self.prompts[name] = {
+                'func': func,
+                'kwargs': kwargs,
+                'signature': inspect.signature(func)
+            }
+            return func
+        return decorator
+
+    def run(self):
+        """Run the MCP server."""
+        logger.info(f"Starting MCP server: {self.name}")
+        logger.warning("This is a fallback implementation. It won't actually handle connections.")
         
-        Returns:
-            Dictionary of initialization options
-        """
-        return {
-            "server_name": self.server_name,
-            "server_version": self.version,
-            "capabilities": self.capabilities
-        }
-    
-    async def connect(self, transport: str = "stdio") -> None:
-        """
-        Connect to a client using the specified transport.
-        
-        Args:
-            transport: The transport to use (stdio, sse)
-        """
-        # Implementation depends on the transport
-        if transport == "stdio":
-            # Stdio transport implementation would go here
-            pass
-        elif transport == "sse":
-            # SSE transport implementation would go here
-            pass
-        else:
-            raise ValueError(f"Unsupported transport: {transport}")
+    def sse_app(self):
+        """Return an ASGI app for SSE transport."""
+        async def app(scope, receive, send):
+            await send({
+                'type': 'http.response.start',
+                'status': 200,
+                'headers': [
+                    [b'content-type', b'text/plain'],
+                ],
+            })
+            await send({
+                'type': 'http.response.body',
+                'body': b'MCP connector fallback',
+            })
+        return app
+
+# Attempt to import the real MCP classes
+try:
+    from mcp.server.fastmcp import FastMCP as RealFastMCP, Context as RealContext
+    # If we successfully imported the real classes, use them instead
+    FastMCP = RealFastMCP
+    Context = RealContext
+    logger.info("Using actual MCP package classes")
+except ImportError:
+    logger.warning("Using fallback MCP connector classes")
