@@ -1,0 +1,150 @@
+# AI Librarian Tool Matrix
+# Claude's internal guide for optimal tool selection
+# Created: 2025-05-08
+# Version: 1.0
+
+## FILE READING TOOLS
+
+read_file:
+- USE_WHEN: SingleFile, DetailedMetadataNeeded, SpecificContentExtraction
+- AVOID_WHEN: MultipleRelatedFiles, ComparativeAnalysis
+- PERF: Fast
+- CONTEXT_IMPACT: Low
+- PREFERRED_FOR: DetailedInspection, SingleFileAnalysis
+- DECISION_FACTOR: SingleFileOperation & DetailNeeded
+
+read_multiple_files:
+- USE_WHEN: RelatedFiles>1, ComparativeNeeds, BatchProcessing
+- AVOID_WHEN: SingleFileOnly, LargeFilesWouldOverflowContext
+- PERF: Medium
+- CONTEXT_IMPACT: Medium-High
+- PREFERRED_FOR: CrossFileAnalysis, RelatedComponentStudy
+- DECISION_FACTOR: MultiFileOperation | RelatedFilesAnalysis
+
+## FILE WRITING TOOLS
+
+write_file:
+- USE_WHEN: NewFile, CompleteReplacement, NoPartialEdits
+- AVOID_WHEN: PartialChanges, PreserveFormatting
+- PERF: Fast
+- CONTEXT_IMPACT: Low
+- PREFERRED_FOR: NewContent, ConfigGeneration, OutputSaving
+- DECISION_FACTOR: CreateNewFile | CompleteOverwrite
+
+edit_file:
+- USE_WHEN: PartialChanges, SmallEdits, PreciseLocation
+- AVOID_WHEN: CompleteReplacement, AmbiguousMatches
+- PERF: Fast
+- CONTEXT_IMPACT: Low
+- PREFERRED_FOR: BugFixes, CommentAddition, SimpleUpdates
+- DECISION_FACTOR: PartialUpdate & !CriticalFile
+
+enhanced_edit_file:
+- USE_WHEN: CriticalChanges, SafetyPriority, DetailedDiffNeeded
+- AVOID_WHEN: SimpleEdits, PerformanceCritical
+- PERF: Medium
+- CONTEXT_IMPACT: Low
+- PREFERRED_FOR: ImportantFiles, ComplexEdits, RefactoringOperations
+- DECISION_FACTOR: CriticalFile | ComplexChange
+
+move_file:
+- USE_WHEN: Reorganizing, Refactoring, Renaming
+- AVOID_WHEN: ContentModification
+- PERF: Fast
+- CONTEXT_IMPACT: Low
+- PREFERRED_FOR: PathChanges, DirectoryRestructuring
+- DECISION_FACTOR: LocationChange & !ContentChange
+
+## CODE ANALYSIS TOOLS
+
+search_files:
+- USE_WHEN: PatternSearch, NameFiltering, WithExclusions
+- AVOID_WHEN: ComplexPatterns, ComponentSpecificSearch
+- PERF: Medium
+- CONTEXT_IMPACT: Medium
+- PREFERRED_FOR: FileFinding, BroadSearch, SimplePatterns
+- DECISION_FACTOR: BroadSearch & SimplePattern
+
+find_implementation:
+- USE_WHEN: CodeSearch, ContextImportant, LineNumbersNeeded
+- AVOID_WHEN: SimpleTextSearch, FileNameSearch
+- PERF: Medium-Slow
+- CONTEXT_IMPACT: High
+- PREFERRED_FOR: APIUsage, FunctionLocations, CodeStudy
+- DECISION_FACTOR: CodeContextNeeded & !ComponentKnown
+
+query_component:
+- USE_WHEN: ComponentKnown, StructuralUnderstanding, APIExploration
+- AVOID_WHEN: UnknownComponents, GeneralSearch
+- PERF: Fast
+- CONTEXT_IMPACT: Medium
+- PREFERRED_FOR: ClassDetails, FunctionAnalysis, ComponentUnderstanding
+- DECISION_FACTOR: ComponentKnown & DetailedAnalysisNeeded
+
+## PROJECT MANAGEMENT TOOLS
+
+initialize_librarian:
+- USE_WHEN: FirstInteraction, NewProject, DeepUnderstandingNeeded
+- AVOID_WHEN: AlreadyInitialized, QuickQuestion
+- PERF: Very Slow
+- CONTEXT_IMPACT: Low
+- PREFERRED_FOR: ProjectSetup, InitialExploration
+- DECISION_FACTOR: FirstTimeAnalysis | NoAIReference
+
+generate_librarian:
+- USE_WHEN: RefreshNeeded, CodebaseUpdated, AlreadyInitialized
+- AVOID_WHEN: NeverInitialized, NoChanges
+- PERF: Slow
+- CONTEXT_IMPACT: Low
+- PREFERRED_FOR: UpdateAnalysis, RefreshContext
+- DECISION_FACTOR: UpdatedCodebase & AIReferenceExists
+
+sanity_check:
+- USE_WHEN: QualityConcerns, PreRelease, ConfigurationIssues
+- AVOID_WHEN: SpeedCritical, UnrelatedToQuality
+- PERF: Slow
+- CONTEXT_IMPACT: High
+- PREFERRED_FOR: BugPrevention, StructureValidation, ConsistencyVerification
+- DECISION_FACTOR: QualityConcern | ValidationNeeded
+
+## DECISION TREES
+
+# File Operation Decision Tree
+FileOperation:
+  Read?
+    SingleFile → read_file
+    MultipleFiles → read_multiple_files
+  Write?
+    NewOrComplete → write_file
+    Partial?
+      CriticalFile → enhanced_edit_file
+      SimpleEdit → edit_file
+    Relocate → move_file
+
+# Code Search Decision Tree
+CodeSearch:
+  ComponentKnown → query_component
+  ImplementationFocus → find_implementation
+  GeneralPattern → search_files
+
+# Project Management Decision Tree
+ProjectMgmt:
+  FirstSetup → initialize_librarian
+  Refresh → generate_librarian
+  QualityCheck → sanity_check
+
+## USAGE PATTERNS
+
+InitialExploration = initialize_librarian → query_component → search_files
+DeepUnderstanding = query_component → find_implementation → read_file
+TargetedChanges = read_file → enhanced_edit_file → sanity_check
+Refactoring = search_files → read_multiple_files → move_file → enhanced_edit_file
+QualityImprovement = sanity_check → find_implementation → edit_file
+
+## OPTIMIZATION RULES
+
+1. MinimizeContext: When context window limited, prefer tools with smaller outputs
+2. BatchOperations: Use read_multiple_files instead of multiple read_file calls
+3. PrecisionTargeting: Use query_component over find_implementation when component known
+4. SafetyProtocol: Use enhanced_edit_file for critical files, write_file for new content
+5. ValidationCycle: Run sanity_check after significant changes
