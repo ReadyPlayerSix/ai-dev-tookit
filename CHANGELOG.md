@@ -22,7 +22,7 @@
 - Enhanced AI Librarian to integrate with TaskBoard
 - Updated documentation with new features and examples
 
-## v0.3.0 - Integrated Server (2025-05-07)
+## v0.3.0 - Integrated Server (2025-05-08)
 
 ### Added
 - **Integrated Server**: Combined AI Librarian and File System functionality into a single MCP server

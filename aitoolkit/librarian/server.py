@@ -2323,6 +2323,259 @@ def write_file(path: str, content: str, encoding: str = "utf-8") -> Dict[str, An
                 "message": f"Error writing file: {str(e)}"
             }
             
+@mcp.tool()
+def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
+    """
+    Find files that are related to a specific file in the project.
+    
+    This tool analyzes the project structure to find files that are related to the 
+    specified file through imports, class/function references, naming patterns, 
+    or module/package relationships.
+    
+    Args:
+        project_path: The root directory of the project
+        file_path: The file to find related files for (absolute or relative to project_path)
+        
+    Returns:
+        Dictionary with related files organized by relationship type
+    """
+    # Pause monitoring during this operation
+    with MonitoringPauser():
+        try:
+            # Normalize paths
+            project_path = os.path.abspath(project_path)
+            
+            # Convert file_path to absolute path if it's relative
+            if not os.path.isabs(file_path):
+                file_path = os.path.join(project_path, file_path)
+            file_path = os.path.abspath(file_path)
+            
+            # Validate paths
+            if not validate_path(project_path, ALLOWED_DIRECTORIES):
+                return {
+                    "status": "error",
+                    "message": f"Access denied: {project_path} is not within allowed directories"
+                }
+            
+            if not validate_path(file_path, ALLOWED_DIRECTORIES):
+                return {
+                    "status": "error",
+                    "message": f"Access denied: {file_path} is not within allowed directories"
+                }
+            
+            # Check if file exists
+            if not os.path.isfile(file_path):
+                return {
+                    "status": "error",
+                    "message": f"File not found: {file_path}"
+                }
+                
+            # Get relative path for cleaner output
+            rel_file_path = os.path.relpath(file_path, project_path)
+            
+            # Initialize result structure
+            related_files = {
+                "imports": [],        # Files that import the target file
+                "imported_by": [],    # Files imported by the target file
+                "name_related": [],   # Files with similar names
+                "package_related": [], # Files in the same package
+                "class_references": [], # Files that reference classes from the target file
+                "function_calls": []  # Files that call functions from the target file
+            }
+            
+            # Check if AI Librarian has been initialized
+            ai_ref_path = os.path.join(project_path, ".ai_reference")
+            if not os.path.exists(ai_ref_path):
+                return {
+                    "status": "error",
+                    "message": f"AI Librarian not initialized for {project_path}. Run initialize_librarian first."
+                }
+                
+            # Get script index
+            script_index_path = os.path.join(ai_ref_path, "script_index.json")
+            if not os.path.exists(script_index_path):
+                return {
+                    "status": "error",
+                    "message": f"Script index not found at {script_index_path}."
+                }
+                
+            with open(script_index_path, 'r', encoding='utf-8') as f:
+                script_index = json.load(f)
+                
+            # Get component registry
+            component_registry_path = os.path.join(ai_ref_path, "component_registry.json")
+            if not os.path.exists(component_registry_path):
+                return {
+                    "status": "error",
+                    "message": f"Component registry not found at {component_registry_path}."
+                }
+                
+            with open(component_registry_path, 'r', encoding='utf-8') as f:
+                component_registry = json.load(f)
+
+            # Parse the target file to get its imports, classes, and functions
+            target_file_info = None
+            target_file_rel_path = rel_file_path.replace("\\", "/")
+            
+            for path, info in script_index["files"].items():
+                if path == target_file_rel_path:
+                    target_file_info = info
+                    break
+                    
+            if not target_file_info:
+                # If the file is not in the index, parse it directly
+                target_file_info = {
+                    "path": target_file_rel_path, 
+                    "classes": [], 
+                    "functions": [], 
+                    "imports": []
+                }
+                
+                try:
+                    file_structure = parse_python_file(file_path)
+                    target_file_info["classes"] = file_structure["classes"]
+                    target_file_info["functions"] = file_structure["functions"]
+                    target_file_info["imports"] = file_structure["imports"]
+                except Exception as e:
+                    logger.error(f"Error parsing target file {file_path}: {str(e)}")
+            
+            # Get imports from the target file
+            target_imports = []
+            mini_librarian_path = None
+            
+            if "mini_librarian" in target_file_info:
+                mini_librarian_path = os.path.join(ai_ref_path, target_file_info["mini_librarian"])
+                if os.path.exists(mini_librarian_path):
+                    with open(mini_librarian_path, 'r', encoding='utf-8') as f:
+                        mini_librarian = json.load(f)
+                        if "imports" in mini_librarian:
+                            target_imports = mini_librarian["imports"]
+                            
+            # For each file in the script index, check for relationships
+            for path, info in script_index["files"].items():
+                # Skip the target file itself
+                if path == target_file_rel_path:
+                    continue
+                    
+                full_path = os.path.join(project_path, path)
+                
+                # 1. Package relationship
+                if os.path.dirname(path) == os.path.dirname(target_file_rel_path):
+                    related_files["package_related"].append({
+                        "path": path,
+                        "relationship": "same_package"
+                    })
+                
+                # 2. Name relationship
+                target_name = os.path.splitext(os.path.basename(target_file_rel_path))[0]
+                file_name = os.path.splitext(os.path.basename(path))[0]
+                
+                # Check for name similarities
+                if (target_name in file_name or 
+                    file_name in target_name or 
+                    file_name.startswith(target_name) or 
+                    target_name.startswith(file_name)):
+                    related_files["name_related"].append({
+                        "path": path,
+                        "relationship": "similar_name"
+                    })
+                
+                # 3. Check if this file imports the target file or is imported by it
+                mini_librarian_path = None
+                if "mini_librarian" in info:
+                    mini_librarian_path = os.path.join(ai_ref_path, info["mini_librarian"])
+                    
+                if mini_librarian_path and os.path.exists(mini_librarian_path):
+                    with open(mini_librarian_path, 'r', encoding='utf-8') as f:
+                        mini_librarian = json.load(f)
+                        
+                        if "imports" in mini_librarian:
+                            # Check if this file imports the target file
+                            target_module = os.path.splitext(target_file_rel_path)[0].replace("/", ".")
+                            
+                            for imp in mini_librarian["imports"]:
+                                # Look for direct or relative imports
+                                if (imp == target_module or 
+                                    imp.endswith("." + os.path.basename(target_module))):
+                                    related_files["imports"].append({
+                                        "path": path,
+                                        "relationship": "imports_target",
+                                        "import_statement": imp
+                                    })
+                                    break
+                                    
+                            # Check if the target file imports this file
+                            this_module = os.path.splitext(path)[0].replace("/", ".")
+                            for imp in target_imports:
+                                if (imp == this_module or 
+                                    imp.endswith("." + os.path.basename(this_module))):
+                                    related_files["imported_by"].append({
+                                        "path": path,
+                                        "relationship": "imported_by_target",
+                                        "import_statement": imp
+                                    })
+                                    break
+                                    
+                # 4. Class and function references
+                if "classes" in target_file_info:
+                    # Check if this file references classes from the target file
+                    full_content = ""
+                    try:
+                        with open(full_path, 'r', encoding='utf-8') as f:
+                            full_content = f.read()
+                    except Exception as e:
+                        logger.error(f"Error reading file {full_path}: {str(e)}")
+                        
+                    if full_content:
+                        for class_name in target_file_info["classes"]:
+                            if class_name in full_content:
+                                # Verify it's a proper reference, not just string matching
+                                # Look for patterns like: ClassName(, ClassName., = ClassName
+                                import re
+                                if re.search(r'[(\s=.]' + re.escape(class_name) + r'[\s(.]', full_content):
+                                    related_files["class_references"].append({
+                                        "path": path,
+                                        "relationship": "references_class",
+                                        "class_name": class_name
+                                    })
+                                    
+                    # Check for function calls
+                    for func_name in target_file_info["functions"]:
+                        if func_name in full_content:
+                            # Look for pattern like function_name(
+                            import re
+                            if re.search(r'[(\s=.]' + re.escape(func_name) + r'\s*\(', full_content):
+                                related_files["function_calls"].append({
+                                    "path": path,
+                                    "relationship": "calls_function",
+                                    "function_name": func_name
+                                })
+                                
+            # Count total related files
+            total_related = sum(len(files) for files in related_files.values())
+            
+            # Create unique list by removing duplicates
+            unique_related = set()
+            for category, files in related_files.items():
+                for file_info in files:
+                    unique_related.add(file_info["path"])
+            
+            return {
+                "status": "success",
+                "file": rel_file_path,
+                "related_files": related_files,
+                "total_related": total_related,
+                "unique_related": len(unique_related),
+                "message": f"Found {len(unique_related)} unique files related to {rel_file_path}"
+            }
+            
+        except Exception as e:
+            logger.error(f"Error finding related files: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Error finding related files: {str(e)}"
+            }
+
 # Helper function for path validation
 def validate_path(path: str, allowed_directories: List[str]) -> bool:
     """
