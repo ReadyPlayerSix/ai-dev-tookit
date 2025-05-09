@@ -1,103 +1,151 @@
 #!/usr/bin/env python3
 """
-Cleanup script to remove empty directories after migration.
+AI Dev Toolkit Project Cleanup Script
 
-This script will:
-1. Check if directories are empty (except for __pycache__)
-2. Remove empty directories
-3. Print a summary of changes
+This script cleans up the project directory by removing unnecessary files,
+moving legacy files to the legacy directory, and organizing the codebase.
 """
 
 import os
-import shutil
 import sys
+import shutil
 from pathlib import Path
 
-def is_empty_dir(path):
-    """
-    Check if a directory is empty (ignoring __pycache__).
+def print_colored(text, color="green"):
+    """Print colored text to the console."""
+    colors = {
+        "red": "\033[31m",
+        "green": "\033[32m",
+        "yellow": "\033[33m",
+        "blue": "\033[34m",
+        "magenta": "\033[35m",
+        "cyan": "\033[36m",
+        "reset": "\033[0m"
+    }
     
-    Args:
-        path: Directory path to check
-        
-    Returns:
-        bool: True if directory is empty (except for __pycache__), False otherwise
-    """
-    # List all items in the directory
-    items = os.listdir(path)
-    
-    # Filter out __pycache__ directories
-    non_cache_items = [item for item in items if item != "__pycache__"]
-    
-    # If there are no non-cache items, the directory is considered empty
-    return len(non_cache_items) == 0
+    # Check if we're in a terminal that supports colors
+    if sys.stdout.isatty():
+        print(f"{colors.get(color, '')}{text}{colors['reset']}")
+    else:
+        print(text)
 
-def remove_empty_dirs():
-    """
-    Remove empty directories from the project.
+def cleanup_project():
+    """Clean up the project directory."""
+    # Get the project root directory
+    project_root = Path(__file__).parent.parent.absolute()
+    legacy_dir = project_root / "legacy"
     
-    Returns:
-        list: List of removed directories
-    """
-    # Directories to check
-    dirs_to_check = [
-        "ai-librarian-server",
-        "gui",
-        "src"
+    # Ensure the legacy directory exists
+    os.makedirs(legacy_dir, exist_ok=True)
+    
+    # Files to delete
+    files_to_delete = [
+        # Backup/temporary files
+        "aitoolkit/librarian/server.py.bak",
+        "aitoolkit/gui/configurator.py.backup",
+        "aitoolkit/gui/configurator.py.fixed",
+        "aitoolkit/gui/configurator_new.py.fixed",
+        "aitoolkit/gui/__init__.py.old",
+        "aitoolkit/gui/configurator.py.updated",
+        # Test files
+        "aitoolkit/test_file.txt",
+        # The gitStatus.txt file
+        "gitStatus.txt",
     ]
     
-    removed_dirs = []
+    # Files to move to legacy
+    files_to_legacy = [
+        # Deprecated configurator files
+        "aitoolkit/gui/configurator_fixed.py",
+        "aitoolkit/gui/configurator_legacy.py",
+        "aitoolkit/gui/configurator_test.py",
+    ]
     
-    for dir_name in dirs_to_check:
-        dir_path = Path(dir_name)
-        
-        if not dir_path.exists():
-            print(f"Directory {dir_name} does not exist, skipping...")
-            continue
-            
-        if not dir_path.is_dir():
-            print(f"{dir_name} is not a directory, skipping...")
-            continue
-            
-        if is_empty_dir(dir_path):
-            # Remove __pycache__ directory if it exists
-            pycache_path = dir_path / "__pycache__"
-            if pycache_path.exists():
-                shutil.rmtree(pycache_path)
-                print(f"Removed {pycache_path}")
-                
-            # Remove the empty directory
-            os.rmdir(dir_path)
-            removed_dirs.append(str(dir_path))
-            print(f"Removed empty directory {dir_path}")
+    # Directories to delete
+    dirs_to_delete = [
+        "aitoolkit/librarian/filesystem_old",
+    ]
+    
+    # Directories to move to legacy
+    dirs_to_legacy = [
+        "test_directory",
+    ]
+    
+    # Process files to delete
+    print_colored("\nDeleting unnecessary files:", "blue")
+    for file_path in files_to_delete:
+        full_path = project_root / file_path
+        if full_path.exists():
+            try:
+                full_path.unlink()
+                print_colored(f"✓ Deleted: {file_path}", "green")
+            except Exception as e:
+                print_colored(f"✗ Error deleting {file_path}: {e}", "red")
         else:
-            print(f"Directory {dir_path} is not empty, skipping...")
-            
-    return removed_dirs
+            print_colored(f"! File not found: {file_path}", "yellow")
+    
+    # Process files to move to legacy
+    print_colored("\nMoving files to legacy directory:", "blue")
+    for file_path in files_to_legacy:
+        full_path = project_root / file_path
+        if full_path.exists():
+            legacy_path = legacy_dir / file_path
+            try:
+                # Create the destination directory
+                os.makedirs(os.path.dirname(legacy_path), exist_ok=True)
+                # Move the file
+                shutil.move(full_path, legacy_path)
+                print_colored(f"✓ Moved to legacy: {file_path}", "green")
+            except Exception as e:
+                print_colored(f"✗ Error moving {file_path}: {e}", "red")
+        else:
+            print_colored(f"! File not found: {file_path}", "yellow")
+    
+    # Process directories to delete
+    print_colored("\nDeleting unnecessary directories:", "blue")
+    for dir_path in dirs_to_delete:
+        full_path = project_root / dir_path
+        if full_path.exists() and full_path.is_dir():
+            try:
+                shutil.rmtree(full_path)
+                print_colored(f"✓ Deleted directory: {dir_path}", "green")
+            except Exception as e:
+                print_colored(f"✗ Error deleting directory {dir_path}: {e}", "red")
+        else:
+            print_colored(f"! Directory not found: {dir_path}", "yellow")
+    
+    # Process directories to move to legacy
+    print_colored("\nMoving directories to legacy:", "blue")
+    for dir_path in dirs_to_legacy:
+        full_path = project_root / dir_path
+        if full_path.exists() and full_path.is_dir():
+            legacy_path = legacy_dir / dir_path
+            try:
+                # Create the destination directory parent if needed
+                os.makedirs(os.path.dirname(legacy_path) if os.path.dirname(legacy_path) else legacy_dir, exist_ok=True)
+                # Move the directory
+                shutil.move(full_path, legacy_path)
+                print_colored(f"✓ Moved directory to legacy: {dir_path}", "green")
+            except Exception as e:
+                print_colored(f"✗ Error moving directory {dir_path}: {e}", "red")
+        else:
+            print_colored(f"! Directory not found: {dir_path}", "yellow")
 
-def main():
-    """Main function to run the cleanup script."""
-    print("=== AI Dev Toolkit Cleanup Script ===")
-    
-    # Get script directory
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # Change to project root directory
-    os.chdir(os.path.dirname(script_dir))
-    
-    print(f"Working directory: {os.getcwd()}")
-    
-    # Remove empty directories
-    removed_dirs = remove_empty_dirs()
-    
     # Print summary
-    if removed_dirs:
-        print("\nRemoved directories:")
-        for dir_path in removed_dirs:
-            print(f"- {dir_path}")
-        print("\nCleanup complete.")
-    else:
-        print("\nNo directories were removed.")
+    print_colored("\nCleanup complete!", "green")
+    print_colored("The project directory has been cleaned up and organized.", "green")
+    print_colored("Legacy files and directories have been moved to the legacy directory.", "green")
 
 if __name__ == "__main__":
-    main()
+    # Confirm before proceeding
+    print("AI Dev Toolkit Project Cleanup")
+    print("==============================")
+    print("This script will clean up the project directory by removing unnecessary files,")
+    print("moving legacy files to the legacy directory, and organizing the codebase.")
+    print()
+    proceed = input("Do you want to proceed? (y/n): ").lower() == 'y'
+    
+    if proceed:
+        cleanup_project()
+    else:
+        print("Cleanup cancelled.")

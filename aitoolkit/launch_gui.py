@@ -47,8 +47,8 @@ def main():
         sys.path.insert(0, parent_dir)
     
     try:
-        # Import the GUI class after fixing the path
-        from aitoolkit.gui.configurator import AIDevToolkitGUI
+        # Import the unified GUI class after fixing the path
+        from aitoolkit.gui.configurator_unified import AIDevToolkitGUI
         
         # Create and run the GUI
         root = tk.Tk()

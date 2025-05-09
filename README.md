@@ -1,67 +1,105 @@
 # AI Dev Toolkit
 
-A comprehensive toolkit that enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-powered task management.
+![AI-Assisted](https://img.shields.io/badge/AI--Assisted-Claude%203.7-yellow?logo=anthropic&logoColor=white)
+![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-blue)
+![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-Compatible-green)
+![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Release](https://img.shields.io/badge/release-v0.3.0-orange)
+
+A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
+
+<div align="center">
+  <!-- Insert screenshot of GUI here when available -->
+  <img src="docs/images/ai-dev-toolkit-banner.png" alt="AI Dev Toolkit Banner" width="800"/>
+</div>
 
 ## 🌟 Overview
 
-AI Dev Toolkit integrates with Claude Desktop to provide AI-assisted development capabilities beyond what's available out of the box. The toolkit creates a bridge between your projects and Claude, allowing it to understand your codebase, assist with development tasks, and maintain context across conversations.
+AI Dev Toolkit elevates Claude Desktop beyond a conversational assistant to a comprehensive development partner. The toolkit creates a bidirectional bridge between your projects and Claude, enabling it to:
+
+- **Understand your codebase** through persistent context that spans conversations
+- **Access and modify your filesystem** with appropriate permissions
+- **Track and manage development tasks** with sophisticated context awareness
+- **Offload complex cognitive tasks** to specialized AI mini-librarians
+- **Create a seamless development workflow** within Claude's interface
+
+With this toolkit, Claude becomes a true development partner - remembering your project structure, understanding component relationships, tracking tasks, and assisting with development activities.
 
 ## 🚀 Features
 
-### AI Librarian (Stable)
-- **Code Understanding**: Maintains a comprehensive index of your codebase
-- **Persistent Context**: Remembers code structure across conversations
-- **Component Tracking**: Identifies functions, classes, and modules
-- **Smart Search**: Find implementations and references quickly
-- **Real-time Updates**: Monitors project changes automatically
-
 ### Unified MCP Server (Stable)
-- **Integrated Experience**: Combined AI Librarian and File System functionality in a single server
-- **Simplified Setup**: Easier configuration and installation
-- **Improved Performance**: Optimized for faster response times
-- **MCP Protocol Support**: Full compliance with Model Context Protocol standards
+- **Single Server Architecture**: All capabilities integrated in one Model Context Protocol server
+- **Simplified Setup**: One-step installation to Claude Desktop
+- **Optimized Performance**: Reduced overhead and faster response times
+- **Full MCP Compliance**: Complete implementation of Model Context Protocol standards
 
-### File System Tools (Stable)
-- **Secure File Access**: Controlled access to your project files
-- **Directory Management**: List, search, and navigate directories
-- **File Operations**: Read from and write to files with proper encoding detection
-- **Directory Visualization**: Generate tree views of project structure
-- **File Analysis**: Detailed information about files and their contents
+### AI Librarian (Stable)
+- **Code Understanding**: Comprehensive codebase indexing with component tracking
+- **Persistent Context**: Code structure awareness persists across conversations
+- **Component Relationship Analysis**: Automatically detects dependencies and relationships
+- **Documentation Generation**: Extracts docstrings and creates documentation
+- **Real-time Updates**: Monitors project changes automatically to stay current
 
 ### Enhanced Code Analysis (Stable)
 - **Reference Finding**: Locate all references to components across the codebase
-- **File Overview**: Get comprehensive analysis of file structure and metrics
-- **Component Details**: Enhanced component querying with examples and docstrings
-- **Related Files**: Find files related to a specific file based on imports and references
+- **Pattern Detection**: Identify common patterns and anti-patterns
+- **File Overview**: Comprehensive analysis of file structure with metrics
+- **Component Details**: Rich component information with examples and documentation
+- **Usage Context**: Understand how components are used throughout the project
 
-### Task Management (Stable)
-- **Task Tracking**: Create and manage AI tasks for your projects
-- **Status Updates**: Track progress and update task status
-- **Subtasks**: Break down complex tasks into manageable parts
-- **Inference**: Automatically extract tasks from conversations
+### File System Integration (Stable)
+- **Secure Project Access**: Controlled access to your development files
+- **Directory Navigation**: Intuitive directory navigation and exploration
+- **Code Manipulation**: Read, write, and modify code with proper error handling
+- **File Operations**: Comprehensive file management capabilities
+- **Search & Indexing**: Find files and content with powerful search tools
 
-### TaskBoard System (Beta - Coming Soon)
-- **AI Mini-Librarians**: Specialized components that process specific tasks for Claude
-- **Asynchronous Processing**: Offload complex information gathering to background processes
-- **Persistent Communication**: Maintain task state across conversations
+### Task Management System (Stable)
+- **Persistent To-Do Tracking**: Tasks persist across conversations
+- **Multi-level Task Structure**: Support for tasks, subtasks, and dependencies
+- **Priority & Status Tracking**: Organize work by importance and completion status
+- **Code Context Linking**: Associate tasks with specific code components
+- **Automatic Task Inference**: Extract potential tasks from conversations
+
+### TaskBoard System (Coming Soon - Beta)
+- **AI Mini-Librarians**: Specialized AI agents that process specific analysis tasks
+- **Asynchronous Processing**: Background task processing for complex operations
 - **AI-Optimized Shorthand**: Compressed format for efficient AI-to-AI communication
-- **Enhanced Task Context**: Rich contextual information about code tasks
+- **Advanced Context Awareness**: Rich contextual information links tasks to code
+- **Distributed Knowledge System**: Intelligence distributed across specialized agents
 
-### Think Tool (Beta - Coming Soon)
-- **Claude Reasoning**: Enhanced capability for Claude to think through complex problems
-- **Task Delegation**: Automatically delegate information gathering to mini-librarians
-- **Knowledge Synthesis**: Combine results from multiple information sources
-- **Contextual Memory**: Build and maintain detailed understanding across conversations
+### Think Tool (Coming Soon - Beta)
+- **Advanced AI Reasoning**: Enhanced capability for Claude to reason through complex problems
+- **Information Gathering Delegation**: Automatically assign research to mini-librarians
+- **Knowledge Synthesis**: Combine insights from multiple specialized agents
+- **Contextual Memory**: Build and maintain detailed understanding across sessions
+- **Self-directed Exploration**: Allow Claude to explore code paths independently
+
+## 🖼️ Screenshots
+
+<div align="center">
+  <!-- These are placeholders - replace with actual screenshots -->
+  <table>
+    <tr>
+      <td><img src="docs/images/screenshot-librarian.png" alt="AI Librarian" width="400"/></td>
+      <td><img src="docs/images/screenshot-filesystem.png" alt="File System Integration" width="400"/></td>
+    </tr>
+    <tr>
+      <td><img src="docs/images/screenshot-tasks.png" alt="Task Management" width="400"/></td>
+      <td><img src="docs/images/screenshot-configurator.png" alt="Configurator GUI" width="400"/></td>
+    </tr>
+  </table>
+</div>
 
 ## 🛠️ Installation
 
 ### Prerequisites
 - Python 3.8 or higher
 - Claude Desktop (latest version)
+- Git
 
-### Installation Options
-
-#### Option 1: Install Unified Server (Recommended)
+### Option 1: Install Unified Server (Recommended)
 ```bash
 # Clone the repository
 git clone https://github.com/isekaizen/ai-dev-toolkit.git
@@ -74,7 +112,7 @@ pip install -r requirements.txt
 python install_unified.py
 ```
 
-#### Option 2: Install AI Librarian Only
+### Option 2: Install AI Librarian Only
 ```bash
 # After cloning and installing dependencies
 python install_to_claude.py
@@ -103,10 +141,10 @@ add_todo("path/to/project", "Implement login feature", priority="high")
 list_todos("path/to/project")
 
 # Update task status
-update_todo_status("path/to/project", "task-123", "completed")
+update_todo_status("path/to/project", "todo-123", "completed")
 ```
 
-### Advanced AI Task Management (New)
+### Advanced AI Task Management
 ```
 # Create an AI-optimized task
 add_ai_task("path/to/project", "Authentication system refactoring", "Improve security and performance", "refactor", 2)
@@ -127,37 +165,95 @@ think("I need to understand how the authentication system works and its dependen
 get_task_results("task-12345,task-67890")
 ```
 
-## ⚙️ Configuration
+### File System Operations
+```
+# Read a file
+read_file("path/to/your/file.py")
 
-### Configuration File Location
-Claude Desktop configuration file is typically located at:
-- Windows: `%APPDATA%\Claude Desktop\claude_desktop_config.json`
-- macOS: `~/Library/Application Support/Claude Desktop/claude_desktop_config.json`
+# Write to a file
+write_file("path/to/your/file.py", "file content")
 
-The installation scripts handle all configuration file edits automatically.
+# List directory contents
+list_directory("path/to/your/directory")
+
+# Search for files
+search_files("path/to/your/project", "pattern")
+```
+
+## 🔌 Architecture
+
+The AI Dev Toolkit uses a modular architecture built around the Model Context Protocol (MCP) to integrate with Claude Desktop:
+
+```
+┌─────────────────────┐      ┌───────────────────┐      ┌─────────────────┐
+│                     │      │                   │      │                 │
+│   Claude Desktop    │◄────►│   Unified MCP     │◄────►│  Your Project   │
+│                     │      │     Server        │      │   Filesystem    │
+└─────────────────────┘      └───────────────────┘      └─────────────────┘
+                                      ▲
+                                      │
+                                      ▼
+                             ┌────────────────────┐
+                             │                    │
+                             │ AI Librarian Cache │
+                             │                    │
+                             └────────────────────┘
+```
+
+The unified MCP server provides a seamless interface between Claude Desktop and your project, maintaining persistent context through the AI Librarian cache.
+
+## 🤖 AI-Assisted Development
+
+This toolkit was developed with Claude's assistance, demonstrating the power of human-AI collaboration in creating developer tools. The project itself serves as an example of enhancing AI capabilities through specialized extensions.
+
+Key AI-assisted development techniques used in this project:
+
+- **Iterative Design**: Human-AI dialogue to refine architecture and interfaces
+- **Context-Aware Coding**: Using AI Librarian to maintain project context
+- **Specialized AI Agents**: Mini-librarians handling specific cognitive tasks
+- **Task Decomposition**: Breaking complex problems into manageable chunks
+- **Knowledge Integration**: Combining domain expertise with AI capabilities
 
 ## 🔍 Troubleshooting
 
 Common issues and solutions:
+
 - **Toolkit Not Appearing in Claude**: Ensure configuration was saved correctly and Claude Desktop was restarted
 - **Permission Errors**: Check allowed directories in the configuration
 - **Connection Issues**: Verify Claude Desktop is properly configured and restart the server
+- **Import Errors**: Make sure all dependencies are installed
+- **File Access Problems**: Verify the server has appropriate permissions to access your files
+
+## 📚 Documentation
+
+Additional documentation is available in the [docs](docs/) directory:
+
+- [AI Librarian Guide](docs/ai_librarian_guide.md)
+- [Task System Documentation](docs/todo_list_guide.md)
+- [MCP Server Template](docs/mcp-server-template.md)
+- [Project Structure](docs/project_structure.md)
+- [Tools Reference](docs/tools_reference.md)
+
+## 📅 Roadmap
+
+- **Beta Release**: TaskBoard System and Think Tool coming soon
+- **GUI Improvements**: Enhanced configurator interface
+- **Project Templates**: Starter templates for common project types
+- **IDE Integration**: Extensions for VS Code and other IDEs
+- **Collaborative Mode**: Multi-user collaboration capabilities
+- **Advanced Code Analysis**: Deeper semantic code understanding
+- **Team Workflow Tools**: Project management integration
 
 ## 🤝 Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get involved.
 
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📚 Documentation
+## 🙏 Acknowledgments
 
-Additional documentation is available in the [docs](docs/) directory.
-
-## 📅 Roadmap
-
-- **Beta Release**: Coming very soon with TaskBoard System and Think Tool
-- **Improved UI**: Enhanced GUI configurator for easier setup (Planned)
-- **Project Templates**: Starter templates for common project types (Planned)
-- **Integration with Developer Tools**: Support for VS Code, GitHub, etc. (Planned)
+- The Claude team at Anthropic for creating an extensible AI assistant
+- Contributors to the MCP protocol for enabling rich AI-tool integration
+- Everyone in the AI-assisted development community

@@ -1,8 +1,8 @@
 """
-AI Dev Toolkit Unified Configurator GUI
+AI Dev Toolkit Enhanced Configurator GUI
 
-This is the unified GUI implementation for the AI Dev Toolkit.
-It replaces all previous implementations with a single, reliable version.
+This is an enhanced GUI implementation for the AI Dev Toolkit.
+It includes improved project management features and visual enhancements.
 """
 import os
 import sys
@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 import webbrowser
 import traceback
+import datetime
 
 class AIDevToolkitGUI:
     def __init__(self, root):
@@ -24,7 +25,7 @@ class AIDevToolkitGUI:
         self.root.resizable(True, True)
         
         # Set version
-        self.version = "0.3.0"
+        self.version = "0.4.0"
         
         # Track changes
         self.has_changes = False
@@ -54,15 +55,27 @@ class AIDevToolkitGUI:
         # Style for server selection
         self.style.configure('Server.TCheckbutton', font=('Segoe UI', 10, 'bold'))
         
+        # Style for larger Treeview checkboxes
+        self.style.configure('Large.Treeview', rowheight=30)  # Make rows taller
+        
         # Variables
         self.claude_desktop_path = tk.StringVar()
         self.config_path = tk.StringVar()
         # Server enabled is determined by tool selection
         self.project_dirs = []
         self.project_enabled = {}  # Map of project path to enabled status
+        self.project_privacy = {}  # Map of project path to privacy status (Public/Private)
+        self.project_last_accessed = {}  # Dictionary to store last accessed times
+        self.project_git_status = {}  # Dictionary to store git status
+        self.project_documents = {}  # Dictionary to store project documents
         self.server_status = tk.StringVar(value="Stopped")
         self.server_process = None
         self.server_log = tk.StringVar(value="")
+        self.current_project = None  # Currently selected project
+        self.current_doc_index = 0  # Index of currently displayed document
+        
+        # Store default application
+        self.default_app = None
         
         # Server configuration type - for official MCP servers
         self.server_config_type = tk.StringVar(value="npm")  # Default to npm package (recommended)
@@ -219,9 +232,7 @@ class AIDevToolkitGUI:
                                text="Note: This application edits Claude Desktop's configuration file. Claude itself does not have direct access to edit these files.",
                                wraplength=750, style='Info.TLabel')
         safety_label.pack(fill=tk.X)
-        
 
-        
         # AI Dev Toolkit Servers section
         server_selection_frame = ttk.LabelFrame(self.claude_frame, text="AI Dev Toolkit Servers", padding="10 10 10 10")
         server_selection_frame.pack(fill=tk.X, pady=(0, 15))
@@ -404,7 +415,8 @@ class AIDevToolkitGUI:
             projects_frame, 
             columns=("Private", "Path", "Status", "LastAccessed", "GitStatus"), 
             selectmode='browse', 
-            height=10
+            height=10,
+            style='Large.Treeview'  # Apply the custom style for larger rows
         )
         
         # Configure the treeview
@@ -441,21 +453,23 @@ class AIDevToolkitGUI:
         self.projects_treeview.bind('<ButtonRelease-1>', self.on_treeview_click)
         self.projects_treeview.bind('<<TreeviewSelect>>', self.on_project_selected)
         
-        # Right side: Controls and logs
+        # Right side: Controls (logs moved to bottom)
         right_side = ttk.Frame(main_content)
         right_side.grid(row=0, column=1, sticky="nsew")
         
-        # Project Controls (top part of right side)
+        # Project Controls
         controls_frame = ttk.LabelFrame(right_side, text="Project Controls", padding="10 10 10 10")
         controls_frame.pack(fill=tk.X, pady=(0, 10))
         
-        # Button grid for controls - 2 columns
+        # Button grid for controls
         btn_frame = ttk.Frame(controls_frame)
         btn_frame.pack(fill=tk.X, pady=5)
         
-        # Buttons now on the right side
+        # First row of buttons
         ttk.Button(btn_frame, text="Add Project", width=20, command=self.add_directory).grid(row=0, column=0, padx=5, pady=5)
         ttk.Button(btn_frame, text="Remove Project", width=20, command=self.remove_directory).grid(row=0, column=1, padx=5, pady=5)
+        
+        # Second row of buttons
         ttk.Button(btn_frame, text="Create Project", width=20, command=self.toggle_create_project_area).grid(row=1, column=0, padx=5, pady=5)
         
         # Open Project With... button with default app selection
@@ -494,7 +508,7 @@ class AIDevToolkitGUI:
         
         # Log frame now at the bottom of the entire tab, not in the right side
         log_frame = ttk.LabelFrame(self.project_frame, text="Server Log", padding="10 10 10 10")
-        log_frame.pack(fill=tk.X, expand=False, pady=(10, 0), before=self.project_message_label)
+        log_frame.pack(fill=tk.X, expand=False, pady=(10, 0))
         
         self.log_text = tk.Text(log_frame, height=8, width=100, wrap=tk.WORD)
         log_scrollbar = ttk.Scrollbar(log_frame, orient=tk.VERTICAL, command=self.log_text.yview)
@@ -553,19 +567,7 @@ class AIDevToolkitGUI:
                 command=lambda: self.create_project_frame.pack_forget()).pack(side=tk.RIGHT, padx=(5, 0))
         ttk.Button(button_row, text="Create Project", 
                 command=self.create_new_project).pack(side=tk.RIGHT)
-        
-        # Add data structures for new features
-        self.project_privacy = {}  # Dictionary to store privacy settings
-        self.project_last_accessed = {}  # Dictionary to store last accessed times
-        self.project_git_status = {}  # Dictionary to store git status
-        self.project_documents = {}  # Dictionary to store project documents
-        self.current_project = None  # Currently selected project
-        self.current_doc_index = 0  # Index of currently displayed document
-        
-        # Create custom style for larger checkboxes
-        self.style.configure('Large.Treeview', rowheight=30)  # Make rows taller
-        self.projects_treeview.configure(style='Large.Treeview')  # Apply the style
-                 
+
     #-----------------------------------------------------
     # About Tab  
     #-----------------------------------------------------
@@ -631,9 +633,10 @@ When you enable project directories, you are granting Claude permission to read 
         servers_link.pack(anchor=tk.W, pady=2)
         servers_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/modelcontextprotocol/servers"))
 
-    #-----------------------------------------------------
-    # Utility Methods
-    #-----------------------------------------------------
+    #---------------------------------------------------------
+    # Core Functionality Methods
+    #---------------------------------------------------------
+    
     def detect_claude_desktop(self):
         """Detect Claude Desktop installation and config location"""
         self.claude_status_label.config(text="Checking Claude Desktop installation...")
@@ -662,7 +665,7 @@ When you enable project directories, you are granting Claude permission to read 
         else:
             self.claude_status_label.config(text="Claude Desktop not found. Please specify the config path manually.")
             self.claude_config_status_label.config(text="Claude Desktop not found. Please specify the config path manually.")
-        
+    
     def load_config(self):
         """Load configuration from Claude Desktop config file"""
         config_path = self.config_path.get()
@@ -707,7 +710,142 @@ When you enable project directories, you are granting Claude permission to read 
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load configuration: {str(e)}")
             print(f"Error loading config: {str(e)}")
+
+    def update_server_status(self):
+        """Update server status display based on enabled/disabled state"""
+        if self.ai_dev_toolkit_server_enabled.get():
+            self.server_status_label.config(text="MCP Server: Ready to Start", style="Warning.Status.TLabel")
+        else:
+            self.server_status_label.config(text="MCP Server: Disabled", style="Stopped.Status.TLabel")
+        
+        # Mark that changes have been made
+        self.has_changes = True
     
+    def update_server_config_type(self):
+        """Update server configuration type displays"""
+        if self.server_config_type.get() == "npm":
+            self.npm_config_note.pack(fill=tk.X, pady=(0, 5))
+            self.uv_config_note.pack_forget()
+        else:
+            self.npm_config_note.pack_forget()
+            self.uv_config_note.pack(fill=tk.X, pady=(0, 5))
+        
+        # Mark that changes have been made
+        self.has_changes = True
+    
+    def browse_config(self):
+        """Browse for Claude Desktop config file"""
+        config_path = filedialog.askopenfilename(
+            title="Select Claude Desktop Configuration File",
+            filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")]
+        )
+        if config_path:
+            self.config_path.set(config_path)
+            self.load_config()
+    
+    def apply_claude_config(self):
+        """Apply configuration to Claude Desktop config file"""
+        config_path = self.config_path.get()
+        if not config_path:
+            messagebox.showerror("Error", "No Claude Desktop configuration path specified.")
+            return
+        
+        try:
+            # Load existing config
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+            
+            # Make sure mcpServers section exists
+            if "mcpServers" not in config:
+                config["mcpServers"] = {}
+            
+            # Remove legacy servers if they exist
+            if "ai-librarian" in config["mcpServers"]:
+                del config["mcpServers"]["ai-librarian"]
+            
+            if "file-system-tools" in config["mcpServers"]:
+                del config["mcpServers"]["file-system-tools"]
+            
+            # Detect directories to include in configuration
+            enabled_dirs = []
+            for dir_path in self.project_dirs:
+                if self.project_enabled.get(dir_path, False):
+                    enabled_dirs.append(dir_path)
+            
+            # Configure or remove the integrated server based on enabled state
+            if self.ai_dev_toolkit_server_enabled.get():
+                # Find the unified server path
+                script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                script_path = os.path.join(script_dir, "launch_unified.py")
+                
+                if self.server_config_type.get() == "npm":
+                    # NPM package configuration (recommended)
+                    config["mcpServers"]["integrated-server"] = {
+                        "command": "python",
+                        "args": [script_path] + enabled_dirs,
+                        "env": {}
+                    }
+                else:
+                    # Python with uv configuration (for development)
+                    config["mcpServers"]["integrated-server"] = {
+                        "command": "python",
+                        "args": [script_path] + enabled_dirs,
+                        "pythonEnvType": "uv",
+                        "absolutePaths": True,
+                        "env": {}
+                    }
+            else:
+                # Remove the integrated server if disabled
+                if "integrated-server" in config["mcpServers"]:
+                    del config["mcpServers"]["integrated-server"]
+            
+            # Save the updated config
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+            
+            # Reset changes flag
+            self.has_changes = False
+            
+            messagebox.showinfo("Success", "Configuration has been updated successfully!")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to update configuration: {str(e)}")
+            print(f"Error updating config: {str(e)}")
+    
+    def check_server_status(self):
+        """Check if the MCP server is running"""
+        # To be implemented - will check if server process exists and update UI
+        pass
+    
+    def restart_server(self):
+        """Restart the MCP server"""
+        # To be implemented - will stop and restart the server process
+        messagebox.showinfo("Restart Server", "Server restart functionality will be implemented in a future version.")
+    
+    def clear_server_log(self):
+        """Clear the server log display"""
+        self.log_text.config(state=tk.NORMAL)
+        self.log_text.delete(1.0, tk.END)
+        self.log_text.insert(tk.END, "Server log cleared.")
+        self.log_text.config(state=tk.DISABLED)
+    
+    def open_claude_directory(self):
+        """Open the Claude Desktop configuration directory"""
+        config_path = self.config_path.get()
+        if config_path and os.path.exists(config_path):
+            config_dir = os.path.dirname(config_path)
+            try:
+                if os.name == 'nt':  # Windows
+                    os.startfile(config_dir)
+                elif os.name == 'posix':  # macOS and Linux
+                    if sys.platform == 'darwin':  # macOS
+                        subprocess.run(['open', config_dir])
+                    else:  # Linux
+                        subprocess.run(['xdg-open', config_dir])
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to open directory: {str(e)}")
+        else:
+            messagebox.showerror("Error", "Claude Desktop configuration path not found.")
+
     def scan_for_projects(self):
         """Scan directories for .ai_reference folders to find existing projects"""
         # Clear status message
@@ -720,6 +858,37 @@ When you enable project directories, you are granting Claude permission to read 
         for dir_path in self.project_dirs:
             if os.path.exists(os.path.join(dir_path, ".ai_reference")):
                 found_projects.append(dir_path)
+                # Set last accessed time
+                try:
+                    last_accessed_file = os.path.join(dir_path, ".ai_reference", "last_accessed.txt")
+                    if os.path.exists(last_accessed_file):
+                        with open(last_accessed_file, 'r') as f:
+                            self.project_last_accessed[dir_path] = f.read().strip()
+                    else:
+                        self.project_last_accessed[dir_path] = "Never"
+                except:
+                    self.project_last_accessed[dir_path] = "Unknown"
+                
+                # Check git status
+                try:
+                    git_dir = os.path.join(dir_path, ".git")
+                    if os.path.exists(git_dir):
+                        # Check if there are changes
+                        result = subprocess.run(
+                            ["git", "-C", dir_path, "status", "--porcelain"],
+                            capture_output=True, text=True
+                        )
+                        if result.returncode == 0:
+                            if result.stdout.strip():
+                                self.project_git_status[dir_path] = "Changes"
+                            else:
+                                self.project_git_status[dir_path] = "Clean"
+                        else:
+                            self.project_git_status[dir_path] = "Unknown"
+                    else:
+                        self.project_git_status[dir_path] = "No Git"
+                except:
+                    self.project_git_status[dir_path] = "Unknown"
         
         # Look through common directories for potential projects
         home_dir = os.path.expanduser("~")
@@ -755,11 +924,74 @@ When you enable project directories, you are granting Claude permission to read 
                 if project not in self.project_dirs:
                     self.project_dirs.append(project)
                     self.project_enabled[project] = True
+                    self.project_privacy[project] = "Public"  # Default to public
+                    
+                    # Set last accessed time
+                    try:
+                        last_accessed_file = os.path.join(project, ".ai_reference", "last_accessed.txt")
+                        if os.path.exists(last_accessed_file):
+                            with open(last_accessed_file, 'r') as f:
+                                self.project_last_accessed[project] = f.read().strip()
+                        else:
+                            self.project_last_accessed[project] = "Never"
+                    except:
+                        self.project_last_accessed[project] = "Unknown"
+                    
+                    # Check git status
+                    try:
+                        git_dir = os.path.join(project, ".git")
+                        if os.path.exists(git_dir):
+                            # Check if there are changes
+                            result = subprocess.run(
+                                ["git", "-C", project, "status", "--porcelain"],
+                                capture_output=True, text=True
+                            )
+                            if result.returncode == 0:
+                                if result.stdout.strip():
+                                    self.project_git_status[project] = "Changes"
+                                else:
+                                    self.project_git_status[project] = "Clean"
+                            else:
+                                self.project_git_status[project] = "Unknown"
+                        else:
+                            self.project_git_status[project] = "No Git"
+                    except:
+                        self.project_git_status[project] = "Unknown"
             
             self.update_projects_list()
             self.project_message_var.set(f"Found {len(found_projects)} projects with .ai_reference folders.")
         else:
             self.project_message_var.set("No new projects with .ai_reference folders found.")
+        
+        # Scan project directories for documentation files
+        self.scan_project_documentation()
+    
+    def scan_project_documentation(self):
+        """Scan project directories for documentation files"""
+        doc_extensions = ['.md', '.txt', '.rst', '.adoc']
+        
+        for dir_path in self.project_dirs:
+            if os.path.exists(dir_path) and os.path.isdir(dir_path):
+                # Look for documentation files in the root directory
+                docs = []
+                try:
+                    for filename in os.listdir(dir_path):
+                        if (os.path.isfile(os.path.join(dir_path, filename)) and 
+                            any(filename.lower().endswith(ext) for ext in doc_extensions)):
+                            # Prioritize README files
+                            if filename.upper().startswith('README'):
+                                docs.insert(0, filename)
+                            # Prioritize all-caps documentation files
+                            elif filename.isupper():
+                                docs.append(filename)
+                            # Add other documentation files
+                            else:
+                                docs.append(filename)
+                    
+                    self.project_documents[dir_path] = docs
+                except PermissionError:
+                    # Skip directories we can't access
+                    self.project_documents[dir_path] = []
         
     def update_projects_list(self):
         """Update the projects list display using the treeview"""
@@ -770,6 +1002,9 @@ When you enable project directories, you are granting Claude permission to read 
         # Clear active projects listbox
         self.active_projects_listbox.delete(0, tk.END)
         
+        # Get current time for any new entries
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d")
+        
         # Repopulate with current projects
         for i, dir_path in enumerate(self.project_dirs):
             enabled = self.project_enabled.get(dir_path, True)
@@ -778,10 +1013,19 @@ When you enable project directories, you are granting Claude permission to read 
             has_ai_ref = os.path.exists(os.path.join(dir_path, ".ai_reference"))
             status = "AI Librarian" if has_ai_ref else "Regular"
             
-            # Add to treeview with checkbox state
+            # Get privacy setting (or use "Public" as default)
+            privacy = self.project_privacy.get(dir_path, "Public")
+            
+            # Get last accessed time
+            last_accessed = self.project_last_accessed.get(dir_path, current_time)
+            
+            # Get git status
+            git_status = self.project_git_status.get(dir_path, "Unknown")
+            
+            # Add to treeview with checkbox state and all columns
             item_id = self.projects_treeview.insert('', 'end', 
-                                                  text="✓" if enabled else "◻", 
-                                                  values=(dir_path, status))
+                                                  text="✓" if enabled else "□", 
+                                                  values=(privacy, dir_path, status, last_accessed, git_status))
             
             # Add to active projects listbox if enabled
             if enabled:
@@ -800,11 +1044,11 @@ When you enable project directories, you are granting Claude permission to read 
             if column == '#0' or int(event.x) < 70:  # Checkbox column
                 # Toggle checkbox state
                 current_text = self.projects_treeview.item(item_id, 'text')
-                new_text = "◻" if current_text == "✓" else "✓"
+                new_text = "□" if current_text == "✓" else "✓"
                 self.projects_treeview.item(item_id, text=new_text)
                 
                 # Update state in project_enabled dictionary
-                dir_path = self.projects_treeview.item(item_id, 'values')[0]
+                dir_path = self.projects_treeview.item(item_id, 'values')[1]  # Path is now the second column
                 self.project_enabled[dir_path] = (new_text == "✓")
                 
                 # Update active projects list on dashboard
@@ -812,6 +1056,193 @@ When you enable project directories, you are granting Claude permission to read 
                 
                 # Mark changes
                 self.has_changes = True
+            
+            # Handle click on privacy column
+            elif column == '#1' or (70 <= int(event.x) < 170):  # Privacy column
+                # Toggle privacy state
+                values = self.projects_treeview.item(item_id, 'values')
+                dir_path = values[1]  # Path is now the second column
+                current_privacy = values[0]
+                new_privacy = "Private" if current_privacy == "Public" else "Public"
+                
+                # Update privacy in the dictionary
+                self.project_privacy[dir_path] = new_privacy
+                
+                # Update the treeview
+                self.projects_treeview.item(item_id, values=(new_privacy,) + values[1:])
+                
+                # Mark changes
+                self.has_changes = True
+    
+    def on_project_selected(self, event):
+        """Handle project selection in treeview"""
+        selected_items = self.projects_treeview.selection()
+        if selected_items:
+            # Get the selected project path
+            item_id = selected_items[0]
+            values = self.projects_treeview.item(item_id, 'values')
+            dir_path = values[1]  # Path is now the second column
+            privacy = values[0]  # Privacy status
+            
+            # Update privacy selection
+            self.privacy_var.set(privacy)
+            
+            # Save current project
+            self.current_project = dir_path
+            
+            # Load README or other documentation
+            self.load_project_documentation(dir_path)
+    
+    def load_project_documentation(self, dir_path):
+        """Load README or other documentation for the selected project"""
+        # Check if this is a private project
+        if self.project_privacy.get(dir_path, "Public") == "Private":
+            # Show private message
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, f"This project is set to PRIVATE.\n\nThe documentation for private projects is not displayed for security reasons.")
+            self.doc_text.config(state=tk.DISABLED)
+            
+            # Disable navigation buttons
+            self.prev_doc_btn.config(state=tk.DISABLED)
+            self.next_doc_btn.config(state=tk.DISABLED)
+            self.current_doc_var.set("Private Project")
+            return
+        
+        # Get documentation files for this project
+        docs = self.project_documents.get(dir_path, [])
+        
+        if not docs:
+            # No documentation found
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, f"No documentation files found in {dir_path}.\n\nConsider adding a README.md file to the project root.")
+            self.doc_text.config(state=tk.DISABLED)
+            
+            # Disable navigation buttons
+            self.prev_doc_btn.config(state=tk.DISABLED)
+            self.next_doc_btn.config(state=tk.DISABLED)
+            self.current_doc_var.set("No documentation")
+            return
+        
+        # Reset current document index
+        self.current_doc_index = 0
+        
+        # Load the first document
+        doc_name = docs[self.current_doc_index]
+        doc_path = os.path.join(dir_path, doc_name)
+        
+        try:
+            with open(doc_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Update the text widget
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, content)
+            self.doc_text.config(state=tk.DISABLED)
+            
+            # Update navigation
+            self.current_doc_var.set(doc_name)
+            
+            # Enable/disable navigation buttons based on document count
+            self.prev_doc_btn.config(state=tk.DISABLED)  # First document
+            self.next_doc_btn.config(state=tk.NORMAL if len(docs) > 1 else tk.DISABLED)
+        except Exception as e:
+            # Error loading document
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, f"Error loading {doc_name}:\n\n{str(e)}")
+            self.doc_text.config(state=tk.DISABLED)
+            
+            # Update navigation
+            self.current_doc_var.set(f"Error: {doc_name}")
+            
+            # Disable navigation buttons
+            self.prev_doc_btn.config(state=tk.DISABLED)
+            self.next_doc_btn.config(state=tk.DISABLED)
+    
+    def prev_document(self):
+        """Show the previous document for the current project"""
+        if not self.current_project:
+            return
+        
+        # Get documentation files for this project
+        docs = self.project_documents.get(self.current_project, [])
+        
+        if not docs or self.current_doc_index <= 0:
+            return
+        
+        # Decrement index
+        self.current_doc_index -= 1
+        
+        # Load the document
+        doc_name = docs[self.current_doc_index]
+        doc_path = os.path.join(self.current_project, doc_name)
+        
+        try:
+            with open(doc_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Update the text widget
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, content)
+            self.doc_text.config(state=tk.DISABLED)
+            
+            # Update navigation
+            self.current_doc_var.set(doc_name)
+            
+            # Enable/disable navigation buttons based on index
+            self.prev_doc_btn.config(state=tk.DISABLED if self.current_doc_index == 0 else tk.NORMAL)
+            self.next_doc_btn.config(state=tk.NORMAL)
+        except Exception as e:
+            # Error loading document
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, f"Error loading {doc_name}:\n\n{str(e)}")
+            self.doc_text.config(state=tk.DISABLED)
+    
+    def next_document(self):
+        """Show the next document for the current project"""
+        if not self.current_project:
+            return
+        
+        # Get documentation files for this project
+        docs = self.project_documents.get(self.current_project, [])
+        
+        if not docs or self.current_doc_index >= len(docs) - 1:
+            return
+        
+        # Increment index
+        self.current_doc_index += 1
+        
+        # Load the document
+        doc_name = docs[self.current_doc_index]
+        doc_path = os.path.join(self.current_project, doc_name)
+        
+        try:
+            with open(doc_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Update the text widget
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, content)
+            self.doc_text.config(state=tk.DISABLED)
+            
+            # Update navigation
+            self.current_doc_var.set(doc_name)
+            
+            # Enable/disable navigation buttons based on index
+            self.prev_doc_btn.config(state=tk.NORMAL)
+            self.next_doc_btn.config(state=tk.DISABLED if self.current_doc_index == len(docs) - 1 else tk.NORMAL)
+        except Exception as e:
+            # Error loading document
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, f"Error loading {doc_name}:\n\n{str(e)}")
+            self.doc_text.config(state=tk.DISABLED)
     
     def update_active_projects_list(self):
         """Update the list of active projects on the dashboard"""
@@ -821,8 +1252,9 @@ When you enable project directories, you are granting Claude permission to read 
             if self.project_enabled.get(dir_path, False):
                 has_ai_ref = os.path.exists(os.path.join(dir_path, ".ai_reference"))
                 status = "AI Librarian" if has_ai_ref else "Regular"
-                self.active_projects_listbox.insert(tk.END, f"{dir_path} [{status}]")
-        
+                privacy = self.project_privacy.get(dir_path, "Public")
+                self.active_projects_listbox.insert(tk.END, f"{dir_path} [{status}, {privacy}]")
+    
     def add_directory(self):
         """Add a directory to the project list"""
         dir_path = filedialog.askdirectory(title="Select Project Directory")
@@ -830,329 +1262,227 @@ When you enable project directories, you are granting Claude permission to read 
             if dir_path not in self.project_dirs:
                 self.project_dirs.append(dir_path)
                 self.project_enabled[dir_path] = True
+                self.project_privacy[dir_path] = "Public"  # Default to public
+                
+                # Record the current time as last accessed
+                self.project_last_accessed[dir_path] = datetime.datetime.now().strftime("%Y-%m-%d")
+                
+                # Check git status
+                try:
+                    git_dir = os.path.join(dir_path, ".git")
+                    if os.path.exists(git_dir):
+                        # Check if there are changes
+                        result = subprocess.run(
+                            ["git", "-C", dir_path, "status", "--porcelain"],
+                            capture_output=True, text=True
+                        )
+                        if result.returncode == 0:
+                            if result.stdout.strip():
+                                self.project_git_status[dir_path] = "Changes"
+                            else:
+                                self.project_git_status[dir_path] = "Clean"
+                        else:
+                            self.project_git_status[dir_path] = "Unknown"
+                    else:
+                        self.project_git_status[dir_path] = "No Git"
+                except:
+                    self.project_git_status[dir_path] = "Unknown"
+                
+                # Scan for documentation
+                self.scan_project_documentation()
+                
                 self.has_changes = True
                 self.update_projects_list()
-                self.project_message_var.set(f"Added project directory: {dir_path}")
-            else:
-                messagebox.showinfo("Already Added", "This directory is already in the project list.")
+                self.project_message_var.set(f"Added project: {dir_path}")
     
     def remove_directory(self):
-        """Remove the selected directory from the treeview"""
-        selected_item = self.projects_treeview.selection()
-        if selected_item:
-            # Get the directory path from the selected item
-            dir_path = self.projects_treeview.item(selected_item[0], 'values')[0]
-            
-            # Remove directory from project_dirs list
+        """Remove a directory from the project list"""
+        selected_items = self.projects_treeview.selection()
+        if not selected_items:
+            messagebox.showinfo("Information", "Please select a project to remove.")
+            return
+        
+        # Get the selected project path
+        item_id = selected_items[0]
+        values = self.projects_treeview.item(item_id, 'values')
+        dir_path = values[1]  # Path is in the second column
+        
+        # Confirm removal
+        if messagebox.askyesno("Remove Project", f"Are you sure you want to remove this project?\n\n{dir_path}"):
+            # Remove from project lists
             if dir_path in self.project_dirs:
                 self.project_dirs.remove(dir_path)
-                if dir_path in self.project_enabled:
-                    del self.project_enabled[dir_path]
+            
+            # Remove from dictionaries
+            if dir_path in self.project_enabled:
+                del self.project_enabled[dir_path]
+            
+            if dir_path in self.project_privacy:
+                del self.project_privacy[dir_path]
+            
+            if dir_path in self.project_last_accessed:
+                del self.project_last_accessed[dir_path]
+            
+            if dir_path in self.project_git_status:
+                del self.project_git_status[dir_path]
+            
+            if dir_path in self.project_documents:
+                del self.project_documents[dir_path]
+            
+            # Reset current project if removed
+            if self.current_project == dir_path:
+                self.current_project = None
                 
-                # Update displays
-                self.update_projects_list()
-                self.update_active_projects_list()
+                # Clear document viewer
+                self.doc_text.config(state=tk.NORMAL)
+                self.doc_text.delete(1.0, tk.END)
+                self.doc_text.insert(tk.END, "Select a project to view its documentation.")
+                self.doc_text.config(state=tk.DISABLED)
                 
-                # Mark as changed
-                self.has_changes = True
-                
-                # Show message
-                self.project_message_var.set(f"Removed project directory: {dir_path}")
-        else:
-            messagebox.showinfo("No Selection", "Please select a project to remove.")
+                # Reset navigation
+                self.current_doc_var.set("No document")
+                self.prev_doc_btn.config(state=tk.DISABLED)
+                self.next_doc_btn.config(state=tk.DISABLED)
+            
+            # Update the UI
+            self.has_changes = True
+            self.update_projects_list()
+            self.project_message_var.set(f"Removed project: {dir_path}")
     
-    def browse_config(self):
-        """Browse for Claude Desktop config file"""
-        config_file = filedialog.askopenfilename(
-            title="Select Claude Desktop Configuration File",
-            filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
-        )
-        if config_file:
-            self.config_path.set(config_file)
+    def update_project_privacy(self):
+        """Update privacy setting for the current project"""
+        if not self.current_project:
+            return
+        
+        privacy = self.privacy_var.get()
+        self.project_privacy[self.current_project] = privacy
+        
+        # Update the treeview
+        for item_id in self.projects_treeview.get_children():
+            values = self.projects_treeview.item(item_id, 'values')
+            dir_path = values[1]  # Path is in the second column
+            
+            if dir_path == self.current_project:
+                # Update the values tuple with new privacy status
+                self.projects_treeview.item(item_id, values=(privacy,) + values[1:])
+                break
+        
+        # Reload documentation if privacy changed
+        self.load_project_documentation(self.current_project)
+        
+        # Update active projects list
+        self.update_active_projects_list()
+        
+        # Mark changes
+        self.has_changes = True
+    
+    def toggle_create_project_area(self):
+        """Show or hide the create project area"""
+        if self.create_project_frame.winfo_manager():
+            self.create_project_frame.pack_forget()
+        else:
+            self.create_project_frame.pack(fill=tk.X, pady=(10, 0))
     
     def browse_project_location(self):
-        """Browse for project location directory"""
-        dir_path = filedialog.askdirectory(title="Select Project Location")
+        """Browse for a location to create a new project"""
+        dir_path = filedialog.askdirectory(title="Select Project Parent Directory")
         if dir_path:
             self.new_project_location.set(dir_path)
     
     def create_new_project(self):
-        """Create a new project"""
-        # Validate inputs
-        project_name = self.new_project_name.get().strip()
-        project_type = self.new_project_type.get()
-        location = self.new_project_location.get()
-        
-        if not project_name:
-            messagebox.showerror("Error", "Project name is required.")
+        """Create a new project directory"""
+        # To be implemented: creating a new project from template
+        messagebox.showinfo("Coming Soon", "Project creation functionality will be implemented in a future version.")
+        self.create_project_frame.pack_forget()
+    
+    def open_project_with(self):
+        """Open the selected project with the default application"""
+        if not self.current_project:
+            messagebox.showinfo("Information", "Please select a project to open.")
             return
-        
-        if not location:
-            messagebox.showerror("Error", "Project location is required.")
-            return
-        
-        # Create project directory
-        project_dir = os.path.join(location, project_name)
         
         try:
-            if os.path.exists(project_dir):
-                messagebox.showerror("Error", f"Directory {project_dir} already exists.")
-                return
-                
-            # Create directories
-            os.makedirs(project_dir)
-            os.makedirs(os.path.join(project_dir, "src"))
-            os.makedirs(os.path.join(project_dir, "tests"))
-            
-            # Create basic files based on type
-            if project_type == "web":
-                with open(os.path.join(project_dir, "index.html"), 'w') as f:
-                    f.write("<!DOCTYPE html>\n<html>\n<head>\n  <title>Project</title>\n</head>\n<body>\n  <h1>Hello World</h1>\n</body>\n</html>")
-                    
-                with open(os.path.join(project_dir, "style.css"), 'w') as f:
-                    f.write("body {\n  font-family: Arial, sans-serif;\n}")
-                    
-            elif project_type == "cli" or project_type == "library":
-                with open(os.path.join(project_dir, "main.py"), 'w') as f:
-                    f.write('def main():\n    print("Hello World!")\n\nif __name__ == "__main__":\n    main()')
-                    
-            elif project_type == "api":
-                with open(os.path.join(project_dir, "api.py"), 'w') as f:
-                    f.write('from flask import Flask\n\napp = Flask(__name__)\n\n@app.route("/")\ndef hello():\n    return "Hello World!"\n\nif __name__ == "__main__":\n    app.run(debug=True)')
-            
-            # Add README
-            with open(os.path.join(project_dir, "README.md"), 'w') as f:
-                f.write(f"# {project_name}\n\nA {project_type} project.\n")
-            
-            # Initialize AI Librarian
-            from subprocess import run
-            try:
-                run([sys.executable, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                    "ai_librarian_init.py"), project_dir])
-                has_ai_ref = True
-            except Exception as e:
-                print(f"Error initializing AI Librarian: {str(e)}")
-                has_ai_ref = False
-            
-            # Add to project list
-            self.project_dirs.append(project_dir)
-            self.project_enabled[project_dir] = True
-            self.has_changes = True
-            self.update_projects_list()
-            
-            # Hide create project frame
-            self.create_project_frame.pack_forget()
-            
-            # Show message
-            ai_librarian_status = "and initialized AI Librarian" if has_ai_ref else "without AI Librarian"
-            self.project_message_var.set(f"Created project {project_name} {ai_librarian_status}.")
-            
+            # Use the default app if set, otherwise prompt
+            if self.default_app:
+                if self.default_app == "VS Code":
+                    # Special handling for VS Code
+                    subprocess.Popen(["code", self.current_project])
+                elif self.default_app == "Explorer":
+                    # Open in file explorer
+                    if os.name == 'nt':  # Windows
+                        os.startfile(self.current_project)
+                    elif os.name == 'posix':  # macOS and Linux
+                        if sys.platform == 'darwin':  # macOS
+                            subprocess.run(['open', self.current_project])
+                        else:  # Linux
+                            subprocess.run(['xdg-open', self.current_project])
+                elif self.default_app == "Notepad":
+                    # Open with notepad
+                    subprocess.Popen(["notepad", self.current_project])
+                else:
+                    # Other applications
+                    subprocess.Popen([self.default_app, self.current_project])
+            else:
+                # Open with system default
+                if os.name == 'nt':  # Windows
+                    os.startfile(self.current_project)
+                elif os.name == 'posix':  # macOS and Linux
+                    if sys.platform == 'darwin':  # macOS
+                        subprocess.run(['open', self.current_project])
+                    else:  # Linux
+                        subprocess.run(['xdg-open', self.current_project])
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to create project: {str(e)}")
+            messagebox.showerror("Error", f"Failed to open project: {str(e)}")
     
-    def toggle_create_project_area(self):
-        """Show or hide the create project area"""
-        if self.create_project_frame.winfo_ismapped():
-            self.create_project_frame.pack_forget()
-        else:
-            self.create_project_frame.pack(fill=tk.X, pady=(0, 15))
-    
-    def update_server_status(self):
-        """Update server status based on selected tools"""
-        # Update server status based on selections
-        if self.ai_dev_toolkit_server_enabled.get():
-            self.server_status_label.config(text="MCP Server: Ready to Configure", style='Status.TLabel')
-        else:
-            self.server_status_label.config(text="MCP Server: Disabled", style='Stopped.Status.TLabel')
-        
-        self.has_changes = True
-    
-    def update_server_config_type(self):
-        """Update server configuration type information"""
-        if self.server_config_type.get() == "npm":
-            self.npm_config_note.pack(fill=tk.X, pady=(0, 5))
-            if hasattr(self, 'uv_config_note'):
-                self.uv_config_note.pack_forget()
-        else:
-            if hasattr(self, 'npm_config_note'):
-                self.npm_config_note.pack_forget()
-            self.uv_config_note.pack(fill=tk.X, pady=(0, 5))
-    
-    def check_server_status(self):
-        """Check if the server is running"""
-        # This is a simple implementation - in a real app you would check the process status
-        if hasattr(self, 'server_process') and self.server_process and self.server_process.poll() is None:
-            self.server_status_label.config(text="MCP Server: Running", style='Running.Status.TLabel')
-        else:
-            self.server_status_label.config(text="MCP Server: Stopped", style='Stopped.Status.TLabel')
-    
-    def restart_server(self):
-        """Restart the MCP server process"""
-        # Stop the server if it's running
-        if hasattr(self, 'server_process') and self.server_process:
-            try:
-                self.server_process.terminate()
-                self.server_process.wait(timeout=5)
-            except:
-                pass
-        
-        # Apply changes to ensure latest config is used
-        self.apply_claude_config()
-        
-        # Start the server using the exact librarian server pattern
-        try:
-            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            server_script_path = os.path.join(project_root, "aitoolkit", "librarian", "server.py")
-            
-            # Get enabled directories
-            enabled_dirs = [d for d in self.project_dirs if self.project_enabled.get(d, True)]
-            
-            # Build command with directories - just like ai-librarian format
-            cmd = ["python", server_script_path] + enabled_dirs
-            
-            # Start the server
-            self.clear_server_log()
-            self.server_process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                bufsize=1
+    def set_default_application(self, event=None):
+        """Set the default application for opening projects"""
+        app = self.default_app_var.get()
+        if app == "Custom...":
+            # Prompt for custom application
+            app_path = filedialog.askopenfilename(
+                title="Select Application",
+                filetypes=[("Executable Files", "*.exe"), ("All Files", "*.*")]
             )
-            
-            # Start a thread to read output
-            def read_output():
-                while self.server_process and self.server_process.poll() is None:
-                    line = self.server_process.stdout.readline()
-                    if line:
-                        self.log_text.config(state=tk.NORMAL)
-                        self.log_text.insert(tk.END, line)
-                        self.log_text.see(tk.END)
-                        self.log_text.config(state=tk.DISABLED)
-            
-            threading.Thread(target=read_output, daemon=True).start()
-            
-            # Update status
-            self.server_status_label.config(text="MCP Server: Running", style='Running.Status.TLabel')
-            
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to start server: {str(e)}")
-            print(f"Error starting server: {str(e)}")
-    
-    def clear_server_log(self):
-        """Clear the server log display"""
-        self.log_text.config(state=tk.NORMAL)
-        self.log_text.delete(1.0, tk.END)
-        self.log_text.config(state=tk.DISABLED)
-    
-    def open_claude_directory(self):
-        """Open Claude Desktop directory in file explorer"""
-        config_path = self.config_path.get()
-        if config_path and os.path.exists(config_path):
-            config_dir = os.path.dirname(config_path)
-            try:
-                import platform
-                system = platform.system()
-                
-                if system == "Windows":
-                    os.startfile(config_dir)
-                elif system == "Darwin":  # macOS
-                    subprocess.run(["open", config_dir], check=True)
-                elif system == "Linux":
-                    subprocess.run(["xdg-open", config_dir], check=True)
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to open directory: {str(e)}")
+            if app_path:
+                self.default_app = app_path
+                # Update the display with just the executable name
+                exe_name = os.path.basename(app_path)
+                self.default_app_var.set(exe_name)
         else:
-            messagebox.showinfo("Not Found", "Claude Desktop configuration directory not found.")
-    
-    def generate_integrated_server_config(self):
-        """Generate the configuration for the integrated server that EXACTLY matches the working ai-librarian pattern"""
-        # Get the project root directory
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        
-        # Get enabled directories
-        enabled_dirs = [d for d in self.project_dirs if self.project_enabled.get(d, True)]
-        
-        # Use the EXACT working pattern from ai-librarian:
-        # - command: "python" (not sys.executable)
-        # - args: [script_path, dir1, dir2, ...] (putting directories directly in args array, not in env vars)
-        server_config = {
-            "command": "python",
-            "args": [
-                os.path.join(project_root, "aitoolkit", "librarian", "server.py")
-            ] + enabled_dirs
-        }
-        
-        return server_config
-    
-    def apply_claude_config(self):
-        """Apply changes to Claude Desktop configuration file"""
-        config_path = self.config_path.get()
-        if not config_path:
-            messagebox.showinfo("No Config", "No Claude Desktop configuration file specified.")
-            return
-        
-        try:
-            # Read existing config
-            config = {}
-            if os.path.exists(config_path):
-                with open(config_path, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-            
-            # Ensure mcpServers section exists
-            if "mcpServers" not in config:
-                config["mcpServers"] = {}
-            
-            # Remove previous servers if they exist
-            for old_server in ["integrated-server", "ai-librarian", "file-system-tools"]:
-                if old_server in config["mcpServers"]:
-                    del config["mcpServers"][old_server]
-            
-            # Add our server using the EXACT working pattern from ai-librarian
-            if self.ai_dev_toolkit_server_enabled.get():
-                server_config = self.generate_integrated_server_config()
-                config["mcpServers"]["ai-librarian"] = server_config
-            
-            # Save the config
-            with open(config_path, 'w', encoding='utf-8') as f:
-                json.dump(config, f, indent=2)
-            
-            self.project_message_var.set("Configuration saved successfully! You may need to restart Claude Desktop.")
-            self.has_changes = False
-            
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to save configuration: {str(e)}")
-            print(f"Error saving config: {str(e)}")
-    
-    def apply_and_exit(self):
-        """Apply changes and exit the application"""
-        self.apply_claude_config()
-        self.root.quit()
-    
-    def discard_and_exit(self):
-        """Discard changes and exit the application"""
-        if self.has_changes:
-            if not messagebox.askyesno("Confirm", "You have unsaved changes. Are you sure you want to exit without saving?"):
-                return
-        self.root.quit()
+            self.default_app = app
     
     def on_closing(self):
-        """Handle window close event"""
+        """Handle window closing"""
         if self.has_changes:
-            response = messagebox.askyesnocancel("Unsaved Changes", 
-                "You have unsaved changes. Would you like to save them before exiting?")
+            response = messagebox.askyesnocancel(
+                "Save Changes", 
+                "You have unsaved changes. Would you like to save them before exiting?",
+                icon=messagebox.WARNING
+            )
             
-            if response is None:  # Cancel was clicked
+            if response is None:  # Cancel
                 return
-            elif response:  # Yes was clicked
+            elif response:  # Yes, save changes
                 self.apply_claude_config()
         
-        # Stop the server if it's running
-        if hasattr(self, 'server_process') and self.server_process:
-            try:
-                self.server_process.terminate()
-                self.server_process.wait(timeout=5)
-            except:
-                pass
-        
+        # Cleanup and close
         self.root.destroy()
+    
+    def apply_and_exit(self):
+        """Apply changes and exit"""
+        self.apply_claude_config()
+        self.root.destroy()
+    
+    def discard_and_exit(self):
+        """Discard changes and exit"""
+        if self.has_changes:
+            if messagebox.askyesno("Discard Changes", "Are you sure you want to discard all changes?"):
+                self.root.destroy()
+        else:
+            self.root.destroy()
+
+# Main entry point
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = AIDevToolkitGUI(root)
+    root.mainloop()
