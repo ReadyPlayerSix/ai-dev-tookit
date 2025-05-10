@@ -661,6 +661,8 @@ class SanityChecker:
 
 def run_sanity_check(project_path: str, create_artifact: bool = False) -> str:
     """
+    [TEMPORARILY DISABLED - Under maintenance]
+    
     Run a sanity check and return the results as a formatted string.
     This function is designed to be used as an MCP tool.
     
@@ -671,8 +673,36 @@ def run_sanity_check(project_path: str, create_artifact: bool = False) -> str:
     Returns:
         Formatted report of the sanity check
     """
-    checker = SanityChecker(project_path)
-    return checker.generate_report(create_artifact)
+    # TEMPORARILY DISABLED
+    warning_message = """# ⚠️ SANITY CHECK TEMPORARILY DISABLED ⚠️
+
+The sanity_check tool is currently unavailable due to maintenance and improvements.
+
+We are working on enhancing this feature to provide:
+- Better performance and reliability
+- More detailed diagnostics
+- Modular approach with quick scan and detailed analysis
+- Improved reporting with actionable recommendations
+
+## Alternative Tools
+
+For immediate project validation needs, please use individual diagnostic tools such as:
+- `find_implementation()` to locate specific code patterns
+- `query_component()` to check component integrity
+- `list_bookmarks()` to manage edit sessions
+- `directory_tree()` to examine project structure
+
+## Status
+
+The improved sanity_check will be available in an upcoming release.
+
+## Reason for Disabling
+
+This tool was temporarily disabled to address performance issues and improve the overall
+diagnostic capabilities. The new version will provide more targeted analysis and better
+actionable recommendations.
+"""
+    return warning_message
 
 def main():
     """Main entry point for the script when run directly."""

@@ -5,7 +5,7 @@
 ![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-Compatible-green)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.4.2-orange)
+![Release](https://img.shields.io/badge/release-v0.4.3--prep-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -266,6 +266,10 @@ Common issues and solutions:
 - **Connection Issues**: Verify Claude Desktop is properly configured and restart the server
 - **Import Errors**: Make sure all dependencies are installed
 - **File Access Problems**: Verify the server has appropriate permissions to access your files
+- **Sanity Check Issues**: If experiencing problems with the sanity_check tool, use individual diagnostic tools like find_implementation() and query_component() as alternatives
+- **Legacy Files**: Use `git clean -fd` after a `git reset --hard` to ensure all untracked files are removed when reverting to a previous version
+- **Duplicate Files**: During our cleanup process, you may encounter duplicate files with extensions like .old, .backup, .fixed - these will be addressed in an upcoming release
+- **find_related_files Tool Errors**: This tool has a known issue that will be fixed in an upcoming release
 
 ## 📚 Documentation
 
@@ -279,12 +283,40 @@ Additional documentation is available in the [docs](docs/) directory:
 
 ## 📅 Roadmap
 
+### Upcoming Releases
+
 - **Beta Release**: TaskBoard System and Think Tool coming soon
-- **GUI Improvements**: Enhanced configurator interface
+- **Codebase Cleanup**: Consolidation of duplicate files and legacy code
+- **Sanity Check Improvements**: Enhanced diagnostic capabilities and reporting
+- **GUI Improvements**: Enhanced configurator interface with cleanup utilities
 - **Project Templates**: Starter templates for common project types
+
+### Future Plans
+
 - **IDE Integration**: Extensions for VS Code and other IDEs
 - **Advanced Code Analysis**: Deeper semantic code understanding
 - **Team Workflow Tools**: Project management integration
+
+### Current Work in Progress
+
+- **Sanity Check Refactoring**: The sanity_check tool will soon be temporarily disabled while we implement significant improvements:
+  - Modular class-based design with plugin system
+  - Severity levels for issues (critical, warning, info)
+  - Two-phase approach: quick scan and detailed analysis
+  - Improved reporting with structured JSON and Markdown outputs
+  - Better progress tracking and cancellation support
+  
+- **Directory Structure Cleanup**: Planned consolidation of overlapping functionality:
+  - Consolidating duplicate files in the `librarian` directory:
+    - Merging enhanced file editing functionality
+    - Combining validation tools into a unified module
+    - Standardizing naming conventions
+  - Cleaning up the `gui` directory:
+    - Removing multiple configurator variants
+    - Eliminating legacy and backup files
+    - Adding a GUI button for legacy file pruning
+
+- **Filesystem Operations**: Enhanced file editing and manipulation capabilities
 
 ## 📜 License
 
