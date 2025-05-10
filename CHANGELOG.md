@@ -1,59 +1,48 @@
 # Changelog
 
-## v0.4.0 - TaskBoard System (Coming Soon)
+All notable changes to this project will be documented in this file.
+
+## [0.3.1] - 2025-05-09
 
 ### Added
-- **TaskBoard System**: Persistent AI-optimized task management system
-  - Mini-Librarian architecture for specialized task processing
-  - Asynchronous background processing for information gathering
-  - AI-optimized shorthand format for efficient AI-to-AI communication
-  - Task queue system for requesting and tracking information
-- **Think Tool**: Enhanced capability for Claude to reason through complex problems
-  - Task delegation to mini-librarians
-  - Knowledge synthesis from multiple information sources
-  - Contextual memory across conversations
-- **Advanced AI Task Management**:
-  - Richer task context with code references
-  - Task dependencies and relationships
-  - Progress tracking and reporting
+- Tool Index implementation for AI-optimized tool selection
+- Tool profiles for enhanced tool usage
+- Tool relationship mapping for improved decision-making
+- Self-diagnostic capabilities for context validation
 
 ### Changed
-- Refactored task management system for improved performance
-- Enhanced AI Librarian to integrate with TaskBoard
-- Updated documentation with new features and examples
+- Improved error handling in FileSystem operations
+- Enhanced permission validation for better security
+- Updated documentation to reflect current features
 
-## v0.3.0 - Integrated Server (2025-05-08)
+## [0.3.0] - 2025-05-08
 
 ### Added
-- **Integrated Server**: Combined AI Librarian and File System functionality into a single MCP server
-- **Enhanced File Operations**:
-  - `find_related_files`: Find files related to a specific file based on imports and references
-  - `find_references`: Find all references to a component across the codebase
-  - `get_file_overview`: Get comprehensive analysis of a file including structure and metrics
-  - `optimized_query_component`: Improved version of query_component with better performance
-- **Easy Installation**: Added `install_unified.py` to simplify Claude Desktop integration
-- **Launcher Script**: Added `launch_unified.py` for easy server startup
+- Unified Server implementation combining AI Librarian and FileSystem
+- Enhanced Todo Management System with persistent storage
+- Component Registry for code understanding
+- Diagnostic system for AI Librarian verification
 
 ### Changed
-- Updated MCP connector to expose the integrated server
-- Moved legacy files to dedicated directory for better organization
-- Improved error handling and stability
+- Reorganized project structure for better maintainability
+- Improved documentation with usage examples
+- Updated GUI configurator for better user experience
 
-## v0.2.0 - AI Librarian Enhancements (2025-04-15)
+## [0.2.0-alpha] - 2025-05-07
 
 ### Added
-- Enhanced indexer for improved code understanding
-- AI-optimized task system for better task tracking
-- Improved diagnostic tools
+- Initial AI Librarian implementation
+- Basic filesystem operations
+- Command line interface
+- Preliminary GUI configurator
 
 ### Changed
-- Refactored filesystem utilities for better performance
-- Updated AI Librarian interface for better usability
+- Project structure refactoring
+- Updated documentation
 
-## v0.1.0 - Initial Release (2025-03-01)
+## [0.1.0-stable] - 2025-05-06
 
 ### Added
-- Basic AI Librarian functionality
-- File System tools for file access
-- GUI configurator for setup
-- Claude Desktop integration
+- Initial project structure
+- Documentation framework
+- Basic server implementation
