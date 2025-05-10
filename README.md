@@ -5,7 +5,7 @@
 ![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-Compatible-green)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.4.0-orange)
+![Release](https://img.shields.io/badge/release-v0.4.1-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -21,10 +21,13 @@ AI Dev Toolkit elevates Claude Desktop beyond a conversational assistant to a co
 - **Understand your codebase** through persistent context that spans conversations
 - **Access and modify your filesystem** with appropriate permissions
 - **Track and manage development tasks** with sophisticated context awareness
+- **Navigate between code and tools** with unified context awareness
 - **Offload complex cognitive tasks** to specialized AI mini-librarians
 - **Create a seamless development workflow** within Claude's interface
 
-With this toolkit, Claude becomes a true development partner - remembering your project structure, understanding component relationships, tracking tasks, and assisting with development activities.
+With this toolkit, Claude becomes a true development partner - remembering your project structure, understanding component relationships, connecting code to relevant tools, tracking tasks, and assisting with development activities.
+
+All this happens automatically - just initialize once and the system handles everything behind the scenes, continuously updating its understanding of your codebase as it evolves.
 
 ## 🚀 Features
 
@@ -42,6 +45,13 @@ With this toolkit, Claude becomes a true development partner - remembering your 
 - **Documentation Generation**: Extracts docstrings and creates documentation
 - **Real-time Updates**: Monitors project changes automatically to stay current
 
+### Unified Context System (Stable)
+- **Automatic Integration**: Zero manual setup - just initialize and everything works
+- **Code-Tool Bridging**: Intelligently connects code components to relevant tools
+- **Bidirectional References**: Navigate from components to tools and vice versa
+- **Context Awareness**: Understands which tools are most useful for specific code
+- **Background Maintenance**: Continuously updates cross-references as code evolves
+
 ### Enhanced Code Analysis (Stable)
 - **Reference Finding**: Locate all references to components across the codebase
 - **Pattern Detection**: Identify common patterns and anti-patterns
@@ -53,6 +63,7 @@ With this toolkit, Claude becomes a true development partner - remembering your 
 - **Secure Project Access**: Controlled access to your development files
 - **Directory Navigation**: Intuitive directory navigation and exploration
 - **Code Manipulation**: Read, write, and modify code with proper error handling
+- **Edit Bookmarks**: Create, edit, and apply bookmarks for complex code section edits
 - **File Operations**: Comprehensive file management capabilities
 - **Search & Indexing**: Find files and content with powerful search tools
 
@@ -128,9 +139,10 @@ python development/launch.py
 
 ## 📊 Usage
 
-### AI Librarian
+### AI Librarian & Unified Context
 ```
 # Initialize AI Librarian for a project
+# This one command sets up everything - AI Librarian, Unified Context, and Tool References
 initialize_librarian("path/to/your/project")
 
 # Search for code implementations
@@ -138,6 +150,15 @@ find_implementation("path/to/your/project", "login function")
 
 # Query components
 query_component("path/to/your/project", "MyClass")
+
+# Find tools related to a specific component
+find_related_tools("path/to/your/project", "AuthenticationManager")
+
+# Find components related to a specific tool
+find_related_components("path/to/your/project", "edit_file")
+
+# Get a unified view of your project
+get_unified_context("path/to/your/project")
 ```
 
 ### Task Management
@@ -181,6 +202,11 @@ read_file("path/to/your/file.py")
 # Write to a file
 write_file("path/to/your/file.py", "file content")
 
+# Edit bookmarks for complex code changes
+bookmark_id = create_edit_bookmark("path/to/project", "path/to/file.py", 10, 25)
+update_bookmark("path/to/project", bookmark_id, "new content for lines 10-25")
+apply_bookmark("path/to/project", bookmark_id)
+
 # List directory contents
 list_directory("path/to/your/directory")
 
@@ -193,22 +219,31 @@ search_files("path/to/your/project", "pattern")
 The AI Dev Toolkit uses a modular architecture built around the Model Context Protocol (MCP) to integrate with Claude Desktop:
 
 ```
-┌─────────────────────┐      ┌───────────────────┐      ┌─────────────────┐
-│                     │      │                   │      │                 │
-│   Claude Desktop    │◄────►│   AI Librarian    │◄────►│  Your Project   │
-│                     │      │     Server        │      │   Filesystem    │
-└─────────────────────┘      └───────────────────┘      └─────────────────┘
+┌─────────────────────┐      ┌───────────────────┐      ┌───────────────┐
+│                     │      │                   │      │               │
+│   Claude Desktop    │◄────►│   AI Librarian    │◄────►│  Your Project  │
+│                     │      │     Server        │      │   Filesystem   │
+└─────────────────────┘      └───────────────────┘      └───────────────┘
                                       ▲
                                       │
                                       ▼
-                             ┌────────────────────┐
-                             │                    │
-                             │ Persistent Context & Tool Index │
-                             │                    │
-                             └────────────────────┘
+                        ┌─────────────────────────────┐
+                        │                             │
+                        │    Unified Context System    │
+                        │                             │
+                        └─────────────────────────────┘
+                                      ▲
+                                      │
+                                      ▼
+                  ┌────────────────┐     ┌────────────────┐
+                  │                │     │                │
+                  │ AI Librarian   │◄───►│  Tool Reference │
+                  │ Persistent     │     │  System        │
+                  │ Context        │     │                │
+                  └────────────────┘     └────────────────┘
 ```
 
-The AI Librarian server provides a seamless interface between Claude Desktop and your project, maintaining persistent context and intelligent tool selection capabilities.
+The AI Librarian server provides a seamless interface between Claude Desktop and your project. The Unified Context System automatically bridges the AI Librarian's code understanding with the Tool Reference System, enabling intelligent navigation between components and tools without any manual configuration.
 
 ## 🤖 AI-Assisted Development
 

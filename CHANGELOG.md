@@ -2,18 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.3.1] - 2025-05-09
+## [0.4.1] - 2025-05-10
 
 ### Added
-- Tool Index implementation for AI-optimized tool selection
-- Tool profiles for enhanced tool usage
-- Tool relationship mapping for improved decision-making
-- Self-diagnostic capabilities for context validation
+- Edit Bookmark system for complex code section editing
+- Persistent bookmarks with metadata storage
+- Tools for creating, updating, applying and removing bookmarks
+- Improved docstrings and error handling
 
 ### Changed
-- Improved error handling in FileSystem operations
-- Enhanced permission validation for better security
-- Updated documentation to reflect current features
+- Enhanced AI Librarian initialization to support bookmark directories
+- Updated README with edit bookmark documentation and examples
+
+## [0.4.0] - 2025-05-09
+
+### Added
+- Unified Context System integrating AI Librarian and Tool Reference
+- Bidirectional cross-references between components and tools
+- Enhanced component analysis with relationship mapping
+- Tool recommendation based on component context
+
+### Changed
+- Improved code analysis capabilities
+- More robust error handling throughout the system
+- Better performance for large codebases
 
 ## [0.3.0] - 2025-05-08
 

@@ -40,7 +40,15 @@ if parent_dir not in sys.path:
 from aitoolkit.librarian.todos import TodoManager
 from aitoolkit.librarian.sanity_check import run_sanity_check
 from aitoolkit.librarian.enhanced_indexer import initialize_enhanced_librarian
+from aitoolkit.librarian.edit_bookmark import EditBookmark
 from aitoolkit.utils.logging_manager import configure_logger
+
+# Import Unified Context Integration
+try:
+    from aitoolkit.librarian.unified_context_integration import register_unified_context_tools
+except ImportError:
+    logger.warning("Unified Context Integration not available")
+    register_unified_context_tools = None
 
 # Import filesystem module for file operations
 import shutil
@@ -357,6 +365,11 @@ def initialize_tool_index():
 
 # Initialize Tool Index
 TOOL_INDEX_PATH = initialize_tool_index()
+
+# Initialize Unified Context Integration
+if register_unified_context_tools is not None:
+    register_unified_context_tools(mcp)
+    logger.info("Registered Unified Context tools")
 
 def query_tool_index(query_type, query_params):
     """
@@ -1006,8 +1019,10 @@ def initialize_librarian(project_path: str) -> str:
             # Create subdirectories
             scripts_path = os.path.join(ai_ref_path, "scripts")
             diagnostics_path = os.path.join(ai_ref_path, "diagnostics")
+            edit_bookmarks_path = os.path.join(ai_ref_path, "edit_bookmarks")
             os.makedirs(scripts_path, exist_ok=True)
             os.makedirs(diagnostics_path, exist_ok=True)
+            os.makedirs(edit_bookmarks_path, exist_ok=True)
             
             # Create README.md
             readme_content = """# AI Librarian
@@ -1855,6 +1870,267 @@ def search_todos(project_path: str, query: str) -> Dict[str, Any]:
             return {
                 "status": "error",
                 "message": f"Error searching to-do items: {str(e)}"
+            }
+            
+#-----------------------------------------------------------------
+# Edit Bookmark Tools
+#-----------------------------------------------------------------
+
+@mcp.tool()
+def create_edit_bookmark(project_path: str, file_path: str, start_line: int, end_line: int, bookmark_name: str = None) -> Dict[str, Any]:
+    """
+    Create a bookmark for editing a section of a file.
+    
+    This tool extracts a section of a file based on line numbers and creates a temporary
+    bookmark file that can be edited and later applied back to the original file.
+    
+    Args:
+        project_path: The root directory of the project
+        file_path: Path to the file to bookmark
+        start_line: First line of the section to bookmark (1-based)
+        end_line: Last line of the section to bookmark (inclusive)
+        bookmark_name: Optional name for the bookmark
+        
+    Returns:
+        Dictionary with bookmark information
+    """
+    # Pause monitoring during this operation
+    with MonitoringPauser():
+        try:
+            # Initialize the edit bookmark manager
+            bookmark_manager = EditBookmark(project_path)
+            
+            # Create the bookmark
+            bookmark_id = bookmark_manager.create_bookmark(file_path, start_line, end_line, bookmark_name)
+            
+            # Get the content for convenience
+            content = bookmark_manager.get_bookmark_content(bookmark_id)
+            
+            return {
+                "status": "success",
+                "bookmark_id": bookmark_id,
+                "file_path": file_path,
+                "start_line": start_line,
+                "end_line": end_line,
+                "line_count": end_line - start_line + 1,
+                "content": content,
+                "message": f"Created edit bookmark '{bookmark_id}' for lines {start_line}-{end_line}"
+            }
+        except Exception as e:
+            logger.error(f"Error creating edit bookmark: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Error creating edit bookmark: {str(e)}"
+            }
+
+@mcp.tool()
+def get_bookmark_content(project_path: str, bookmark_id: str) -> Dict[str, Any]:
+    """
+    Get the content of an edit bookmark.
+    
+    Args:
+        project_path: The root directory of the project
+        bookmark_id: The ID of the bookmark
+        
+    Returns:
+        Dictionary with the bookmark content
+    """
+    # Pause monitoring during this operation
+    with MonitoringPauser():
+        try:
+            # Initialize the edit bookmark manager
+            bookmark_manager = EditBookmark(project_path)
+            
+            # Get the bookmark content
+            content = bookmark_manager.get_bookmark_content(bookmark_id)
+            
+            if content is None:
+                return {
+                    "status": "error",
+                    "message": f"Bookmark not found: {bookmark_id}"
+                }
+            
+            return {
+                "status": "success",
+                "bookmark_id": bookmark_id,
+                "content": content,
+                "message": f"Retrieved content for bookmark '{bookmark_id}'"
+            }
+        except Exception as e:
+            logger.error(f"Error getting bookmark content: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Error getting bookmark content: {str(e)}"
+            }
+
+@mcp.tool()
+def update_bookmark(project_path: str, bookmark_id: str, new_content: str) -> Dict[str, Any]:
+    """
+    Update the content of an edit bookmark.
+    
+    Args:
+        project_path: The root directory of the project
+        bookmark_id: The ID of the bookmark
+        new_content: The new content for the bookmark
+        
+    Returns:
+        Dictionary with the result of the update operation
+    """
+    # Pause monitoring during this operation
+    with MonitoringPauser():
+        try:
+            # Initialize the edit bookmark manager
+            bookmark_manager = EditBookmark(project_path)
+            
+            # Update the bookmark
+            success = bookmark_manager.update_bookmark(bookmark_id, new_content)
+            
+            if not success:
+                return {
+                    "status": "error",
+                    "message": f"Bookmark not found: {bookmark_id}"
+                }
+            
+            # Get diff if available
+            diff = bookmark_manager.get_bookmark_diff(bookmark_id)
+            
+            return {
+                "status": "success",
+                "bookmark_id": bookmark_id,
+                "diff": diff,
+                "message": f"Updated content for bookmark '{bookmark_id}'"
+            }
+        except Exception as e:
+            logger.error(f"Error updating bookmark: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Error updating bookmark: {str(e)}"
+            }
+
+@mcp.tool()
+def apply_bookmark(project_path: str, bookmark_id: str) -> Dict[str, Any]:
+    """
+    Apply a bookmark to the original file.
+    
+    This tool replaces the bookmarked section in the original file with the
+    edited content from the bookmark.
+    
+    Args:
+        project_path: The root directory of the project
+        bookmark_id: The ID of the bookmark
+        
+    Returns:
+        Dictionary with the result of the apply operation
+    """
+    # Pause monitoring during this operation
+    with MonitoringPauser():
+        try:
+            # Initialize the edit bookmark manager
+            bookmark_manager = EditBookmark(project_path)
+            
+            # Get diff before applying for reporting
+            diff = bookmark_manager.get_bookmark_diff(bookmark_id)
+            
+            # Apply the bookmark
+            success = bookmark_manager.apply_bookmark(bookmark_id)
+            
+            if not success:
+                return {
+                    "status": "error",
+                    "message": f"Bookmark not found or could not be applied: {bookmark_id}"
+                }
+            
+            return {
+                "status": "success",
+                "bookmark_id": bookmark_id,
+                "diff": diff,
+                "message": f"Successfully applied bookmark '{bookmark_id}' to original file"
+            }
+        except Exception as e:
+            logger.error(f"Error applying bookmark: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Error applying bookmark: {str(e)}"
+            }
+
+@mcp.tool()
+def list_bookmarks(project_path: str) -> Dict[str, Any]:
+    """
+    List all active bookmarks for a project.
+    
+    Args:
+        project_path: The root directory of the project
+        
+    Returns:
+        Dictionary with all active bookmarks
+    """
+    # Pause monitoring during this operation
+    with MonitoringPauser():
+        try:
+            # Initialize the edit bookmark manager
+            bookmark_manager = EditBookmark(project_path)
+            
+            # List bookmarks
+            bookmarks = bookmark_manager.list_bookmarks()
+            
+            if not bookmarks:
+                return {
+                    "status": "success",
+                    "found": False,
+                    "message": "No active bookmarks found for this project"
+                }
+            
+            return {
+                "status": "success",
+                "found": True,
+                "count": len(bookmarks),
+                "bookmarks": bookmarks,
+                "message": f"Found {len(bookmarks)} active bookmarks"
+            }
+        except Exception as e:
+            logger.error(f"Error listing bookmarks: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Error listing bookmarks: {str(e)}"
+            }
+
+@mcp.tool()
+def remove_bookmark(project_path: str, bookmark_id: str) -> Dict[str, Any]:
+    """
+    Remove a bookmark.
+    
+    Args:
+        project_path: The root directory of the project
+        bookmark_id: The ID of the bookmark
+        
+    Returns:
+        Dictionary with the result of the remove operation
+    """
+    # Pause monitoring during this operation
+    with MonitoringPauser():
+        try:
+            # Initialize the edit bookmark manager
+            bookmark_manager = EditBookmark(project_path)
+            
+            # Remove the bookmark
+            success = bookmark_manager.remove_bookmark(bookmark_id)
+            
+            if not success:
+                return {
+                    "status": "error",
+                    "message": f"Bookmark not found: {bookmark_id}"
+                }
+            
+            return {
+                "status": "success",
+                "bookmark_id": bookmark_id,
+                "message": f"Removed bookmark '{bookmark_id}'"
+            }
+        except Exception as e:
+            logger.error(f"Error removing bookmark: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Error removing bookmark: {str(e)}"
             }
 
 @mcp.tool()
