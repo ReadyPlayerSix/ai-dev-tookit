@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-AI Dev Toolkit Sanity Checker
+AI Dev Toolkit Sanity Checker (Fixed Version)
 
 This module provides functionality to check the AI Dev Toolkit codebase for
 common issues, inconsistencies, and path problems. It can be used as both
 a standalone script and an MCP tool integrated with the AI Librarian.
+
+This is a fixed version that avoids encoding issues.
 """
 
 import os
@@ -14,9 +16,6 @@ import re
 import importlib
 import importlib.util
 import subprocess
-import platform
-import locale
-import codecs
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Any, Optional
 
@@ -28,37 +27,11 @@ try:
 except ImportError:
     ENHANCED_CHECKS_AVAILABLE = False
 
-# Output symbols with proper Unicode handling
-INFO_CHAR = "ℹ"  # Information symbol 
-OK_CHAR = "✓"    # Check mark
-WARN_CHAR = "⚠"  # Warning symbol
-ERROR_CHAR = "✗"  # X mark
-
-# ASCII fallbacks in case terminal doesn't support Unicode
-ASCII_INFO_CHAR = "i"
-ASCII_OK_CHAR = "v"
-ASCII_WARN_CHAR = "!"
-ASCII_ERROR_CHAR = "X"
-
-# Determine if we can use Unicode
-USE_UNICODE = True
-try:
-    # Test if the terminal can print Unicode
-    import sys
-    if hasattr(sys.stdout, 'encoding') and sys.stdout.encoding:
-        # Try to encode a Unicode character
-        "✓".encode(sys.stdout.encoding)
-    else:
-        USE_UNICODE = False
-except UnicodeEncodeError:
-    USE_UNICODE = False
-
-# Use ASCII symbols if Unicode is not supported
-if not USE_UNICODE:
-    INFO_CHAR = ASCII_INFO_CHAR
-    OK_CHAR = ASCII_OK_CHAR
-    WARN_CHAR = ASCII_WARN_CHAR
-    ERROR_CHAR = ASCII_ERROR_CHAR
+# ASCII symbols for output - using plain ASCII for better compatibility
+INFO_CHAR = "i"
+OK_CHAR = "v"  # ASCII alternative to check mark
+WARN_CHAR = "!"
+ERROR_CHAR = "X"
 
 # Terminal colors - only used if supported
 try:
@@ -138,38 +111,13 @@ class SanityChecker:
         elif status == "info":
             prefix = f"{BLUE}{INFO_CHAR} "
         
-        # Handle encoding properly for all output
+        # Encode to utf-8 to prevent issues with special characters
         try:
-            # First try to print directly - this will work in most cases
-            if hasattr(sys.stdout, 'encoding') and sys.stdout.encoding:
-                # Try to encode the full message to check if it's supported
-                full_msg = f"{prefix}{message}{RESET}"
-                full_msg.encode(sys.stdout.encoding)
-                print(full_msg)
-            else:
-                # No encoding info available, try anyway
-                print(f"{prefix}{message}{RESET}")
+            print(f"{prefix}{message}{RESET}")
         except UnicodeEncodeError:
-            # If there's an encoding error, use a more robust approach
-            # First ensure the prefix is displayable
-            safe_prefix = prefix
-            try:
-                safe_prefix.encode(sys.stdout.encoding or 'ascii')
-            except UnicodeEncodeError:
-                # Fall back to ASCII prefix if needed
-                if status == "success":
-                    safe_prefix = f"{GREEN}{ASCII_OK_CHAR} "
-                elif status == "warning":
-                    safe_prefix = f"{YELLOW}{ASCII_WARN_CHAR} "
-                elif status == "error":
-                    safe_prefix = f"{RED}{ASCII_ERROR_CHAR} "
-                elif status == "info":
-                    safe_prefix = f"{BLUE}{ASCII_INFO_CHAR} "
-            
-            # Then safely encode the message
-            encoding = sys.stdout.encoding or 'ascii'
-            safe_message = message.encode(encoding, 'replace').decode(encoding)
-            print(f"{safe_prefix}{safe_message}{RESET}")
+            # Fallback to ASCII if encoding fails
+            ascii_message = message.encode('ascii', 'replace').decode('ascii')
+            print(f"{prefix}{ascii_message}{RESET}")
     
     def check_all(self) -> Tuple[List[str], List[str], List[str]]:
         """
@@ -457,7 +405,7 @@ class SanityChecker:
             if script_validation.get("status") == "success":
                 self.print_status("Script index validation passed", "success")
                 self.info.append("Script index is accurate and complete")
-            elif script_validation.get("status") == "issues_found":
+            elif script_validation.get("status") == "issues_found"):
                 self.print_status("Script index has issues", "warning")
                 
                 # Add specific warnings
@@ -658,46 +606,3 @@ class SanityChecker:
             report.append("**Passed** - All checks passed successfully")
         
         return "\n".join(report)
-
-def run_sanity_check(project_path: str, create_artifact: bool = False) -> str:
-    """
-    Run a sanity check and return the results as a formatted string.
-    This function is designed to be used as an MCP tool.
-    
-    Args:
-        project_path: Path to the project directory
-        create_artifact: Whether to create an artifact (if supported)
-        
-    Returns:
-        Formatted report of the sanity check
-    """
-    checker = SanityChecker(project_path)
-    return checker.generate_report(create_artifact)
-
-def main():
-    """Main entry point for the script when run directly."""
-    # Parse arguments
-    if len(sys.argv) > 1:
-        root_dir = sys.argv[1]
-    else:
-        root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    
-    checker = SanityChecker(root_dir)
-    issues, warnings, info = checker.check_all()
-    
-    # Print summary
-    print(f"\n{BOLD}Sanity Check Summary:{RESET}")
-    print(f"{RED}{len(issues)} issues{RESET}, {YELLOW}{len(warnings)} warnings{RESET}, {BLUE}{len(info)} info messages{RESET}")
-    
-    if issues:
-        print(f"\n{RED}FAILED: Sanity check failed with {len(issues)} issues{RESET}")
-        return 1
-    elif warnings:
-        print(f"\n{YELLOW}WARNING: Sanity check passed with {len(warnings)} warnings{RESET}")
-        return 0
-    else:
-        print(f"\n{GREEN}PASSED: Sanity check passed successfully!{RESET}")
-        return 0
-
-if __name__ == "__main__":
-    sys.exit(main())

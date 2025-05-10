@@ -1503,7 +1503,7 @@ def run_librarian_diagnostics(project_path: str) -> str:
         return f"Error running diagnostics: {str(e)}"
 
 @mcp.tool()
-def sanity_check(project_path: str) -> str:
+def sanity_check(project_path: str, create_artifact: bool = False) -> str:
     """
     Run a comprehensive code quality check on the project.
     
@@ -1519,9 +1519,12 @@ def sanity_check(project_path: str) -> str:
     - Duplicate functionality identification
     - Misplaced files detection
     - Static analysis with pylint (if available)
+    - AI Librarian self-validation
+    - Execution trace analysis
     
     Args:
         project_path: The root directory of the project to check
+        create_artifact: Whether to create an artifact with the report (default: False)
         
     Returns:
         A detailed report of the sanity check results
@@ -1535,9 +1538,50 @@ def sanity_check(project_path: str) -> str:
                 if "Permission denied" in access_check or "Error checking access" in access_check:
                     return access_check
             
-            # Use the run_sanity_check function imported at the top of the file
-            # This avoids circular imports and ensures the function is properly registered
-            return run_sanity_check(project_path)
+            # Try to use the custom script first
+            try:
+                import subprocess
+                
+                # Run the custom script
+                custom_script = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+                                           "scripts", "run_sanity_check.py")
+                
+                if os.path.exists(custom_script):
+                    result = subprocess.run([sys.executable, custom_script, project_path], 
+                                          capture_output=True, text=True, check=False)
+                    report = result.stdout
+                    
+                    # If we got a valid report, use it
+                    if "AI Dev Toolkit Sanity Check Report" in report:
+                        return report
+                
+                # Fall back to the imported run_sanity_check
+                logger.info("Using fallback sanity check implementation")
+                report = run_sanity_check(project_path, create_artifact)
+            except Exception as e:
+                logger.error(f"Error running custom sanity check: {str(e)}")
+                # Fall back to the imported run_sanity_check
+                report = run_sanity_check(project_path, create_artifact)
+            
+            # Save a copy of the report to the diagnostics directory for future reference
+            try:
+                ai_ref_path = os.path.join(project_path, ".ai_reference")
+                if os.path.exists(ai_ref_path):
+                    diagnostics_path = os.path.join(ai_ref_path, "diagnostics")
+                    if not os.path.exists(diagnostics_path):
+                        os.makedirs(diagnostics_path, exist_ok=True)
+                    
+                    # Save the report with timestamp
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    report_path = os.path.join(diagnostics_path, f"sanity_check_{timestamp}.md")
+                    with open(report_path, 'w', encoding='utf-8') as f:
+                        f.write(report)
+                    
+                    logger.info(f"Saved sanity check report to {report_path}")
+            except Exception as e:
+                logger.warning(f"Failed to save sanity check report: {e}")
+            
+            return report
         except Exception as e:
             logger.error(f"Error running sanity check: {str(e)}")
             return f"Error running sanity check: {str(e)}"
@@ -2130,31 +2174,63 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                     "message": f"Permission denied: Cannot modify {path}"
                 }
             
+            # If we get here, we're using the fallback implementation
+            # Let's add some logging and minor improvements to the original method
+            
+            # Check file size before trying to read (for logging)
+            try:
+                file_size = os.path.getsize(path)
+                logger.info(f"File size: {file_size} bytes")
+                
+                # Add a size limit for very large files
+                MAX_SIZE = 50 * 1024 * 1024  # 50 MB
+                if file_size > MAX_SIZE:
+                    logger.warning(f"File too large: {file_size} bytes exceeds limit of {MAX_SIZE} bytes")
+                    return {
+                        "status": "error",
+                        "message": f"File too large: {file_size / 1024 / 1024:.2f} MB exceeds limit of {MAX_SIZE / 1024 / 1024} MB"
+                    }
+            except Exception as e:
+                logger.error(f"Error checking file size: {str(e)}")
+            
             # Read the current content of the file
             try:
+                logger.info("Reading file content")
                 with open(path, 'r', encoding=encoding) as f:
                     content = f.read()
-            except UnicodeDecodeError:
+                logger.info(f"File content read, length: {len(content)} characters")
+            except UnicodeDecodeError as ude:
+                logger.error(f"Unicode decode error: {str(ude)}")
                 return {
                     "status": "error",
                     "message": f"Cannot edit binary file or file with encoding different from {encoding}"
                 }
+            except Exception as e:
+                logger.error(f"Error reading file: {str(e)}")
+                return {
+                    "status": "error",
+                    "message": f"Error reading file: {str(e)}"
+                }
             
             # Check if the old_text exists in the content
             if old_text not in content:
+                logger.warning("The specified text segment was not found in the file")
                 return {
                     "status": "error",
                     "message": f"The specified text segment was not found in the file"
                 }
             
             # Check if the old text occurs multiple times (ambiguous replacement)
-            if content.count(old_text) > 1:
+            occurrences = content.count(old_text)
+            if occurrences > 1:
+                logger.warning(f"Text segment appears multiple times in file ({occurrences} occurrences)")
                 return {
                     "status": "error",
-                    "message": f"The specified text segment appears multiple times in the file. Please provide a more specific text segment."
+                    "message": f"The specified text segment appears {occurrences} times in the file. Please provide a more specific text segment."
                 }
             
             # Replace the text
+            logger.info("Performing text replacement")
             new_content = content.replace(old_text, new_text)
             
             # Calculate a more descriptive diff for the response
@@ -2167,38 +2243,56 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
             diff.append(f"+++ {path} (modified)")
             
             # Add the changed lines with line numbers if possible
-            # First, find where in the file the old_text is located
-            lines_before = content.split(old_text, 1)[0].count('\n') + 1
-            
-            # Add a better header for the diff
-            diff.append(f"@@ -{lines_before},{len(old_lines)} +{lines_before},{len(new_lines)} @@")
-            
-            for line in old_lines:
-                diff.append(f"- {line}")
-            for line in new_lines:
-                diff.append(f"+ {line}")
+            try:
+                # Find where in the file the old_text is located
+                lines_before = content.split(old_text, 1)[0].count('\n') + 1
+                
+                # Add a better header for the diff
+                diff.append(f"@@ -{lines_before},{len(old_lines)} +{lines_before},{len(new_lines)} @@")
+                
+                for line in old_lines:
+                    diff.append(f"- {line}")
+                for line in new_lines:
+                    diff.append(f"+ {line}")
+            except Exception as e:
+                logger.error(f"Error generating diff: {str(e)}")
+                # Fall back to a simple diff message
+                diff = ["Changes: (detailed diff not available)"]
             
             # Create the directory if it doesn't exist
             dir_name = os.path.dirname(path)
             if dir_name and not os.path.exists(dir_name):
                 try:
+                    logger.info(f"Creating directory: {dir_name}")
                     os.makedirs(dir_name, exist_ok=True)
                 except OSError as e:
+                    logger.error(f"Cannot create directory {dir_name}: {str(e)}")
                     return {
                         "status": "error",
                         "message": f"Cannot create directory {dir_name}: {str(e)}"
                     }
             
-            # Write the modified content to the file using atomic write pattern
+            # Create a temporary file in the system temp directory instead of target directory
+            # to avoid potential permission issues
+            logger.info("Creating temporary file in system temp directory")
+            temp_fd, temp_path = tempfile.mkstemp(suffix='.tmp')
+            os.close(temp_fd)  # Close the file descriptor
+            
+            # Write the modified content to the temporary file
             try:
-                with tempfile.NamedTemporaryFile(mode='w', encoding=encoding, 
-                                                dir=os.path.dirname(path) or ".", 
-                                                delete=False) as temp_file:
+                with open(temp_path, 'w', encoding=encoding) as temp_file:
                     temp_file.write(new_content)
-                    temp_path = temp_file.name
                 
-                # Rename the temporary file to the target path (atomic operation)
-                shutil.move(temp_path, path)
+                logger.info(f"Copying {temp_path} to {path}")
+                # Use copy2 which preserves file metadata
+                shutil.copy2(temp_path, path)
+                
+                # Remove the temporary file after successful copy
+                try:
+                    logger.info(f"Removing temporary file: {temp_path}")
+                    os.unlink(temp_path)
+                except Exception as cleanup_error:
+                    logger.warning(f"Could not remove temporary file {temp_path}: {str(cleanup_error)}")
                 
                 logger.info(f"Successfully edited file: {path}")
                 
@@ -2207,6 +2301,11 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                 chars_added = len(new_text)
                 lines_removed = len(old_lines)
                 lines_added = len(new_lines)
+                
+                # Create hash instead of using built-in hash function for better consistency
+                import hashlib
+                content_hash_before = hashlib.md5(content.encode()).hexdigest()
+                content_hash_after = hashlib.md5(new_content.encode()).hexdigest()
                 
                 return {
                     "status": "success",
@@ -2222,17 +2321,17 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                         "lines_added": lines_added,
                         "lines_net_change": lines_added - lines_removed
                     },
-                    "content_hash_before": hash(content),  # For verification
-                    "content_hash_after": hash(new_content)  # For verification
+                    "content_hash_before": content_hash_before,
+                    "content_hash_after": content_hash_after
                 }
                 
             except Exception as e:
                 # Clean up the temporary file if it exists
-                if 'temp_path' in locals() and os.path.exists(temp_path):
+                if os.path.exists(temp_path):
                     try:
                         os.unlink(temp_path)
-                    except:
-                        pass
+                    except Exception as cleanup_error:
+                        logger.error(f"Error cleaning up temp file: {str(cleanup_error)}")
                 
                 logger.error(f"Error writing to file {path}: {str(e)}")
                 return {
@@ -2263,11 +2362,19 @@ def enhanced_edit_file(path: str, old_text: str, new_text: str, encoding: str = 
     Returns:
         Dictionary with the result of the edit operation, including a git-style diff
     """
+    # Import the fixed implementation
+    try:
+        from aitoolkit.librarian.enhanced_edit_file_fix import enhanced_edit_file_fixed
+        return enhanced_edit_file_fixed(path, old_text, new_text, encoding, ALLOWED_DIRECTORIES, logger)
+    except ImportError:
+        logger.warning("Could not import enhanced_edit_file_fix, falling back to default implementation")
+    
     # Pause monitoring during this operation
     with MonitoringPauser():
         try:
             # Normalize the path
             path = os.path.abspath(path)
+            logger.info(f"Starting enhanced_edit_file for {path}")
             
             # Check if path is within allowed directories
             if not validate_path(path, ALLOWED_DIRECTORIES):
