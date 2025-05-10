@@ -3169,17 +3169,28 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                     "message": f"Component registry not found at {component_registry_path}."
                 }
 
-            with open(component_registry_path, 'r', encoding='utf-8') as f:
-                component_registry = json.load(f)
+            try:
+                with open(component_registry_path, 'r', encoding='utf-8') as f:
+                    component_registry = json.load(f)
+                
+                # Verify proper structure
+                if not isinstance(component_registry, dict):
+                    logger.error(f"Component registry is not a dictionary: {component_registry_path}")
+                    component_registry = {"components": {}}
+            except Exception as e:
+                logger.error(f"Error loading component registry: {str(e)}")
+                component_registry = {"components": {}}
 
             # Parse the target file to get its imports, classes, and functions
             target_file_info = None
             target_file_rel_path = rel_file_path.replace("\\", "/")
 
-            for path, info in script_index["files"].items():
-                if path == target_file_rel_path:
-                    target_file_info = info
-                    break
+            # Properly check if script_index is a dictionary and has the "files" key
+            if isinstance(script_index, dict) and "files" in script_index and isinstance(script_index["files"], dict):
+                for path, info in script_index["files"].items():
+                    if path == target_file_rel_path:
+                        target_file_info = info
+                        break
 
             if not target_file_info:
                 # If the file is not in the index, parse it directly
@@ -3211,6 +3222,13 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                             target_imports = mini_librarian["imports"]
 
             # For each file in the script index, check for relationships
+            # Only proceed if script_index has the proper structure
+            if not (isinstance(script_index, dict) and "files" in script_index and isinstance(script_index["files"], dict)):
+                return {
+                    "status": "error",
+                    "message": "Invalid script index structure"
+                }
+                
             for path, info in script_index["files"].items():
                 # Skip the target file itself
                 if path == target_file_rel_path:
@@ -3249,31 +3267,69 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                         mini_librarian = json.load(f)
 
                         if "imports" in mini_librarian:
-                            # Check if this file imports the target file
-                            target_module = os.path.splitext(target_file_rel_path)[0].replace("/", ".")
+                            try:
+                                # Check if this file imports the target file
+                                target_module = os.path.splitext(target_file_rel_path)[0].replace("/", ".")
+                                
+                                # Guard against non-string target_module or bad module names
+                                if not isinstance(target_module, str) or not target_module:
+                                    logger.error(f"Invalid target module name: {target_module}")
+                                    continue
+                                
+                                # Make sure os.path.basename returns a string
+                                target_basename = os.path.basename(target_module)
+                                if not isinstance(target_basename, str) or not target_basename:
+                                    logger.error(f"Invalid target basename: {target_basename}")
+                                    continue
+                                
+                                for imp in mini_librarian["imports"]:
+                                    # Make sure imp is a string
+                                    if not isinstance(imp, str):
+                                        continue
+                                        
+                                    # Look for direct or relative imports
+                                    if (imp == target_module or
+                                        imp.endswith("." + target_basename)):
+                                        related_files["imports"].append({
+                                            "path": path,
+                                            "relationship": "imports_target",
+                                            "import_statement": imp
+                                        })
+                                        break
+                            except Exception as e:
+                                logger.error(f"Error checking imports: {str(e)}")
+                                continue
 
-                            for imp in mini_librarian["imports"]:
-                                # Look for direct or relative imports
-                                if (imp == target_module or
-                                    imp.endswith("." + os.path.basename(target_module))):
-                                    related_files["imports"].append({
-                                        "path": path,
-                                        "relationship": "imports_target",
-                                        "import_statement": imp
-                                    })
-                                    break
-
-                            # Check if the target file imports this file
-                            this_module = os.path.splitext(path)[0].replace("/", ".")
-                            for imp in target_imports:
-                                if (imp == this_module or
-                                    imp.endswith("." + os.path.basename(this_module))):
-                                    related_files["imported_by"].append({
-                                        "path": path,
-                                        "relationship": "imported_by_target",
-                                        "import_statement": imp
-                                    })
-                                    break
+                            try:
+                                # Check if the target file imports this file
+                                this_module = os.path.splitext(path)[0].replace("/", ".")
+                                
+                                # Guard against non-string this_module
+                                if not isinstance(this_module, str) or not this_module:
+                                    logger.error(f"Invalid module name: {this_module}")
+                                    continue
+                                
+                                this_basename = os.path.basename(this_module)
+                                if not isinstance(this_basename, str) or not this_basename:
+                                    logger.error(f"Invalid basename: {this_basename}")
+                                    continue
+                                
+                                for imp in target_imports:
+                                    # Make sure imp is a string
+                                    if not isinstance(imp, str):
+                                        continue
+                                        
+                                    if (imp == this_module or
+                                        imp.endswith("." + this_basename)):
+                                        related_files["imported_by"].append({
+                                            "path": path,
+                                            "relationship": "imported_by_target",
+                                            "import_statement": imp
+                                        })
+                                        break
+                            except Exception as e:
+                                logger.error(f"Error checking target imports: {str(e)}")
+                                continue
 
                 # 4. Class and function references
                 if "classes" in target_file_info:
