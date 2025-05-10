@@ -119,7 +119,7 @@ def monitor_projects():
     This runs in a separate thread to provide real-time updates.
     """
     logger.info("Starting project monitoring thread")
-    
+
     while monitoring_active:
         try:
             # Check if monitoring is paused
@@ -127,11 +127,11 @@ def monitor_projects():
                 if librarian_context["paused"]:
                     time.sleep(1)  # Short sleep when paused
                     continue
-                
+
                 current_time = time.time()
                 # Make a copy of active projects to avoid modification during iteration
                 active_projects = list(librarian_context["active_projects"])
-            
+
             # Check each active project for changes
             for project_path in active_projects:
                 if not os.path.exists(project_path):
@@ -139,14 +139,14 @@ def monitor_projects():
                         logger.warning(f"Project path no longer exists: {project_path}")
                         librarian_context["active_projects"].remove(project_path)
                     continue
-                    
+
                 # Only check every 30 seconds per project to avoid excessive file system operations
                 with state_lock:
                     last_check = librarian_context["last_update"].get(project_path, 0)
-                    
+
                 if current_time - last_check < 30:
                     continue
-                    
+
                 # Check for file changes
                 has_changes = check_project_changes(project_path)
                 if has_changes:
@@ -157,7 +157,7 @@ def monitor_projects():
                 else:
                     with state_lock:
                         librarian_context["last_update"][project_path] = current_time
-                
+
             # Sleep to avoid high CPU usage
             time.sleep(5)
         except Exception as e:
@@ -178,7 +178,7 @@ def check_project_changes(project_path):
         # Get currently indexed files
         with state_lock:
             indexed_files = librarian_context["indexed_files"].get(project_path, {})
-        
+
         # Scan for Python files
         current_files = {}
         for root, _, files in os.walk(project_path):
@@ -186,7 +186,7 @@ def check_project_changes(project_path):
             if any(part.startswith('.') for part in Path(root).parts) or \
                any(part in ['venv', 'env', '__pycache__', 'node_modules'] for part in Path(root).parts):
                 continue
-                
+
             for file in files:
                 if file.endswith('.py'):
                     file_path = os.path.join(root, file)
@@ -195,16 +195,16 @@ def check_project_changes(project_path):
                         current_files[file_path] = mtime
                     except OSError:
                         pass
-        
+
         # Check for added, removed, or modified files
         if set(indexed_files.keys()) != set(current_files.keys()):
             return True
-            
+
         # Check for modified files
         for file_path, mtime in current_files.items():
             if file_path in indexed_files and indexed_files[file_path] != mtime:
                 return True
-                
+
         return False
     except Exception as e:
         logger.error(f"Error checking project changes: {str(e)}")
@@ -222,10 +222,10 @@ def update_librarian_for_project(project_path):
         # Update the librarian files using the imported function
         message, file_count, component_count = initialize_enhanced_librarian(project_path)
         logger.info(f"Updated librarian for {project_path}: {message}")
-        
+
         # Update our in-memory representation
         ai_ref_path = os.path.join(project_path, ".ai_reference")
-        
+
         # Read script index
         script_index_path = os.path.join(ai_ref_path, "script_index.json")
         if os.path.exists(script_index_path):
@@ -233,7 +233,7 @@ def update_librarian_for_project(project_path):
                 script_index = json.load(f)
                 with state_lock:
                     librarian_context["projects"][project_path] = script_index
-        
+
         # Read component registry
         component_registry_path = os.path.join(ai_ref_path, "component_registry.json")
         if os.path.exists(component_registry_path):
@@ -241,14 +241,14 @@ def update_librarian_for_project(project_path):
                 component_registry = json.load(f)
                 with state_lock:
                     librarian_context["components"][project_path] = component_registry
-        
+
         # Update indexed files
         current_files = {}
         for root, _, files in os.walk(project_path):
             if any(part.startswith('.') for part in Path(root).parts) or \
                any(part in ['venv', 'env', '__pycache__', 'node_modules'] for part in Path(root).parts):
                 continue
-                
+
             for file in files:
                 if file.endswith('.py'):
                     file_path = os.path.join(root, file)
@@ -257,7 +257,7 @@ def update_librarian_for_project(project_path):
                         current_files[file_path] = mtime
                     except OSError:
                         pass
-        
+
         with state_lock:
             librarian_context["indexed_files"][project_path] = current_files
     except Exception as e:
@@ -272,7 +272,7 @@ def cleanup():
     global monitoring_active
     monitoring_active = False
     logger.info("Shutting down AI Librarian server")
-    
+
     # Save any persistent state if needed
     state_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ai_librarian_state.json")
     try:
@@ -297,7 +297,7 @@ if os.path.exists(state_file):
             with state_lock:
                 librarian_context["active_projects"] = set(state.get("active_projects", []))
                 librarian_context["last_update"] = state.get("last_update", {})
-            
+
         # Reload active projects
         for project_path in list(librarian_context["active_projects"]):
             if os.path.exists(project_path):
@@ -316,25 +316,25 @@ permission_status = {}
 # Parse directories from command line args
 def initialize_allowed_directories():
     allowed_dirs = []
-    
+
     # Check for directories in command line args
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
             if os.path.exists(arg):
                 allowed_dirs.append(os.path.abspath(arg))
                 logger.info(f"Added allowed directory from command line: {arg}")
-    
+
     # Add the current directory as a fallback
     if not allowed_dirs:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         parent_dir = os.path.dirname(script_dir)
         allowed_dirs.append(parent_dir)
         logger.info(f"Added parent directory: {parent_dir}")
-    
+
     # Update our permission status tracker
     for dir_path in allowed_dirs:
         permission_status[dir_path] = True
-    
+
     return allowed_dirs
 
 # Get allowed directories
@@ -349,18 +349,18 @@ def initialize_tool_index():
         Path to the Tool Index directory if found, None otherwise
     """
     tool_index_path = None
-    
+
     for project_path in ALLOWED_DIRECTORIES:
         potential_path = os.path.join(project_path, ".tool_reference")
         if os.path.exists(potential_path):
             tool_index_path = potential_path
             logger.info(f"Found Tool Index at {tool_index_path}")
             break
-    
+
     # Store the path in the global context
     with state_lock:
         librarian_context["tool_index"] = tool_index_path
-    
+
     return tool_index_path
 
 # Initialize Tool Index
@@ -383,18 +383,18 @@ def query_tool_index(query_type, query_params):
         Query results or None if not found
     """
     tool_index_path = librarian_context["tool_index"]
-    
+
     # First verification step - verify Tool Index exists
     if not tool_index_path:
         logger.warning(f"Tool Index not found when querying {query_type}")
         return None
-        
+
     # Second verification step - verify required directories exist
     required_directories = {
         "tool_profiles": os.path.join(tool_index_path, "tool_profiles"),
         "decision_trees": os.path.join(tool_index_path, "decision_trees")
     }
-    
+
     for dir_name, dir_path in required_directories.items():
         if not os.path.exists(dir_path):
             try:
@@ -403,7 +403,7 @@ def query_tool_index(query_type, query_params):
             except Exception as e:
                 logger.error(f"Failed to create missing directory {dir_path}: {str(e)}")
                 return None
-    
+
     # Third verification step - verify registry.json exists
     registry_path = os.path.join(tool_index_path, "registry.json")
     if not os.path.exists(registry_path):
@@ -412,16 +412,16 @@ def query_tool_index(query_type, query_params):
             "error": "Tool Index registry.json not found",
             "message": "The Tool Index requires a registry.json file to function properly."
         }
-    
+
     try:
         if query_type == "profile":
             tool_name = query_params.get("tool")
             if not tool_name:
                 logger.warning("No tool name provided for profile query")
                 return None
-                
+
             profile_path = os.path.join(tool_index_path, "tool_profiles", f"{tool_name}.json")
-            
+
             # Fallback for missing profiles
             if not os.path.exists(profile_path):
                 logger.info(f"Profile not found for tool: {tool_name}, using default profile")
@@ -434,22 +434,22 @@ def query_tool_index(query_type, query_params):
                     "never_use_when": [],
                     "_fallback_profile": True
                 }
-            
+
             with open(profile_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        
+
         elif query_type == "relationship":
             rel_group = query_params.get("group")
             if not rel_group:
                 logger.warning("No relationship group provided for query")
                 return None
-                
+
             # First check for a dedicated relationship file
             rel_path = os.path.join(tool_index_path, f"relationship_{rel_group}.json")
             if os.path.exists(rel_path):
                 with open(rel_path, 'r', encoding='utf-8') as f:
                     return json.load(f)
-            
+
             # Then check in the registry file
             with open(registry_path, 'r', encoding='utf-8') as f:
                 registry = json.load(f)
@@ -457,7 +457,7 @@ def query_tool_index(query_type, query_params):
                     for rel in registry["relationships"]:
                         if rel.get("group_name") == rel_group:
                             return rel
-            
+
             # Fallback for missing relationships
             logger.info(f"Relationship group not found: {rel_group}")
             return {
@@ -467,18 +467,18 @@ def query_tool_index(query_type, query_params):
                 "common_sequences": [],
                 "_fallback_relationship": True
             }
-        
+
         elif query_type == "decision_tree":
             tree_id = query_params.get("tree_id")
             if not tree_id:
                 logger.warning("No tree_id provided for decision tree query")
                 return None
-                
+
             tree_path = os.path.join(tool_index_path, "decision_trees", f"{tree_id}.json")
             if os.path.exists(tree_path):
                 with open(tree_path, 'r', encoding='utf-8') as f:
                     return json.load(f)
-            
+
             # Fallback for missing decision trees
             logger.info(f"Decision tree not found: {tree_id}")
             return {
@@ -487,11 +487,11 @@ def query_tool_index(query_type, query_params):
                 "decision_nodes": [],
                 "_fallback_tree": True
             }
-                    
+
         elif query_type == "registry":
             with open(registry_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-                    
+
         elif query_type == "categories":
             categories_path = os.path.join(tool_index_path, "categories.json")
             if not os.path.exists(categories_path):
@@ -499,13 +499,13 @@ def query_tool_index(query_type, query_params):
                 # Create a basic categories structure from registry
                 with open(registry_path, 'r', encoding='utf-8') as f:
                     registry = json.load(f)
-                    
+
                 # Extract relationships as categories
                 categories = {
                     "version": registry.get("version", "1.0.0"),
                     "categories": []
                 }
-                
+
                 if "relationships" in registry:
                     for rel in registry["relationships"]:
                         if "group_name" in rel and "tools" in rel:
@@ -514,12 +514,12 @@ def query_tool_index(query_type, query_params):
                                 "description": rel.get("description", f"Tools related to {rel['group_name']}"),
                                 "tools": rel["tools"]
                             })
-                
+
                 return categories
-            
+
             with open(categories_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-    
+
     except Exception as e:
         logger.error(f"Error querying Tool Index: {str(e)}")
         return {
@@ -527,7 +527,7 @@ def query_tool_index(query_type, query_params):
             "query_type": query_type,
             "query_params": query_params
         }
-    
+
     return None
 
 def query_tool_index_for_taskboard(task_type):
@@ -541,12 +541,12 @@ def query_tool_index_for_taskboard(task_type):
         Information about which mini-librarians to use for the task
     """
     tool_index_path = librarian_context["tool_index"]
-    
+
     # Verification step - verify Tool Index exists
     if not tool_index_path:
         logger.warning(f"Tool Index not found when querying for TaskBoard task type: {task_type}")
         return None
-    
+
     # Default mappings to ensure resilient behavior even without registry
     default_mappings = {
         "component_analysis": ["component-analyzer"],
@@ -555,11 +555,11 @@ def query_tool_index_for_taskboard(task_type):
         "file_search": ["file-indexer"],
         "todo_management": ["todo-manager"]
     }
-        
+
     try:
         # Check for TaskBoard integration information
         registry_path = os.path.join(tool_index_path, "registry.json")
-        
+
         # Verify registry exists
         if not os.path.exists(registry_path):
             logger.warning(f"Registry file not found: {registry_path}, using default mappings")
@@ -570,31 +570,31 @@ def query_tool_index_for_taskboard(task_type):
                     "_using_default": True
                 }
             return None
-            
+
         # Read and process registry
         with open(registry_path, 'r', encoding='utf-8') as f:
             registry = json.load(f)
-            
+
         # Check for TaskBoard integration section
         if "taskboard_integration" in registry:
             mapping = registry["taskboard_integration"].get("task_type_to_mini_librarian_mapping", {})
-            
+
             # If task type is found in mapping, return it
             if task_type in mapping:
                 return {
                     "mini_librarians": mapping[task_type],
                     "task_type": task_type
                 }
-                
+
             # If task type not found but we have other mappings, try to find related tasks
             logger.info(f"Task type '{task_type}' not found in mappings, attempting to find similar")
-            
+
             # Try to find similar task types by partial matching
             similar_tasks = []
             for known_type in mapping.keys():
                 if known_type in task_type or task_type in known_type:
                     similar_tasks.append(known_type)
-            
+
             if similar_tasks:
                 # Use the first similar task found
                 similar_task = similar_tasks[0]
@@ -605,7 +605,7 @@ def query_tool_index_for_taskboard(task_type):
                     "mapped_from": similar_task,
                     "_similar_match": True
                 }
-        
+
         # Fall back to default mappings if no specific mapping found
         if task_type in default_mappings:
             logger.info(f"Using default mapping for task type: {task_type}")
@@ -614,10 +614,10 @@ def query_tool_index_for_taskboard(task_type):
                 "task_type": task_type,
                 "_using_default": True
             }
-    
+
     except Exception as e:
         logger.error(f"Error querying Tool Index for TaskBoard: {str(e)}")
-        
+
         # Even on error, try to provide default mappings
         if task_type in default_mappings:
             logger.info(f"Using default mapping for task type {task_type} after error")
@@ -627,7 +627,7 @@ def query_tool_index_for_taskboard(task_type):
                 "_using_default": True,
                 "_error_recovery": True
             }
-    
+
     return None
 
 def determine_mini_librarians(task_type, task_params=None):
@@ -645,12 +645,12 @@ def determine_mini_librarians(task_type, task_params=None):
         List of mini-librarian IDs that should handle the task
     """
     logger.debug(f"Determining mini-librarians for task type: {task_type}")
-    
+
     # First verification step - ensure we have a valid task type
     if not task_type:
         logger.warning("No task type provided to determine_mini_librarians")
         return ["general-assistant"]  # Default to general assistant for unspecified tasks
-    
+
     # Default mappings for known task types (hardcoded fallback)
     default_mappings = {
         "component_analysis": ["component-analyzer"],
@@ -660,14 +660,14 @@ def determine_mini_librarians(task_type, task_params=None):
         "todo_management": ["todo-manager"],
         "diagnostics": ["diagnostics-runner"]
     }
-    
+
     # Special case for task parameters with specific requirements
     if task_params:
         # Check if task parameters indicate specific mini-librarians
         if task_params.get("mini_librarians"):
             logger.info(f"Using explicitly specified mini-librarians from task parameters")
             return task_params.get("mini_librarians")
-        
+
         # Check if task involves file operations
         if "file" in task_params or "path" in task_params:
             if "file-indexer" not in default_mappings.get(task_type, []):
@@ -679,25 +679,25 @@ def determine_mini_librarians(task_type, task_params=None):
                     if "file-indexer" not in librarians:
                         librarians.append("file-indexer")
                     return librarians
-    
+
     # First query the Tool Index for best information
     tool_index_info = query_tool_index_for_taskboard(task_type)
-    
+
     if tool_index_info and "mini_librarians" in tool_index_info:
         logger.info(f"Using mini-librarians from Tool Index: {tool_index_info['mini_librarians']}")
         return tool_index_info["mini_librarians"]
-    
+
     # Fallback to hardcoded defaults if Tool Index query failed
     if task_type in default_mappings:
         logger.info(f"Using default mini-librarians for task type: {task_type}")
         return default_mappings[task_type]
-    
+
     # Try to infer based on task type name
     for known_type, librarians in default_mappings.items():
         if known_type in task_type or task_type in known_type:
             logger.info(f"Inferring mini-librarians based on similar task type: {known_type}")
             return librarians
-    
+
     # Ultimate fallback - use general assistant
     logger.info(f"No matching mini-librarians found for task type: {task_type}, using general-assistant")
     return ["general-assistant"]
@@ -716,7 +716,7 @@ def validate_path(path, allowed_directories):
     """
     # Normalize path
     path = os.path.abspath(path)
-    
+
     # Check if path is within allowed directories
     return any(path.startswith(allowed_dir) for allowed_dir in allowed_directories)
 
@@ -736,7 +736,7 @@ class MonitoringPauser:
     def __enter__(self):
         pause_monitoring()
         return self
-        
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         resume_monitoring()
 
@@ -765,21 +765,21 @@ def check_project_access(project_path: str) -> str:
     try:
         # Normalize the path
         project_path = os.path.abspath(project_path)
-        
+
         # First check our permission tracker
         if project_path in permission_status and permission_status[project_path]:
             return f"✅ The server has permission to access: {project_path}\n\nYou can initialize the AI Librarian for this project."
-        
+
         # Check if the path is within any of the allowed directories
         for allowed_dir in ALLOWED_DIRECTORIES:
             if project_path.startswith(allowed_dir) or allowed_dir.startswith(project_path):
                 permission_status[project_path] = True
                 return f"✅ The server has permission to access: {project_path}\n\nYou can initialize the AI Librarian for this project."
-        
+
         # Try to access the directory
         if not os.path.exists(project_path):
             return f"❌ Directory does not exist: {project_path}"
-        
+
         # Try to list the directory contents as a basic access test
         try:
             os.listdir(project_path)
@@ -815,17 +815,17 @@ def scan_directory(directory: str, exclude_dirs: Optional[List[str]] = None) -> 
     """
     if exclude_dirs is None:
         exclude_dirs = ['venv', 'env', '.venv', '.env', '__pycache__', 'node_modules', '.git']
-    
+
     python_files = []
-    
+
     for root, dirs, files in os.walk(directory):
         # Skip excluded directories
         dirs[:] = [d for d in dirs if d not in exclude_dirs and not d.startswith('.')]
-        
+
         for file in files:
             if file.endswith('.py'):
                 python_files.append(os.path.join(root, file))
-    
+
     return python_files
 
 def parse_python_file(file_path: str) -> Dict[str, List[str]]:
@@ -841,13 +841,13 @@ def parse_python_file(file_path: str) -> Dict[str, List[str]]:
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        
+
         tree = ast.parse(content)
-        
+
         classes = []
         functions = []
         imports = []
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 classes.append(node.name)
@@ -860,7 +860,7 @@ def parse_python_file(file_path: str) -> Dict[str, List[str]]:
                 module = node.module or ""
                 for name in node.names:
                     imports.append(f"{module}.{name.name}")
-        
+
         return {
             "classes": classes,
             "functions": functions,
@@ -889,16 +889,16 @@ def generate_mini_librarian(file_path: str, file_info: Dict[str, List[str]], out
     # Create a relative path for the mini-librarian
     rel_path = os.path.relpath(file_path, os.path.dirname(output_dir))
     rel_path = rel_path.replace('\\', '/')
-    
+
     # Create output path
     mini_librarian_path = os.path.join(
-        output_dir, 
+        output_dir,
         f"{rel_path.replace('/', '_').replace('.', '_')}.json"
     )
-    
+
     # Add file description
     description = f"Mini-librarian for {rel_path}"
-    
+
     # Create the mini-librarian content
     mini_librarian = {
         "file_path": rel_path,
@@ -907,12 +907,12 @@ def generate_mini_librarian(file_path: str, file_info: Dict[str, List[str]], out
         "imports": file_info["imports"],
         "description": description
     }
-    
+
     # Write the mini-librarian
     os.makedirs(os.path.dirname(mini_librarian_path), exist_ok=True)
     with open(mini_librarian_path, 'w', encoding='utf-8') as f:
         json.dump(mini_librarian, f, indent=2)
-    
+
     return os.path.relpath(mini_librarian_path, output_dir)
 
 def generate_script_index(files_info: Dict[str, Dict], output_file: str) -> None:
@@ -924,7 +924,7 @@ def generate_script_index(files_info: Dict[str, Dict], output_file: str) -> None
         output_file: Path where the script index should be saved
     """
     script_index = {"files": {}, "version": "0.1.0"}
-    
+
     for file_path, info in files_info.items():
         rel_path = file_path.replace('\\', '/')
         script_index["files"][rel_path] = {
@@ -933,7 +933,7 @@ def generate_script_index(files_info: Dict[str, Dict], output_file: str) -> None
             "functions": info["file_info"]["functions"],
             "mini_librarian": info["mini_librarian_path"]
         }
-    
+
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(script_index, f, indent=2)
 
@@ -946,12 +946,12 @@ def generate_component_registry(files_info: Dict[str, Dict], output_file: str) -
         output_file: Path where the component registry should be saved
     """
     components = {}
-    
+
     # Collect all components
     for file_path, info in files_info.items():
         file_info = info["file_info"]
         rel_path = file_path.replace('\\', '/')
-        
+
         # Add classes
         for class_name in file_info["classes"]:
             components[class_name] = {
@@ -959,7 +959,7 @@ def generate_component_registry(files_info: Dict[str, Dict], output_file: str) -
                 "file": rel_path,
                 "references": []
             }
-        
+
         # Add functions
         for func_name in file_info["functions"]:
             components[func_name] = {
@@ -967,13 +967,13 @@ def generate_component_registry(files_info: Dict[str, Dict], output_file: str) -
                 "file": rel_path,
                 "references": []
             }
-    
+
     # Write the component registry
     registry = {
         "components": components,
         "version": "0.1.0"
     }
-    
+
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(registry, f, indent=2)
 
@@ -1002,7 +1002,7 @@ def initialize_librarian(project_path: str) -> str:
                 try:
                     if not os.path.exists(project_path):
                         return f"❌ Directory does not exist: {project_path}"
-                    
+
                     # Try to list the directory contents as a basic access test
                     os.listdir(project_path)
                     # If we get here, we have access
@@ -1011,11 +1011,11 @@ def initialize_librarian(project_path: str) -> str:
                     return f"❌ Permission denied: {project_path}\n\nPlease grant access to this directory in Claude Desktop first:\n" + \
                            f"1. Use check_project_access(\"{project_path}\") to verify access\n" + \
                            "2. If needed, edit Claude Desktop permissions settings"
-            
+
             # Create the .ai_reference directory
             ai_ref_path = os.path.join(project_path, ".ai_reference")
             os.makedirs(ai_ref_path, exist_ok=True)
-            
+
             # Create subdirectories
             scripts_path = os.path.join(ai_ref_path, "scripts")
             diagnostics_path = os.path.join(ai_ref_path, "diagnostics")
@@ -1023,7 +1023,7 @@ def initialize_librarian(project_path: str) -> str:
             os.makedirs(scripts_path, exist_ok=True)
             os.makedirs(diagnostics_path, exist_ok=True)
             os.makedirs(edit_bookmarks_path, exist_ok=True)
-            
+
             # Create README.md
             readme_content = """# AI Librarian
 
@@ -1044,17 +1044,17 @@ Changes to your codebase will be tracked in real-time, maintaining context acros
 """
             with open(os.path.join(ai_ref_path, "README.md"), 'w', encoding='utf-8') as f:
                 f.write(readme_content)
-            
+
             # Create component_registry.json
             component_registry = {"components": {}, "version": "0.1.0"}
             with open(os.path.join(ai_ref_path, "component_registry.json"), 'w', encoding='utf-8') as f:
                 json.dump(component_registry, f, indent=2)
-            
+
             # Create script_index.json
             script_index = {"files": {}, "version": "0.1.0"}
             with open(os.path.join(ai_ref_path, "script_index.json"), 'w', encoding='utf-8') as f:
                 json.dump(script_index, f, indent=2)
-            
+
             # Create a diagnostic README
             diag_readme = """# Diagnostics
 
@@ -1063,20 +1063,20 @@ Diagnostic files help troubleshoot issues with code understanding and navigation
 """
             with open(os.path.join(diagnostics_path, "README.md"), 'w', encoding='utf-8') as f:
                 f.write(diag_readme)
-            
+
             # Add project to active monitoring list
             with state_lock:
                 librarian_context["active_projects"].add(project_path)
                 librarian_context["last_update"][project_path] = time.time()
-            
+
             # Run initial generation - using the imported initialize_enhanced_librarian
             update_librarian_for_project(project_path)
-            
+
             logger.info(f"Added project to active monitoring: {project_path}")
-            
+
             # Run diagnostic checks to verify librarian functionality
             diagnostic_results = run_librarian_diagnostics(project_path)
-            
+
             return f"Successfully initialized AI Librarian at {ai_ref_path}\n\n" + \
                    "Project is now being actively monitored for changes. Any updates to the codebase " + \
                    "will be automatically detected and processed. Claude will maintain context awareness " + \
@@ -1104,12 +1104,12 @@ def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
             # Check if project is in our active monitoring
             with state_lock:
                 is_active = project_path in librarian_context["active_projects"]
-                
+
             if is_active:
                 logger.info(f"Using in-memory context for querying component: {component_name}")
             else:
                 logger.info(f"Project not in active monitoring, checking disk: {project_path}")
-                
+
             # Check if the AI Librarian exists
             ai_ref_path = os.path.join(project_path, ".ai_reference")
             if not os.path.exists(ai_ref_path):
@@ -1117,14 +1117,14 @@ def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
                     "status": "error",
                     "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
                 }
-            
+
             # Get script index - first check in-memory, then fallback to file
             script_index = None
             with state_lock:
                 if project_path in librarian_context["projects"]:
                     script_index = librarian_context["projects"][project_path]
                     logger.info("Using in-memory script index")
-            
+
             if script_index is None:
                 script_index_path = os.path.join(ai_ref_path, "script_index.json")
                 if not os.path.exists(script_index_path):
@@ -1132,49 +1132,49 @@ def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
                         "status": "error",
                         "message": f"Script index not found at {script_index_path}."
                     }
-                
+
                 with open(script_index_path, 'r', encoding='utf-8') as f:
                     script_index = json.load(f)
                     # Cache it for future use
                     with state_lock:
                         librarian_context["projects"][project_path] = script_index
-            
+
             # Search for the component in all files
             results = []
-            
+
             for file_path, file_info in script_index["files"].items():
-                if (component_name in file_info.get("classes", []) or 
+                if (component_name in file_info.get("classes", []) or
                     component_name in file_info.get("functions", [])):
-                    
+
                     # Read the mini-librarian for more details
                     mini_librarian_path = os.path.join(ai_ref_path, file_info["mini_librarian"])
                     if os.path.exists(mini_librarian_path):
                         with open(mini_librarian_path, 'r', encoding='utf-8') as f:
                             mini_librarian = json.load(f)
-                        
+
                         # Check if the file exists
                         full_file_path = os.path.join(project_path, file_path)
                         if os.path.exists(full_file_path):
                             try:
                                 with open(full_file_path, 'r', encoding='utf-8') as f:
                                     file_content = f.read()
-                                
+
                                 # Extract the component's code
                                 import ast
                                 try:
                                     tree = ast.parse(file_content)
                                     for node in ast.walk(tree):
-                                        if ((isinstance(node, ast.ClassDef) or isinstance(node, ast.FunctionDef)) and 
+                                        if ((isinstance(node, ast.ClassDef) or isinstance(node, ast.FunctionDef)) and
                                             node.name == component_name):
-                                            
+
                                             # Get the component's source code
                                             start_line = node.lineno
                                             end_line = node.end_lineno if hasattr(node, 'end_lineno') else start_line + 1
-                                            
+
                                             # Extract line numbers and code
                                             lines = file_content.splitlines()
                                             component_code = "\n".join(lines[start_line-1:end_line])
-                                            
+
                                             # Add to results
                                             results.append({
                                                 "file_path": file_path,
@@ -1194,13 +1194,13 @@ def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
                                     "file_path": file_path,
                                     "error": f"Error reading file: {str(e)}"
                                 })
-            
+
             if not results:
                 return {
                     "status": "error",
                     "message": f"Component '{component_name}' not found in the project."
                 }
-            
+
             # Return structured results
             return {
                 "status": "success",
@@ -1235,13 +1235,13 @@ def find_implementation(project_path: str, search_text: str, file_pattern: str =
             # Check if project is in active monitoring
             with state_lock:
                 is_active = project_path in librarian_context["active_projects"]
-                
+
             if is_active:
                 logger.info(f"Using in-memory context for searching: {search_text}")
-                
+
             results = []
             search_text = search_text.lower()
-            
+
             # Determine which extensions to search based on file_pattern
             extensions = []
             if file_pattern:
@@ -1253,41 +1253,41 @@ def find_implementation(project_path: str, search_text: str, file_pattern: str =
             else:
                 # Default to common code files
                 extensions = [".py", ".js", ".ts", ".java", ".c", ".cpp", ".cs", ".go", ".rb", ".php"]
-            
+
             # Function to check if a file should be searched
             def should_search_file(filename):
                 if not extensions:
                     return True
                 return any(filename.endswith(ext) for ext in extensions)
-            
+
             # Walk the directory tree
             for root, dirs, files in os.walk(project_path):
                 # Skip hidden directories and common excluded directories
-                dirs[:] = [d for d in dirs if not d.startswith('.') and 
+                dirs[:] = [d for d in dirs if not d.startswith('.') and
                           d not in ['venv', 'env', 'node_modules', '__pycache__', '.git']]
-                
+
                 # Search files
                 for filename in files:
                     if should_search_file(filename):
                         file_path = os.path.join(root, filename)
                         rel_path = os.path.relpath(file_path, project_path)
-                        
+
                         try:
                             with open(file_path, 'r', encoding='utf-8') as f:
                                 content = f.read()
-                            
+
                             # Search for the text
                             if search_text in content.lower():
                                 # Find matching lines with context
                                 lines = content.splitlines()
                                 matches = []
-                                
+
                                 for i, line in enumerate(lines):
                                     if search_text in line.lower():
                                         # Get context (3 lines before and after)
                                         start = max(0, i - 3)
                                         end = min(len(lines), i + 4)
-                                        
+
                                         # Format the context
                                         context = []
                                         for j in range(start, end):
@@ -1298,9 +1298,9 @@ def find_implementation(project_path: str, search_text: str, file_pattern: str =
                                                 context.append(f"{line_num:4d}* {line_text}")
                                             else:
                                                 context.append(f"{line_num:4d}  {line_text}")
-                                        
+
                                         matches.append("\n".join(context))
-                                
+
                                 if matches:
                                     results.append({
                                         "file": rel_path,
@@ -1312,7 +1312,7 @@ def find_implementation(project_path: str, search_text: str, file_pattern: str =
                         except Exception as e:
                             logger.error(f"Error searching file {file_path}: {str(e)}")
                             # Don't include errors in results to avoid strange output
-            
+
             # Return structured results
             if not results:
                 return {
@@ -1320,7 +1320,7 @@ def find_implementation(project_path: str, search_text: str, file_pattern: str =
                     "found": False,
                     "message": f"No matches found for '{search_text}'"
                 }
-            
+
             return {
                 "status": "success",
                 "found": True,
@@ -1357,34 +1357,34 @@ def generate_librarian(project_path: str) -> str:
                     "status": "error",
                     "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
                 }
-                
+
             # If project is not in active monitoring, add it
             with state_lock:
                 if project_path not in librarian_context["active_projects"]:
                     librarian_context["active_projects"].add(project_path)
                     librarian_context["last_update"][project_path] = time.time()
                     logger.info(f"Added project to active monitoring: {project_path}")
-            
+
             # Force update the librarian
             update_librarian_for_project(project_path)
-            
+
             # Get stats
             file_count = 0
             component_count = 0
-            
+
             # Count components from in-memory representation
             with state_lock:
                 if project_path in librarian_context["components"]:
                     component_registry = librarian_context["components"][project_path]
                     component_count = len(component_registry.get("components", {}))
-                
+
                 # Count files from in-memory representation
                 if project_path in librarian_context["indexed_files"]:
                     file_count = len(librarian_context["indexed_files"][project_path])
-            
+
             # Run diagnostic checks to verify librarian functionality
             diagnostic_results = run_librarian_diagnostics(project_path)
-            
+
             return f"Successfully generated AI Librarian for {project_path}:\n" + \
                    f"- {file_count} files indexed\n" + \
                    f"- {component_count} components identified\n\n" + \
@@ -1412,7 +1412,7 @@ def run_librarian_diagnostics(project_path: str) -> str:
     try:
         logger.info(f"Running diagnostic checks for AI Librarian in {project_path}")
         results = ["🔍 AI Librarian Diagnostic Report:"]
-        
+
         # 1. Check AI Reference Directory
         ai_ref_path = os.path.join(project_path, ".ai_reference")
         if os.path.exists(ai_ref_path):
@@ -1420,11 +1420,11 @@ def run_librarian_diagnostics(project_path: str) -> str:
         else:
             results.append("✗ .ai_reference directory not found")
             return "\n".join(results)
-        
+
         # 2. Check Script Index
         script_index_path = os.path.join(ai_ref_path, "script_index.json")
         script_index = None
-        
+
         if os.path.exists(script_index_path):
             try:
                 with open(script_index_path, 'r', encoding='utf-8') as f:
@@ -1436,11 +1436,11 @@ def run_librarian_diagnostics(project_path: str) -> str:
                 script_index = None
         else:
             results.append("✗ Script index not found")
-        
+
         # 3. Check Component Registry
         component_registry_path = os.path.join(ai_ref_path, "component_registry.json")
         component_registry = None
-        
+
         if os.path.exists(component_registry_path):
             try:
                 with open(component_registry_path, 'r', encoding='utf-8') as f:
@@ -1453,7 +1453,7 @@ def run_librarian_diagnostics(project_path: str) -> str:
                 component_registry = None
         else:
             results.append("✗ Component registry not found")
-        
+
         # 4. Test Component Query - Try to find a random component if registry exists
         if component_registry and component_registry.get('components'):
             try:
@@ -1462,7 +1462,7 @@ def run_librarian_diagnostics(project_path: str) -> str:
                 if components:
                     test_component = components[0]  # Take the first component for testing
                     results.append(f"✓ Test component found: {test_component}")
-                    
+
                     # Don't actually perform the search here to prevent potential output issues
                     results.append(f"✓ Component testing skipped (but component is available)")
                 else:
@@ -1472,7 +1472,7 @@ def run_librarian_diagnostics(project_path: str) -> str:
                 results.append(f"✗ Error testing component query: {str(e)}")
         else:
             results.append("⚠ Skipping component query test - no components available")
-        
+
         # 5. Verify scripts directory
         scripts_dir = os.path.join(ai_ref_path, "scripts")
         if os.path.exists(scripts_dir):
@@ -1480,28 +1480,28 @@ def run_librarian_diagnostics(project_path: str) -> str:
             results.append(f"✓ Scripts directory contains {len(script_files)} mini-librarian files")
         else:
             results.append("✗ Scripts directory not found")
-            
+
         # 6. Check active monitoring status
         with state_lock:
             is_monitored = project_path in librarian_context["active_projects"]
-            
+
         if is_monitored:
             results.append("✓ Project is actively monitored for changes")
         else:
             results.append("✗ Project is not in active monitoring list")
-        
+
         # 7. Summary
         success_count = len([line for line in results if line.startswith("✓")])
         warning_count = len([line for line in results if line.startswith("⚠")])
         error_count = len([line for line in results if line.startswith("✗")])
-        
+
         results.append(f"\nDiagnostic Summary: {success_count} checks passed, {warning_count} warnings, {error_count} errors")
-        
+
         if error_count > 0:
             results.append("⚠ Some diagnostics failed. The librarian may have limited functionality.")
         else:
             results.append("✅ AI Librarian is fully operational!")
-        
+
         # Save diagnostic report
         timestamp = time.strftime("%Y%m%d-%H%M%S")
         report_path = os.path.join(ai_ref_path, "diagnostics", f"diagnostic-report-{timestamp}.txt")
@@ -1511,7 +1511,7 @@ def run_librarian_diagnostics(project_path: str) -> str:
         except Exception as e:
             logger.error(f"Error saving diagnostic report: {str(e)}")
             # Don't add to results to avoid corruption
-        
+
         return "\n".join(results)
     except Exception as e:
         logger.error(f"Error during diagnostics: {str(e)}")
@@ -1552,24 +1552,24 @@ def sanity_check(project_path: str, create_artifact: bool = False) -> str:
                 access_check = check_project_access(project_path)
                 if "Permission denied" in access_check or "Error checking access" in access_check:
                     return access_check
-            
+
             # Try to use the custom script first
             try:
                 import subprocess
-                
+
                 # Run the custom script
-                custom_script = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+                custom_script = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                                            "scripts", "run_sanity_check.py")
-                
+
                 if os.path.exists(custom_script):
-                    result = subprocess.run([sys.executable, custom_script, project_path], 
+                    result = subprocess.run([sys.executable, custom_script, project_path],
                                           capture_output=True, text=True, check=False)
                     report = result.stdout
-                    
+
                     # If we got a valid report, use it
                     if "AI Dev Toolkit Sanity Check Report" in report:
                         return report
-                
+
                 # Fall back to the imported run_sanity_check
                 logger.info("Using fallback sanity check implementation")
                 report = run_sanity_check(project_path, create_artifact)
@@ -1577,7 +1577,7 @@ def sanity_check(project_path: str, create_artifact: bool = False) -> str:
                 logger.error(f"Error running custom sanity check: {str(e)}")
                 # Fall back to the imported run_sanity_check
                 report = run_sanity_check(project_path, create_artifact)
-            
+
             # Save a copy of the report to the diagnostics directory for future reference
             try:
                 ai_ref_path = os.path.join(project_path, ".ai_reference")
@@ -1585,17 +1585,17 @@ def sanity_check(project_path: str, create_artifact: bool = False) -> str:
                     diagnostics_path = os.path.join(ai_ref_path, "diagnostics")
                     if not os.path.exists(diagnostics_path):
                         os.makedirs(diagnostics_path, exist_ok=True)
-                    
+
                     # Save the report with timestamp
                     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
                     report_path = os.path.join(diagnostics_path, f"sanity_check_{timestamp}.md")
                     with open(report_path, 'w', encoding='utf-8') as f:
                         f.write(report)
-                    
+
                     logger.info(f"Saved sanity check report to {report_path}")
             except Exception as e:
                 logger.warning(f"Failed to save sanity check report: {e}")
-            
+
             return report
         except Exception as e:
             logger.error(f"Error running sanity check: {str(e)}")
@@ -1630,13 +1630,13 @@ def add_todo(project_path: str, title: str, description: str = "", priority: str
                     "status": "error",
                     "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
                 }
-            
+
             # Create the todo manager
             todo_manager = TodoManager(project_path)
-            
+
             # Parse tags
             tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
-            
+
             # Add the to-do item
             todo_id = todo_manager.add_todo(
                 title=title,
@@ -1644,7 +1644,7 @@ def add_todo(project_path: str, title: str, description: str = "", priority: str
                 priority=priority,
                 tags=tag_list
             )
-            
+
             return {
                 "status": "success",
                 "todo_id": todo_id,
@@ -1683,13 +1683,13 @@ def list_todos(project_path: str, status: str = "active", priority: str = None, 
                     "status": "error",
                     "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
                 }
-            
+
             # Create the todo manager
             todo_manager = TodoManager(project_path)
-            
+
             # Get the to-do items
             todos = todo_manager.get_todos(status=status, priority=priority, tag=tag)
-            
+
             if not todos:
                 return {
                     "status": "success",
@@ -1701,7 +1701,7 @@ def list_todos(project_path: str, status: str = "active", priority: str = None, 
                         "tag": tag or "any"
                     }
                 }
-            
+
             # Return structured results
             return {
                 "status": "success",
@@ -1744,13 +1744,13 @@ def update_todo_status(project_path: str, todo_id: str, status: str) -> Dict[str
                     "status": "error",
                     "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
                 }
-            
+
             # Create the todo manager
             todo_manager = TodoManager(project_path)
-            
+
             # Update the to-do item
             success = todo_manager.update_todo(todo_id, status=status)
-            
+
             if success:
                 return {
                     "status": "success",
@@ -1793,13 +1793,13 @@ def add_subtask(project_path: str, todo_id: str, title: str) -> Dict[str, Any]:
                     "status": "error",
                     "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
                 }
-            
+
             # Create the todo manager
             todo_manager = TodoManager(project_path)
-            
+
             # Add the subtask
             subtask_id = todo_manager.add_subtask(todo_id, title)
-            
+
             if subtask_id:
                 return {
                     "status": "success",
@@ -1842,13 +1842,13 @@ def search_todos(project_path: str, query: str) -> Dict[str, Any]:
                     "status": "error",
                     "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
                 }
-            
+
             # Create the todo manager
             todo_manager = TodoManager(project_path)
-            
+
             # Search for to-do items
             todos = todo_manager.search_todos(query)
-            
+
             if not todos:
                 return {
                     "status": "success",
@@ -1856,7 +1856,7 @@ def search_todos(project_path: str, query: str) -> Dict[str, Any]:
                     "query": query,
                     "message": f"No to-do items found matching '{query}'"
                 }
-            
+
             # Return structured results
             return {
                 "status": "success",
@@ -1871,7 +1871,7 @@ def search_todos(project_path: str, query: str) -> Dict[str, Any]:
                 "status": "error",
                 "message": f"Error searching to-do items: {str(e)}"
             }
-            
+
 #-----------------------------------------------------------------
 # Edit Bookmark Tools
 #-----------------------------------------------------------------
@@ -1899,13 +1899,13 @@ def create_edit_bookmark(project_path: str, file_path: str, start_line: int, end
         try:
             # Initialize the edit bookmark manager
             bookmark_manager = EditBookmark(project_path)
-            
+
             # Create the bookmark
             bookmark_id = bookmark_manager.create_bookmark(file_path, start_line, end_line, bookmark_name)
-            
+
             # Get the content for convenience
             content = bookmark_manager.get_bookmark_content(bookmark_id)
-            
+
             return {
                 "status": "success",
                 "bookmark_id": bookmark_id,
@@ -1940,16 +1940,16 @@ def get_bookmark_content(project_path: str, bookmark_id: str) -> Dict[str, Any]:
         try:
             # Initialize the edit bookmark manager
             bookmark_manager = EditBookmark(project_path)
-            
+
             # Get the bookmark content
             content = bookmark_manager.get_bookmark_content(bookmark_id)
-            
+
             if content is None:
                 return {
                     "status": "error",
                     "message": f"Bookmark not found: {bookmark_id}"
                 }
-            
+
             return {
                 "status": "success",
                 "bookmark_id": bookmark_id,
@@ -1981,19 +1981,19 @@ def update_bookmark(project_path: str, bookmark_id: str, new_content: str) -> Di
         try:
             # Initialize the edit bookmark manager
             bookmark_manager = EditBookmark(project_path)
-            
+
             # Update the bookmark
             success = bookmark_manager.update_bookmark(bookmark_id, new_content)
-            
+
             if not success:
                 return {
                     "status": "error",
                     "message": f"Bookmark not found: {bookmark_id}"
                 }
-            
+
             # Get diff if available
             diff = bookmark_manager.get_bookmark_diff(bookmark_id)
-            
+
             return {
                 "status": "success",
                 "bookmark_id": bookmark_id,
@@ -2027,19 +2027,19 @@ def apply_bookmark(project_path: str, bookmark_id: str) -> Dict[str, Any]:
         try:
             # Initialize the edit bookmark manager
             bookmark_manager = EditBookmark(project_path)
-            
+
             # Get diff before applying for reporting
             diff = bookmark_manager.get_bookmark_diff(bookmark_id)
-            
+
             # Apply the bookmark
             success = bookmark_manager.apply_bookmark(bookmark_id)
-            
+
             if not success:
                 return {
                     "status": "error",
                     "message": f"Bookmark not found or could not be applied: {bookmark_id}"
                 }
-            
+
             return {
                 "status": "success",
                 "bookmark_id": bookmark_id,
@@ -2069,17 +2069,17 @@ def list_bookmarks(project_path: str) -> Dict[str, Any]:
         try:
             # Initialize the edit bookmark manager
             bookmark_manager = EditBookmark(project_path)
-            
+
             # List bookmarks
             bookmarks = bookmark_manager.list_bookmarks()
-            
+
             if not bookmarks:
                 return {
                     "status": "success",
                     "found": False,
                     "message": "No active bookmarks found for this project"
                 }
-            
+
             return {
                 "status": "success",
                 "found": True,
@@ -2111,16 +2111,16 @@ def remove_bookmark(project_path: str, bookmark_id: str) -> Dict[str, Any]:
         try:
             # Initialize the edit bookmark manager
             bookmark_manager = EditBookmark(project_path)
-            
+
             # Remove the bookmark
             success = bookmark_manager.remove_bookmark(bookmark_id)
-            
+
             if not success:
                 return {
                     "status": "error",
                     "message": f"Bookmark not found: {bookmark_id}"
                 }
-            
+
             return {
                 "status": "success",
                 "bookmark_id": bookmark_id,
@@ -2153,42 +2153,42 @@ def read_file(path: str, encoding: str = "utf-8") -> Dict[str, Any]:
         try:
             # Normalize the path
             path = os.path.abspath(path)
-            
+
             # Check if path is within allowed directories
             if not any(path.startswith(allowed_dir) for allowed_dir in ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {path} is not within allowed directories"
                 }
-            
+
             # Check if file exists
             if not os.path.isfile(path):
                 return {
                     "status": "error",
                     "message": f"File not found: {path}"
                 }
-                
+
             # Check if we have read permission
             if not os.access(path, os.R_OK):
                 return {
                     "status": "error",
                     "message": f"Permission denied: Cannot read {path}"
                 }
-            
+
             # Try to determine MIME type
             mime_type, _ = mimetypes.guess_type(path)
             if mime_type is None:
                 # Default to text if we can't determine
                 mime_type = "text/plain"
-            
+
             # Read the file content
             try:
                 with open(path, 'r', encoding=encoding) as f:
                     content = f.read()
-                
+
                 # Get file stats
                 stats = os.stat(path)
-                
+
                 return {
                     "status": "success",
                     "path": path,
@@ -2204,7 +2204,7 @@ def read_file(path: str, encoding: str = "utf-8") -> Dict[str, Any]:
                 try:
                     with open(path, 'rb') as f:
                         binary_content = f.read()
-                    
+
                     # Return summary for binary files
                     return {
                         "status": "binary",
@@ -2251,12 +2251,12 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
     with MonitoringPauser():
         try:
             results = {}
-            
+
             for path in paths:
                 try:
                     # Normalize the path
                     path = os.path.abspath(path)
-                    
+
                     # Check if path is within allowed directories
                     if not any(path.startswith(allowed_dir) for allowed_dir in ALLOWED_DIRECTORIES):
                         results[path] = {
@@ -2264,7 +2264,7 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
                             "message": f"Access denied: {path} is not within allowed directories"
                         }
                         continue
-                    
+
                     # Check if file exists
                     if not os.path.isfile(path):
                         results[path] = {
@@ -2272,7 +2272,7 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
                             "message": f"File not found: {path}"
                         }
                         continue
-                    
+
                     # Check if we have read permission
                     if not os.access(path, os.R_OK):
                         results[path] = {
@@ -2280,21 +2280,21 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
                             "message": f"Permission denied: Cannot read {path}"
                         }
                         continue
-                    
+
                     # Try to determine MIME type
                     mime_type, _ = mimetypes.guess_type(path)
                     if mime_type is None:
                         # Default to text if we can't determine
                         mime_type = "text/plain"
-                    
+
                     # Read the file content
                     try:
                         with open(path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                        
+
                         # Get file stats
                         stats = os.stat(path)
-                        
+
                         results[path] = {
                             "status": "success",
                             "content": content,
@@ -2307,7 +2307,7 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
                         try:
                             with open(path, 'rb') as f:
                                 binary_content = f.read()
-                            
+
                             results[path] = {
                                 "status": "binary",
                                 "size": len(binary_content),
@@ -2328,10 +2328,10 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
                 except Exception as e:
                     logger.error(f"Error processing file {path}: {str(e)}")
                     results[path] = {
-                        "status": "error", 
+                        "status": "error",
                         "message": f"Error processing file: {str(e)}"
                     }
-            
+
             return {
                 "status": "success",
                 "count": len(paths),
@@ -2370,27 +2370,27 @@ def infer_todos(project_path: str, text: str) -> Dict[str, Any]:
                     "status": "error",
                     "message": f"AI Librarian not initialized at {project_path}. Run initialize_librarian first."
                 }
-            
+
             # Create the todo manager
             todo_manager = TodoManager(project_path)
-            
+
             # Infer to-do items
             todo_item = todo_manager.infer_todo_item(text)
-            
+
             if not todo_item:
                 return {
                     "status": "success",
                     "found": False,
                     "message": "No potential to-do items found in the text."
                 }
-            
+
             # Add the inferred to-do item
             todo_id = todo_manager.add_todo(
                 title=todo_item['title'],
                 description=todo_item['description'],
                 priority="medium"
             )
-            
+
             return {
                 "status": "success",
                 "found": True,
@@ -2428,36 +2428,36 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
         try:
             # Normalize the path
             path = os.path.abspath(path)
-            
+
             # Validate path using the improved validate_path function
             if not validate_path(path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {path} is not within allowed directories"
                 }
-            
+
             # Check if file exists
             if not os.path.isfile(path):
                 return {
                     "status": "error",
                     "message": f"File not found: {path}"
                 }
-                
+
             # Check if we have read and write permission
             if not os.access(path, os.R_OK | os.W_OK):
                 return {
                     "status": "error",
                     "message": f"Permission denied: Cannot modify {path}"
                 }
-            
+
             # If we get here, we're using the fallback implementation
             # Let's add some logging and minor improvements to the original method
-            
+
             # Check file size before trying to read (for logging)
             try:
                 file_size = os.path.getsize(path)
                 logger.info(f"File size: {file_size} bytes")
-                
+
                 # Add a size limit for very large files
                 MAX_SIZE = 50 * 1024 * 1024  # 50 MB
                 if file_size > MAX_SIZE:
@@ -2468,7 +2468,7 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                     }
             except Exception as e:
                 logger.error(f"Error checking file size: {str(e)}")
-            
+
             # Read the current content of the file
             try:
                 logger.info("Reading file content")
@@ -2487,7 +2487,7 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                     "status": "error",
                     "message": f"Error reading file: {str(e)}"
                 }
-            
+
             # Check if the old_text exists in the content
             if old_text not in content:
                 logger.warning("The specified text segment was not found in the file")
@@ -2495,7 +2495,7 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                     "status": "error",
                     "message": f"The specified text segment was not found in the file"
                 }
-            
+
             # Check if the old text occurs multiple times (ambiguous replacement)
             occurrences = content.count(old_text)
             if occurrences > 1:
@@ -2504,28 +2504,28 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                     "status": "error",
                     "message": f"The specified text segment appears {occurrences} times in the file. Please provide a more specific text segment."
                 }
-            
+
             # Replace the text
             logger.info("Performing text replacement")
             new_content = content.replace(old_text, new_text)
-            
+
             # Calculate a more descriptive diff for the response
             old_lines = old_text.splitlines()
             new_lines = new_text.splitlines()
-            
+
             # Generate a unified diff-like output
             diff = ["Changes:"]
             diff.append(f"--- {path} (original)")
             diff.append(f"+++ {path} (modified)")
-            
+
             # Add the changed lines with line numbers if possible
             try:
                 # Find where in the file the old_text is located
                 lines_before = content.split(old_text, 1)[0].count('\n') + 1
-                
+
                 # Add a better header for the diff
                 diff.append(f"@@ -{lines_before},{len(old_lines)} +{lines_before},{len(new_lines)} @@")
-                
+
                 for line in old_lines:
                     diff.append(f"- {line}")
                 for line in new_lines:
@@ -2534,7 +2534,7 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                 logger.error(f"Error generating diff: {str(e)}")
                 # Fall back to a simple diff message
                 diff = ["Changes: (detailed diff not available)"]
-            
+
             # Create the directory if it doesn't exist
             dir_name = os.path.dirname(path)
             if dir_name and not os.path.exists(dir_name):
@@ -2547,42 +2547,42 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                         "status": "error",
                         "message": f"Cannot create directory {dir_name}: {str(e)}"
                     }
-            
+
             # Create a temporary file in the system temp directory instead of target directory
             # to avoid potential permission issues
             logger.info("Creating temporary file in system temp directory")
             temp_fd, temp_path = tempfile.mkstemp(suffix='.tmp')
             os.close(temp_fd)  # Close the file descriptor
-            
+
             # Write the modified content to the temporary file
             try:
                 with open(temp_path, 'w', encoding=encoding) as temp_file:
                     temp_file.write(new_content)
-                
+
                 logger.info(f"Copying {temp_path} to {path}")
                 # Use copy2 which preserves file metadata
                 shutil.copy2(temp_path, path)
-                
+
                 # Remove the temporary file after successful copy
                 try:
                     logger.info(f"Removing temporary file: {temp_path}")
                     os.unlink(temp_path)
                 except Exception as cleanup_error:
                     logger.warning(f"Could not remove temporary file {temp_path}: {str(cleanup_error)}")
-                
+
                 logger.info(f"Successfully edited file: {path}")
-                
+
                 # Calculate the character and line differences for better reporting
                 chars_removed = len(old_text)
                 chars_added = len(new_text)
                 lines_removed = len(old_lines)
                 lines_added = len(new_lines)
-                
+
                 # Create hash instead of using built-in hash function for better consistency
                 import hashlib
                 content_hash_before = hashlib.md5(content.encode()).hexdigest()
                 content_hash_after = hashlib.md5(new_content.encode()).hexdigest()
-                
+
                 return {
                     "status": "success",
                     "message": f"Successfully edited file: {path}",
@@ -2600,7 +2600,7 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                     "content_hash_before": content_hash_before,
                     "content_hash_after": content_hash_after
                 }
-                
+
             except Exception as e:
                 # Clean up the temporary file if it exists
                 if os.path.exists(temp_path):
@@ -2608,7 +2608,7 @@ def edit_file(path: str, old_text: str, new_text: str, encoding: str = "utf-8") 
                         os.unlink(temp_path)
                     except Exception as cleanup_error:
                         logger.error(f"Error cleaning up temp file: {str(cleanup_error)}")
-                
+
                 logger.error(f"Error writing to file {path}: {str(e)}")
                 return {
                     "status": "error",
@@ -2644,35 +2644,35 @@ def enhanced_edit_file(path: str, old_text: str, new_text: str, encoding: str = 
         return enhanced_edit_file_fixed(path, old_text, new_text, encoding, ALLOWED_DIRECTORIES, logger)
     except ImportError:
         logger.warning("Could not import enhanced_edit_file_fix, falling back to default implementation")
-    
+
     # Pause monitoring during this operation
     with MonitoringPauser():
         try:
             # Normalize the path
             path = os.path.abspath(path)
             logger.info(f"Starting enhanced_edit_file for {path}")
-            
+
             # Check if path is within allowed directories
             if not validate_path(path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {path} is not within allowed directories"
                 }
-            
+
             # Check if file exists
             if not os.path.isfile(path):
                 return {
                     "status": "error",
                     "message": f"File not found: {path}"
                 }
-                
+
             # Check if we have read and write permission
             if not os.access(path, os.R_OK | os.W_OK):
                 return {
                     "status": "error",
                     "message": f"Permission denied: Cannot modify {path}"
                 }
-            
+
             # Read the current content of the file
             try:
                 with open(path, 'r', encoding=encoding) as f:
@@ -2682,54 +2682,54 @@ def enhanced_edit_file(path: str, old_text: str, new_text: str, encoding: str = 
                     "status": "error",
                     "message": f"Cannot edit binary file or file with encoding different from {encoding}"
                 }
-            
+
             # Check if the old_text exists in the content
             if old_text not in content:
                 return {
                     "status": "error",
                     "message": f"The specified text segment was not found in the file"
                 }
-                
+
             # Check if the old_text appears multiple times
             if content.count(old_text) > 1:
                 return {
                     "status": "error",
                     "message": f"The specified text segment appears multiple times in the file. Please provide a more specific text segment."
                 }
-            
+
             # Replace the text
             new_content = content.replace(old_text, new_text)
-            
+
             # Calculate a more comprehensive diff for the response
             old_lines = old_text.splitlines()
             new_lines = new_text.splitlines()
-            
+
             # Generate a unified diff-like output
             diff = ["Changes to be made:"]
             diff.append(f"--- {path} (original)")
             diff.append(f"+++ {path} (modified)")
-            
+
             # Add the changed lines
             diff.append(f"@@ -1,{len(old_lines)} +1,{len(new_lines)} @@")
             for line in old_lines:
                 diff.append(f"- {line}")
             for line in new_lines:
                 diff.append(f"+ {line}")
-            
+
             # Write the modified content to the file using atomic write pattern
             try:
                 # Create a temporary file in the same directory
                 dir_name = os.path.dirname(path) or "."
-                with tempfile.NamedTemporaryFile(mode='w', encoding=encoding, 
+                with tempfile.NamedTemporaryFile(mode='w', encoding=encoding,
                                                dir=dir_name, delete=False) as temp_file:
                     temp_file.write(new_content)
                     temp_path = temp_file.name
-                
+
                 # Rename the temporary file to the target path (atomic operation)
                 shutil.move(temp_path, path)
-                
+
                 logger.info(f"Successfully edited file: {path}")
-                
+
                 return {
                     "status": "success",
                     "message": f"Successfully edited file: {path}",
@@ -2740,7 +2740,7 @@ def enhanced_edit_file(path: str, old_text: str, new_text: str, encoding: str = 
                     "new_text_length": len(new_text),
                     "change_location": content.find(old_text)
                 }
-                
+
             except Exception as e:
                 # Clean up the temporary file if it exists
                 if 'temp_path' in locals() and os.path.exists(temp_path):
@@ -2748,7 +2748,7 @@ def enhanced_edit_file(path: str, old_text: str, new_text: str, encoding: str = 
                         os.unlink(temp_path)
                     except:
                         pass
-                
+
                 logger.error(f"Error writing to file {path}: {str(e)}")
                 return {
                     "status": "error",
@@ -2782,35 +2782,35 @@ def move_file(source: str, destination: str) -> Dict[str, Any]:
             # Normalize the paths
             source_path = os.path.abspath(source)
             dest_path = os.path.abspath(destination)
-            
+
             # Validate source path
             if not validate_path(source_path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {source} is not within allowed directories"
                 }
-            
+
             # Validate destination path
             if not validate_path(dest_path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {destination} is not within allowed directories"
                 }
-            
+
             # Check if source exists
             if not os.path.exists(source_path):
                 return {
                     "status": "error",
                     "message": f"Source not found: {source}"
                 }
-                
+
             # Check if we have read and write permission on source
             if not os.access(source_path, os.R_OK | os.W_OK):
                 return {
                     "status": "error",
                     "message": f"Permission denied: Cannot access {source}"
                 }
-            
+
             # Create destination directory if it doesn't exist
             dest_dir = os.path.dirname(dest_path)
             if dest_dir and not os.path.exists(dest_dir):
@@ -2821,30 +2821,30 @@ def move_file(source: str, destination: str) -> Dict[str, Any]:
                         "status": "error",
                         "message": f"Cannot create destination directory {dest_dir}: {str(e)}"
                     }
-            
+
             # Check if we have write permission on destination directory
             if not os.access(dest_dir or ".", os.W_OK):
                 return {
                     "status": "error",
                     "message": f"Permission denied: Cannot write to destination directory"
                 }
-            
+
             # Check if destination already exists
             if os.path.exists(dest_path):
                 return {
                     "status": "error",
                     "message": f"Destination already exists: {destination}"
                 }
-            
+
             # Move the file or directory
             try:
                 shutil.move(source_path, dest_path)
                 logger.info(f"Successfully moved {source_path} to {dest_path}")
-                
+
                 # Determine if it was a file or directory that was moved
                 is_dir = os.path.isdir(dest_path)
                 entity_type = "directory" if is_dir else "file"
-                
+
                 return {
                     "status": "success",
                     "message": f"Successfully moved {entity_type}: {source} → {destination}",
@@ -2888,34 +2888,34 @@ def search_files(path: str, pattern: str, file_pattern: str = None, excludePatte
         try:
             # Normalize path
             search_path = os.path.abspath(path)
-            
+
             # Validate path
             if not validate_path(search_path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {path} is not within allowed directories"
                 }
-            
+
             # Check if directory exists
             if not os.path.exists(search_path):
                 return {
                     "status": "error",
                     "message": f"Directory not found: {path}"
                 }
-            
+
             # Check if path is a directory
             if not os.path.isdir(search_path):
                 return {
                     "status": "error",
                     "message": f"Not a directory: {path}"
                 }
-            
+
             # Ensure excludePatterns is a list
             exclude_patterns = excludePatterns or []
-            
+
             # Convert pattern to lowercase for case-insensitive matching
             pattern_lower = pattern.lower()
-            
+
             # Define function to check if a path should be excluded
             def should_exclude(item_path):
                 base_name = os.path.basename(item_path)
@@ -2924,22 +2924,22 @@ def search_files(path: str, pattern: str, file_pattern: str = None, excludePatte
                     if fnmatch.fnmatch(base_name.lower(), exclude.lower()):
                         return True
                     # Also check if parent directory matches exclude pattern
-                    if any(fnmatch.fnmatch(part.lower(), exclude.lower()) 
+                    if any(fnmatch.fnmatch(part.lower(), exclude.lower())
                            for part in Path(item_path).parts):
                         return True
                 # Skip common directories and hidden files/dirs by default
                 if base_name.startswith('.') or base_name in ['__pycache__', 'node_modules', '.git', 'venv', 'env']:
                     return True
                 return False
-            
+
             # Collect matching files
             matches = []
-            
+
             for root, dirs, files in os.walk(search_path):
                 # Filter out directories that should be excluded
                 # This modifies dirs in-place to avoid traversing excluded dirs
                 dirs[:] = [d for d in dirs if not should_exclude(os.path.join(root, d))]
-                
+
                 # Check files that match the pattern
                 for file in files:
                     file_path = os.path.join(root, file)
@@ -2947,7 +2947,7 @@ def search_files(path: str, pattern: str, file_pattern: str = None, excludePatte
                         # Return path relative to the search directory
                         rel_path = os.path.relpath(file_path, search_path)
                         matches.append(rel_path)
-            
+
             # Return the results
             return {
                 "status": "success",
@@ -2986,14 +2986,14 @@ def write_file(path: str, content: str, encoding: str = "utf-8") -> Dict[str, An
         try:
             # Normalize the path
             file_path = os.path.abspath(path)
-            
+
             # Validate path
             if not validate_path(file_path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {path} is not within allowed directories"
                 }
-            
+
             # Create the directory if it doesn't exist
             dir_name = os.path.dirname(file_path)
             if dir_name and not os.path.exists(dir_name):
@@ -3004,40 +3004,40 @@ def write_file(path: str, content: str, encoding: str = "utf-8") -> Dict[str, An
                         "status": "error",
                         "message": f"Cannot create directory {dir_name}: {str(e)}"
                     }
-            
+
             # Check if we have write permission to the directory
             if not os.access(dir_name or ".", os.W_OK):
                 return {
                     "status": "error",
                     "message": f"Permission denied: Cannot write to directory {dir_name}"
                 }
-            
+
             # If the file exists, check if we have write permission
             if os.path.exists(file_path) and not os.access(file_path, os.W_OK):
                 return {
                     "status": "error",
                     "message": f"Permission denied: Cannot modify {path}"
                 }
-            
+
             # Write the file using atomic write pattern
             try:
                 # Create a temporary file in the same directory
-                with tempfile.NamedTemporaryFile(mode='w', encoding=encoding, 
+                with tempfile.NamedTemporaryFile(mode='w', encoding=encoding,
                                               dir=dir_name or ".", delete=False) as temp_file:
                     temp_file.write(content)
                     temp_path = temp_file.name
-                
+
                 # Rename the temporary file to the target path (atomic operation)
                 shutil.move(temp_path, file_path)
-                
+
                 # Get file stats
                 stats = os.stat(file_path)
-                
+
                 # Determine if this was a create or overwrite operation
                 operation = "Updated" if os.path.exists(file_path) else "Created"
-                
+
                 logger.info(f"Successfully wrote to file: {file_path}")
-                
+
                 return {
                     "status": "success",
                     "message": f"Successfully wrote {len(content)} characters to {path}",
@@ -3047,7 +3047,7 @@ def write_file(path: str, content: str, encoding: str = "utf-8") -> Dict[str, An
                     "operation": operation,
                     "bytes_written": len(content.encode(encoding))
                 }
-                
+
             except Exception as e:
                 # Clean up the temporary file if it exists
                 if 'temp_path' in locals() and os.path.exists(temp_path):
@@ -3055,7 +3055,7 @@ def write_file(path: str, content: str, encoding: str = "utf-8") -> Dict[str, An
                         os.unlink(temp_path)
                     except:
                         pass
-                
+
                 logger.error(f"Error writing to file {file_path}: {str(e)}")
                 return {
                     "status": "error",
@@ -3067,7 +3067,7 @@ def write_file(path: str, content: str, encoding: str = "utf-8") -> Dict[str, An
                 "status": "error",
                 "message": f"Error writing file: {str(e)}"
             }
-            
+
 @mcp.tool()
 def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
     """
@@ -3089,35 +3089,35 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
         try:
             # Normalize paths
             project_path = os.path.abspath(project_path)
-            
+
             # Convert file_path to absolute path if it's relative
             if not os.path.isabs(file_path):
                 file_path = os.path.join(project_path, file_path)
             file_path = os.path.abspath(file_path)
-            
+
             # Validate paths
             if not validate_path(project_path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {project_path} is not within allowed directories"
                 }
-            
+
             if not validate_path(file_path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {file_path} is not within allowed directories"
                 }
-            
+
             # Check if file exists
             if not os.path.isfile(file_path):
                 return {
                     "status": "error",
                     "message": f"File not found: {file_path}"
                 }
-                
+
             # Get relative path for cleaner output
             rel_file_path = os.path.relpath(file_path, project_path)
-            
+
             # Initialize result structure
             related_files = {
                 "imports": [],        # Files that import the target file
@@ -3127,7 +3127,7 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                 "class_references": [], # Files that reference classes from the target file
                 "function_calls": []  # Files that call functions from the target file
             }
-            
+
             # Check if AI Librarian has been initialized
             ai_ref_path = os.path.join(project_path, ".ai_reference")
             if not os.path.exists(ai_ref_path):
@@ -3135,7 +3135,7 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                     "status": "error",
                     "message": f"AI Librarian not initialized for {project_path}. Run initialize_librarian first."
                 }
-                
+
             # Get script index
             script_index_path = os.path.join(ai_ref_path, "script_index.json")
             if not os.path.exists(script_index_path):
@@ -3143,10 +3143,10 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                     "status": "error",
                     "message": f"Script index not found at {script_index_path}."
                 }
-                
+
             with open(script_index_path, 'r', encoding='utf-8') as f:
                 script_index = json.load(f)
-                
+
             # Get component registry
             component_registry_path = os.path.join(ai_ref_path, "component_registry.json")
             if not os.path.exists(component_registry_path):
@@ -3154,28 +3154,28 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                     "status": "error",
                     "message": f"Component registry not found at {component_registry_path}."
                 }
-                
+
             with open(component_registry_path, 'r', encoding='utf-8') as f:
                 component_registry = json.load(f)
 
             # Parse the target file to get its imports, classes, and functions
             target_file_info = None
             target_file_rel_path = rel_file_path.replace("\\", "/")
-            
+
             for path, info in script_index["files"].items():
                 if path == target_file_rel_path:
                     target_file_info = info
                     break
-                    
+
             if not target_file_info:
                 # If the file is not in the index, parse it directly
                 target_file_info = {
-                    "path": target_file_rel_path, 
-                    "classes": [], 
-                    "functions": [], 
+                    "path": target_file_rel_path,
+                    "classes": [],
+                    "functions": [],
                     "imports": []
                 }
-                
+
                 try:
                     file_structure = parse_python_file(file_path)
                     target_file_info["classes"] = file_structure["classes"]
@@ -3183,11 +3183,11 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                     target_file_info["imports"] = file_structure["imports"]
                 except Exception as e:
                     logger.error(f"Error parsing target file {file_path}: {str(e)}")
-            
+
             # Get imports from the target file
             target_imports = []
             mini_librarian_path = None
-            
+
             if "mini_librarian" in target_file_info:
                 mini_librarian_path = os.path.join(ai_ref_path, target_file_info["mini_librarian"])
                 if os.path.exists(mini_librarian_path):
@@ -3195,52 +3195,52 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                         mini_librarian = json.load(f)
                         if "imports" in mini_librarian:
                             target_imports = mini_librarian["imports"]
-                            
+
             # For each file in the script index, check for relationships
             for path, info in script_index["files"].items():
                 # Skip the target file itself
                 if path == target_file_rel_path:
                     continue
-                    
+
                 full_path = os.path.join(project_path, path)
-                
+
                 # 1. Package relationship
                 if os.path.dirname(path) == os.path.dirname(target_file_rel_path):
                     related_files["package_related"].append({
                         "path": path,
                         "relationship": "same_package"
                     })
-                
+
                 # 2. Name relationship
                 target_name = os.path.splitext(os.path.basename(target_file_rel_path))[0]
                 file_name = os.path.splitext(os.path.basename(path))[0]
-                
+
                 # Check for name similarities
-                if (target_name in file_name or 
-                    file_name in target_name or 
-                    file_name.startswith(target_name) or 
+                if (target_name in file_name or
+                    file_name in target_name or
+                    file_name.startswith(target_name) or
                     target_name.startswith(file_name)):
                     related_files["name_related"].append({
                         "path": path,
                         "relationship": "similar_name"
                     })
-                
+
                 # 3. Check if this file imports the target file or is imported by it
                 mini_librarian_path = None
                 if "mini_librarian" in info:
                     mini_librarian_path = os.path.join(ai_ref_path, info["mini_librarian"])
-                    
+
                 if mini_librarian_path and os.path.exists(mini_librarian_path):
                     with open(mini_librarian_path, 'r', encoding='utf-8') as f:
                         mini_librarian = json.load(f)
-                        
+
                         if "imports" in mini_librarian:
                             # Check if this file imports the target file
                             target_module = os.path.splitext(target_file_rel_path)[0].replace("/", ".")
-                            
+
                             for imp in mini_librarian["imports"]:
                                 # Look for direct or relative imports
-                                if (imp == target_module or 
+                                if (imp == target_module or
                                     imp.endswith("." + os.path.basename(target_module))):
                                     related_files["imports"].append({
                                         "path": path,
@@ -3248,11 +3248,11 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                                         "import_statement": imp
                                     })
                                     break
-                                    
+
                             # Check if the target file imports this file
                             this_module = os.path.splitext(path)[0].replace("/", ".")
                             for imp in target_imports:
-                                if (imp == this_module or 
+                                if (imp == this_module or
                                     imp.endswith("." + os.path.basename(this_module))):
                                     related_files["imported_by"].append({
                                         "path": path,
@@ -3260,7 +3260,7 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                                         "import_statement": imp
                                     })
                                     break
-                                    
+
                 # 4. Class and function references
                 if "classes" in target_file_info:
                     # Check if this file references classes from the target file
@@ -3270,7 +3270,7 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                             full_content = f.read()
                     except Exception as e:
                         logger.error(f"Error reading file {full_path}: {str(e)}")
-                        
+
                     if full_content:
                         for class_name in target_file_info["classes"]:
                             if class_name in full_content:
@@ -3283,7 +3283,7 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                                         "relationship": "references_class",
                                         "class_name": class_name
                                     })
-                                    
+
                     # Check for function calls
                     for func_name in target_file_info["functions"]:
                         if func_name in full_content:
@@ -3295,16 +3295,16 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                                     "relationship": "calls_function",
                                     "function_name": func_name
                                 })
-                                
+
             # Count total related files
             total_related = sum(len(files) for files in related_files.values())
-            
+
             # Create unique list by removing duplicates
             unique_related = set()
             for category, files in related_files.items():
                 for file_info in files:
                     unique_related.add(file_info["path"])
-            
+
             return {
                 "status": "success",
                 "file": rel_file_path,
@@ -3313,7 +3313,7 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                 "unique_related": len(unique_related),
                 "message": f"Found {len(unique_related)} unique files related to {rel_file_path}"
             }
-            
+
         except Exception as e:
             logger.error(f"Error finding related files: {str(e)}")
             return {
@@ -3335,16 +3335,16 @@ def validate_path(path: str, allowed_directories: List[str]) -> bool:
     """
     # Convert to absolute path
     abs_path = os.path.abspath(path)
-    
+
     # Convert all allowed directories to absolute paths
     abs_allowed = [os.path.abspath(d) for d in allowed_directories]
-    
+
     # Check if the path is within any allowed directory
     for allowed_dir in abs_allowed:
         # Use pathlib for safer path comparison
         path_obj = Path(abs_path)
         allowed_obj = Path(allowed_dir)
-        
+
         try:
             # Use relative_to to check if the path is inside the allowed dir
             # This will raise ValueError if path is not within allowed_dir
@@ -3353,7 +3353,7 @@ def validate_path(path: str, allowed_directories: List[str]) -> bool:
         except ValueError:
             # Path is not within this allowed dir, try the next one
             continue
-    
+
     # If we get here, the path is not within any allowed directory
     return False
 
@@ -3377,32 +3377,32 @@ def create_directory(path: str) -> Dict[str, Any]:
         try:
             # Normalize the path
             dir_path = os.path.abspath(path)
-            
+
             # Validate path
             if not validate_path(dir_path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {path} is not within allowed directories"
                 }
-            
+
             # No need to check if parent directory exists - os.makedirs will create all needed parents
             # Just check if we have permission to write to the nearest existing parent directory
             current_path = dir_path
             while current_path and not os.path.exists(current_path):
                 current_path = os.path.dirname(current_path)
-            
+
             # If we found an existing parent, check if it's writable
             if current_path and not os.access(current_path, os.W_OK):
                 return {
                     "status": "error",
                     "message": f"Permission denied: Cannot write to parent directory {current_path}"
                 }
-            
+
             # Create the directory (and any missing parent directories)
             try:
                 os.makedirs(dir_path, exist_ok=True)
                 logger.info(f"Successfully created directory: {dir_path}")
-                
+
                 # Check if directory exists after creation
                 if os.path.exists(dir_path) and os.path.isdir(dir_path):
                     existed = os.path.exists(dir_path) and os.path.isdir(dir_path)
@@ -3450,35 +3450,35 @@ def directory_tree(path: str, max_depth: int = 5) -> Dict[str, Any]:
         try:
             # Normalize the path
             dir_path = os.path.abspath(path)
-            
+
             # Validate path
             if not validate_path(dir_path, ALLOWED_DIRECTORIES):
                 return {
-                    "status": "error", 
+                    "status": "error",
                     "message": f"Access denied: {path} is not within allowed directories"
                 }
-            
+
             # Check if directory exists
             if not os.path.exists(dir_path):
                 return {
-                    "status": "error", 
+                    "status": "error",
                     "message": f"Directory not found: {path}"
                 }
-            
+
             # Check if path is a directory
             if not os.path.isdir(dir_path):
                 return {
-                    "status": "error", 
+                    "status": "error",
                     "message": f"Not a directory: {path}"
                 }
-            
+
             # Check if we have read permission
             if not os.access(dir_path, os.R_OK):
                 return {
-                    "status": "error", 
+                    "status": "error",
                     "message": f"Permission denied: Cannot read directory {path}"
                 }
-            
+
             # Function to recursively build the tree
             def build_tree(current_path, current_depth=0):
                 """Build a recursive tree structure of the directory"""
@@ -3486,10 +3486,10 @@ def directory_tree(path: str, max_depth: int = 5) -> Dict[str, Any]:
                 if current_depth > max_depth:
                     return {
                         "name": os.path.basename(current_path) or current_path,
-                        "type": "directory", 
+                        "type": "directory",
                         "children": [{"name": "...", "type": "truncated"}]
                     }
-                
+
                 # Create the base node for this path
                 name = os.path.basename(current_path) or current_path
                 result = {
@@ -3497,17 +3497,17 @@ def directory_tree(path: str, max_depth: int = 5) -> Dict[str, Any]:
                     "type": "directory",
                     "children": []
                 }
-                
+
                 try:
                     # Get all entries in the directory
                     entries = sorted(os.scandir(current_path), key=lambda e: (e.is_file(), e.name))
-                    
+
                     # Process each entry
                     for entry in entries:
                         # Skip hidden files and common excluded directories
                         if entry.name.startswith('.') or entry.name in ['__pycache__', 'node_modules', '.git', 'venv', 'env']:
                             continue
-                            
+
                         if entry.is_dir():
                             # Recursively process subdirectories
                             child = build_tree(entry.path, current_depth + 1)
@@ -3522,12 +3522,12 @@ def directory_tree(path: str, max_depth: int = 5) -> Dict[str, Any]:
                     result["error"] = "Permission denied"
                 except Exception as e:
                     result["error"] = str(e)
-                
+
                 return result
-            
+
             # Build the tree structure
             tree = build_tree(dir_path)
-            
+
             # Return with success status and metadata
             return {
                 "status": "success",
@@ -3563,35 +3563,35 @@ def get_file_info(path: str) -> Dict[str, Any]:
         try:
             # Normalize the path
             file_path = os.path.abspath(path)
-            
+
             # Validate path
             if not validate_path(file_path, ALLOWED_DIRECTORIES):
                 return {
                     "status": "error",
                     "message": f"Access denied: {path} is not within allowed directories"
                 }
-            
+
             # Check if path exists
             if not os.path.exists(file_path):
                 return {
                     "status": "error",
                     "message": f"Path not found: {path}"
                 }
-            
+
             # Check if we have read permission
             if not os.access(file_path, os.R_OK):
                 return {
                     "status": "error",
                     "message": f"Permission denied: Cannot read {path}"
                 }
-            
+
             # Get basic file info
             is_dir = os.path.isdir(file_path)
             stat_info = os.stat(file_path)
-            
+
             # Determine if it's a symlink
             is_symlink = os.path.islink(file_path)
-            
+
             # Build the base info dictionary
             info = {
                 "name": os.path.basename(file_path),
@@ -3608,18 +3608,18 @@ def get_file_info(path: str) -> Dict[str, Any]:
                     "execute": os.access(file_path, os.X_OK)
                 }
             }
-            
+
             # Add type-specific information
             if not is_dir:
                 # File-specific information
                 extension = os.path.splitext(file_path)[1].lstrip('.')
                 mime_type, _ = mimetypes.guess_type(file_path)
-                
+
                 info.update({
                     "extension": extension or "(none)",
                     "mime_type": mime_type or "application/octet-stream"
                 })
-                
+
                 # Try to determine if it's a text or binary file
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
@@ -3635,27 +3635,27 @@ def get_file_info(path: str) -> Dict[str, Any]:
                     entries = list(os.scandir(file_path))
                     files = [e for e in entries if e.is_file()]
                     dirs = [e for e in entries if e.is_dir()]
-                    
+
                     info["contents"] = {
                         "files": len(files),
                         "directories": len(dirs),
                         "total_entries": len(entries)
                     }
-                    
+
                     # List the first few entries (up to 10)
                     info["entries"] = [entry.name for entry in entries[:10]]
                     if len(entries) > 10:
                         info["entries"].append("... and more")
                 except Exception as e:
                     info["error"] = f"Error reading directory contents: {str(e)}"
-            
+
             # Add symlink information if applicable
             if is_symlink:
                 try:
                     info["symlink_target"] = os.readlink(file_path)
                 except:
                     info["symlink_target"] = "Could not read symlink target"
-            
+
             return {
                 "status": "success",
                 "info": info

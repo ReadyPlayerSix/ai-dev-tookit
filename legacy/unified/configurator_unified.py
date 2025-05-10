@@ -8,13 +8,14 @@ import os
 import sys
 import json
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, scrolledtext
 import subprocess
 import threading
 import time
 from pathlib import Path
 import webbrowser
 import traceback
+from typing import List, Tuple
 
 class AIDevToolkitGUI:
     def __init__(self, root):
@@ -157,6 +158,10 @@ class AIDevToolkitGUI:
         ttk.Button(actions_frame, text="Open Claude Desktop Location", 
                  command=self.open_claude_directory).pack(
             fill=tk.X, pady=5, padx=5)
+            
+        ttk.Button(actions_frame, text="Clean Legacy Files", 
+                 command=self.show_cleanup_dialog).pack(
+            fill=tk.X, pady=5, padx=5)
         
         # Active projects
         projects_frame = ttk.LabelFrame(self.dashboard_frame, text="Active Projects", padding="10 10 10 10")
@@ -295,9 +300,12 @@ class AIDevToolkitGUI:
                                     wraplength=750, style='Info.TLabel')
         claude_compat_note.pack(fill=tk.X, pady=(10, 0))
         
-        # Official MCP Servers section
-        mcp_servers_frame = ttk.LabelFrame(self.claude_frame, text="Official MCP Servers", padding="10 10 10 10")
-        mcp_servers_frame.pack(fill=tk.X, pady=(0, 15))
+        # Official MCP Servers section - add a frame to contain both the section and the button
+        bottom_frame = ttk.Frame(self.claude_frame)
+        bottom_frame.pack(fill=tk.X, pady=(0, 5))
+        
+        mcp_servers_frame = ttk.LabelFrame(bottom_frame, text="Official MCP Servers", padding="10 10 10 10")
+        mcp_servers_frame.pack(fill=tk.X, pady=(0, 5))
         
         # Note about official MCP servers
         mcp_servers_note = ttk.Label(mcp_servers_frame, 
@@ -342,10 +350,14 @@ class AIDevToolkitGUI:
         mcp_servers_link.pack(anchor=tk.W, pady=2)
         mcp_servers_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/modelcontextprotocol/servers"))
         
-        # Button for adding project directories
-        add_proj_btn = ttk.Button(self.claude_frame, text="Add Project Directories", 
-                                  command=lambda: self.notebook.select(self.project_frame))
-        add_proj_btn.pack(side=tk.LEFT, pady=(10, 0))
+        # Button row that will be placed at the bottom with minimal padding
+        button_row = ttk.Frame(bottom_frame)
+        button_row.pack(fill=tk.X, pady=2)
+        
+        # Button for adding project directories - now in a frame with controlled padding
+        add_proj_btn = ttk.Button(button_row, text="Add Project Directories", 
+                                 command=lambda: self.notebook.select(self.project_frame))
+        add_proj_btn.pack(side=tk.LEFT, padx=0, pady=0)
     
     #-----------------------------------------------------
     # Project Management Tab
@@ -492,9 +504,18 @@ class AIDevToolkitGUI:
         )
         self.private_radio.pack(side=tk.LEFT)
         
+        # Message area for project updates
+        self.project_message_var = tk.StringVar()
+        self.project_message_label = ttk.Label(self.project_frame, textvariable=self.project_message_var, 
+                                            style='Info.TLabel', wraplength=750)
+        self.project_message_label.pack(fill=tk.X, pady=(10, 0))
+        
+        # Initially set a default message
+        self.project_message_var.set("Add project directories that Claude should have access to.")
+        
         # Log frame now at the bottom of the entire tab, not in the right side
         log_frame = ttk.LabelFrame(self.project_frame, text="Server Log", padding="10 10 10 10")
-        log_frame.pack(fill=tk.X, expand=False, pady=(10, 0), before=self.project_message_label)
+        log_frame.pack(fill=tk.X, expand=False, pady=(10, 0))
         
         self.log_text = tk.Text(log_frame, height=8, width=100, wrap=tk.WORD)
         log_scrollbar = ttk.Scrollbar(log_frame, orient=tk.VERTICAL, command=self.log_text.yview)
@@ -505,15 +526,6 @@ class AIDevToolkitGUI:
         
         self.log_text.insert(tk.END, "Server log will appear here when the server is started.")
         self.log_text.config(state=tk.DISABLED)
-        
-        # Message area for project updates
-        self.project_message_var = tk.StringVar()
-        self.project_message_label = ttk.Label(self.project_frame, textvariable=self.project_message_var, 
-                                            style='Info.TLabel', wraplength=750)
-        self.project_message_label.pack(fill=tk.X, pady=(10, 0))
-        
-        # Initially set a default message
-        self.project_message_var.set("Add project directories that Claude should have access to.")
         
         # Create project section (hidden initially)
         self.create_project_frame = ttk.LabelFrame(self.project_frame, text="Create New Project", padding="10 10 10 10")
@@ -565,6 +577,183 @@ class AIDevToolkitGUI:
         # Create custom style for larger checkboxes
         self.style.configure('Large.Treeview', rowheight=30)  # Make rows taller
         self.projects_treeview.configure(style='Large.Treeview')  # Apply the style
+        
+    def on_project_selected(self, event):
+        """Handle project selection in the treeview"""
+        selected_item = self.projects_treeview.selection()
+        if selected_item:
+            # Get the directory path from the selected item values
+            values = self.projects_treeview.item(selected_item[0], 'values')
+            if values:
+                dir_path = values[0]  # Path is in the first column
+                self.current_project = dir_path
+                self.load_project_documentation(dir_path)
+                
+                # Update UI elements based on project selection
+                # For example, enable the Open Project With... button
+                if hasattr(self, 'open_with_btn'):
+                    self.open_with_btn.config(state=tk.NORMAL)
+        
+    def open_project_with(self):
+        """Open the selected project with the specified application"""
+        if not self.current_project:
+            messagebox.showinfo("No Project Selected", "Please select a project first.")
+            return
+            
+        # Get the application to use
+        app = self.default_app_var.get()
+        
+        try:
+            if app == "VS Code":
+                # Open with VS Code
+                subprocess.Popen(["code", self.current_project])
+            elif app == "Notepad":
+                # Open with Notepad (just opens the first file it finds)
+                subprocess.Popen(["notepad", os.path.join(self.current_project, "README.md")])
+            elif app == "Explorer":
+                # Open with File Explorer
+                os.startfile(self.current_project)
+            elif app == "Custom...":
+                # Ask for a custom command
+                from tkinter import simpledialog
+                custom_cmd = simpledialog.askstring("Custom Command", 
+                                                  "Enter the command to open the project:",
+                                                  initialvalue="")
+                if custom_cmd:
+                    subprocess.Popen([custom_cmd, self.current_project])
+            else:
+                # Just use default application
+                os.startfile(self.current_project)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open project: {str(e)}")
+            
+    def set_default_application(self, event):
+        """Set the default application for opening projects"""
+        # This is called when a selection is made in the combobox
+        # Nothing special needed here since we read the combobox value when opening
+        pass
+        
+    def update_project_privacy(self):
+        """Update the privacy setting for the selected project"""
+        if not self.current_project:
+            return
+            
+        # Update the privacy setting
+        privacy = self.privacy_var.get()
+        self.project_privacy[self.current_project] = privacy
+        
+        # Update the treeview with the new privacy setting
+        selected_item = self.projects_treeview.selection()
+        if selected_item:
+            # Update the Private column (column 0)
+            self.projects_treeview.set(selected_item[0], "Private", privacy)
+        
+    def load_project_documentation(self, project_path):
+        """Load documentation from the project directory"""
+        if not os.path.exists(project_path):
+            return
+            
+        # Reset document navigation
+        self.project_documents[project_path] = []
+        self.current_doc_index = 0
+        
+        # Look for documentation files
+        doc_files = []
+        
+        # First, check for README.md
+        readme_path = os.path.join(project_path, "README.md")
+        if os.path.exists(readme_path):
+            doc_files.append(("README", readme_path))
+            
+        # Check for other common documentation files
+        doc_patterns = ["CHANGELOG.md", "CONTRIBUTING.md", "LICENSE", "docs/*.md"]
+        for pattern in doc_patterns:
+            if "*" in pattern:
+                # Handle wildcards
+                import glob
+                base_dir, pat = pattern.split("/", 1)
+                search_dir = os.path.join(project_path, base_dir)
+                if os.path.exists(search_dir):
+                    for file_path in glob.glob(os.path.join(search_dir, pat)):
+                        name = os.path.basename(file_path)
+                        doc_files.append((name, file_path))
+            else:
+                # Direct file
+                file_path = os.path.join(project_path, pattern)
+                if os.path.exists(file_path):
+                    name = os.path.basename(file_path)
+                    doc_files.append((name, file_path))
+        
+        # Store documents
+        self.project_documents[project_path] = doc_files
+        
+        # Display the first document if available
+        if doc_files:
+            self.display_current_document()
+            
+            # Enable navigation buttons if more than one document
+            self.prev_doc_btn.config(state=tk.NORMAL if len(doc_files) > 1 else tk.DISABLED)
+            self.next_doc_btn.config(state=tk.NORMAL if len(doc_files) > 1 else tk.DISABLED)
+        else:
+            # No documentation found
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, "No documentation found for this project.")
+            self.doc_text.config(state=tk.DISABLED)
+            
+            # Disable navigation buttons
+            self.prev_doc_btn.config(state=tk.DISABLED)
+            self.next_doc_btn.config(state=tk.DISABLED)
+            
+            # Update label
+            self.current_doc_var.set("No documentation")
+        
+    def display_current_document(self):
+        """Display the current document"""
+        if not self.current_project or self.current_project not in self.project_documents:
+            return
+            
+        doc_files = self.project_documents[self.current_project]
+        if not doc_files:
+            return
+            
+        # Ensure current_doc_index is in range
+        if self.current_doc_index < 0:
+            self.current_doc_index = len(doc_files) - 1
+        elif self.current_doc_index >= len(doc_files):
+            self.current_doc_index = 0
+            
+        # Get the current document
+        doc_name, doc_path = doc_files[self.current_doc_index]
+        
+        # Read the file content
+        try:
+            with open(doc_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            # Display in the text widget
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, content)
+            self.doc_text.config(state=tk.DISABLED)
+            
+            # Update the label
+            self.current_doc_var.set(doc_name)
+        except Exception as e:
+            self.doc_text.config(state=tk.NORMAL)
+            self.doc_text.delete(1.0, tk.END)
+            self.doc_text.insert(tk.END, f"Error loading document: {str(e)}")
+            self.doc_text.config(state=tk.DISABLED)
+        
+    def next_document(self):
+        """Navigate to the next document"""
+        self.current_doc_index += 1
+        self.display_current_document()
+        
+    def prev_document(self):
+        """Navigate to the previous document"""
+        self.current_doc_index -= 1
+        self.display_current_document()
                  
     #-----------------------------------------------------
     # About Tab  
@@ -1156,3 +1345,158 @@ When you enable project directories, you are granting Claude permission to read 
                 pass
         
         self.root.destroy()
+        
+    #-----------------------------------------------------
+    # Legacy File Cleanup Functions
+    #-----------------------------------------------------
+    def find_legacy_files(self, project_path: str) -> List[str]:
+        """Find all legacy files in the project.
+        
+        Args:
+            project_path: Root directory to search in
+            
+        Returns:
+            List of full paths to legacy files
+        """
+        legacy_files = []
+        extensions = ['.old', '.backup', '.fixed', '.updated']
+        
+        for root, _, files in os.walk(project_path):
+            for file in files:
+                if any(file.endswith(ext) for ext in extensions):
+                    legacy_files.append(os.path.join(root, file))
+        
+        return legacy_files
+    
+    def cleanup_legacy_files(self, files_to_remove: List[str]) -> Tuple[int, List[str]]:
+        """Remove legacy files and return count and any errors.
+        
+        Args:
+            files_to_remove: List of file paths to remove
+            
+        Returns:
+            Tuple of (number of files removed, list of error messages)
+        """
+        removed_count = 0
+        errors = []
+        
+        for file_path in files_to_remove:
+            try:
+                os.remove(file_path)
+                removed_count += 1
+            except Exception as e:
+                errors.append(f"Error removing {file_path}: {str(e)}")
+        
+        return removed_count, errors
+    
+    def show_cleanup_dialog(self):
+        """Show dialog with legacy files to clean up"""
+        # Get the base path for scanning
+        project_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        # Find legacy files
+        legacy_files = self.find_legacy_files(project_path)
+        
+        if not legacy_files:
+            messagebox.showinfo("Clean Legacy Files", "No legacy files found.")
+            return
+        
+        # Create dialog window
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Clean Legacy Files")
+        dialog.geometry("600x500")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Create and configure frame
+        frame = ttk.Frame(dialog, padding="10")
+        frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Header label
+        ttk.Label(frame, text="Legacy Files to Remove", font=('Segoe UI', 12, 'bold')).pack(pady=(0, 10))
+        
+        # Description
+        description = f"Found {len(legacy_files)} legacy files with extensions: .old, .backup, .fixed, .updated"
+        ttk.Label(frame, text=description, wraplength=550).pack(pady=(0, 10))
+        
+        # File listbox with checkboxes
+        file_frame = ttk.Frame(frame)
+        file_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        # Create a scrolled text widget to display files
+        file_list_text = scrolledtext.ScrolledText(file_frame, wrap=tk.WORD, height=15)
+        file_list_text.pack(fill=tk.BOTH, expand=True)
+        
+        # Populate text widget with file paths
+        for file_path in legacy_files:
+            # Make path relative to project root for cleaner display
+            rel_path = os.path.relpath(file_path, project_path)
+            file_list_text.insert(tk.END, f"{rel_path}\n")
+        
+        # Set widget to read-only
+        file_list_text.config(state=tk.DISABLED)
+        
+        # Warning message
+        warning_label = ttk.Label(
+            frame, 
+            text="Warning: This action will permanently delete these files. This cannot be undone.",
+            foreground="red",
+            wraplength=550
+        )
+        warning_label.pack(pady=(0, 10))
+        
+        # Button frame
+        button_frame = ttk.Frame(frame)
+        button_frame.pack(fill=tk.X)
+        
+        # Cancel button
+        ttk.Button(
+            button_frame, 
+            text="Cancel", 
+            command=dialog.destroy
+        ).pack(side=tk.RIGHT, padx=5)
+        
+        # Function to handle cleanup
+        def do_cleanup():
+            if not legacy_files:
+                dialog.destroy()
+                return
+                
+            # Ask for final confirmation
+            if not messagebox.askyesno(
+                "Confirm Removal", 
+                f"Are you sure you want to remove {len(legacy_files)} legacy files?"
+            ):
+                return
+                
+            # Do the cleanup
+            removed, errors = self.cleanup_legacy_files(legacy_files)
+            
+            # Close dialog
+            dialog.destroy()
+            
+            # Show results
+            if errors:
+                error_msg = "\n".join(errors[:5])
+                if len(errors) > 5:
+                    error_msg += f"\n... and {len(errors) - 5} more errors"
+                    
+                messagebox.showwarning(
+                    "Cleanup Results", 
+                    f"Removed {removed} of {len(legacy_files)} files.\n\nErrors:\n{error_msg}"
+                )
+            else:
+                messagebox.showinfo(
+                    "Cleanup Complete", 
+                    f"Successfully removed {removed} legacy files."
+                )
+                
+            # Track this change
+            self.has_changes = True
+        
+        # Remove button
+        ttk.Button(
+            button_frame, 
+            text="Remove Legacy Files", 
+            command=do_cleanup
+        ).pack(side=tk.RIGHT, padx=5)

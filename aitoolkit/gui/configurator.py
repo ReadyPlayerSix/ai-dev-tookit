@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, scrolledtext
 import subprocess
 import threading
 import time
@@ -11,6 +11,7 @@ import webbrowser
 import traceback
 import re
 import datetime
+from typing import List, Tuple
 
 class AIDevToolkitGUI:
     def __init__(self, root):
@@ -176,6 +177,10 @@ class AIDevToolkitGUI:
         
         ttk.Button(actions_frame, text="Open Claude Desktop Location", 
                  command=self.open_claude_directory).pack(
+            fill=tk.X, pady=5, padx=5)
+            
+        ttk.Button(actions_frame, text="Clean Legacy Files", 
+                 command=self.show_cleanup_dialog).pack(
             fill=tk.X, pady=5, padx=5)
         
         ttk.Button(actions_frame, text="Git Commit Changes", 
@@ -1243,6 +1248,161 @@ Would you like to commit your changes now?"""
                 return
         else:
             self.root.destroy()
+    
+    #-----------------------------------------------------
+    # Legacy File Cleanup Functions
+    #-----------------------------------------------------
+    def find_legacy_files(self, project_path: str) -> List[str]:
+        """Find all legacy files in the project.
+        
+        Args:
+            project_path: Root directory to search in
+            
+        Returns:
+            List of full paths to legacy files
+        """
+        legacy_files = []
+        extensions = ['.old', '.backup', '.fixed', '.updated']
+        
+        for root, _, files in os.walk(project_path):
+            for file in files:
+                if any(file.endswith(ext) for ext in extensions):
+                    legacy_files.append(os.path.join(root, file))
+        
+        return legacy_files
+    
+    def cleanup_legacy_files(self, files_to_remove: List[str]) -> Tuple[int, List[str]]:
+        """Remove legacy files and return count and any errors.
+        
+        Args:
+            files_to_remove: List of file paths to remove
+            
+        Returns:
+            Tuple of (number of files removed, list of error messages)
+        """
+        removed_count = 0
+        errors = []
+        
+        for file_path in files_to_remove:
+            try:
+                os.remove(file_path)
+                removed_count += 1
+            except Exception as e:
+                errors.append(f"Error removing {file_path}: {str(e)}")
+        
+        return removed_count, errors
+    
+    def show_cleanup_dialog(self):
+        """Show dialog with legacy files to clean up"""
+        # Get the base path for scanning
+        project_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        # Find legacy files
+        legacy_files = self.find_legacy_files(project_path)
+        
+        if not legacy_files:
+            messagebox.showinfo("Clean Legacy Files", "No legacy files found.")
+            return
+        
+        # Create dialog window
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Clean Legacy Files")
+        dialog.geometry("600x500")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Create and configure frame
+        frame = ttk.Frame(dialog, padding="10")
+        frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Header label
+        ttk.Label(frame, text="Legacy Files to Remove", font=('Segoe UI', 12, 'bold')).pack(pady=(0, 10))
+        
+        # Description
+        description = f"Found {len(legacy_files)} legacy files with extensions: .old, .backup, .fixed, .updated"
+        ttk.Label(frame, text=description, wraplength=550).pack(pady=(0, 10))
+        
+        # File listbox with checkboxes
+        file_frame = ttk.Frame(frame)
+        file_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        # Create a scrolled text widget to display files
+        file_list_text = scrolledtext.ScrolledText(file_frame, wrap=tk.WORD, height=15)
+        file_list_text.pack(fill=tk.BOTH, expand=True)
+        
+        # Populate text widget with file paths
+        for file_path in legacy_files:
+            # Make path relative to project root for cleaner display
+            rel_path = os.path.relpath(file_path, project_path)
+            file_list_text.insert(tk.END, f"{rel_path}\n")
+        
+        # Set widget to read-only
+        file_list_text.config(state=tk.DISABLED)
+        
+        # Warning message
+        warning_label = ttk.Label(
+            frame, 
+            text="Warning: This action will permanently delete these files. This cannot be undone.",
+            foreground="red",
+            wraplength=550
+        )
+        warning_label.pack(pady=(0, 10))
+        
+        # Button frame
+        button_frame = ttk.Frame(frame)
+        button_frame.pack(fill=tk.X)
+        
+        # Cancel button
+        ttk.Button(
+            button_frame, 
+            text="Cancel", 
+            command=dialog.destroy
+        ).pack(side=tk.RIGHT, padx=5)
+        
+        # Function to handle cleanup
+        def do_cleanup():
+            if not legacy_files:
+                dialog.destroy()
+                return
+                
+            # Ask for final confirmation
+            if not messagebox.askyesno(
+                "Confirm Removal", 
+                f"Are you sure you want to remove {len(legacy_files)} legacy files?"
+            ):
+                return
+                
+            # Do the cleanup
+            removed, errors = self.cleanup_legacy_files(legacy_files)
+            
+            # Close dialog
+            dialog.destroy()
+            
+            # Show results
+            if errors:
+                error_msg = "\n".join(errors[:5])
+                if len(errors) > 5:
+                    error_msg += f"\n... and {len(errors) - 5} more errors"
+                    
+                messagebox.showwarning(
+                    "Cleanup Results", 
+                    f"Removed {removed} of {len(legacy_files)} files.\n\nErrors:\n{error_msg}"
+                )
+            else:
+                messagebox.showinfo(
+                    "Cleanup Complete", 
+                    f"Successfully removed {removed} legacy files."
+                )
+                
+            # Track this change
+            self.track_change()
+        
+        # Remove button
+        ttk.Button(
+            button_frame, 
+            text="Remove Legacy Files", 
+            command=do_cleanup
+        ).pack(side=tk.RIGHT, padx=5)
     
     #-----------------------------------------------------
     # Server Management Functions
