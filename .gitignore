@@ -138,25 +138,19 @@ reload_directories_method.py
 *.local.yaml
 *.local.yml
 
-# Project specific backup files
-*.backup
-*.bak
-*.swp
-*~
-aitoolkit/gui/configurator.py.backup
-aitoolkit/gui/configurator.py.updated
-aitoolkit/gui/configurator_fixed.py
-aitoolkit/gui/configurator_test.py
-launch.py
-launch_gui_direct.py
-reload_directories_method.py
+# AI Librarian and Tool Reference
+.ai_reference/
+**/.ai_reference/
+.tool_reference/bidirectional_refs.json
+.tool_reference/tool_profiles/*.json
 
-# Local configuration
-*.local.json
-*.local.yaml
-*.local.yml.ai_reference/
-aitoolkit/.ai_reference/
+# Test files
+test_edit_file.txt
+test_filesystem/
+tests/test_edit_file.txt
+tests/test_filesystem/
+
+# Other specific files to ignore
 aitoolkit/test_file.txt
 test_directory/
 gitStatus.txt
-.ai_reference/
