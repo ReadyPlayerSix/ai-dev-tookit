@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.1] - 2025-05-10
+## [0.4.2] - 2025-05-10
 
 ### Added
 - Edit Bookmark system for complex code section editing
@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Enhanced AI Librarian initialization to support bookmark directories
 - Updated README with edit bookmark documentation and examples
+- Simplified project contribution guidelines
 
 ## [0.4.0] - 2025-05-09
 

@@ -5,7 +5,7 @@
 ![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-Compatible-green)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.4.1-orange)
+![Release](https://img.shields.io/badge/release-v0.4.2-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
