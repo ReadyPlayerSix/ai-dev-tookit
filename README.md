@@ -283,7 +283,6 @@ Additional documentation is available in the [docs](docs/) directory:
 - **GUI Improvements**: Enhanced configurator interface
 - **Project Templates**: Starter templates for common project types
 - **IDE Integration**: Extensions for VS Code and other IDEs
-- **Collaborative Mode**: Multi-user collaboration capabilities
 - **Advanced Code Analysis**: Deeper semantic code understanding
 - **Team Workflow Tools**: Project management integration
 
