@@ -1,0 +1,44 @@
+{
+  "group_name": "project_initialization_workflow",
+  "description": "Tools used to set up AI Librarian for a project",
+  "tools": [
+    "list_allowed_directories",
+    "check_project_access",
+    "initialize_librarian",
+    "generate_librarian"
+  ],
+  "common_sequences": [
+    {
+      "sequence": [
+        "check_project_access",
+        "initialize_librarian"
+      ],
+      "purpose": "Verify access, then initialize AI Librarian",
+      "frequency": "very_common"
+    },
+    {
+      "sequence": [
+        "initialize_librarian",
+        "generate_librarian"
+      ],
+      "purpose": "Set up and then refresh the AI Librarian data",
+      "frequency": "common"
+    }
+  ],
+  "anti_patterns": [
+    {
+      "pattern": [
+        "initialize_librarian without check_project_access"
+      ],
+      "risk": "May fail due to permission issues",
+      "recommendation": "Always verify access first"
+    },
+    {
+      "pattern": [
+        "query_component without initialize_librarian"
+      ],
+      "risk": "Will fail if Librarian not initialized",
+      "recommendation": "Always initialize before querying"
+    }
+  ]
+}

@@ -40,6 +40,7 @@ if parent_dir not in sys.path:
 from aitoolkit.librarian.todos import TodoManager
 from aitoolkit.librarian.sanity_check import run_sanity_check
 from aitoolkit.librarian.enhanced_indexer import initialize_enhanced_librarian
+from aitoolkit.utils.logging_manager import configure_logger
 
 # Import filesystem module for file operations
 import shutil
@@ -48,49 +49,34 @@ import fnmatch
 import mimetypes
 from pathlib import Path
 
+# Import datetime for timestamps
+import datetime
+
 # Try different import paths for FastMCP
 try:
     # First try the pip-installed mcp package
     from mcp.server.fastmcp import FastMCP, Context
 except ImportError:
     try:
-        # Next try the local src path
-        from src.mcp.server import FastMCP, Context
-    except ImportError:
-        # Finally try the absolute import
-        import sys
-        print("Could not import FastMCP via standard paths. System paths:", sys.path)
-        print("Attempting to install mcp package...")
+        # Try to install mcp package
         import subprocess
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "mcp[cli]"])
-            from mcp.server.fastmcp import FastMCP, Context
-            print("Successfully installed and imported mcp package")
-        except Exception as e:
-            print(f"Error installing mcp package: {e}")
-            raise ImportError("Could not import FastMCP from any known location")
+        print("Attempting to install mcp package...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "mcp[cli]"])
+        from mcp.server.fastmcp import FastMCP, Context
+        print("Successfully installed and imported mcp package")
+    except Exception as e:
+        print(f"Error installing mcp package: {e}")
+        raise ImportError("Could not import FastMCP. Please install the mcp package: pip install mcp[cli]")
 
-# Configure logging with separate handlers for file and console
-logger = logging.getLogger("ai-librarian")
-logger.setLevel(logging.INFO)
-# Clear any existing handlers
-if logger.handlers:
-    logger.handlers.clear()
-
-# File handler - all levels
-file_handler = logging.FileHandler("ai_librarian.log")
-file_handler.setLevel(logging.INFO)
-file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(file_formatter)
-
-# Console handler - only warnings and errors
-console_handler = logging.StreamHandler(sys.stderr)  # Explicitly use stderr
-console_handler.setLevel(logging.WARNING)  # Only show warnings and errors
-console_formatter = logging.Formatter('%(levelname)s - %(message)s')
-console_handler.setFormatter(console_formatter)
-
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
+# Configure logging using the centralized logging manager
+logger = configure_logger(
+    name="ai-librarian",
+    log_level=logging.INFO,
+    log_file="ai_librarian.log",
+    log_dir=os.path.join(parent_dir, "logs"),
+    console_level=logging.WARNING,
+    file_level=logging.INFO
+)
 
 # Create the MCP server with proper initialization
 mcp = FastMCP(
@@ -112,7 +98,8 @@ librarian_context = {
     "last_update": {},  # Map of project paths to last update timestamp
     "indexed_files": {},  # Map of project paths to their indexed files
     "components": {},  # Map of project paths to their component registries
-    "paused": False   # Flag to temporarily pause monitoring
+    "paused": False,   # Flag to temporarily pause monitoring
+    "tool_index": None  # Path to Tool Index directory if available
 }
 
 # File change monitoring thread
@@ -344,6 +331,381 @@ def initialize_allowed_directories():
 
 # Get allowed directories
 ALLOWED_DIRECTORIES = initialize_allowed_directories()
+
+# Initialize Tool Index integration
+def initialize_tool_index():
+    """
+    Check for Tool Index in allowed directories and initialize integration.
+    
+    Returns:
+        Path to the Tool Index directory if found, None otherwise
+    """
+    tool_index_path = None
+    
+    for project_path in ALLOWED_DIRECTORIES:
+        potential_path = os.path.join(project_path, ".tool_reference")
+        if os.path.exists(potential_path):
+            tool_index_path = potential_path
+            logger.info(f"Found Tool Index at {tool_index_path}")
+            break
+    
+    # Store the path in the global context
+    with state_lock:
+        librarian_context["tool_index"] = tool_index_path
+    
+    return tool_index_path
+
+# Initialize Tool Index
+TOOL_INDEX_PATH = initialize_tool_index()
+
+def query_tool_index(query_type, query_params):
+    """
+    Query the Tool Index for information.
+    
+    Args:
+        query_type: Type of query (profile, relationship, decision_tree)
+        query_params: Parameters for the query
+        
+    Returns:
+        Query results or None if not found
+    """
+    tool_index_path = librarian_context["tool_index"]
+    
+    # First verification step - verify Tool Index exists
+    if not tool_index_path:
+        logger.warning(f"Tool Index not found when querying {query_type}")
+        return None
+        
+    # Second verification step - verify required directories exist
+    required_directories = {
+        "tool_profiles": os.path.join(tool_index_path, "tool_profiles"),
+        "decision_trees": os.path.join(tool_index_path, "decision_trees")
+    }
+    
+    for dir_name, dir_path in required_directories.items():
+        if not os.path.exists(dir_path):
+            try:
+                os.makedirs(dir_path, exist_ok=True)
+                logger.info(f"Created missing directory: {dir_path}")
+            except Exception as e:
+                logger.error(f"Failed to create missing directory {dir_path}: {str(e)}")
+                return None
+    
+    # Third verification step - verify registry.json exists
+    registry_path = os.path.join(tool_index_path, "registry.json")
+    if not os.path.exists(registry_path):
+        logger.error(f"Registry file not found: {registry_path}")
+        return {
+            "error": "Tool Index registry.json not found",
+            "message": "The Tool Index requires a registry.json file to function properly."
+        }
+    
+    try:
+        if query_type == "profile":
+            tool_name = query_params.get("tool")
+            if not tool_name:
+                logger.warning("No tool name provided for profile query")
+                return None
+                
+            profile_path = os.path.join(tool_index_path, "tool_profiles", f"{tool_name}.json")
+            
+            # Fallback for missing profiles
+            if not os.path.exists(profile_path):
+                logger.info(f"Profile not found for tool: {tool_name}, using default profile")
+                # Return a basic profile with essential information
+                return {
+                    "tool_id": tool_name,
+                    "primary_purpose": f"Function {tool_name} - refer to its documentation",
+                    "parameter_patterns": {},
+                    "always_use_when": [],
+                    "never_use_when": [],
+                    "_fallback_profile": True
+                }
+            
+            with open(profile_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        
+        elif query_type == "relationship":
+            rel_group = query_params.get("group")
+            if not rel_group:
+                logger.warning("No relationship group provided for query")
+                return None
+                
+            # First check for a dedicated relationship file
+            rel_path = os.path.join(tool_index_path, f"relationship_{rel_group}.json")
+            if os.path.exists(rel_path):
+                with open(rel_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            
+            # Then check in the registry file
+            with open(registry_path, 'r', encoding='utf-8') as f:
+                registry = json.load(f)
+                if "relationships" in registry:
+                    for rel in registry["relationships"]:
+                        if rel.get("group_name") == rel_group:
+                            return rel
+            
+            # Fallback for missing relationships
+            logger.info(f"Relationship group not found: {rel_group}")
+            return {
+                "group_name": rel_group,
+                "description": f"Relationship group for {rel_group}",
+                "tools": [],
+                "common_sequences": [],
+                "_fallback_relationship": True
+            }
+        
+        elif query_type == "decision_tree":
+            tree_id = query_params.get("tree_id")
+            if not tree_id:
+                logger.warning("No tree_id provided for decision tree query")
+                return None
+                
+            tree_path = os.path.join(tool_index_path, "decision_trees", f"{tree_id}.json")
+            if os.path.exists(tree_path):
+                with open(tree_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            
+            # Fallback for missing decision trees
+            logger.info(f"Decision tree not found: {tree_id}")
+            return {
+                "tree_id": tree_id,
+                "description": f"Decision tree for {tree_id}",
+                "decision_nodes": [],
+                "_fallback_tree": True
+            }
+                    
+        elif query_type == "registry":
+            with open(registry_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+                    
+        elif query_type == "categories":
+            categories_path = os.path.join(tool_index_path, "categories.json")
+            if not os.path.exists(categories_path):
+                logger.info("Categories file not found, extracting from registry")
+                # Create a basic categories structure from registry
+                with open(registry_path, 'r', encoding='utf-8') as f:
+                    registry = json.load(f)
+                    
+                # Extract relationships as categories
+                categories = {
+                    "version": registry.get("version", "1.0.0"),
+                    "categories": []
+                }
+                
+                if "relationships" in registry:
+                    for rel in registry["relationships"]:
+                        if "group_name" in rel and "tools" in rel:
+                            categories["categories"].append({
+                                "name": rel["group_name"],
+                                "description": rel.get("description", f"Tools related to {rel['group_name']}"),
+                                "tools": rel["tools"]
+                            })
+                
+                return categories
+            
+            with open(categories_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    
+    except Exception as e:
+        logger.error(f"Error querying Tool Index: {str(e)}")
+        return {
+            "error": f"Error querying Tool Index: {str(e)}",
+            "query_type": query_type,
+            "query_params": query_params
+        }
+    
+    return None
+
+def query_tool_index_for_taskboard(task_type):
+    """
+    Query the Tool Index for TaskBoard-specific information.
+    
+    Args:
+        task_type: Type of task being processed
+        
+    Returns:
+        Information about which mini-librarians to use for the task
+    """
+    tool_index_path = librarian_context["tool_index"]
+    
+    # Verification step - verify Tool Index exists
+    if not tool_index_path:
+        logger.warning(f"Tool Index not found when querying for TaskBoard task type: {task_type}")
+        return None
+    
+    # Default mappings to ensure resilient behavior even without registry
+    default_mappings = {
+        "component_analysis": ["component-analyzer"],
+        "find_usages": ["file-indexer", "component-analyzer"],
+        "code_modification": ["file-indexer", "component-analyzer", "code-modifier"],
+        "file_search": ["file-indexer"],
+        "todo_management": ["todo-manager"]
+    }
+        
+    try:
+        # Check for TaskBoard integration information
+        registry_path = os.path.join(tool_index_path, "registry.json")
+        
+        # Verify registry exists
+        if not os.path.exists(registry_path):
+            logger.warning(f"Registry file not found: {registry_path}, using default mappings")
+            if task_type in default_mappings:
+                return {
+                    "mini_librarians": default_mappings[task_type],
+                    "task_type": task_type,
+                    "_using_default": True
+                }
+            return None
+            
+        # Read and process registry
+        with open(registry_path, 'r', encoding='utf-8') as f:
+            registry = json.load(f)
+            
+        # Check for TaskBoard integration section
+        if "taskboard_integration" in registry:
+            mapping = registry["taskboard_integration"].get("task_type_to_mini_librarian_mapping", {})
+            
+            # If task type is found in mapping, return it
+            if task_type in mapping:
+                return {
+                    "mini_librarians": mapping[task_type],
+                    "task_type": task_type
+                }
+                
+            # If task type not found but we have other mappings, try to find related tasks
+            logger.info(f"Task type '{task_type}' not found in mappings, attempting to find similar")
+            
+            # Try to find similar task types by partial matching
+            similar_tasks = []
+            for known_type in mapping.keys():
+                if known_type in task_type or task_type in known_type:
+                    similar_tasks.append(known_type)
+            
+            if similar_tasks:
+                # Use the first similar task found
+                similar_task = similar_tasks[0]
+                logger.info(f"Using similar task type: {similar_task} for {task_type}")
+                return {
+                    "mini_librarians": mapping[similar_task],
+                    "task_type": task_type,
+                    "mapped_from": similar_task,
+                    "_similar_match": True
+                }
+        
+        # Fall back to default mappings if no specific mapping found
+        if task_type in default_mappings:
+            logger.info(f"Using default mapping for task type: {task_type}")
+            return {
+                "mini_librarians": default_mappings[task_type],
+                "task_type": task_type,
+                "_using_default": True
+            }
+    
+    except Exception as e:
+        logger.error(f"Error querying Tool Index for TaskBoard: {str(e)}")
+        
+        # Even on error, try to provide default mappings
+        if task_type in default_mappings:
+            logger.info(f"Using default mapping for task type {task_type} after error")
+            return {
+                "mini_librarians": default_mappings[task_type],
+                "task_type": task_type,
+                "_using_default": True,
+                "_error_recovery": True
+            }
+    
+    return None
+
+def determine_mini_librarians(task_type, task_params=None):
+    """
+    Determine which mini-librarians should handle a TaskBoard task.
+    
+    This function implements a resilient approach to determine which mini-librarians
+    should handle a particular task type, with multiple fallback strategies.
+    
+    Args:
+        task_type: Type of task
+        task_params: Task parameters (optional)
+        
+    Returns:
+        List of mini-librarian IDs that should handle the task
+    """
+    logger.debug(f"Determining mini-librarians for task type: {task_type}")
+    
+    # First verification step - ensure we have a valid task type
+    if not task_type:
+        logger.warning("No task type provided to determine_mini_librarians")
+        return ["general-assistant"]  # Default to general assistant for unspecified tasks
+    
+    # Default mappings for known task types (hardcoded fallback)
+    default_mappings = {
+        "component_analysis": ["component-analyzer"],
+        "find_usages": ["file-indexer", "component-analyzer"],
+        "code_modification": ["file-indexer", "component-analyzer", "code-modifier"],
+        "file_search": ["file-indexer"],
+        "todo_management": ["todo-manager"],
+        "diagnostics": ["diagnostics-runner"]
+    }
+    
+    # Special case for task parameters with specific requirements
+    if task_params:
+        # Check if task parameters indicate specific mini-librarians
+        if task_params.get("mini_librarians"):
+            logger.info(f"Using explicitly specified mini-librarians from task parameters")
+            return task_params.get("mini_librarians")
+        
+        # Check if task involves file operations
+        if "file" in task_params or "path" in task_params:
+            if "file-indexer" not in default_mappings.get(task_type, []):
+                logger.info("Task involves file operations, adding file-indexer")
+                # Ensure file operations get the file indexer involved
+                if task_type in default_mappings:
+                    # Add file-indexer if not already present
+                    librarians = default_mappings[task_type].copy()
+                    if "file-indexer" not in librarians:
+                        librarians.append("file-indexer")
+                    return librarians
+    
+    # First query the Tool Index for best information
+    tool_index_info = query_tool_index_for_taskboard(task_type)
+    
+    if tool_index_info and "mini_librarians" in tool_index_info:
+        logger.info(f"Using mini-librarians from Tool Index: {tool_index_info['mini_librarians']}")
+        return tool_index_info["mini_librarians"]
+    
+    # Fallback to hardcoded defaults if Tool Index query failed
+    if task_type in default_mappings:
+        logger.info(f"Using default mini-librarians for task type: {task_type}")
+        return default_mappings[task_type]
+    
+    # Try to infer based on task type name
+    for known_type, librarians in default_mappings.items():
+        if known_type in task_type or task_type in known_type:
+            logger.info(f"Inferring mini-librarians based on similar task type: {known_type}")
+            return librarians
+    
+    # Ultimate fallback - use general assistant
+    logger.info(f"No matching mini-librarians found for task type: {task_type}, using general-assistant")
+    return ["general-assistant"]
+
+# Function to validate paths (used in edit_file and other functions)
+def validate_path(path, allowed_directories):
+    """
+    Validate that a path is within allowed directories.
+    
+    Args:
+        path: Path to validate
+        allowed_directories: List of allowed directories
+        
+    Returns:
+        True if path is valid, False otherwise
+    """
+    # Normalize path
+    path = os.path.abspath(path)
+    
+    # Check if path is within allowed directories
+    return any(path.startswith(allowed_dir) for allowed_dir in allowed_directories)
 
 # Utility function to pause/resume monitoring during operations
 def pause_monitoring():

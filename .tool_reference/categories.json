@@ -1,0 +1,54 @@
+{
+  "version": "0.1.0",
+  "description": "Tool categorization for Claude",
+  "categories": {
+    "filesystem": {
+      "name": "filesystem",
+      "description": "Tools related to filesystem operations",
+      "tools": [
+        "read_file",
+        "write_file",
+        "edit_file",
+        "enhanced_edit_file",
+        "search_files",
+        "move_file",
+        "directory_tree",
+        "create_directory",
+        "get_file_info",
+        "read_multiple_files"
+      ]
+    },
+    "librarian": {
+      "name": "librarian",
+      "description": "Tools related to librarian operations",
+      "tools": [
+        "initialize_librarian",
+        "query_component",
+        "find_implementation",
+        "generate_librarian",
+        "sanity_check",
+        "find_related_files"
+      ]
+    },
+    "todo": {
+      "name": "todo",
+      "description": "Tools related to todo operations",
+      "tools": [
+        "add_todo",
+        "list_todos",
+        "update_todo_status",
+        "add_subtask",
+        "search_todos",
+        "infer_todos"
+      ]
+    },
+    "server": {
+      "name": "server",
+      "description": "Tools related to server operations",
+      "tools": [
+        "list_allowed_directories",
+        "check_project_access"
+      ]
+    }
+  }
+}

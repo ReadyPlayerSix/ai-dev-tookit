@@ -1,0 +1,116 @@
+{
+  "tool_id": "edit_file",
+  "primary_purpose": "modify portions of existing files",
+  "execution_context": "file system access required, write permissions needed",
+  "parameter_patterns": {
+    "path": {
+      "validation": "must be string, must exist in allowed directories",
+      "common_errors": [
+        "path not found",
+        "permission denied"
+      ],
+      "recovery_strategies": [
+        "check_project_access",
+        "list_allowed_directories"
+      ]
+    },
+    "old_text": {
+      "validation": "must exist exactly once in file",
+      "common_errors": [
+        "text not found",
+        "text appears multiple times"
+      ],
+      "recovery_strategies": [
+        "read file first to check content",
+        "make old_text more specific"
+      ]
+    },
+    "new_text": {
+      "validation": "any string, can be empty for deletion",
+      "common_errors": [
+        "incorrect indentation",
+        "syntax errors"
+      ],
+      "recovery_strategies": [
+        "preserve original indentation",
+        "validate code before editing"
+      ]
+    }
+  },
+  "always_use_when": [
+    "need to make targeted changes to portions of a file",
+    "modifying specific parameters or values",
+    "updating function implementations",
+    "need to replace specific text patterns"
+  ],
+  "never_use_when": [
+    "file doesn't exist yet - use write_file instead",
+    "need to completely overwrite file - use write_file instead",
+    "not sure if old_text appears exactly once",
+    "changes are too complex or span multiple non-contiguous sections"
+  ],
+  "use_with": [
+    {
+      "tool": "read_file",
+      "pattern": "read-then-modify",
+      "rationale": "get current content before modifying"
+    },
+    {
+      "tool": "search_files",
+      "pattern": "find-then-modify",
+      "rationale": "locate files to modify"
+    }
+  ],
+  "complexity_limits": {
+    "max_edit_size_recommendation": "300 lines of code",
+    "handling_strategy_for_large_edits": "break into multiple smaller edits"
+  },
+  "coding_limits": {
+    "max_code_size_safely_editable": "300 lines",
+    "error_rate_threshold": "multiple syntax or logic errors indicate need for rewrite",
+    "rewrite_indicators": [
+      "needing multiple passes to fix errors",
+      "confusion about context or variable scope",
+      "significant structural changes to the code"
+    ]
+  },
+  "context_validation": {
+    "prerequisites": [
+      "file exists",
+      "have write permissions",
+      "old_text exists exactly once"
+    ],
+    "post_conditions": [
+      "file contains new_text where old_text was"
+    ]
+  },
+  "common_error_patterns": [
+    {
+      "pattern": "old_text not found",
+      "meaning": "Text has changed or was incorrectly specified",
+      "solution": "read_file first, then precisely copy the text to replace"
+    },
+    {
+      "pattern": "old_text appears multiple times",
+      "meaning": "Ambiguous replacement target",
+      "solution": "make old_text longer and more specific"
+    },
+    {
+      "pattern": "PermissionError",
+      "meaning": "No write access to file",
+      "solution": "check_project_access to verify permissions"
+    }
+  ],
+  "execution_examples": [
+    {
+      "intent": "Update a function parameter",
+      "parameters": {
+        "path": "project/src/module.py",
+        "old_text": "def process_data(input_file):",
+        "new_text": "def process_data(input_file, debug=False):"
+      },
+      "success_pattern": "Function signature updated with new parameter",
+      "follow_up": "may need to update function body to use new parameter"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "group_name": "file_editing_workflow",
+  "description": "Tools used in sequence for file editing operations",
+  "tools": [
+    "read_file",
+    "edit_file",
+    "write_file",
+    "enhanced_edit_file"
+  ],
+  "common_sequences": [
+    {
+      "sequence": [
+        "read_file",
+        "edit_file"
+      ],
+      "purpose": "Make targeted modification to existing file",
+      "frequency": "very_common"
+    },
+    {
+      "sequence": [
+        "search_files",
+        "read_file",
+        "edit_file"
+      ],
+      "purpose": "Find files matching criteria, then modify them",
+      "frequency": "common"
+    },
+    {
+      "sequence": [
+        "read_file",
+        "enhanced_edit_file"
+      ],
+      "purpose": "Make complex modifications with enhanced error handling",
+      "frequency": "common"
+    }
+  ],
+  "anti_patterns": [
+    {
+      "pattern": [
+        "edit_file without read_file first"
+      ],
+      "risk": "May overwrite important content without understanding current state",
+      "recommendation": "Always read_file before edit_file"
+    },
+    {
+      "pattern": [
+        "read_file, edit_file with non-unique old_text"
+      ],
+      "risk": "Ambiguous edit that may change wrong section",
+      "recommendation": "Ensure old_text is unique in the file"
+    }
+  ]
+}

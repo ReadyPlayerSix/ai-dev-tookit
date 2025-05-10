@@ -5,7 +5,7 @@
 ![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-Compatible-green)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.3.0-orange)
+![Release](https://img.shields.io/badge/release-v0.4.0-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -28,11 +28,12 @@ With this toolkit, Claude becomes a true development partner - remembering your 
 
 ## 🚀 Features
 
-### Unified MCP Server (Stable)
-- **Single Server Architecture**: All capabilities integrated in one Model Context Protocol server
+### AI Librarian Server (Stable)
+- **Integrated Architecture**: All capabilities consolidated in one AI Librarian server
 - **Simplified Setup**: One-step installation to Claude Desktop
 - **Optimized Performance**: Reduced overhead and faster response times
 - **Full MCP Compliance**: Complete implementation of Model Context Protocol standards
+- **Tool Index Integration**: AI-optimized tool selection and usage guidance
 
 ### AI Librarian (Stable)
 - **Code Understanding**: Comprehensive codebase indexing with component tracking
@@ -61,6 +62,13 @@ With this toolkit, Claude becomes a true development partner - remembering your 
 - **Priority & Status Tracking**: Organize work by importance and completion status
 - **Code Context Linking**: Associate tasks with specific code components
 - **Automatic Task Inference**: Extract potential tasks from conversations
+
+### Tool Index System (Stable)
+- **AI-Optimized Tool Profiles**: Detailed metadata that helps Claude select the right tools
+- **Tool Relationships**: Understanding of how tools work together in sequences
+- **Decision Trees**: AI-optimized decision frameworks for tool selection
+- **Self-Diagnostic Tools**: Capabilities to validate Claude's understanding of context
+- **Usage Patterns**: Common patterns for effective tool combinations
 
 ### TaskBoard System (Coming Soon - Beta)
 - **AI Mini-Librarians**: Specialized AI agents that process specific analysis tasks
@@ -99,7 +107,7 @@ With this toolkit, Claude becomes a true development partner - remembering your 
 - Claude Desktop (latest version)
 - Git
 
-### Option 1: Install Unified Server (Recommended)
+### Option 1: Install AI Librarian Server (Recommended)
 ```bash
 # Clone the repository
 git clone https://github.com/isekaizen/ai-dev-toolkit.git
@@ -109,13 +117,13 @@ cd ai-dev-toolkit
 pip install -r requirements.txt
 
 # Install to Claude Desktop
-python install_unified.py
+python development/install_to_claude.py
 ```
 
-### Option 2: Install AI Librarian Only
+### Option 2: Use the Development Launcher
 ```bash
 # After cloning and installing dependencies
-python install_to_claude.py
+python development/launch.py
 ```
 
 ## 📊 Usage
@@ -187,7 +195,7 @@ The AI Dev Toolkit uses a modular architecture built around the Model Context Pr
 ```
 ┌─────────────────────┐      ┌───────────────────┐      ┌─────────────────┐
 │                     │      │                   │      │                 │
-│   Claude Desktop    │◄────►│   Unified MCP     │◄────►│  Your Project   │
+│   Claude Desktop    │◄────►│   AI Librarian    │◄────►│  Your Project   │
 │                     │      │     Server        │      │   Filesystem    │
 └─────────────────────┘      └───────────────────┘      └─────────────────┘
                                       ▲
@@ -195,12 +203,12 @@ The AI Dev Toolkit uses a modular architecture built around the Model Context Pr
                                       ▼
                              ┌────────────────────┐
                              │                    │
-                             │ AI Librarian Cache │
+                             │ Persistent Context & Tool Index │
                              │                    │
                              └────────────────────┘
 ```
 
-The unified MCP server provides a seamless interface between Claude Desktop and your project, maintaining persistent context through the AI Librarian cache.
+The AI Librarian server provides a seamless interface between Claude Desktop and your project, maintaining persistent context and intelligent tool selection capabilities.
 
 ## 🤖 AI-Assisted Development
 

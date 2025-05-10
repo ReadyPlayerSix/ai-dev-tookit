@@ -1,0 +1,58 @@
+{
+  "pattern_id": "project_analysis",
+  "description": "Patterns for analyzing a project effectively",
+  "patterns": [
+    {
+      "name": "top_down_analysis",
+      "description": "Analyze project from high-level structure to details",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Use initialize_librarian to set up the librarian",
+          "rationale": "Required first step for project analysis"
+        },
+        {
+          "step": 2,
+          "action": "Use generate_librarian to create comprehensive index",
+          "rationale": "Build the component registry"
+        },
+        {
+          "step": 3,
+          "action": "Use query_component on key components",
+          "rationale": "Understand core parts of the system"
+        },
+        {
+          "step": 4,
+          "action": "Use find_implementation to search for specific patterns",
+          "rationale": "Dive deeper into specific functionality"
+        }
+      ]
+    },
+    {
+      "name": "targeted_analysis",
+      "description": "Analyze specific functionality across the project",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Use find_implementation with specific search terms",
+          "rationale": "Find where functionality is implemented"
+        },
+        {
+          "step": 2,
+          "action": "Use query_component on identified components",
+          "rationale": "Get detailed understanding of the components"
+        },
+        {
+          "step": 3,
+          "action": "Use read_file to examine full file context",
+          "rationale": "See how components fit into the broader file"
+        }
+      ]
+    }
+  ],
+  "warning_signs": [
+    "Reading many files without a clear strategy",
+    "Failing to initialize the librarian first",
+    "Making conclusions based on incomplete code analysis"
+  ]
+}

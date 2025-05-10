@@ -1,0 +1,37 @@
+{
+  "validator_id": "project_structure_validator",
+  "description": "Validates Claude's understanding of project structure",
+  "validation_checks": [
+    {
+      "check_name": "directory_structure_check",
+      "check_description": "Verify key directory structure understanding",
+      "validation_method": {
+        "tool": "directory_tree",
+        "test_parameters": {
+          "path": ".",
+          "max_depth": 2
+        },
+        "analyze": {
+          "check_existence": [
+            "aitoolkit/librarian",
+            "aitoolkit/gui",
+            "scripts"
+          ],
+          "confirm_relationships": [
+            {
+              "parent": "aitoolkit",
+              "child": "librarian"
+            },
+            {
+              "parent": "aitoolkit/librarian",
+              "child": "server.py"
+            }
+          ]
+        }
+      },
+      "corrective_action": "Update context to match actual project structure"
+    }
+  ],
+  "execution_frequency": "on_explicit_request",
+  "validation_priority": "medium"
+}
