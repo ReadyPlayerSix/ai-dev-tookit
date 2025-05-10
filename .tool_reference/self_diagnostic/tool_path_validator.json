@@ -1,0 +1,21 @@
+{
+  "validator_id": "tool_path_validator",
+  "description": "Validates the tool execution paths in Claude's understanding",
+  "validation_checks": [
+    {
+      "check_name": "initialize_librarian_path_check",
+      "check_description": "Verify that initialize_librarian is from librarian/server.py",
+      "validation_method": {
+        "tool": "initialize_librarian",
+        "test_parameters": {
+          "project_path": "."
+        },
+        "success_pattern": "Successfully initialized AI Librarian",
+        "error_pattern": "Error initializing AI Librarian"
+      },
+      "corrective_action": "Update context to recognize initialize_librarian is from librarian/server.py"
+    }
+  ],
+  "execution_frequency": "on_doubt",
+  "validation_priority": "medium"
+}

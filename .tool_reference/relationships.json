@@ -1,0 +1,81 @@
+{
+  "version": "0.1.0",
+  "description": "Tool relationships for Claude",
+  "tool_relationships": {
+    "read_file": {
+      "often_used_with": [
+        "edit_file",
+        "search_files"
+      ],
+      "usually_precedes": [
+        "edit_file",
+        "enhanced_edit_file"
+      ],
+      "common_sequence": [
+        "search_files",
+        "read_file",
+        "edit_file"
+      ]
+    },
+    "edit_file": {
+      "often_used_with": [
+        "read_file"
+      ],
+      "usually_follows": [
+        "read_file"
+      ],
+      "alternative_to": [
+        "enhanced_edit_file",
+        "write_file"
+      ]
+    },
+    "initialize_librarian": {
+      "usually_precedes": [
+        "query_component",
+        "find_implementation",
+        "generate_librarian"
+      ],
+      "often_used_with": [
+        "check_project_access"
+      ]
+    },
+    "check_project_access": {
+      "usually_precedes": [
+        "initialize_librarian"
+      ],
+      "often_used_with": [
+        "list_allowed_directories"
+      ]
+    }
+  },
+  "common_workflows": [
+    {
+      "name": "file_editing",
+      "description": "Edit existing files",
+      "tools": [
+        "search_files",
+        "read_file",
+        "edit_file"
+      ],
+      "typical_sequence": [
+        "search_files",
+        "read_file",
+        "edit_file"
+      ]
+    },
+    {
+      "name": "project_initialization",
+      "description": "Initialize AI Librarian for a project",
+      "tools": [
+        "list_allowed_directories",
+        "check_project_access",
+        "initialize_librarian"
+      ],
+      "typical_sequence": [
+        "list_allowed_directories",
+        "check_project_access",
+        "initialize_librarian"
+      ]
+    }
+  ]
+}

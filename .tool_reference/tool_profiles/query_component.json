@@ -1,0 +1,82 @@
+{
+  "tool_id": "query_component",
+  "primary_purpose": "retrieve information about a specific code component",
+  "execution_context": "requires initialized AI Librarian",
+  "parameter_patterns": {
+    "project_path": {
+      "validation": "must be string, must be a directory with initialized AI Librarian",
+      "common_errors": [
+        "librarian not initialized",
+        "permission denied"
+      ],
+      "recovery_strategies": [
+        "initialize_librarian first",
+        "check_project_access"
+      ]
+    },
+    "component_name": {
+      "validation": "must be string, should be a class or function name",
+      "common_errors": [
+        "component not found"
+      ],
+      "recovery_strategies": [
+        "use find_implementation to search first"
+      ]
+    }
+  },
+  "always_use_when": [
+    "need to find detailed information about a specific component",
+    "need to locate where a class or function is defined",
+    "need to understand a specific component's implementation",
+    "trying to find a component's code before modifying it"
+  ],
+  "never_use_when": [
+    "looking for text rather than components - use find_implementation instead",
+    "librarian not initialized - use initialize_librarian first",
+    "component name is uncertain - use find_implementation first"
+  ],
+  "use_with": [
+    {
+      "tool": "initialize_librarian",
+      "pattern": "initialize-then-query",
+      "rationale": "must initialize before querying components"
+    },
+    {
+      "tool": "find_implementation",
+      "pattern": "search-then-query",
+      "rationale": "find component names first, then query details"
+    }
+  ],
+  "context_validation": {
+    "prerequisites": [
+      "AI Librarian initialized",
+      "component exists in project"
+    ],
+    "post_conditions": [
+      "component details in context"
+    ]
+  },
+  "common_error_patterns": [
+    {
+      "pattern": "librarian not initialized",
+      "meaning": "AI Librarian setup required",
+      "solution": "run initialize_librarian first"
+    },
+    {
+      "pattern": "component not found",
+      "meaning": "Component doesn't exist or has different name",
+      "solution": "use find_implementation to search for similar names"
+    }
+  ],
+  "execution_examples": [
+    {
+      "intent": "Get implementation details of a class",
+      "parameters": {
+        "project_path": "/path/to/project",
+        "component_name": "UserAuthentication"
+      },
+      "success_pattern": "Returns file location and code for UserAuthentication",
+      "follow_up": "analyze code structure and relationships"
+    }
+  ]
+}

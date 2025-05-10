@@ -188,8 +188,12 @@ logger.setLevel(logging.INFO)
 if logger.handlers:
     logger.handlers.clear()
 
+# Create logs directory if it doesn't exist
+logs_dir = os.path.join(project_root, "logs")
+os.makedirs(logs_dir, exist_ok=True)
+
 # File handler - all levels
-file_handler = logging.FileHandler("unified_server.log")
+file_handler = logging.FileHandler(os.path.join(logs_dir, "unified_server.log"))
 file_handler.setLevel(logging.INFO)
 file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(file_formatter)

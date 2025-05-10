@@ -1,0 +1,42 @@
+{
+  "validator_id": "active_file_validator",
+  "description": "Validates that files Claude believes exist actually do",
+  "validation_checks": [
+    {
+      "check_name": "unified_server_check",
+      "check_description": "Verify understanding of unified_server.py vs librarian/server.py",
+      "validation_method": {
+        "tool": "get_file_info",
+        "test_parameters": {
+          "path": "aitoolkit/unified_server.py"
+        },
+        "success_pattern": "Size: ",
+        "error_pattern": "Error",
+        "output_analysis": {
+          "if_success": "unified_server.py exists but is not currently used by Claude",
+          "if_error": "unified_server.py might have been moved to legacy"
+        }
+      },
+      "corrective_action": "Update understanding of which server file is active"
+    },
+    {
+      "check_name": "librarian_server_check",
+      "check_description": "Verify librarian/server.py status",
+      "validation_method": {
+        "tool": "get_file_info",
+        "test_parameters": {
+          "path": "aitoolkit/librarian/server.py"
+        },
+        "success_pattern": "Size: ",
+        "error_pattern": "Error",
+        "output_analysis": {
+          "if_success": "librarian/server.py exists and is the active server Claude uses",
+          "if_error": "Critical error: active server file missing"
+        }
+      },
+      "corrective_action": "Confirm librarian/server.py is the active server implementation"
+    }
+  ],
+  "execution_frequency": "on_doubt",
+  "validation_priority": "high"
+}

@@ -1,0 +1,64 @@
+{
+  "tree_id": "project_setup",
+  "description": "Decision tree for project setup operations",
+  "decision_nodes": [
+    {
+      "question": "project_status",
+      "options": [
+        {
+          "value": "new_project",
+          "next_question": "verify_access"
+        },
+        {
+          "value": "existing_project",
+          "next_question": "librarian_status"
+        }
+      ]
+    },
+    {
+      "question": "verify_access",
+      "options": [
+        {
+          "value": "need_to_verify",
+          "recommendation": {
+            "tool": "check_project_access",
+            "confidence": "high"
+          }
+        },
+        {
+          "value": "access_confirmed",
+          "recommendation": {
+            "tool": "initialize_librarian",
+            "confidence": "high"
+          }
+        }
+      ]
+    },
+    {
+      "question": "librarian_status",
+      "options": [
+        {
+          "value": "not_initialized",
+          "recommendation": {
+            "tool": "initialize_librarian",
+            "confidence": "high"
+          }
+        },
+        {
+          "value": "needs_update",
+          "recommendation": {
+            "tool": "generate_librarian",
+            "confidence": "high"
+          }
+        },
+        {
+          "value": "needs_verification",
+          "recommendation": {
+            "tool": "sanity_check",
+            "confidence": "medium"
+          }
+        }
+      ]
+    }
+  ]
+}

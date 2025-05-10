@@ -1,0 +1,25 @@
+{
+  "validator_id": "server_connection_validator",
+  "description": "Validates which server implementation Claude is connected to",
+  "validation_checks": [
+    {
+      "check_name": "server_identity_check",
+      "check_description": "Verify which server implementation is active",
+      "validation_method": {
+        "tool": "check_project_access",
+        "test_parameters": {
+          "project_path": "."
+        },
+        "success_pattern": "The server has permission to access",
+        "output_analysis": {
+          "if_contains": "ai-librarian",
+          "conclusion": "Connected to the AI Librarian server (librarian/server.py)",
+          "confidence": "high"
+        }
+      },
+      "corrective_action": "Update context to recognize connection to librarian/server.py"
+    }
+  ],
+  "execution_frequency": "once_per_conversation",
+  "validation_priority": "high"
+}
