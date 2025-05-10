@@ -18,7 +18,7 @@ class AIDevToolkitGUI:
         self.root.resizable(True, True)
         
         # Set version
-        self.version = "0.1.0"
+        self.version = "0.4.4"
         
         # Track changes
         self.has_changes = False
@@ -151,6 +151,12 @@ class AIDevToolkitGUI:
         
         ttk.Button(actions_frame, text="Open Claude Desktop Location", 
                  command=self.open_claude_directory).pack(
+            fill=tk.X, pady=5, padx=5)
+            
+        # Add a button to clean up legacy files
+        ttk.Button(actions_frame, text="Clean Legacy Files", 
+                 command=self.cleanup_legacy_files,
+                 style='TButton').pack(
             fill=tk.X, pady=5, padx=5)
         
         # Active projects
@@ -566,3 +572,64 @@ When you enable project directories, you are granting Claude permission to read 
     def on_closing(self):
         # Placeholder implementation
         pass
+        
+    def cleanup_legacy_files(self):
+        """
+        Clean up legacy and backup files in the GUI directory.
+        This helps maintain a cleaner codebase by moving old files to a backup directory.
+        """
+        import os
+        import shutil
+        from tkinter import messagebox
+        
+        # Define the GUI directory and backup directory
+        gui_dir = os.path.dirname(os.path.abspath(__file__))
+        backup_dir = os.path.join(gui_dir, "legacy_backup")
+        
+        # Ensure backup directory exists
+        os.makedirs(backup_dir, exist_ok=True)
+        
+        # Files to keep (current version and enhanced version for reference)
+        files_to_keep = [
+            "__init__.py",
+            "configurator_new.py",
+            "configurator_enhanced.py"
+        ]
+        
+        # Get all files in the GUI directory
+        all_files = [f for f in os.listdir(gui_dir) if os.path.isfile(os.path.join(gui_dir, f))]
+        
+        # Find files to move (all except those to keep)
+        files_to_move = [f for f in all_files if f not in files_to_keep]
+        
+        # Move files to backup directory
+        moved_files = []
+        for file in files_to_move:
+            source = os.path.join(gui_dir, file)
+            destination = os.path.join(backup_dir, file)
+            
+            # If file already exists in backup directory, add timestamp
+            if os.path.exists(destination):
+                import time
+                timestamp = time.strftime("%Y%m%d-%H%M%S")
+                file_name, file_ext = os.path.splitext(file)
+                destination = os.path.join(backup_dir, f"{file_name}_{timestamp}{file_ext}")
+            
+            try:
+                shutil.move(source, destination)
+                moved_files.append(file)
+            except Exception as e:
+                print(f"Error moving {file}: {str(e)}")
+        
+        # Show confirmation message
+        if moved_files:
+            messagebox.showinfo(
+                "Cleanup Complete", 
+                f"Successfully moved {len(moved_files)} legacy files to backup directory.\n\n"
+                f"Files moved: {', '.join(moved_files)}"
+            )
+        else:
+            messagebox.showinfo(
+                "Cleanup Complete", 
+                "No legacy files found to clean up."
+            )
