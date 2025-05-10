@@ -201,11 +201,11 @@ The AI Dev Toolkit uses a modular architecture built around the Model Context Pr
                                       ▲
                                       │
                                       ▼
-                             ┌────────────────────┐
-                             │                    │
+                             ┌─────────────────────────────────┐
+                             │                                 │
                              │ Persistent Context & Tool Index │
-                             │                    │
-                             └────────────────────┘
+                             │                                 │
+                             └─────────────────────────────────┘
 ```
 
 The AI Librarian server provides a seamless interface between Claude Desktop and your project, maintaining persistent context and intelligent tool selection capabilities.
@@ -248,13 +248,7 @@ Additional documentation is available in the [docs](docs/) directory:
 - **GUI Improvements**: Enhanced configurator interface
 - **Project Templates**: Starter templates for common project types
 - **IDE Integration**: Extensions for VS Code and other IDEs
-- **Collaborative Mode**: Multi-user collaboration capabilities
 - **Advanced Code Analysis**: Deeper semantic code understanding
-- **Team Workflow Tools**: Project management integration
-
-## 🤝 Contributing
-
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get involved.
 
 ## 📜 License
 
