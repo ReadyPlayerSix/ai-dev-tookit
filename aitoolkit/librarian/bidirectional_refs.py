@@ -160,16 +160,72 @@ class BidirectionalReferenceSystem:
             # Check if component file contains tool usage
             file_path = component_info.get("file", "")
             if file_path:
+                # This now returns detailed references with relationship info
                 tools_in_file = self._find_tools_in_file(file_path)
                 if tools_in_file:
-                    self.component_to_tool_refs[component_name].extend(tools_in_file)
+                    # Extract detailed information
+                    for tool_ref in tools_in_file:
+                        # Check for duplicates before adding
+                        if not self._contains_tool_ref(self.component_to_tool_refs[component_name], tool_ref["tool_id"]):
+                            self.component_to_tool_refs[component_name].append(tool_ref)
             
             # Look for tool name matches in component name
             for tool_id in tools:
-                # Check if tool name is part of component name
+                # Check if tool name is part of component name (case insensitive)
                 if tool_id.lower() in component_name.lower():
-                    if tool_id not in self.component_to_tool_refs[component_name]:
-                        self.component_to_tool_refs[component_name].append(tool_id)
+                    # Avoid duplicates by checking if the tool is already referenced
+                    if not self._contains_tool_ref(self.component_to_tool_refs[component_name], tool_id):
+                        # Create a name-based relationship
+                        relationship_info = {
+                            "relationship_type": "name_similarity",
+                            "relationship_strength": "medium",
+                            "match_reason": f"tool name '{tool_id}' is part of component name '{component_name}'",
+                            "metadata": {
+                                "tool_category": tools[tool_id].get("category", "unknown")
+                            }
+                        }
+                        
+                        self.component_to_tool_refs[component_name].append({
+                            "tool_id": tool_id,
+                            "relationship": relationship_info
+                        })
+                        
+            # Add relationship to implementation tools if component is a function implementation
+            if component_info.get("type") == "function" and component_name in tools:
+                # If the component is itself a tool implementation, create a self-reference
+                if not self._contains_tool_ref(self.component_to_tool_refs[component_name], component_name):
+                    relationship_info = {
+                        "relationship_type": "implementation",
+                        "relationship_strength": "very_strong",
+                        "match_reason": "direct implementation of tool",
+                        "metadata": {
+                            "tool_category": tools[component_name].get("category", "unknown")
+                        }
+                    }
+                    
+                    self.component_to_tool_refs[component_name].append({
+                        "tool_id": component_name,
+                        "relationship": relationship_info
+                    })
+                    
+    def _contains_tool_ref(self, refs_list: List, tool_id: str) -> bool:
+        """
+        Check if a tool ID is already in the references list, accounting for both
+        simple string references and dictionary references.
+        
+        Args:
+            refs_list: List of references
+            tool_id: Tool ID to check
+            
+        Returns:
+            True if the tool is already referenced, False otherwise
+        """
+        for ref in refs_list:
+            if isinstance(ref, dict) and ref.get("tool_id") == tool_id:
+                return True
+            elif ref == tool_id:  # Handle simple string references
+                return True
+        return False
     
     def _build_tool_to_component_references(self) -> None:
         """
@@ -188,13 +244,99 @@ class BidirectionalReferenceSystem:
             # Look for component references in the profile
             for component_name in components:
                 if component_name in profile_text:
-                    self.tool_to_component_refs[tool_id].append(component_name)
+                    # Check if we already have this component reference
+                    if not self._contains_component_ref(self.tool_to_component_refs[tool_id], component_name):
+                        # Create a reference with relationship details
+                        relationship_info = {
+                            "relationship_type": "profile_reference",
+                            "relationship_strength": "medium",
+                            "match_reason": f"component '{component_name}' mentioned in tool profile",
+                            "metadata": {
+                                "component_type": components[component_name].get("type", "unknown")
+                            }
+                        }
+                        
+                        self.tool_to_component_refs[tool_id].append({
+                            "component_name": component_name,
+                            "relationship": relationship_info
+                        })
             
-            # Check for function name matches
+            # Check for function name matches (implementation relationship)
             for component_name, component_info in components.items():
                 if component_info.get("type") == "function" and tool_id.lower() == component_name.lower():
-                    if component_name not in self.tool_to_component_refs[tool_id]:
-                        self.tool_to_component_refs[tool_id].append(component_name)
+                    # Check for duplicates
+                    if not self._contains_component_ref(self.tool_to_component_refs[tool_id], component_name):
+                        # Create a strong implementation relationship
+                        relationship_info = {
+                            "relationship_type": "implementation",
+                            "relationship_strength": "very_strong",
+                            "match_reason": f"component '{component_name}' directly implements this tool",
+                            "metadata": {
+                                "component_type": "function",
+                                "file": component_info.get("file", "")
+                            }
+                        }
+                        
+                        self.tool_to_component_refs[tool_id].append({
+                            "component_name": component_name,
+                            "relationship": relationship_info
+                        })
+            
+            # If we have component-to-tool references, check for reverse relationships
+            # This ensures bidirectional consistency
+            for component_name, tool_refs in self.component_to_tool_refs.items():
+                for tool_ref in tool_refs:
+                    # Handle both dictionary and string references
+                    ref_tool_id = tool_ref.get("tool_id") if isinstance(tool_ref, dict) else tool_ref
+                    
+                    if ref_tool_id == tool_id:
+                        # We found a component that references this tool
+                        if not self._contains_component_ref(self.tool_to_component_refs[tool_id], component_name):
+                            # Get relationship details if available
+                            relationship_info = {}
+                            if isinstance(tool_ref, dict) and "relationship" in tool_ref:
+                                # Copy and invert relationship
+                                orig_relationship = tool_ref["relationship"]
+                                relationship_info = {
+                                    "relationship_type": orig_relationship.get("relationship_type", "reference"),
+                                    "relationship_strength": orig_relationship.get("relationship_strength", "medium"),
+                                    "match_reason": orig_relationship.get("match_reason", "bidirectional reference"),
+                                    "metadata": orig_relationship.get("metadata", {})
+                                }
+                            else:
+                                # Create basic relationship info
+                                relationship_info = {
+                                    "relationship_type": "reference",
+                                    "relationship_strength": "medium",
+                                    "match_reason": "bidirectional reference consistency",
+                                    "metadata": {
+                                        "component_type": components[component_name].get("type", "unknown")
+                                    }
+                                }
+                            
+                            self.tool_to_component_refs[tool_id].append({
+                                "component_name": component_name,
+                                "relationship": relationship_info
+                            })
+                            
+    def _contains_component_ref(self, refs_list: List, component_name: str) -> bool:
+        """
+        Check if a component name is already in the references list, accounting for both
+        simple string references and dictionary references.
+        
+        Args:
+            refs_list: List of references
+            component_name: Component name to check
+            
+        Returns:
+            True if the component is already referenced, False otherwise
+        """
+        for ref in refs_list:
+            if isinstance(ref, dict) and ref.get("component_name") == component_name:
+                return True
+            elif ref == component_name:  # Handle simple string references
+                return True
+        return False
     
     def _enhance_references_with_semantics(self) -> None:
         """
@@ -211,59 +353,290 @@ class BidirectionalReferenceSystem:
         # Find components that match tool categories
         for component_name, component_info in self.component_registry.get("components", {}).items():
             component_file = component_info.get("file", "")
+            component_description = component_info.get("description", "")
+            component_responsibilities = component_info.get("responsibilities", [])
             
             # Check file path for category matches
             for category, tools in categories.items():
+                # Match by file path, description or responsibilities
+                should_match = False
+                match_reason = ""
+                
                 if category.lower() in component_file.lower():
+                    should_match = True
+                    match_reason = f"path contains category '{category}'"
+                elif category.lower() in component_description.lower():
+                    should_match = True
+                    match_reason = f"description contains category '{category}'"
+                else:
+                    # Check responsibilities
+                    for responsibility in component_responsibilities:
+                        if category.lower() in responsibility.lower():
+                            should_match = True
+                            match_reason = f"responsibility relates to '{category}'"
+                            break
+                
+                if should_match:
                     for tool_id in tools:
-                        # Add bidirectional references
-                        if tool_id not in self.component_to_tool_refs.get(component_name, []):
-                            if component_name not in self.component_to_tool_refs:
-                                self.component_to_tool_refs[component_name] = []
-                            self.component_to_tool_refs[component_name].append(tool_id)
+                        # Get tool info for more detailed relationship data
+                        tool_info = self.tool_registry.get("tools", {}).get(tool_id, {})
+                        tool_purpose = ""
+                        if tool_id in self.tool_profiles:
+                            tool_purpose = self.tool_profiles[tool_id].get("primary_purpose", "")
                         
-                        if component_name not in self.tool_to_component_refs.get(tool_id, []):
-                            if tool_id not in self.tool_to_component_refs:
-                                self.tool_to_component_refs[tool_id] = []
-                            self.tool_to_component_refs[tool_id].append(component_name)
+                        # Create reference information with relationship details
+                        reference_info = {
+                            "match_reason": match_reason,
+                            "relationship_strength": "strong",
+                            "relationship_type": "semantic_category",
+                            "metadata": {
+                                "category": category,
+                                "tool_purpose": tool_purpose
+                            }
+                        }
+                        
+                        # Add bidirectional references with detailed information
+                        if component_name not in self.component_to_tool_refs:
+                            self.component_to_tool_refs[component_name] = []
+                        
+                        # Check if tool is already in references
+                        existing_ref = False
+                        for ref in self.component_to_tool_refs[component_name]:
+                            if isinstance(ref, dict) and ref.get("tool_id") == tool_id:
+                                existing_ref = True
+                                break
+                            elif ref == tool_id:  # Handle simple string references
+                                existing_ref = True
+                                # Remove simple reference to replace with enhanced one
+                                self.component_to_tool_refs[component_name].remove(ref)
+                                break
+                                
+                        if not existing_ref:
+                            self.component_to_tool_refs[component_name].append({
+                                "tool_id": tool_id,
+                                "relationship": reference_info
+                            })
+                        
+                        # Add component reference to tool
+                        if tool_id not in self.tool_to_component_refs:
+                            self.tool_to_component_refs[tool_id] = []
+                            
+                        # Check if component is already in references
+                        existing_ref = False
+                        for ref in self.tool_to_component_refs[tool_id]:
+                            if isinstance(ref, dict) and ref.get("component_name") == component_name:
+                                existing_ref = True
+                                break
+                            elif ref == component_name:  # Handle simple string references
+                                existing_ref = True
+                                # Remove simple reference to replace with enhanced one
+                                self.tool_to_component_refs[tool_id].remove(ref)
+                                break
+                                
+                        if not existing_ref:
+                            self.tool_to_component_refs[tool_id].append({
+                                "component_name": component_name,
+                                "relationship": reference_info
+                            })
     
-    def _find_tools_in_file(self, file_path: str) -> List[str]:
+    def _find_tools_in_file(self, file_path: str) -> List[dict]:
         """
-        Find tools referenced in a file.
+        Find tools referenced in a file with detailed relationship information.
         
         Args:
             file_path: Relative path to the file
             
         Returns:
-            List of tool IDs found in the file
+            List of dictionaries with tool IDs and relationship details
         """
         tools_found = []
         tool_ids = list(self.tool_registry.get("tools", {}).keys())
         
         try:
             full_path = os.path.join(self.project_path, file_path)
-            if os.path.exists(full_path):
-                with open(full_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
+            if not os.path.exists(full_path):
+                logger.warning(f"File does not exist: {full_path}")
+                return tools_found
                 
-                # Use a more sophisticated pattern to find tool references
-                # Look for patterns like "def tool_name", "@mcp.tool()\ndef tool_name", "tool_name("
-                for tool_id in tool_ids:
-                    # Patterns to search for
+            # Skip binary files
+            if self._is_binary_file(full_path):
+                logger.debug(f"Skipping binary file: {full_path}")
+                return tools_found
+                
+            # Get file extension
+            file_ext = os.path.splitext(full_path)[1].lower()
+            
+            with open(full_path, 'r', encoding='utf-8', errors='replace') as f:
+                content = f.read()
+            
+            # Use a more sophisticated pattern to find tool references
+            for tool_id in tool_ids:
+                # Initialize match strength and contexts
+                match_strength = "weak"
+                match_contexts = []
+                match_lines = []
+                relationship_type = "unknown"
+                
+                # Define different patterns based on file type
+                if file_ext == '.py':
+                    # Python-specific patterns
                     patterns = [
-                        r"def\s+" + re.escape(tool_id) + r"\s*\(",  # Function definition
-                        r"@mcp\.tool\(\).*?def\s+" + re.escape(tool_id),  # MCP tool decorator
-                        r"[^a-zA-Z0-9_]" + re.escape(tool_id) + r"\s*\("  # Function call
+                        {
+                            "pattern": r"def\s+" + re.escape(tool_id) + r"\s*\(",  # Function definition
+                            "relationship_type": "implementation",
+                            "strength": "very_strong"
+                        },
+                        {
+                            "pattern": r"@mcp\.tool\(\).*?def\s+" + re.escape(tool_id),  # MCP tool decorator
+                            "relationship_type": "implementation",
+                            "strength": "very_strong"
+                        },
+                        {
+                            "pattern": r"[^a-zA-Z0-9_]" + re.escape(tool_id) + r"\s*\(",  # Function call
+                            "relationship_type": "usage",
+                            "strength": "strong"
+                        },
+                        {
+                            "pattern": r"['\"]" + re.escape(tool_id) + r"['\"]",  # String literal
+                            "relationship_type": "reference",
+                            "strength": "medium"
+                        },
+                        {
+                            "pattern": r"#.*" + re.escape(tool_id),  # Comment
+                            "relationship_type": "documentation",
+                            "strength": "medium"
+                        }
                     ]
+                elif file_ext in ['.md', '.txt']:
+                    # Documentation file patterns
+                    patterns = [
+                        {
+                            "pattern": r"^#+\s+.*" + re.escape(tool_id),  # Headline
+                            "relationship_type": "documentation",
+                            "strength": "strong"
+                        },
+                        {
+                            "pattern": r"`" + re.escape(tool_id) + r"`",  # Code formatting
+                            "relationship_type": "documentation",
+                            "strength": "strong"
+                        },
+                        {
+                            "pattern": re.escape(tool_id),  # Plain text mention
+                            "relationship_type": "documentation",
+                            "strength": "medium"
+                        }
+                    ]
+                else:
+                    # Generic patterns for other file types
+                    patterns = [
+                        {
+                            "pattern": re.escape(tool_id),
+                            "relationship_type": "reference",
+                            "strength": "medium"
+                        }
+                    ]
+                
+                # Check each pattern
+                for pattern_info in patterns:
+                    pattern = pattern_info["pattern"]
+                    pattern_strength = pattern_info["strength"]
+                    pattern_type = pattern_info["relationship_type"]
                     
-                    for pattern in patterns:
-                        if re.search(pattern, content, re.DOTALL):
-                            tools_found.append(tool_id)
-                            break
+                    # Find all matches
+                    matches = re.finditer(pattern, content, re.MULTILINE)
+                    for match in matches:
+                        # Extract the matching line and some context
+                        start_pos = max(0, match.start() - 40)
+                        end_pos = min(len(content), match.end() + 40)
+                        context = content[start_pos:end_pos].strip()
+                        
+                        # Count line number
+                        line_number = content[:match.start()].count('\n') + 1
+                        
+                        match_contexts.append(context)
+                        match_lines.append(line_number)
+                        
+                        # Update strength if this match is stronger
+                        if self._strength_value(pattern_strength) > self._strength_value(match_strength):
+                            match_strength = pattern_strength
+                            relationship_type = pattern_type
+                
+                # If we found matches, add the tool with details
+                if match_contexts:
+                    tool_info = self.tool_registry.get("tools", {}).get(tool_id, {})
+                    tool_category = tool_info.get("category", "unknown")
+                    
+                    relationship_info = {
+                        "relationship_type": relationship_type,
+                        "relationship_strength": match_strength,
+                        "match_count": len(match_contexts),
+                        "match_lines": match_lines[:5],  # Limit to first 5 line numbers
+                        "match_contexts": match_contexts[:3],  # Limit to first 3 contexts
+                        "metadata": {
+                            "file_type": file_ext.lstrip('.') or "unknown",
+                            "tool_category": tool_category
+                        }
+                    }
+                    
+                    tools_found.append({
+                        "tool_id": tool_id,
+                        "relationship": relationship_info
+                    })
+                    
+        except UnicodeDecodeError:
+            # This is likely a binary file
+            logger.debug(f"Unicode decode error for file {file_path} - likely binary")
         except Exception as e:
             logger.error(f"Error searching for tools in file {file_path}: {str(e)}")
         
         return tools_found
+        
+    def _is_binary_file(self, file_path: str) -> bool:
+        """
+        Check if a file is binary.
+        
+        Args:
+            file_path: Path to the file
+            
+        Returns:
+            True if the file is binary, False otherwise
+        """
+        try:
+            # Read the first 8KB of the file
+            with open(file_path, 'rb') as f:
+                chunk = f.read(8192)
+            
+            # Check for null bytes (common in binary files)
+            if b'\x00' in chunk:
+                return True
+                
+            # Try to decode as text
+            chunk.decode('utf-8')
+            return False
+        except UnicodeDecodeError:
+            return True
+        except Exception:
+            # Default to False if we can't determine
+            return False
+            
+    def _strength_value(self, strength: str) -> int:
+        """
+        Convert strength string to numeric value for comparison.
+        
+        Args:
+            strength: Strength as string
+            
+        Returns:
+            Numeric value
+        """
+        strengths = {
+            "very_strong": 4,
+            "strong": 3,
+            "medium": 2,
+            "weak": 1,
+            "very_weak": 0
+        }
+        return strengths.get(strength, 0)
     
     def _save_component_references(self) -> None:
         """
@@ -281,6 +654,31 @@ class BidirectionalReferenceSystem:
                 # Add tool references to the component
                 component_copy["tool_references"] = refs
                 
+                # Count references by relationship type for summary statistics
+                relationship_types = {}
+                relationship_strengths = {}
+                
+                for ref in refs:
+                    if isinstance(ref, dict) and "relationship" in ref:
+                        rel_type = ref["relationship"].get("relationship_type", "unknown")
+                        rel_strength = ref["relationship"].get("relationship_strength", "unknown")
+                        
+                        if rel_type not in relationship_types:
+                            relationship_types[rel_type] = 0
+                        relationship_types[rel_type] += 1
+                        
+                        if rel_strength not in relationship_strengths:
+                            relationship_strengths[rel_strength] = 0
+                        relationship_strengths[rel_strength] += 1
+                
+                # Add summary statistics to help Claude understand the relationships
+                component_copy["tool_references_summary"] = {
+                    "count": len(refs),
+                    "relationship_types": relationship_types,
+                    "relationship_strengths": relationship_strengths,
+                    "last_updated": datetime.now().isoformat()
+                }
+                
                 # Update the component in the registry
                 components[component_name] = component_copy
                 modified = True
@@ -291,7 +689,7 @@ class BidirectionalReferenceSystem:
             with open(component_registry_path, 'w', encoding='utf-8') as f:
                 json.dump(self.component_registry, f, indent=2)
             
-            logger.info("Saved component-to-tool references to AI Librarian")
+            logger.info(f"Saved enhanced component-to-tool references for {len(self.component_to_tool_refs)} components")
     
     def _save_tool_references(self) -> None:
         """
@@ -306,6 +704,38 @@ class BidirectionalReferenceSystem:
                 profile = self.tool_profiles[tool_id]
                 profile["component_references"] = refs
                 
+                # Count references by relationship type for summary statistics
+                relationship_types = {}
+                relationship_strengths = {}
+                component_types = {}
+                
+                for ref in refs:
+                    if isinstance(ref, dict) and "relationship" in ref:
+                        rel_type = ref["relationship"].get("relationship_type", "unknown")
+                        rel_strength = ref["relationship"].get("relationship_strength", "unknown")
+                        comp_type = ref["relationship"].get("metadata", {}).get("component_type", "unknown")
+                        
+                        if rel_type not in relationship_types:
+                            relationship_types[rel_type] = 0
+                        relationship_types[rel_type] += 1
+                        
+                        if rel_strength not in relationship_strengths:
+                            relationship_strengths[rel_strength] = 0
+                        relationship_strengths[rel_strength] += 1
+                        
+                        if comp_type not in component_types:
+                            component_types[comp_type] = 0
+                        component_types[comp_type] += 1
+                
+                # Add summary statistics to help Claude understand the relationships
+                profile["component_references_summary"] = {
+                    "count": len(refs),
+                    "relationship_types": relationship_types,
+                    "relationship_strengths": relationship_strengths,
+                    "component_types": component_types,
+                    "last_updated": datetime.now().isoformat()
+                }
+                
                 # Save the updated profile
                 profile_path = os.path.join(
                     self.tool_ref_path,
@@ -319,7 +749,7 @@ class BidirectionalReferenceSystem:
                     modified_profiles.append(tool_id)
         
         if modified_profiles:
-            logger.info(f"Saved tool-to-component references for {len(modified_profiles)} tool profiles")
+            logger.info(f"Saved enhanced tool-to-component references for {len(modified_profiles)} tool profiles")
     
     def _save_unified_reference_map(self) -> None:
         """
