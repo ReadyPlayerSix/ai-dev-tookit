@@ -287,13 +287,11 @@ Additional documentation is available in the [docs](docs/) directory:
 - **Advanced Code Analysis**: Deeper semantic code understanding
 - **Team Workflow Tools**: Project management integration
 
-## 🤝 Contributing
-
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get involved.
-
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+You're welcome to fork this repository and create your own version to suit your specific needs. This toolkit was created to enhance productivity when working with Claude, and you're encouraged to adapt it to your workflow.
 
 ## 🙏 Acknowledgments
 
