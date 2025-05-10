@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "description": "AI-optimized Tool Index for Claude",
-  "last_updated": "2025-05-09T17:38:44.881496",
+  "last_updated": "2025-05-10T14:49:45.668368",
   "tools": {
     "read_file": {
       "id": "read_file",

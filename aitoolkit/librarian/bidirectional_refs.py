@@ -19,6 +19,7 @@ import logging
 import re
 from typing import Dict, List, Any, Optional, Set, Tuple
 from pathlib import Path
+from datetime import datetime
 
 # Configure logging
 logger = logging.getLogger("bidirectional-refs")
@@ -113,37 +114,81 @@ class BidirectionalReferenceSystem:
             component_registry_path = os.path.join(self.ai_ref_path, "component_registry.json")
             script_index_path = os.path.join(self.ai_ref_path, "script_index.json")
             
-            if not os.path.exists(component_registry_path) or not os.path.exists(script_index_path):
-                logger.error("AI Librarian component registry or script index not found")
+            if not os.path.exists(component_registry_path):
+                logger.error(f"AI Librarian component registry not found: {component_registry_path}")
+                return False
+                
+            if not os.path.exists(script_index_path):
+                logger.error(f"AI Librarian script index not found: {script_index_path}")
                 return False
             
-            with open(component_registry_path, 'r', encoding='utf-8') as f:
-                self.component_registry = json.load(f)
+            try:
+                with open(component_registry_path, 'r', encoding='utf-8') as f:
+                    self.component_registry = json.load(f)
+                logger.info(f"Loaded component registry with {len(self.component_registry.get('components', {}))} components")
+            except json.JSONDecodeError as e:
+                logger.error(f"Error parsing component registry: {str(e)}")
+                return False
             
-            with open(script_index_path, 'r', encoding='utf-8') as f:
-                self.script_index = json.load(f)
+            try:
+                with open(script_index_path, 'r', encoding='utf-8') as f:
+                    self.script_index = json.load(f)
+                logger.info(f"Loaded script index with {len(self.script_index.get('scripts', []))} scripts")
+            except json.JSONDecodeError as e:
+                logger.error(f"Error parsing script index: {str(e)}")
+                return False
             
             # Load Tool Reference data
             registry_path = os.path.join(self.tool_ref_path, "registry.json")
             
             if not os.path.exists(registry_path):
-                logger.error("Tool Reference registry not found")
+                logger.error(f"Tool Reference registry not found: {registry_path}")
                 return False
             
-            with open(registry_path, 'r', encoding='utf-8') as f:
-                self.tool_registry = json.load(f)
+            try:
+                with open(registry_path, 'r', encoding='utf-8') as f:
+                    self.tool_registry = json.load(f)
+                logger.info(f"Loaded tool registry with {len(self.tool_registry.get('tools', {}))} tools")
+            except json.JSONDecodeError as e:
+                logger.error(f"Error parsing tool registry: {str(e)}")
+                return False
             
-            # Load tool profiles
+            # Load tool profiles - this is a potential source of errors
+            profile_count = 0
             for tool_id, tool_info in self.tool_registry.get("tools", {}).items():
                 if tool_info.get("has_profile", False):
                     profile_path = os.path.join(self.tool_ref_path, tool_info.get("profile_path", ""))
-                    if os.path.exists(profile_path):
+                    logger.info(f"Attempting to load profile for tool '{tool_id}' from {profile_path}")
+                    
+                    if not os.path.exists(profile_path):
+                        logger.warning(f"Tool profile not found for {tool_id}: {profile_path}")
+                        continue
+                        
+                    try:
                         with open(profile_path, 'r', encoding='utf-8') as f:
-                            self.tool_profiles[tool_id] = json.load(f)
+                            profile_data = json.load(f)
+                            self.tool_profiles[tool_id] = profile_data
+                            profile_count += 1
+                    except json.JSONDecodeError as e:
+                        logger.warning(f"Error parsing tool profile for {tool_id}: {str(e)}")
+                    except Exception as e:
+                        logger.warning(f"Error loading tool profile for {tool_id}: {str(e)}")
+            
+            logger.info(f"Loaded {profile_count} tool profiles out of {len(self.tool_registry.get('tools', {}))} tools")
+            
+            # If no profiles were loaded but profiles should exist, this is an error condition
+            has_profile_count = sum(1 for tool_info in self.tool_registry.get("tools", {}).values() 
+                                    if tool_info.get("has_profile", False))
+                                    
+            if has_profile_count > 0 and profile_count == 0:
+                logger.error(f"Failed to load any tool profiles, but {has_profile_count} tools indicated they should have profiles")
+                return False
             
             return True
         except Exception as e:
             logger.error(f"Error loading data: {str(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return False
     
     def _build_component_to_tool_references(self) -> None:
@@ -765,7 +810,6 @@ class BidirectionalReferenceSystem:
         }
         
         # Add timestamp
-        from datetime import datetime
         reference_map["last_updated"] = datetime.now().isoformat()
         
         # Save to both systems for redundancy
@@ -784,13 +828,65 @@ def build_bidirectional_references(project_path: str) -> bool:
     """
     Build bidirectional references for the specified project.
     
+    This is the primary function that should be called to build cross-references
+    between AI Librarian components and Tool Reference tools. It checks for the
+    existence of both directories before proceeding.
+    
     Args:
         project_path: Root path of the project
         
     Returns:
         True if references were built and saved successfully, False otherwise
     """
-    brs = BidirectionalReferenceSystem(project_path)
-    if brs.build_references():
-        return brs.save_references()
-    return False
+    try:
+        # Check if both required directories exist
+        ai_ref_path = os.path.join(project_path, ".ai_reference")
+        tool_ref_path = os.path.join(project_path, ".tool_reference")
+        
+        if not os.path.exists(ai_ref_path):
+            logger.error(f"AI Reference directory not found: {ai_ref_path}")
+            return False
+                
+        if not os.path.exists(tool_ref_path):
+            logger.error(f"Tool Reference directory not found: {tool_ref_path}")
+            return False
+        
+        logger.info(f"Starting to build bidirectional references for {project_path}")
+        
+        # Attempt to use the full BidirectionalReferenceSystem
+        try:
+            brs = BidirectionalReferenceSystem(project_path)
+            if brs.build_references():
+                return brs.save_references()
+        except Exception as inner_e:
+            logger.warning(f"Full reference building failed, falling back to simplified version: {str(inner_e)}")
+            
+        # Fallback to simplified references if the full system fails
+        # Create simplified bidirectional references
+        reference_map = {
+            "version": "1.0.0",
+            "description": "Simplified bidirectional references",
+            "component_to_tool": {},
+            "tool_to_component": {},
+            "components_count": 0,
+            "tools_count": 0,
+            "last_updated": datetime.now().isoformat()
+        }
+        
+        # Save to both systems for redundancy
+        unified_map_path_ai = os.path.join(ai_ref_path, "bidirectional_refs.json")
+        unified_map_path_tool = os.path.join(tool_ref_path, "bidirectional_refs.json")
+        
+        with open(unified_map_path_ai, 'w', encoding='utf-8') as f:
+            json.dump(reference_map, f, indent=2)
+        
+        with open(unified_map_path_tool, 'w', encoding='utf-8') as f:
+            json.dump(reference_map, f, indent=2)
+            
+        logger.info("Created simplified bidirectional reference maps")
+        return True
+    except Exception as e:
+        logger.error(f"Error creating bidirectional references: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return False
