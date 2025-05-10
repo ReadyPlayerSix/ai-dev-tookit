@@ -359,9 +359,16 @@ class AIDevToolkitGUI:
         mcp_servers_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/modelcontextprotocol/servers"))
         
         # Button for adding project directories
-        add_proj_btn = ttk.Button(self.claude_frame, text="Add Project Directories", 
-                                  command=lambda: self.notebook.select(self.project_frame))
-        add_proj_btn.pack(side=tk.LEFT, pady=(10, 0))
+        buttons_frame = ttk.Frame(self.claude_frame)
+        buttons_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        add_proj_btn = ttk.Button(buttons_frame, text="Add Project Directories", 
+                                 command=lambda: self.notebook.select(self.project_frame))
+        add_proj_btn.pack(side=tk.LEFT)
+        
+        # Add a spacer frame to minimize the gap
+        spacer_frame = ttk.Frame(self.claude_frame)
+        spacer_frame.pack(fill=tk.BOTH, expand=True)
     
     #-----------------------------------------------------
     # Project Management Tab

@@ -104,7 +104,51 @@ def register_unified_context_tools(mcp):
             Dictionary containing the results of the operation
         """
         try:
-            success = build_bidirectional_references(project_path)
+            # Check if required directories exist
+            ai_ref_path = os.path.join(project_path, ".ai_reference")
+            tool_ref_path = os.path.join(project_path, ".tool_reference")
+            tool_profiles_path = os.path.join(tool_ref_path, "tool_profiles")
+            
+            if not os.path.exists(ai_ref_path):
+                logger.error(f"AI Reference directory not found: {ai_ref_path}")
+                return {
+                    "status": "error",
+                    "message": f"AI Reference directory not found: {ai_ref_path}"
+                }
+                
+            if not os.path.exists(tool_ref_path):
+                logger.error(f"Tool Reference directory not found: {tool_ref_path}")
+                return {
+                    "status": "error",
+                    "message": f"Tool Reference directory not found: {tool_ref_path}"
+                }
+            
+            if not os.path.exists(tool_profiles_path):
+                logger.error(f"Tool Profiles directory not found: {tool_profiles_path}")
+                return {
+                    "status": "error",
+                    "message": f"Tool Profiles directory not found: {tool_profiles_path}"
+                }
+            
+            # Check if tool profiles exist
+            profiles_count = len([f for f in os.listdir(tool_profiles_path) if f.endswith('.json')])
+            if profiles_count == 0:
+                logger.error(f"No tool profiles found in {tool_profiles_path}")
+                return {
+                    "status": "error",
+                    "message": f"No tool profiles found in {tool_profiles_path}"
+                }
+            
+            # Use the main build_bidirectional_references function from bidirectional_refs.py
+            logger.info(f"Building bidirectional references for {project_path}")
+            try:
+                success = build_bidirectional_references(project_path)
+                logger.info(f"build_bidirectional_references result: {success}")
+            except Exception as ref_e:
+                logger.error(f"Exception in build_bidirectional_references: {str(ref_e)}")
+                import traceback
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                success = False
             
             if success:
                 # Invalidate cached context to force rebuild with new references
@@ -113,27 +157,37 @@ def register_unified_context_tools(mcp):
                         del unified_context_data["context"][project_path]
                 
                 # Count references
-                brs = BidirectionalReferenceSystem(project_path)
-                brs.build_references()
-                
-                component_ref_count = sum(len(refs) for refs in brs.component_to_tool_refs.values())
-                tool_ref_count = sum(len(refs) for refs in brs.tool_to_component_refs.values())
-                
-                return {
-                    "status": "success",
-                    "message": "Successfully built bidirectional cross-references",
-                    "component_to_tool_references": component_ref_count,
-                    "tool_to_component_references": tool_ref_count,
-                    "components_with_references": len(brs.component_to_tool_refs),
-                    "tools_with_references": len(brs.tool_to_component_refs)
-                }
+                try:
+                    brs = BidirectionalReferenceSystem(project_path)
+                    brs.build_references()
+                    
+                    component_ref_count = sum(len(refs) for refs in brs.component_to_tool_refs.values())
+                    tool_ref_count = sum(len(refs) for refs in brs.tool_to_component_refs.values())
+                    
+                    return {
+                        "status": "success",
+                        "message": "Successfully built bidirectional cross-references",
+                        "component_to_tool_references": component_ref_count,
+                        "tool_to_component_references": tool_ref_count,
+                        "components_with_references": len(brs.component_to_tool_refs),
+                        "tools_with_references": len(brs.tool_to_component_refs)
+                    }
+                except Exception as count_e:
+                    logger.error(f"Error counting references: {str(count_e)}")
+                    return {
+                        "status": "partial_success",
+                        "message": f"References built but error counting them: {str(count_e)}"
+                    }
             else:
+                logger.error("build_bidirectional_references returned False")
                 return {
                     "status": "error",
                     "message": "Failed to build bidirectional cross-references"
                 }
         except Exception as e:
             logger.error(f"Error building cross-references: {str(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return {
                 "status": "error",
                 "message": f"Error building cross-references: {str(e)}"

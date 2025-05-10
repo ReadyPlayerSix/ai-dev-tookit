@@ -1603,7 +1603,7 @@ def sanity_check(project_path: str, create_artifact: bool = False) -> str:
 
 
 @mcp.tool()
-def add_todo(project_path: str, title: str, description: str = "", priority: str = "medium", tags: str = "") -> Dict[str, str]:
+def add_todo(project_path: str, title: str, description: str = "", priority: str = "medium", tags: str = "", context_prompt: str = None) -> Dict[str, str]:
     """
     Add a new to-do item to the project's persistent to-do list.
     
@@ -1616,6 +1616,7 @@ def add_todo(project_path: str, title: str, description: str = "", priority: str
         description: Detailed description of the task
         priority: Priority level (low, medium, high)
         tags: Comma-separated list of tags
+        context_prompt: Optional prompt to help Claude retrieve full context for this todo item
         
     Returns:
         Success message with the ID of the created to-do item
@@ -1642,16 +1643,29 @@ def add_todo(project_path: str, title: str, description: str = "", priority: str
                 title=title,
                 description=description,
                 priority=priority,
-                tags=tag_list
+                tags=tag_list,
+                context_prompt=context_prompt
             )
-
-            return {
+            
+            # Get the created todo to check if it's a quick view item
+            todo = todo_manager.get_todo(todo_id)
+            is_quick_view = todo.get("context_prompt") is not None and todo.get("full_description") is not None
+            
+            result = {
                 "status": "success",
                 "todo_id": todo_id,
                 "title": title,
                 "priority": priority,
                 "message": f"To-do item added with ID: {todo_id}"
             }
+            
+            # If this is a quick view todo, add a note about it
+            if is_quick_view:
+                result["is_quick_view"] = True
+                result["context_prompt"] = todo.get("context_prompt")
+                result["message"] += " (Quick view format: Full details stored in context)"
+            
+            return result
         except Exception as e:
             logger.error(f"Error adding to-do item: {str(e)}")
             return {

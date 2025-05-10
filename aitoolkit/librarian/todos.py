@@ -75,7 +75,8 @@ class TodoManager:
             json.dump(todos, f, indent=2)
     
     def add_todo(self, title: str, description: str = "", priority: str = "medium", 
-                 tags: List[str] = None, subtasks: List[Dict[str, str]] = None) -> str:
+                 tags: List[str] = None, subtasks: List[Dict[str, str]] = None,
+                 context_prompt: str = None) -> str:
         """
         Add a new to-do item.
         
@@ -85,6 +86,7 @@ class TodoManager:
             priority: Priority level (low, medium, high)
             tags: List of tags
             subtasks: List of subtask dictionaries with title and status
+            context_prompt: Optional prompt for Claude to retrieve context
             
         Returns:
             ID of the created to-do item
@@ -93,6 +95,34 @@ class TodoManager:
         
         # Generate a unique ID
         todo_id = f"todo-{uuid.uuid4().hex[:8]}"
+        
+        # Check if this is a "quick view" todo (with long description but no context prompt)
+        if len(description) > 250 and not context_prompt:
+            # Create a context prompt from the description
+            context_prompt = f"Claude, use current context. Ask user about '{title}' details."
+            
+            # Store a concise version of the description
+            # Get the first paragraph or first two sentences
+            summary = ""
+            if "\n\n" in description:
+                summary = description.split("\n\n")[0].strip()
+            else:
+                sentences = description.split(". ")
+                if len(sentences) > 1:
+                    summary = ". ".join(sentences[:2]) + "."
+                else:
+                    summary = sentences[0]
+                    
+            # Keep summary under 250 characters
+            if len(summary) > 250:
+                summary = summary[:247] + "..."
+                
+            # Store the full description in a separate field for reference
+            full_description = description
+            # Use the summary as the visible description
+            description = summary
+        else:
+            full_description = None
         
         # Create the new to-do item
         new_todo = {
@@ -103,7 +133,9 @@ class TodoManager:
             "priority": priority,
             "tags": tags or [],
             "created": datetime.datetime.now().isoformat(),
-            "subtasks": []
+            "subtasks": [],
+            "context_prompt": context_prompt,
+            "full_description": full_description
         }
         
         # Add subtasks if provided
