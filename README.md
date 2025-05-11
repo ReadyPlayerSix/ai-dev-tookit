@@ -5,7 +5,7 @@
 ![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-Compatible-green)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.4.3--prep-orange)
+![Release](https://img.shields.io/badge/release-v0.4.6--simple--tool--index-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -75,11 +75,11 @@ All this happens automatically - just initialize once and the system handles eve
 - **Automatic Task Inference**: Extract potential tasks from conversations
 
 ### Tool Index System (Stable)
-- **AI-Optimized Tool Profiles**: Detailed metadata that helps Claude select the right tools
-- **Tool Relationships**: Understanding of how tools work together in sequences
-- **Decision Trees**: AI-optimized decision frameworks for tool selection
-- **Self-Diagnostic Tools**: Capabilities to validate Claude's understanding of context
-- **Usage Patterns**: Common patterns for effective tool combinations
+- **Simple, Robust Implementation**: Single-pass indexing with no subprocesses for improved reliability and performance
+- **AI-Optimized Tool Profiles**: Detailed metadata that helps Claude select the right tools 
+- **Direct Function Discovery**: Scans common locations for tool functions and imports/analyzes them directly
+- **Simplified Output Format**: Flat, reference-catalog style organization for easy navigation
+- **Metadata Extraction**: Uses Python's introspection capabilities for accurate tool information
 
 ### TaskBoard System (Coming Soon - Beta)
 - **AI Mini-Librarians**: Specialized AI agents that process specific analysis tasks
@@ -327,6 +327,13 @@ Additional documentation is available in the [docs](docs/) directory:
 - **Team Workflow Tools**: Project management integration
 
 ### Current Work in Progress
+
+- **Tool Index Improvements**: Recently implemented the Simple Tool Index system with dramatic performance improvements:
+  - Single-pass architecture replaces complex multi-phase processing
+  - Direct function discovery with no subprocess handling
+  - Up to 10x faster execution (< 5 seconds vs 60+ seconds previously)
+  - Improved reliability with fewer failure points
+  - Simplified output format for better maintainability
 
 - **Sanity Check Refactoring**: The sanity_check tool will soon be temporarily disabled while we implement significant improvements:
   - Modular class-based design with plugin system
