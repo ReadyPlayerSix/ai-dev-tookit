@@ -346,7 +346,7 @@ class AIDevToolkitGUI:
         # Button for adding project directories
         add_proj_btn = ttk.Button(self.claude_frame, text="Add Project Directories", 
                                   command=lambda: self.notebook.select(self.project_frame))
-        add_proj_btn.pack(side=tk.LEFT, pady=(10, 0))
+        add_proj_btn.pack(side=tk.LEFT, pady=(10, 10))
     
     #-----------------------------------------------------
     # Project Management Tab

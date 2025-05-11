@@ -221,11 +221,11 @@ class AIDevToolkitGUI:
     #-----------------------------------------------------
     def setup_claude_tab(self):
         # Header
-        header_label = ttk.Label(self.claude_frame, text="Claude Desktop Configuration", style='Header.TLabel')
+        header_label = ttk.Label(self.claude_scrollable_frame, text="Claude Desktop Configuration", style='Header.TLabel')
         header_label.pack(pady=(0, 20), anchor=tk.W)
         
         # Claude Desktop section
-        claude_config_frame = ttk.LabelFrame(self.claude_frame, text="Claude Desktop", padding="10 10 10 10")
+        claude_config_frame = ttk.LabelFrame(self.claude_scrollable_frame, text="Claude Desktop", padding="10 10 10 10")
         claude_config_frame.pack(fill=tk.X, pady=(0, 15))
         
         # Claude Desktop status
@@ -240,8 +240,26 @@ class AIDevToolkitGUI:
         ttk.Entry(path_frame, textvariable=self.config_path, width=50).pack(side=tk.LEFT, padx=(0, 5), fill=tk.X, expand=True)
         ttk.Button(path_frame, text="Browse...", command=self.browse_config).pack(side=tk.LEFT)
         
+        # Create a scrollable canvas for the Claude tab content
+        self.claude_canvas = tk.Canvas(self.claude_frame, borderwidth=0, highlightthickness=0)
+        self.claude_scrollbar = ttk.Scrollbar(self.claude_frame, orient=tk.VERTICAL, command=self.claude_canvas.yview)
+        self.claude_scrollable_frame = ttk.Frame(self.claude_canvas)
+        
+        # Configure the canvas
+        self.claude_scrollable_frame.bind(
+            "<Configure>",
+        
+        # AI Dev Toolkit Servers section
+        server_selection_frame = ttk.LabelFrame(self.claude_scrollable_frame, text="AI Dev Toolkit Servers", padding="10 10 10 10")
+        server_selection_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        # Note about server selection
+        server_note = ttk.Label(server_selection_frame, 
+                              text="The following MCP servers are available for Claude Desktop:",
+        self.claude_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
         # Safety disclaimer
-        safety_frame = ttk.Frame(claude_config_frame, style='TFrame')
+        safety_frame = ttk.Frame(self.claude_scrollable_frame, style='TFrame')
         safety_frame.pack(fill=tk.X, pady=(10, 0))
         
         safety_label = ttk.Label(safety_frame, 
@@ -365,10 +383,6 @@ class AIDevToolkitGUI:
         add_proj_btn = ttk.Button(buttons_frame, text="Add Project Directories", 
                                  command=lambda: self.notebook.select(self.project_frame))
         add_proj_btn.pack(side=tk.LEFT)
-        
-        # Add a spacer frame to minimize the gap
-        spacer_frame = ttk.Frame(self.claude_frame)
-        spacer_frame.pack(fill=tk.BOTH, expand=True)
     
     #-----------------------------------------------------
     # Project Management Tab
