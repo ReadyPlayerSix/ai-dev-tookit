@@ -6,6 +6,9 @@ This module integrates all components of the AI Dev Toolkit into a single unifie
 It provides one-stop initialization for both the AI Librarian and Tool Reference systems,
 and establishes bidirectional references between them.
 
+The implementation uses the simplified Tool Index system which provides dramatic 
+performance improvements through a single-pass architecture with no subprocesses.
+
 Usage:
     # Will be automatically imported by the AI Librarian server
     from aitoolkit.librarian.ai_dev_toolkit import initialize_ai_dev_toolkit
@@ -52,37 +55,21 @@ except ImportError:
             return func
         return decorator
 
-# Import necessary components with error handling
+# Import necessary components with clean imports
 try:
     # Import AI Librarian components
     from .enhanced_indexer import initialize_enhanced_librarian
     from .enhanced_librarian_updater import update_project_librarian
     
-    # Import Tool Reference components (using simplified implementation)
+    # Import Tool Reference component (using simplified implementation)
     from .simple_tool_index import initialize_tool_index
     
-    # Import bidirectional references
+    # Import unified context components
     from .bidirectional_refs import build_bidirectional_references
-    
-    # Import unified context
     from .unified_context import build_unified_context
 except ImportError as e:
     logger.error(f"Error importing components: {str(e)}")
-    # Try relative imports if this fails
-    try:
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        if current_dir not in sys.path:
-            sys.path.append(current_dir)
-        
-        # Import with relative paths
-        from enhanced_indexer import initialize_enhanced_librarian
-        from enhanced_librarian_updater import update_project_librarian
-        from tool_reference import initialize_tool_reference, update_tool_reference
-        from bidirectional_refs import build_bidirectional_references
-        from unified_context import build_unified_context
-    except ImportError as e2:
-        logger.error(f"Failed to import components with relative paths: {str(e2)}")
-        raise
+    raise
 
 # Apply robustness decorators to imported functions
 initialize_enhanced_librarian = with_retry(max_retries=2)(initialize_enhanced_librarian)
@@ -169,48 +156,17 @@ def initialize_ai_dev_toolkit(project_path: str) -> Dict[str, Any]:
         logger.info(f"Step 2: Initializing Tool Reference System for {project_path}")
         tool_ref_path = os.path.join(project_path, ".tool_reference")
         
-        # Use initialize_tool_index instead of initialize_tool_reference to match MCP function name
-        try:
-            # Try importing and using the properly named MCP function
-            logger.info("Attempting to use MCP initialize_tool_index function")
-            try:
-                from ..mcp.integrated_server import initialize_tool_index
-                tool_init_result = initialize_tool_index(project_path)
-            except (ImportError, AttributeError):
-                # If that fails, try searching for it elsewhere
-                logger.info("Direct import failed, searching for initialize_tool_index")
-                try:
-                    import importlib
-                    # Try to dynamically find and import the module with the function
-                    for module_name in ["aitoolkit.mcp.server", "src.mcp.server"]:
-                        try:
-                            module = importlib.import_module(module_name)
-                            if hasattr(module, "initialize_tool_index"):
-                                tool_init_result = module.initialize_tool_index(project_path)
-                                break
-                        except (ImportError, AttributeError):
-                            continue
-                    else:
-                        # If no module found, fallback to local function
-                        raise ImportError("Could not find initialize_tool_index in any module")
-                except (ImportError, AttributeError):
-                    # Final fallback
-                    raise ImportError("All attempts to import initialize_tool_index failed")
-                    
-            # Process the result based on its type
-            if isinstance(tool_init_result, dict):
-                tool_init_success = tool_init_result.get("status") == "success"
-                tool_init_message = tool_init_result.get("message", str(tool_init_result))
-            else:
-                tool_init_success = "Successfully initialized Tool Reference" in str(tool_init_result) or "Successfully updated Tool Reference" in str(tool_init_result)
-                tool_init_message = str(tool_init_result)
-        except (ImportError, AttributeError) as e:
-            # Fall back to the local function if MCP import fails
-            logger.warning(f"Could not import initialize_tool_index: {str(e)}")
-            logger.warning("Using local initialize_tool_reference function instead")
-            tool_init_result = initialize_tool_reference(project_path)
-            tool_init_success = "Successfully initialized Tool Reference" in tool_init_result or "Successfully updated Tool Reference" in tool_init_result
-            tool_init_message = tool_init_result
+        # Initialize the tool reference system using simple_tool_index
+        tool_init_result = initialize_tool_index(project_path)
+        
+        # Process the result
+        if isinstance(tool_init_result, dict):
+            tool_init_success = tool_init_result.get("status") == "success"
+            tool_init_message = tool_init_result.get("message", str(tool_init_result))
+        else:
+            # Handle string result case (for backward compatibility)
+            tool_init_success = "Successfully initialized Tool Reference" in str(tool_init_result)
+            tool_init_message = str(tool_init_result)
         
         step_duration = time.time() - step_start
         results["performance_metrics"]["tool_reference_initialization"] = step_duration
