@@ -1,13 +1,13 @@
 {
   "version": "0.1.0",
   "description": "AI-optimized Tool Index for Claude",
-  "last_updated": "2025-05-10T14:49:45.668368",
+  "last_updated": "2025-05-11T14:50:03.971686",
   "tools": {
     "read_file": {
       "id": "read_file",
       "category": "filesystem",
       "profile_path": "tool_profiles/read_file.json",
-      "has_profile": true
+      "has_profile": false
     },
     "write_file": {
       "id": "write_file",
@@ -19,7 +19,7 @@
       "id": "edit_file",
       "category": "filesystem",
       "profile_path": "tool_profiles/edit_file.json",
-      "has_profile": true
+      "has_profile": false
     },
     "enhanced_edit_file": {
       "id": "enhanced_edit_file",
@@ -49,52 +49,19 @@
       "id": "initialize_librarian",
       "category": "librarian",
       "profile_path": "tool_profiles/initialize_librarian.json",
-      "has_profile": true
+      "has_profile": false
     },
     "query_component": {
       "id": "query_component",
       "category": "librarian",
       "profile_path": "tool_profiles/query_component.json",
-      "has_profile": true
+      "has_profile": false
     },
     "find_implementation": {
       "id": "find_implementation",
       "category": "librarian",
       "profile_path": "tool_profiles/find_implementation.json",
-      "has_profile": true
+      "has_profile": false
     }
-  },
-  "relationships": {
-    "groups": [
-      "file_editing_workflow",
-      "project_initialization_workflow",
-      "code_understanding_workflow"
-    ],
-    "decision_trees": [
-      "filesystem_operations",
-      "code_analysis",
-      "project_setup"
-    ],
-    "usage_patterns": [
-      "file_editing",
-      "project_analysis"
-    ]
-  },
-  "context_validation": {
-    "validators": [
-      "server_connection_validator",
-      "tool_path_validator",
-      "project_structure_validator",
-      "active_file_validator",
-      "tool_capability_validator"
-    ],
-    "error_analyzers": [
-      "common_tool_errors",
-      "context_mismatches"
-    ],
-    "execution_tracers": [
-      "tool_execution_tracer"
-    ],
-    "validator_tool": "context_validator.py"
   }
 }

@@ -1,9 +1,11 @@
 """
-Integrated MCP Server for AI Dev Toolkit
+[DEPRECATED] Integrated MCP Server for AI Dev Toolkit
 
-This module integrates the AI Librarian and enhanced filesystem functionality
-into a single MCP server. It provides comprehensive code understanding,
-file management, and task tracking capabilities in one package.
+THIS FILE IS DEPRECATED AND SHOULD NOT BE USED.
+The official MCP server is now aitoolkit/librarian/server.py.
+
+This module was an earlier attempt to integrate the AI Librarian and filesystem functionality
+into a single MCP server. It has been replaced by server.py and is kept for reference only.
 """
 import os
 import sys
@@ -64,6 +66,8 @@ except ImportError:
 from aitoolkit.librarian.todos import TodoManager
 from aitoolkit.librarian.sanity_check import run_sanity_check
 from aitoolkit.librarian.enhanced_indexer import initialize_enhanced_librarian
+from aitoolkit.librarian.tool_reference import initialize_tool_reference
+from aitoolkit.librarian.ai_dev_toolkit import initialize_ai_dev_toolkit
 
 # Configure logging
 logger = logging.getLogger("integrated-server")
@@ -1264,6 +1268,67 @@ Diagnostic files help troubleshoot issues with code understanding and navigation
         # Register filesystem tools
         self.register_filesystem_tools()
         
+        # Register the AI Dev Toolkit initialization tool
+        @self.mcp.tool()
+        def initialize_ai_dev_toolkit(project_path: str) -> Dict[str, Any]:
+            """
+            Initialize the complete AI Dev Toolkit for a project.
+            
+            This is a one-stop initialization tool that sets up both the AI Librarian 
+            (for code understanding) and the Tool Reference System (for tool awareness) 
+            in a single operation. After running this tool, Claude will have complete 
+            context awareness of both code components and available tools.
+            
+            Args:
+                project_path: The root directory of the project
+                
+            Returns:
+                Dictionary containing initialization results
+            """
+            try:
+                # Check permission first
+                project_path = os.path.abspath(project_path)
+                if project_path not in permission_status or not permission_status[project_path]:
+                    # Try to check access
+                    try:
+                        if not os.path.exists(project_path):
+                            return {
+                                "status": "error",
+                                "message": f"Directory does not exist: {project_path}"
+                            }
+                        
+                        # Try to list the directory contents as a basic access test
+                        os.listdir(project_path)
+                        # If we get here, we have access
+                        permission_status[project_path] = True
+                    except PermissionError:
+                        return {
+                            "status": "error",
+                            "message": f"Permission denied: {project_path}\n\nPlease grant access to this directory in Claude Desktop first:\n1. Use check_project_access(\"{project_path}\") to verify access\n2. If needed, edit Claude Desktop permissions settings"
+                        }
+                
+                # Pause monitoring during this operation
+                with MonitoringPauser():
+                    # Use the imported initialize_ai_dev_toolkit function from the module
+                    # Avoid recursion by using the imported function, not this MCP tool
+                    from aitoolkit.librarian.ai_dev_toolkit import initialize_ai_dev_toolkit as toolkit_initializer
+                    result = toolkit_initializer(project_path)
+                    
+                    # Add project to active monitoring list if successful
+                    if result["status"] == "success" or result["status"] == "partial_failure":
+                        with state_lock:
+                            librarian_context["active_projects"].add(project_path)
+                            librarian_context["last_update"][project_path] = time.time()
+                    
+                    return result
+                    
+            except Exception as e:
+                logger.error(f"Error initializing AI Dev Toolkit: {str(e)}")
+                return {
+                    "status": "error",
+                    "message": f"Error initializing AI Dev Toolkit: {str(e)}"
+                }
+                
         # Register additional tools and prompts
         self.register_additional_tools()
         
