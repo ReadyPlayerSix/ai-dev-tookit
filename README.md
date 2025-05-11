@@ -95,6 +95,13 @@ All this happens automatically - just initialize once and the system handles eve
 - **Contextual Memory**: Build and maintain detailed understanding across sessions
 - **Self-directed Exploration**: Allow Claude to explore code paths independently
 
+### Robustness Features (Stable)
+- **Automatic Retries**: Long-running operations automatically retry on failure
+- **Timeout Handling**: Graceful handling of timeouts with configurable limits
+- **Queue Management**: Clear stale requests before starting new operations
+- **Performance Tracking**: Measure and log execution times for optimization
+- **Error Recovery**: Robust error handling with detailed diagnostics
+
 ## 🖼️ Screenshots
 
 <div align="center">
@@ -214,30 +221,51 @@ list_directory("path/to/your/directory")
 search_files("path/to/your/project", "pattern")
 ```
 
+### Optimizing Performance and Handling Timeouts
+```python
+# Initialize with robustness features automatically applied
+initialize_ai_dev_toolkit("path/to/your/project")
+
+# For other long-running operations, use the robustness decorators
+from aitoolkit.utils.tool_wrappers import make_robust
+
+@make_robust(timeout=60.0, max_retries=2)
+def my_search_function(query):
+    # Implementation here
+```
+
+You can also apply the robustness patch to your MCP server installation:
+
+```bash
+python scripts/apply_robustness.py --server-path path/to/server --timeout 120 --retries 3
+```
+
+This makes search operations and other long-running tasks automatically retry on failure and handle timeouts gracefully.
+
 ## 🔌 Architecture
 
 The AI Dev Toolkit uses a modular architecture built around the Model Context Protocol (MCP) to integrate with Claude Desktop:
 
 ```
-┌─────────────────────┐      ┌───────────────────┐      ┌───────────────┐
-│                     │      │                   │      │               │
-│   Claude Desktop    │◄────►│   AI Librarian    │◄────►│  Your Project  │
-│                     │      │     Server        │      │   Filesystem   │
-└─────────────────────┘      └───────────────────┘      └───────────────┘
-                                      ▲
-                                      │
-                                      ▼
-                        ┌─────────────────────────────┐
-                        │                             │
-                        │    Unified Context System    │
-                        │                             │
-                        └─────────────────────────────┘
-                                      ▲
-                                      │
-                                      ▼
+┌───────────────────┐      ┌───────────────┐      ┌───────────┐
+│                   │      │               │      │           │
+│   Claude Desktop  │◄────►│   AI Librarian│◄────►│Your Project│
+│                   │      │     Server    │      │  Filesystem│
+└───────────────────┘      └───────────────┘      └───────────┘
+                                  ▲
+                                  │
+                                  ▼
+                        ┌─────────────────────┐
+                        │                     │
+                        │  Unified Context System│
+                        │                     │
+                        └─────────────────────┘
+                                  ▲
+                                  │
+                                  ▼
                   ┌────────────────┐     ┌────────────────┐
                   │                │     │                │
-                  │ AI Librarian   │◄───►│  Tool Reference │
+                  │ AI Librarian   │◄───►│  Tool Reference│
                   │ Persistent     │     │  System        │
                   │ Context        │     │                │
                   └────────────────┘     └────────────────┘
@@ -270,6 +298,7 @@ Common issues and solutions:
 - **Legacy Files**: Use `git clean -fd` after a `git reset --hard` to ensure all untracked files are removed when reverting to a previous version
 - **Duplicate Files**: During our cleanup process, you may encounter duplicate files with extensions like .old, .backup, .fixed - these will be addressed in an upcoming release
 - **find_related_files Tool Errors**: This tool has a known issue that will be fixed in an upcoming release
+- **Timeout Errors**: For long-running operations that time out, try applying the robustness features with `@make_robust` or use the `apply_robustness.py` script
 
 ## 📚 Documentation
 
@@ -317,6 +346,12 @@ Additional documentation is available in the [docs](docs/) directory:
     - Adding a GUI button for legacy file pruning
 
 - **Filesystem Operations**: Enhanced file editing and manipulation capabilities
+
+- **Robustness Improvements**: Enhanced timeout and retry handling:
+  - Automatic retry mechanisms for long-running operations
+  - Improved queue management to prevent request collisions
+  - Performance metrics for identifying bottlenecks
+  - Smarter timeout handling with configurable thresholds
 
 ## 📜 License
 

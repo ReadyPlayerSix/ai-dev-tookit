@@ -1337,6 +1337,113 @@ def find_implementation(project_path: str, search_text: str, file_pattern: str =
             }
 
 @mcp.tool()
+def initialize_tool_index(project_path: str) -> Dict[str, Any]:
+    """
+    Initialize the Tool Reference system for a project.
+    
+    This tool creates the .tool_reference directory structure and builds a comprehensive
+    metadata system that helps Claude understand available tools and their relationships.
+    Once initialized, Claude gains enhanced awareness of tool capabilities, relationships,
+    and optimal usage patterns.
+    
+    Args:
+        project_path: The root directory of the project
+        
+    Returns:
+        Dictionary with the result of the operation
+    """
+    # Pause monitoring during this operation
+    with MonitoringPauser():
+        try:
+            logger.info(f"Initializing Tool Reference system for {project_path}")
+            
+            # Validate project path
+            if not os.path.exists(project_path):
+                return {
+                    "status": "error",
+                    "message": f"Directory does not exist: {project_path}"
+                }
+            
+            # Import the simple_tool_index module with absolute path
+            from aitoolkit.librarian.simple_tool_index import initialize_tool_index as simple_initialize_tool_index
+            
+            # Initialize the tool reference using the simple implementation
+            result = simple_initialize_tool_index(project_path)
+            
+            # Check if tool reference was successfully initialized
+            if result.startswith("✅"):
+                # Parse the statistics from the result
+                tool_count = 0
+                profile_count = 0
+                relationship_count = 0
+                decision_tree_count = 0
+                
+                # Extract statistics using regex
+                import re
+                tool_match = re.search(r'(\d+) tools', result)
+                if tool_match:
+                    tool_count = int(tool_match.group(1))
+                
+                profile_match = re.search(r'(\d+) detailed tool profiles', result)
+                if profile_match:
+                    profile_count = int(profile_match.group(1))
+                
+                relationship_match = re.search(r'(\d+) tool relationship', result)
+                if relationship_match:
+                    relationship_count = int(relationship_match.group(1))
+                
+                decision_match = re.search(r'(\d+) decision trees', result)
+                if decision_match:
+                    decision_tree_count = int(decision_match.group(1))
+                
+                # Check if needs cross-references with AI Librarian
+                ai_ref_path = os.path.join(project_path, ".ai_reference")
+                needs_cross_refs = os.path.exists(ai_ref_path)
+                
+                # Build cross-references if both AI Librarian and Tool Reference exist
+                cross_refs_message = ""
+                if needs_cross_refs:
+                    try:
+                        from .unified_context_integration import build_cross_references
+                        cross_refs_result = build_cross_references(project_path)
+                        if cross_refs_result.get("status") == "success":
+                            cross_refs_count = len(cross_refs_result.get("cross_references", {}))
+                            cross_refs_message = f"\n\n🔄 Built {cross_refs_count} cross-references between components and tools"
+                    except Exception as e:
+                        logger.warning(f"Error building cross-references: {str(e)}")
+                        cross_refs_message = "\n\n⚠️ Cross-references could not be built automatically"
+                
+                return {
+                    "status": "success",
+                    "message": f"Tool Reference system initialized successfully for {project_path}",
+                    "tool_count": tool_count,
+                    "profile_count": profile_count,
+                    "relationship_count": relationship_count,
+                    "decision_tree_count": decision_tree_count,
+                    "details": f"✅ Successfully initialized Tool Reference system\n\n" +
+                              f"Tool Index Initialization Report:\n" +
+                              f"✓ Tool registry created with {tool_count} tools\n" +
+                              f"✓ {profile_count} detailed tool profiles generated\n" +
+                              f"✓ {relationship_count} tool relationship groups defined\n" +
+                              f"✓ {decision_tree_count} decision trees for tool selection" +
+                              cross_refs_message +
+                              f"\n\nClaude now has enhanced awareness of tool capabilities, " +
+                              f"relationships between tools, and optimal usage patterns."
+                }
+            else:
+                return {
+                    "status": "error",
+                    "message": f"Failed to initialize Tool Reference: {result}"
+                }
+            
+        except Exception as e:
+            logger.error(f"Error initializing Tool Reference: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Error initializing Tool Reference: {str(e)}"
+            }
+
+@mcp.tool()
 def generate_librarian(project_path: str) -> str:
     """
     Generate or update the AI Librarian for a project.
@@ -1394,6 +1501,150 @@ def generate_librarian(project_path: str) -> str:
         except Exception as e:
             logger.error(f"Error generating librarian: {str(e)}")
             return f"Error generating librarian: {str(e)}"
+
+@mcp.tool()
+def initialize_ai_dev_toolkit(project_path: str) -> Dict[str, Any]:
+    """
+    Initialize the complete AI Dev Toolkit for a project.
+    
+    This is a one-stop initialization tool that sets up both the AI Librarian 
+    (for code understanding) and the Tool Reference System (for tool awareness) 
+    in a single operation. After running this tool, Claude will have complete 
+    context awareness of both code components and available tools.
+    
+    Args:
+        project_path: The root directory of the project
+        
+    Returns:
+        Dictionary containing initialization results
+    """
+    # Validate project path
+    if not os.path.exists(project_path):
+        return {
+            "status": "error",
+            "message": f"Directory does not exist: {project_path}"
+        }
+        
+    # Step 1: Initialize AI Librarian
+    logger.info(f"Initializing AI Dev Toolkit for {project_path}")
+    librarian_result = initialize_librarian(project_path)
+    
+    # Check if librarian initialization was successful
+    if isinstance(librarian_result, dict) and librarian_result.get("status") == "error":
+        return {
+            "status": "error",
+            "message": f"Failed to initialize AI Librarian: {librarian_result.get('message', 'Unknown error')}"
+        }
+        
+    # Step 2: Initialize Tool Reference using the simple implementation
+    from aitoolkit.librarian.simple_tool_index import initialize_tool_index as simple_initialize_tool_index
+    tool_result = simple_initialize_tool_index(project_path)
+    
+    # Parse tool initialization result
+    tool_success = tool_result.startswith("✅")
+    
+    # Step 3: Create cross-references between systems
+    cross_ref_result = None
+    try:
+        if tool_success:
+            from aitoolkit.librarian.unified_context_integration import build_cross_references
+            cross_ref_result = build_cross_references(project_path)
+    except Exception as e:
+        logger.error(f"Error building cross-references: {str(e)}")
+        cross_ref_result = {
+            "status": "error",
+            "message": f"Error building cross-references: {str(e)}"
+        }
+    
+    # Extract statistics for reporting
+    # For AI Librarian
+    file_count = 0
+    component_count = 0
+    with state_lock:
+        if project_path in librarian_context["components"]:
+            component_registry = librarian_context["components"][project_path]
+            component_count = len(component_registry.get("components", {}))
+        if project_path in librarian_context["indexed_files"]:
+            file_count = len(librarian_context["indexed_files"][project_path])
+    
+    # For Tool Reference
+    tool_count = 0
+    profile_count = 0
+    relationship_count = 0
+    decision_tree_count = 0
+    
+    # Extract statistics using regex if tool initialization was successful
+    if tool_success:
+        import re
+        tool_match = re.search(r'(\d+) tools', tool_result)
+        if tool_match:
+            tool_count = int(tool_match.group(1))
+        
+        profile_match = re.search(r'(\d+) detailed tool profiles', tool_result)
+        if profile_match:
+            profile_count = int(profile_match.group(1))
+        
+        relationship_match = re.search(r'(\d+) tool relationship', tool_result)
+        if relationship_match:
+            relationship_count = int(relationship_match.group(1))
+        
+        decision_match = re.search(r'(\d+) decision trees', tool_result)
+        if decision_match:
+            decision_tree_count = int(decision_match.group(1))
+    
+    # For Cross-References
+    cross_ref_count = 0
+    if cross_ref_result and isinstance(cross_ref_result, dict) and cross_ref_result.get("status") == "success":
+        cross_ref_count = len(cross_ref_result.get("cross_references", {}))
+    
+    # Create detailed report
+    report = f"""✅ AI Dev Toolkit Initialization Complete for {project_path}
+
+┌─────────────────────────────────────────┐
+│ AI Librarian Initialization:            │
+├─────────────────────────────────────────┤
+│ ✓ {file_count} files indexed            │
+│ ✓ {component_count} components identified│
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Tool Reference Initialization:          │
+├─────────────────────────────────────────┤
+│ ✓ {tool_count} tools registered         │
+│ ✓ {profile_count} detailed tool profiles│
+│ ✓ {relationship_count} relationship groups│
+│ ✓ {decision_tree_count} decision trees  │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Cross-References:                       │
+├─────────────────────────────────────────┤
+│ ✓ {cross_ref_count} bidirectional references│
+└─────────────────────────────────────────┘
+
+Claude now has complete context awareness of both code components and available tools.
+This enables more intelligent assistance across all aspects of the project.
+"""
+    
+    # Return results
+    return {
+        "status": "success",
+        "message": "AI Dev Toolkit successfully initialized",
+        "ai_librarian": {
+            "file_count": file_count,
+            "component_count": component_count
+        },
+        "tool_reference": {
+            "tool_count": tool_count,
+            "profile_count": profile_count,
+            "relationship_count": relationship_count,
+            "decision_tree_count": decision_tree_count
+        },
+        "cross_references": {
+            "count": cross_ref_count
+        },
+        "details": report
+    }                    
 
 #-----------------------------------------------------------------
 # Diagnostic Tools
@@ -3101,6 +3352,8 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
     # Pause monitoring during this operation
     with MonitoringPauser():
         try:
+            logger.debug(f"Starting find_related_files for {file_path} in {project_path}")
+            
             # Normalize paths
             project_path = os.path.abspath(project_path)
 
@@ -3131,6 +3384,7 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
 
             # Get relative path for cleaner output
             rel_file_path = os.path.relpath(file_path, project_path)
+            logger.debug(f"Working with relative file path: {rel_file_path}")
 
             # Initialize result structure
             related_files = {
@@ -3158,8 +3412,16 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                     "message": f"Script index not found at {script_index_path}."
                 }
 
-            with open(script_index_path, 'r', encoding='utf-8') as f:
-                script_index = json.load(f)
+            # Safely load the script index
+            try:
+                with open(script_index_path, 'r', encoding='utf-8') as f:
+                    script_index = json.load(f)
+            except Exception as e:
+                logger.error(f"Error loading script index: {str(e)}")
+                return {
+                    "status": "error",
+                    "message": f"Error loading script index: {str(e)}"
+                }
 
             # Get component registry
             component_registry_path = os.path.join(ai_ref_path, "component_registry.json")
@@ -3184,6 +3446,7 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
             # Parse the target file to get its imports, classes, and functions
             target_file_info = None
             target_file_rel_path = rel_file_path.replace("\\", "/")
+            logger.debug(f"Normalized target path: {target_file_rel_path}")
 
             # Properly check if script_index is a dictionary and has the "files" key
             if isinstance(script_index, dict) and "files" in script_index and isinstance(script_index["files"], dict):
@@ -3194,6 +3457,7 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
 
             if not target_file_info:
                 # If the file is not in the index, parse it directly
+                logger.debug(f"File not found in index, parsing directly: {file_path}")
                 target_file_info = {
                     "path": target_file_rel_path,
                     "classes": [],
@@ -3216,10 +3480,16 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
             if "mini_librarian" in target_file_info:
                 mini_librarian_path = os.path.join(ai_ref_path, target_file_info["mini_librarian"])
                 if os.path.exists(mini_librarian_path):
-                    with open(mini_librarian_path, 'r', encoding='utf-8') as f:
-                        mini_librarian = json.load(f)
-                        if "imports" in mini_librarian:
-                            target_imports = mini_librarian["imports"]
+                    try:
+                        with open(mini_librarian_path, 'r', encoding='utf-8') as f:
+                            mini_librarian = json.load(f)
+                            if isinstance(mini_librarian, dict) and "imports" in mini_librarian:
+                                if isinstance(mini_librarian["imports"], list):
+                                    target_imports = mini_librarian["imports"]
+                                else:
+                                    logger.warning(f"Imports is not a list in {mini_librarian_path}")
+                    except Exception as e:
+                        logger.error(f"Error reading mini librarian at {mini_librarian_path}: {str(e)}")
 
             # For each file in the script index, check for relationships
             # Only proceed if script_index has the proper structure
@@ -3228,7 +3498,9 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
                     "status": "error",
                     "message": "Invalid script index structure"
                 }
-                
+            
+            # Process each file in the script index
+            logger.debug(f"Processing {len(script_index['files'])} files for relationships")
             for path, info in script_index["files"].items():
                 # Skip the target file itself
                 if path == target_file_rel_path:
@@ -3259,80 +3531,113 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
 
                 # 3. Check if this file imports the target file or is imported by it
                 mini_librarian_path = None
-                if "mini_librarian" in info:
+                if isinstance(info, dict) and "mini_librarian" in info:
                     mini_librarian_path = os.path.join(ai_ref_path, info["mini_librarian"])
 
                 if mini_librarian_path and os.path.exists(mini_librarian_path):
-                    with open(mini_librarian_path, 'r', encoding='utf-8') as f:
-                        mini_librarian = json.load(f)
+                    try:
+                        with open(mini_librarian_path, 'r', encoding='utf-8') as f:
+                            mini_librarian = json.load(f)
 
-                        if "imports" in mini_librarian:
-                            try:
-                                # Check if this file imports the target file
-                                target_module = os.path.splitext(target_file_rel_path)[0].replace("/", ".")
-                                
-                                # Guard against non-string target_module or bad module names
-                                if not isinstance(target_module, str) or not target_module:
-                                    logger.error(f"Invalid target module name: {target_module}")
-                                    continue
-                                
-                                # Make sure os.path.basename returns a string
-                                target_basename = os.path.basename(target_module)
-                                if not isinstance(target_basename, str) or not target_basename:
-                                    logger.error(f"Invalid target basename: {target_basename}")
-                                    continue
-                                
-                                for imp in mini_librarian["imports"]:
-                                    # Make sure imp is a string
-                                    if not isinstance(imp, str):
+                            # Safely check for imports
+                            if isinstance(mini_librarian, dict) and "imports" in mini_librarian:
+                                # 3a. Check if this file imports the target file
+                                try:
+                                    # Check if this file imports the target file
+                                    target_module = os.path.splitext(target_file_rel_path)[0].replace("/", ".")
+                                    
+                                    # Guard against non-string target_module or bad module names
+                                    if not isinstance(target_module, str) or not target_module:
+                                        logger.error(f"Invalid target module name: {target_module}")
                                         continue
-                                        
-                                    # Look for direct or relative imports
-                                    if (imp == target_module or
-                                        imp.endswith("." + target_basename)):
-                                        related_files["imports"].append({
-                                            "path": path,
-                                            "relationship": "imports_target",
-                                            "import_statement": imp
-                                        })
-                                        break
-                            except Exception as e:
-                                logger.error(f"Error checking imports: {str(e)}")
-                                continue
+                                    
+                                    # Make sure os.path.basename returns a string
+                                    target_basename = os.path.basename(target_module)
+                                    if not isinstance(target_basename, str) or not target_basename:
+                                        logger.error(f"Invalid target basename: {target_basename}")
+                                        continue
+                                    
+                                    # Process each import, but only if imports is a list
+                                    if isinstance(mini_librarian["imports"], list):
+                                        for imp in mini_librarian["imports"]:
+                                            # Make sure imp is a string
+                                            if not isinstance(imp, str):
+                                                logger.debug(f"Skipping non-string import: {type(imp)}")
+                                                continue
+                                            
+                                            # Compare imports directly and safely check endswith
+                                            matches_direct = imp == target_module
+                                            matches_relative = False
+                                            
+                                            # Safely check if imp ends with ".target_basename"
+                                            if isinstance(imp, str) and isinstance(target_basename, str):
+                                                suffix = "." + target_basename
+                                                if imp.endswith(suffix):
+                                                    matches_relative = True
+                                            
+                                            if matches_direct or matches_relative:
+                                                related_files["imports"].append({
+                                                    "path": path,
+                                                    "relationship": "imports_target",
+                                                    "import_statement": imp
+                                                })
+                                                break
+                                except Exception as e:
+                                    logger.error(f"Error checking imports: {str(e)}")
+                                    continue
 
-                            try:
-                                # Check if the target file imports this file
-                                this_module = os.path.splitext(path)[0].replace("/", ".")
-                                
-                                # Guard against non-string this_module
-                                if not isinstance(this_module, str) or not this_module:
-                                    logger.error(f"Invalid module name: {this_module}")
-                                    continue
-                                
-                                this_basename = os.path.basename(this_module)
-                                if not isinstance(this_basename, str) or not this_basename:
-                                    logger.error(f"Invalid basename: {this_basename}")
-                                    continue
-                                
-                                for imp in target_imports:
-                                    # Make sure imp is a string
-                                    if not isinstance(imp, str):
+                                # 3b. Check if the target file imports this file
+                                try:
+                                    # Only process if target_imports is a list
+                                    if not isinstance(target_imports, list):
+                                        logger.debug(f"Skipping target imports check - not a list: {type(target_imports)}")
                                         continue
+                                    
+                                    # Check if the target file imports this file
+                                    this_module = os.path.splitext(path)[0].replace("/", ".")
+                                    
+                                    # Guard against non-string this_module
+                                    if not isinstance(this_module, str) or not this_module:
+                                        logger.error(f"Invalid module name: {this_module}")
+                                        continue
+                                    
+                                    this_basename = os.path.basename(this_module)
+                                    if not isinstance(this_basename, str) or not this_basename:
+                                        logger.error(f"Invalid basename: {this_basename}")
+                                        continue
+                                    
+                                    for imp in target_imports:
+                                        # Make sure imp is a string
+                                        if not isinstance(imp, str):
+                                            logger.debug(f"Skipping non-string target import: {type(imp)}")
+                                            continue
                                         
-                                    if (imp == this_module or
-                                        imp.endswith("." + this_basename)):
-                                        related_files["imported_by"].append({
-                                            "path": path,
-                                            "relationship": "imported_by_target",
-                                            "import_statement": imp
-                                        })
-                                        break
-                            except Exception as e:
-                                logger.error(f"Error checking target imports: {str(e)}")
-                                continue
+                                        # Compare imports directly and safely check endswith
+                                        matches_direct = imp == this_module
+                                        matches_relative = False
+                                        
+                                        # Safely check if imp ends with ".this_basename"
+                                        if isinstance(imp, str) and isinstance(this_basename, str):
+                                            suffix = "." + this_basename
+                                            if imp.endswith(suffix):
+                                                matches_relative = True
+                                        
+                                        if matches_direct or matches_relative:
+                                            related_files["imported_by"].append({
+                                                "path": path,
+                                                "relationship": "imported_by_target",
+                                                "import_statement": imp
+                                            })
+                                            break
+                                except Exception as e:
+                                    logger.error(f"Error checking target imports: {str(e)}")
+                                    continue
+                    except Exception as e:
+                        logger.error(f"Error processing mini librarian for {path}: {str(e)}")
+                        continue
 
                 # 4. Class and function references
-                if "classes" in target_file_info:
+                if "classes" in target_file_info and isinstance(target_file_info["classes"], list):
                     # Check if this file references classes from the target file
                     full_content = ""
                     try:
@@ -3343,28 +3648,35 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
 
                     if full_content:
                         for class_name in target_file_info["classes"]:
-                            if class_name in full_content:
+                            if isinstance(class_name, str) and class_name in full_content:
                                 # Verify it's a proper reference, not just string matching
                                 # Look for patterns like: ClassName(, ClassName., = ClassName
-                                import re
-                                if re.search(r'[(\s=.]' + re.escape(class_name) + r'[\s(.]', full_content):
-                                    related_files["class_references"].append({
-                                        "path": path,
-                                        "relationship": "references_class",
-                                        "class_name": class_name
-                                    })
+                                try:
+                                    import re
+                                    if re.search(r'[(\s=.]' + re.escape(class_name) + r'[\s(.]', full_content):
+                                        related_files["class_references"].append({
+                                            "path": path,
+                                            "relationship": "references_class",
+                                            "class_name": class_name
+                                        })
+                                except Exception as e:
+                                    logger.error(f"Error in regex search for class {class_name}: {str(e)}")
 
                     # Check for function calls
-                    for func_name in target_file_info["functions"]:
-                        if func_name in full_content:
-                            # Look for pattern like function_name(
-                            import re
-                            if re.search(r'[(\s=.]' + re.escape(func_name) + r'\s*\(', full_content):
-                                related_files["function_calls"].append({
-                                    "path": path,
-                                    "relationship": "calls_function",
-                                    "function_name": func_name
-                                })
+                    if "functions" in target_file_info and isinstance(target_file_info["functions"], list):
+                        for func_name in target_file_info["functions"]:
+                            if isinstance(func_name, str) and func_name in full_content:
+                                # Look for pattern like function_name(
+                                try:
+                                    import re
+                                    if re.search(r'[(\s=.]' + re.escape(func_name) + r'\s*\(', full_content):
+                                        related_files["function_calls"].append({
+                                            "path": path,
+                                            "relationship": "calls_function",
+                                            "function_name": func_name
+                                        })
+                                except Exception as e:
+                                    logger.error(f"Error in regex search for function {func_name}: {str(e)}")
 
             # Count total related files
             total_related = sum(len(files) for files in related_files.values())
@@ -3373,8 +3685,10 @@ def find_related_files(project_path: str, file_path: str) -> Dict[str, Any]:
             unique_related = set()
             for category, files in related_files.items():
                 for file_info in files:
-                    unique_related.add(file_info["path"])
+                    if isinstance(file_info, dict) and "path" in file_info:
+                        unique_related.add(file_info["path"])
 
+            logger.debug(f"Found {len(unique_related)} unique related files")
             return {
                 "status": "success",
                 "file": rel_file_path,
