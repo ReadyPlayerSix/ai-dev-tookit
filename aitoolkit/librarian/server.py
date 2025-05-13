@@ -58,11 +58,13 @@ try:
         get_task_result_mcp,
         cancel_task_mcp,
         list_tasks_mcp,
-        think as think_task
+        task_deep_analysis  # Was incorrectly trying to import 'think'
     )
+    # Import think tool separately - it's in think_tool.py not task_board.py
+    from aitoolkit.librarian.think_tool import think
     TASKBOARD_AVAILABLE = True
-except ImportError:
-    print("TaskBoard Integration not available")
+except ImportError as e:
+    print(f"TaskBoard Integration not available: {e}")
     TASKBOARD_AVAILABLE = False
     register_unified_context_tools = None
 
