@@ -66,6 +66,14 @@ except ImportError:
     TASKBOARD_AVAILABLE = False
     register_unified_context_tools = None
 
+# Import Security Analyzer Integration
+try:
+    from aitoolkit.librarian.security_analyzer_integration import apply_security_analyzer_integration
+    SECURITY_ANALYZER_AVAILABLE = True
+except ImportError:
+    print("Security Analyzer Integration not available")
+    SECURITY_ANALYZER_AVAILABLE = False
+
 # Import filesystem module for file operations
 import shutil
 import tempfile
@@ -4205,9 +4213,109 @@ if TASKBOARD_AVAILABLE:
         }
         
         apply_taskboard_integration(server_context)
+        
+        # Initialize Tool Reference TaskBoard integration
+        try:
+            from aitoolkit.librarian.tool_reference_taskboard import (
+                register_tool_reference_task_type,
+                initialize_tool_reference_async,
+                update_tool_reference_async,
+                cross_reference_async
+            )
+            
+            # Register the tool reference task type
+            register_tool_reference_task_type()
+            
+            # Add Tool Reference TaskBoard MCP tools
+            @mcp.tool
+            def tool_reference_initialize_async(project_path: str, priority: str = "medium") -> str:
+                """
+                Initialize the Tool Reference system asynchronously using TaskBoard.
+                
+                This tool creates the .tool_reference directory structure and builds a comprehensive
+                metadata system that helps Claude select and use tools effectively. Since this
+                operation can take time for large projects, it runs asynchronously through
+                the TaskBoard system.
+                
+                Args:
+                    project_path: The root directory of the project
+                    priority: Task priority (high, medium, low)
+                    
+                Returns:
+                    Task ID for tracking the operation
+                """
+                return initialize_tool_reference_async(project_path, priority)
+            
+            @mcp.tool
+            def tool_reference_update_async(project_path: str, priority: str = "medium") -> str:
+                """
+                Update the Tool Reference system asynchronously using TaskBoard.
+                
+                This tool updates an existing Tool Reference with the latest tool metadata.
+                Since this operation can take time for large projects, it runs asynchronously
+                through the TaskBoard system.
+                
+                Args:
+                    project_path: The root directory of the project
+                    priority: Task priority (high, medium, low)
+                    
+                Returns:
+                    Task ID for tracking the operation
+                """
+                return update_tool_reference_async(project_path, priority)
+            
+            @mcp.tool
+            def tool_reference_cross_reference(project_path: str, priority: str = "medium") -> str:
+                """
+                Create cross-references between .ai_reference and .tool_reference asynchronously.
+                
+                This tool establishes bidirectional links between the AI Librarian context
+                and the Tool Reference system, improving Claude's ability to navigate between
+                code components and the tools that operate on them.
+                
+                Args:
+                    project_path: The root directory of the project
+                    priority: Task priority (high, medium, low)
+                    
+                Returns:
+                    Task ID for tracking the operation
+                """
+                return cross_reference_async(project_path, priority)
+                
+            print("Tool Reference TaskBoard integration initialized successfully")
+        except Exception as e:
+            print(f"Error initializing Tool Reference TaskBoard integration: {e}")
+        
         print("TaskBoard system initialized successfully")
     except Exception as e:
         print(f"Error initializing TaskBoard: {e}")
+
+# Register Security Analyzer tools if available - only registers, doesn't analyze anything yet
+if SECURITY_ANALYZER_AVAILABLE:
+    try:
+        # Just register the tools, don't do any analysis at startup
+        print("Registering Security Analyzer tools...")
+        if 'server_context' not in locals():
+            server_context = {
+                "mcp_tools": globals(),
+                "project_path": os.getcwd(),  # Will be updated when project paths are set
+                "initialize_server": None  # Placeholder
+            }
+        
+        # Add mcp to server context
+        server_context["mcp"] = mcp
+        
+        # Add the original sanity_check function to context for enhancement
+        for key, value in globals().items():
+            if key == "sanity_check":
+                server_context[key] = value
+                break
+        
+        # Just register the tools, don't perform any analysis yet
+        apply_security_analyzer_integration(server_context)
+        print("Security Analyzer tools registered successfully")
+    except Exception as e:
+        print(f"Error registering Security Analyzer tools: {e}")
 
 if __name__ == "__main__":
     # Initialize any directories passed as command-line arguments

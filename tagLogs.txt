@@ -1,3 +1,5 @@
+2025-05-13 20:15:10 -0500  (tag: v0.5.2-tool-integration)
+2025-05-13 19:30:45 -0500  (tag: v0.5.1-security-analyzer)
 2025-05-13 17:15:30 -0500  (tag: v0.5.0-taskboard-release)
 2025-05-13 14:30:15 -0500  (tag: v0.5.0-taskboard-beta)
 2025-05-13 13:45:28 -0500  (tag: v0.4.8-claude-code-adapters)
