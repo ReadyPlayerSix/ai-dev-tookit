@@ -86,19 +86,22 @@ All this happens automatically - just initialize once and the system handles eve
 - **Simplified Output Format**: Flat, reference-catalog style organization for easy navigation *(Stable)*
 - **Metadata Extraction**: Uses Python's introspection capabilities for accurate tool information *(Stable)*
 
-### TaskBoard System (Coming Soon)
-- **AI Mini-Librarians**: Specialized AI agents that process specific analysis tasks *(Alpha)*
-- **Asynchronous Processing**: Background task processing for complex operations *(Planning)*
-- **AI-Optimized Shorthand**: Compressed format for efficient AI-to-AI communication *(Alpha: Code)*
-- **Advanced Context Awareness**: Rich contextual information links tasks to code *(Alpha)*
-- **Distributed Knowledge System**: Intelligence distributed across specialized agents *(Prototype: Code)*
+### TaskBoard System (New!)
+- **AI Mini-Librarians**: Specialized AI agents that process specific analysis tasks *(Stable)*
+- **Asynchronous Processing**: Background task processing for complex operations *(Stable)*
+- **Task Queue Management**: Prioritized task execution with timeout handling *(Stable)*
+- **Resilient Operations**: Automatic recovery from failures and timeouts *(Stable)*
+- **AI-Optimized Shorthand**: Compressed format for efficient AI-to-AI communication *(Stable: Code, Beta: Desktop)*
+- **Advanced Context Awareness**: Rich contextual information links tasks to code *(Stable)*
+- **Distributed Knowledge System**: Intelligence distributed across specialized agents *(Stable: Code, Beta: Desktop)*
 
-### Think Tool (Coming Soon)
-- **Advanced AI Reasoning**: Enhanced capability for Claude to reason through complex problems *(Alpha: Code)*
-- **Information Gathering Delegation**: Automatically assign research to mini-librarians *(Prototype)*
-- **Knowledge Synthesis**: Combine insights from multiple specialized agents *(Planning)*
-- **Contextual Memory**: Build and maintain detailed understanding across sessions *(Prototype: Code)*
-- **Self-directed Exploration**: Allow Claude to explore code paths independently *(Planning)*
+### Think Tool (Beta)
+- **Advanced AI Reasoning**: Enhanced capability for Claude to reason through complex problems *(Stable)*
+- **Information Gathering Delegation**: Automatically assign research to mini-librarians *(Stable)*
+- **Knowledge Synthesis**: Combine insights from multiple specialized agents *(Beta)*
+- **Contextual Memory**: Build and maintain detailed understanding across sessions *(Stable: Code, Beta: Desktop)*
+- **Self-directed Exploration**: Allow Claude to explore code paths independently *(Beta)*
+- **Asynchronous Processing**: Process complex reasoning tasks in the background without timeouts *(Stable)*
 
 ### Robustness Features
 - **Automatic Retries**: Long-running operations automatically retry on failure *(Stable)*
@@ -239,13 +242,19 @@ list_ai_tasks("path/to/project", status="active", priority=1)
 # (Coming in TaskBoard update)
 ```
 
-### Think Tool (Coming Soon)
+### Think Tool (Beta)
 ```python
-# Think through a complex problem
-think("I need to understand how the authentication system works and its dependencies")
+# Think through a complex problem asynchronously
+task_id = think("I need to understand how the authentication system works and its dependencies")
 
-# Get task results
-get_task_results("task-12345,task-67890")
+# Check status of the thinking task
+get_task_status(project_path, task_id)
+
+# Get final results when completed
+get_task_result(project_path, task_id)
+
+# Manage multiple tasks
+list_tasks(project_path, status="running")
 ```
 
 ### File System Operations
