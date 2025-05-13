@@ -1,3 +1,8 @@
+2025-05-13 14:30:15 -0500  (tag: v0.5.0-taskboard-beta)
+2025-05-13 13:45:28 -0500  (tag: v0.4.8-claude-code-adapters)
+2025-05-13 10:17:57 -0500  (tag: v0.4.7-claude-code-integration)
+2025-05-13 09:30:21 -0500  (tag: v0.4.7-init-claude-md)
+2025-05-12 16:42:33 -0500  (tag: v0.4.6-simple-tool-index)
 2025-05-11 07:58:43 -0500  (tag: v0.4.5-pre-fix, origin/main)
 2025-05-10 18:00:30 -0500  (tag: v0.4.4-prep)
 2025-05-10 16:18:56 -0500  (tag: v0.4.4)
