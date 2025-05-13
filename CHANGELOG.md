@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2-tool-integration] - 2025-05-13
+
+### Added
+- TaskBoard integration for Tool Reference system
+- Asynchronous processing for tool indexing operations
+- Bidirectional cross-references between .ai_reference and .tool_reference
+- Tool-to-component and component-to-tool mapping functionality
+- Improved component navigation with tool awareness
+- New MCP tools for asynchronous tool reference management
+
+### Changed
+- Optimized server startup with lazy-loading of security analyzer
+- Improved tool indexing performance through TaskBoard integration
+- Enhanced component-to-tool relationship tracking
+
+## [0.5.1-security-analyzer] - 2025-05-13
+
+### Added
+- Professional security analyzer for codebase vulnerability assessment
+- Pattern-based security scanning for common vulnerability patterns
+- AST-based security analysis for more sophisticated vulnerability detection
+- Security issue categorization by severity (Critical, High, Medium, Low, Info)
+- CWE ID mapping for standardized vulnerability tracking
+- Enhanced sanity_check with optional security analysis integration
+- Dedicated security_analyze tool for comprehensive security reports
+
+### Changed
+- Improved server integration with modular security analyzer component
+- Enhanced diagnostic capabilities for sanity_check tool
+- Added security-specific patterns for AI Dev Toolkit components
+
 ## [0.5.0-taskboard-release] - 2025-05-13
 
 ### Added

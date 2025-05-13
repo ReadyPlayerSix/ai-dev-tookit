@@ -6,7 +6,7 @@
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-purple)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.5.0--taskboard--release-orange)
+![Release](https://img.shields.io/badge/release-v0.5.2--tool--integration-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -24,6 +24,8 @@ AI Dev Toolkit elevates Claude beyond a conversational assistant to a comprehens
 - **Track and manage development tasks** with sophisticated context awareness
 - **Navigate between code and tools** with unified context awareness
 - **Offload complex cognitive tasks** to specialized AI mini-librarians
+- **Process long-running operations asynchronously** with the TaskBoard system
+- **Analyze codebase security** with professional-level vulnerability assessment
 - **Create a seamless development workflow** within Claude's interface
 
 With this toolkit, Claude becomes a true development partner - remembering your project structure, understanding component relationships, connecting code to relevant tools, tracking tasks, and assisting with development activities.
@@ -72,6 +74,15 @@ All this happens automatically - just initialize once and the system handles eve
 - **File Operations**: Comprehensive file management capabilities *(Stable)*
 - **Search & Indexing**: Find files and content with powerful search tools *(Stable)*
 
+### TaskBoard System
+- **Asynchronous Processing**: Execute long-running operations in the background *(Stable)*
+- **Prioritized Task Queue**: Manage operations by priority with automatic timeouts *(Stable)*
+- **Background Workers**: Pool of worker threads for parallel task execution *(Stable)*
+- **Task Persistence**: Operations survive server restarts with automatic recovery *(Stable)*
+- **Think Tool**: Deep analytical reasoning capabilities for complex problems *(Stable)*
+- **Progress Tracking**: Monitor task status, results and execution metrics *(Stable)*
+- **Cross-component Integration**: Unified task processing across all subsystems *(Stable)*
+
 ### Task Management System
 - **Persistent To-Do Tracking**: Tasks persist across conversations *(Stable)*
 - **Multi-level Task Structure**: Support for tasks, subtasks, and dependencies *(Stable)*
@@ -79,9 +90,21 @@ All this happens automatically - just initialize once and the system handles eve
 - **Code Context Linking**: Associate tasks with specific code components *(Stable)*
 - **Automatic Task Inference**: Extract potential tasks from conversations *(Stable: Code, Beta: Desktop)*
 
+### Security Analysis
+- **Vulnerability Assessment**: Professional-level security analysis of codebases *(Stable)*
+- **Pattern-based Scanning**: Detection of common security vulnerabilities *(Stable)*
+- **AST-based Analysis**: Sophisticated code analysis for security issues *(Stable)*
+- **Severity Classification**: Issues categorized by criticality (Critical to Info) *(Stable)*
+- **Standardized Reporting**: CWE IDs and detailed vulnerability descriptions *(Stable)*
+- **AI Toolkit-Specific Patterns**: Custom rules for AI Dev Toolkit components *(Stable)*
+- **Integration with Sanity Check**: Combined code quality and security assessment *(Stable)*
+
 ### Tool Index System
 - **Simple, Robust Implementation**: Single-pass indexing with no subprocesses for improved reliability and performance *(Stable)*
 - **AI-Optimized Tool Profiles**: Detailed metadata that helps Claude select the right tools *(Stable)*
+- **Asynchronous Tool Indexing**: Background processing of tool indexing via TaskBoard integration *(Stable)*
+- **Bidirectional References**: Cross-references between code components and applicable tools *(Stable)*
+- **Component-Tool Mapping**: Automatic mapping of which tools work with specific components *(Stable)*
 - **Direct Function Discovery**: Scans common locations for tool functions and imports/analyzes them directly *(Stable)*
 - **Simplified Output Format**: Flat, reference-catalog style organization for easy navigation *(Stable)*
 - **Metadata Extraction**: Uses Python's introspection capabilities for accurate tool information *(Stable)*
