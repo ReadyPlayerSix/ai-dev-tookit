@@ -52,8 +52,18 @@ except ImportError:
 # Import TaskBoard Integration
 try:
     from aitoolkit.librarian.server_taskboard_integration import apply_taskboard_integration
+    from aitoolkit.librarian.task_board import (
+        submit_background_task,
+        get_task_status_mcp,
+        get_task_result_mcp,
+        cancel_task_mcp,
+        list_tasks_mcp,
+        think as think_task
+    )
+    TASKBOARD_AVAILABLE = True
 except ImportError:
     print("TaskBoard Integration not available")
+    TASKBOARD_AVAILABLE = False
     register_unified_context_tools = None
 
 # Import filesystem module for file operations
@@ -4091,5 +4101,116 @@ def ai_librarian_help() -> str:
     Would you like me to explain any specific feature in more detail?
     """
 
+# Register TaskBoard tools if available
+if TASKBOARD_AVAILABLE:
+    print("Registering TaskBoard tools...")
+    
+    @mcp.tool()
+    def think(project_path: str, query: str, priority: str = "high") -> str:
+        """
+        The 'think' function starts a deep analysis task that processes complex problems
+        
+        Args:
+            project_path: Path to the project
+            query: The question or problem to analyze
+            priority: Priority of the task ("high", "medium", "low")
+            
+        Returns:
+            Task ID for the thinking task
+        """
+        return think_task(project_path, query, priority)
+    
+    @mcp.tool()
+    def submit_background_task(project_path: str, task_type: str, parameters: dict, priority: str = "medium") -> str:
+        """
+        Submit a task to be processed asynchronously
+        
+        Args:
+            project_path: Path to the project
+            task_type: Type of task (e.g., "code_analysis", "semantic_search")
+            parameters: Parameters for the task
+            priority: Priority of the task ("high", "medium", "low")
+            
+        Returns:
+            Task ID
+        """
+        return submit_background_task(project_path, task_type, parameters, priority)
+    
+    @mcp.tool()
+    def get_task_status(project_path: str, task_id: str) -> str:
+        """
+        Get the status of a background task
+        
+        Args:
+            project_path: Path to the project
+            task_id: ID of the task to check
+            
+        Returns:
+            Task status
+        """
+        return get_task_status_mcp(project_path, task_id)
+    
+    @mcp.tool()
+    def get_task_result(project_path: str, task_id: str) -> str:
+        """
+        Get the result of a completed background task
+        
+        Args:
+            project_path: Path to the project
+            task_id: ID of the task to get the result for
+            
+        Returns:
+            Task result
+        """
+        return get_task_result_mcp(project_path, task_id)
+    
+    @mcp.tool()
+    def cancel_task(project_path: str, task_id: str) -> str:
+        """
+        Cancel a pending background task
+        
+        Args:
+            project_path: Path to the project
+            task_id: ID of the task to cancel
+            
+        Returns:
+            Result of the cancellation attempt
+        """
+        return cancel_task_mcp(project_path, task_id)
+    
+    @mcp.tool()
+    def list_tasks(project_path: str, status: str = None, task_type: str = None) -> str:
+        """
+        List background tasks
+        
+        Args:
+            project_path: Path to the project
+            status: Optional status filter ("pending", "running", "completed", "failed", "timeout", "cancelled")
+            task_type: Optional task type filter
+            
+        Returns:
+            List of tasks
+        """
+        return list_tasks_mcp(project_path, status, task_type)
+
+# Initialize TaskBoard if available
+if TASKBOARD_AVAILABLE:
+    try:
+        # Apply TaskBoard integration to server context
+        print("Initializing TaskBoard system...")
+        server_context = {
+            "mcp_tools": globals(),
+            "project_path": os.getcwd(),  # Will be updated when project paths are set
+            "initialize_server": None  # Placeholder
+        }
+        
+        apply_taskboard_integration(server_context)
+        print("TaskBoard system initialized successfully")
+    except Exception as e:
+        print(f"Error initializing TaskBoard: {e}")
+
 if __name__ == "__main__":
+    # Initialize any directories passed as command-line arguments
+    # This will also initialize the TaskBoard for these directories
+    
     mcp.run()
