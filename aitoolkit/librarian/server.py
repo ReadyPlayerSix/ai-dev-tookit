@@ -23,8 +23,41 @@ import logging
 import threading
 import ast
 import os.path
+import shutil
+import subprocess
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union, Set, Tuple, cast
+
+def create_directory_symlink(source_path: str, target_path: str) -> bool:
+    """
+    Create a directory symlink or junction in a cross-platform way.
+    
+    Args:
+        source_path: Path to the source directory
+        target_path: Path to the target (link) to create
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        # Make sure source exists
+        if not os.path.exists(source_path):
+            return False
+            
+        # Create parent directory of target if needed
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+            
+        # Create the symlink based on platform
+        if os.name == 'nt':  # Windows
+            # Windows needs CMD's internal mklink command with /J for directory junctions
+            subprocess.run(f'cmd /c mklink /J "{target_path}" "{source_path}"', shell=True, check=True)
+        else:  # Linux/Mac
+            os.symlink(source_path, target_path, target_is_directory=True)
+            
+        return os.path.exists(target_path)
+    except Exception as e:
+        logger.warning(f"Could not create symlink: {str(e)}")
+        return False
 
 # Add the current directory to sys.path to ensure local imports work
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -90,17 +123,51 @@ import datetime
 try:
     # First try the pip-installed mcp package
     from mcp.server.fastmcp import FastMCP, Context
+    MCP_AVAILABLE = True
 except ImportError:
     try:
-        # Try to install mcp package
-        import subprocess
-        print("Attempting to install mcp package...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "mcp[cli]"])
-        from mcp.server.fastmcp import FastMCP, Context
-        print("Successfully installed and imported mcp package")
+        # Try to install mcp package - disable automatic install since it's causing issues
+        print("MCP package not found.")
+        print("Please install it manually with: pip install mcp[cli]")
+        print("Running in limited functionality mode...")
+        MCP_AVAILABLE = False
+        
+        # Create stub classes to allow server to start
+        class StubContext:
+            def __init__(self):
+                pass
+        
+        class StubMCP:
+            def __init__(self, name, capabilities=None):
+                self.name = name
+                self.capabilities = capabilities or {}
+                print(f"Initialized stub MCP server: {name}")
+                
+            def tool(self, *args, **kwargs):
+                # Return a no-op decorator
+                return lambda f: f
+                
+            def prompt(self, *args, **kwargs):
+                # Return a no-op decorator 
+                return lambda f: f
+                
+            def subscribe(self, *args, **kwargs):
+                # Return a no-op decorator
+                return lambda f: f
+                
+            def run(self):
+                print("Stub MCP server running in limited functionality mode")
+                # Keep the process alive
+                while True:
+                    time.sleep(1)
+        
+        # Create stub objects
+        FastMCP = StubMCP
+        Context = StubContext
+        
     except Exception as e:
-        print(f"Error installing mcp package: {e}")
-        raise ImportError("Could not import FastMCP. Please install the mcp package: pip install mcp[cli]")
+        print(f"Error setting up stub MCP: {e}")
+        raise ImportError("Could not import or simulate FastMCP.")
 
 # Configure logging using the centralized logging manager
 logger = configure_logger(
@@ -121,6 +188,25 @@ mcp = FastMCP(
         "prompts": {"listChanged": True}
     }
 )
+
+# Log MCP server status
+if 'MCP_AVAILABLE' in globals() and not MCP_AVAILABLE:
+    logger.warning("Running in limited functionality mode without MCP server.")
+    print("\n============================================================")
+    print("RUNNING IN LIMITED FUNCTIONALITY MODE - NO MCP CAPABILITIES")
+    print("To fix: Install MCP package manually with 'pip install mcp[cli]'")
+    print("============================================================\n")
+    
+    # Replace mcp.tool decorator with a no-op decorator to avoid errors
+    original_tool = mcp.tool
+    def dummy_tool(*args, **kwargs):
+        def decorator(func):
+            # Just return the function unchanged
+            return func
+        return decorator
+    mcp.tool = dummy_tool
+else:
+    logger.info("MCP server initialized successfully")
 
 # Thread synchronization lock
 state_lock = threading.Lock()
@@ -380,10 +466,32 @@ def initialize_tool_index():
     tool_index_path = None
 
     for project_path in ALLOWED_DIRECTORIES:
-        potential_path = os.path.join(project_path, ".tool_reference")
-        if os.path.exists(potential_path):
-            tool_index_path = potential_path
-            logger.info(f"Found Tool Index at {tool_index_path}")
+        # First check for .tools_reference (plural - what Claude Desktop expects)
+        potential_path_plural = os.path.join(project_path, ".tools_reference")
+        if os.path.exists(potential_path_plural):
+            tool_index_path = potential_path_plural
+            logger.info(f"Found Tool Index at {tool_index_path} (plural form)")
+            break
+            
+        # Then check for .tool_reference (singular - what code currently creates)
+        potential_path_singular = os.path.join(project_path, ".tool_reference")
+        if os.path.exists(potential_path_singular):
+            tool_index_path = potential_path_singular
+            logger.info(f"Found Tool Index at {tool_index_path} (singular form)")
+            
+            # Create a symlink from .tool_reference to .tools_reference for Claude Desktop
+            plural_path = os.path.join(project_path, ".tools_reference")
+            if not os.path.exists(plural_path):
+                if create_directory_symlink(potential_path_singular, plural_path):
+                    logger.info(f"Created symlink from {potential_path_singular} to {plural_path}")
+                else:
+                    try:
+                        # If symlink fails, try a directory copy
+                        shutil.copytree(potential_path_singular, plural_path)
+                        logger.info(f"Copied {potential_path_singular} to {plural_path} for Claude Desktop")
+                    except Exception as e:
+                        logger.warning(f"Could not create .tools_reference for Claude Desktop: {str(e)}")
+            
             break
 
     # Store the path in the global context
@@ -1400,7 +1508,24 @@ def initialize_tool_index(project_path: str) -> Dict[str, Any]:
             result = simple_initialize_tool_index(project_path)
             
             # Check if tool reference was successfully initialized
-            if result.startswith("✅"):
+            # Handle both string and dictionary returns for backward compatibility
+            is_success = False
+            if isinstance(result, dict):
+                is_success = result.get("status") == "success"
+                tool_count = result.get("tool_count", 0)
+                detail = result.get("detail", "")
+            else:
+                # String-based result for backward compatibility
+                is_success = isinstance(result, str) and result.startswith("✅")
+                # Try to extract tool count from the result string
+                tool_count = 0
+                if is_success and "Tool Count:" in result:
+                    try:
+                        tool_count = int(result.split("Tool Count:")[1].strip())
+                    except (IndexError, ValueError):
+                        pass
+                    
+            if is_success:
                 # Parse the statistics from the result
                 tool_count = 0
                 profile_count = 0
@@ -1570,7 +1695,12 @@ def initialize_ai_dev_toolkit(project_path: str) -> Dict[str, Any]:
     tool_result = simple_initialize_tool_index(project_path)
     
     # Parse tool initialization result
-    tool_success = tool_result.startswith("✅")
+    # Handle both string and dictionary returns for backward compatibility
+    if isinstance(tool_result, dict):
+        tool_success = tool_result.get("status") == "success"
+    else:
+        # String-based result for backward compatibility
+        tool_success = isinstance(tool_result, str) and tool_result.startswith("✅")
     
     # Step 3: Create cross-references between systems
     cross_ref_result = None
@@ -4365,4 +4495,21 @@ if __name__ == "__main__":
     # Initialize any directories passed as command-line arguments
     # This will also initialize the TaskBoard for these directories
     
-    mcp.run()
+    if 'MCP_AVAILABLE' in globals() and not MCP_AVAILABLE:
+        print("\n============================================================")
+        print("WARNING: RUNNING WITHOUT MCP - CLAUDE DESKTOP CONNECTION NOT AVAILABLE")
+        print("To enable Claude Desktop connection, install MCP package:")
+        print("pip install mcp[cli]")
+        print("============================================================\n")
+        print("Starting server anyway for directory scanning and indexing...")
+        
+        # Run a simple loop to keep the script running
+        try:
+            while True:
+                time.sleep(10)
+                print("Server running in limited functionality mode...")
+        except KeyboardInterrupt:
+            print("Server shutting down...")
+    else:
+        # Run the full MCP server
+        mcp.run()
