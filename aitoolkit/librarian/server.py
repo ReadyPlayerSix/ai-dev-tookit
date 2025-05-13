@@ -58,9 +58,9 @@ try:
         get_task_result_mcp,
         cancel_task_mcp,
         list_tasks_mcp,
-        task_deep_analysis  # Was incorrectly trying to import 'think'
+        task_deep_analysis
     )
-    # Import think tool separately - it's in think_tool.py not task_board.py
+    # Import think tool from its dedicated module
     from aitoolkit.librarian.think_tool import think
     TASKBOARD_AVAILABLE = True
 except ImportError as e:
@@ -4140,12 +4140,9 @@ if TASKBOARD_AVAILABLE:
             The formatted thought or reflection
         """
         try:
-            print("Importing standalone think tool")
             from aitoolkit.librarian.think_tool import think as standalone_think
-            print("Successfully imported standalone think tool")
             return standalone_think(thought)
-        except ImportError as e:
-            print(f"Error importing think_tool: {e}")
+        except ImportError:
             # Fallback implementation if the module isn't available
             return f"<reflection>\n{thought}\n</reflection>"
     
@@ -4242,12 +4239,9 @@ if TASKBOARD_AVAILABLE:
             Task ID for the deep analysis task
         """
         try:
-            print("Starting deep analysis task")
             from aitoolkit.librarian.task_board import task_deep_analysis
-            print("Successfully imported task_deep_analysis")
             return task_deep_analysis(project_path, query, priority)
         except ImportError as e:
-            print(f"Error importing task_deep_analysis: {e}")
             return f"Error: Could not import deep analysis function: {e}"
 
 # Initialize TaskBoard if available
@@ -4255,25 +4249,11 @@ if TASKBOARD_AVAILABLE:
     try:
         # Apply TaskBoard integration to server context
         print("Initializing TaskBoard system...")
-        # Verify task_deep_analysis is available
-        print(f"TaskBoard tools available: {'task_deep_analysis' in globals()}")
-        
         server_context = {
             "mcp_tools": globals(),
             "project_path": os.getcwd(),  # Will be updated when project paths are set
             "initialize_server": None  # Placeholder
         }
-        
-        # Make sure the think and taskboard tools are registered properly
-        print("Re-registering TaskBoard tools with explicit paths...")
-        from aitoolkit.librarian.task_board import (
-            submit_background_task,
-            get_task_status_mcp,
-            get_task_result_mcp,
-            cancel_task_mcp,
-            list_tasks_mcp,
-            task_deep_analysis
-        )
         
         # Apply the standard TaskBoard integration
         apply_taskboard_integration(server_context)
