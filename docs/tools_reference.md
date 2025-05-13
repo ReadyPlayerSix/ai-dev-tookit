@@ -47,7 +47,7 @@ This document provides a reference for all the tools available in the AI Dev Too
 
 ## Think Tool
 
-- `think(query)` - Use a structured thinking process to solve a problem
+- `think(thought)` - Use as a scratchpad to reflect on problems, verify requirements, check rules, or analyze results before taking action
 
 ## Prompts
 

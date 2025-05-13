@@ -36,10 +36,10 @@ TASK_TYPE_REGISTRY = {
         "mini_librarians": ["semantic-indexer", "code-searcher"],
         "handler": "_handle_semantic_search_task"
     },
-    "think": {
+    "deep_analysis": {
         "description": "Perform deep analysis on complex problems",
         "mini_librarians": ["component-analyzer", "dependency-mapper", "semantic-indexer"],
-        "handler": "_handle_think_task"
+        "handler": "_handle_deep_analysis_task"
     },
     "documentation_generation": {
         "description": "Generate documentation for code components",
@@ -126,7 +126,7 @@ def register_taskboard_mcp_tools(server_context: Dict[str, Any]) -> None:
         get_task_result_mcp,
         cancel_task_mcp,
         list_tasks_mcp,
-        think
+        task_deep_analysis
     )
     
     # Register MCP tools
@@ -181,9 +181,9 @@ def register_taskboard_mcp_tools(server_context: Dict[str, Any]) -> None:
         ]
     }
     
-    tools["think"] = {
-        "function": think,
-        "description": "The 'think' function starts a deep analysis task that processes complex problems",
+    tools["deep_analysis"] = {
+        "function": task_deep_analysis,
+        "description": "Start a deep analysis task that processes complex problems asynchronously",
         "parameters": [
             {"name": "project_path", "type": "string", "description": "Path to the project"},
             {"name": "query", "type": "string", "description": "The question or problem to analyze"},
@@ -244,8 +244,8 @@ def _handle_semantic_search_task(project_path: str, params: Dict[str, Any]) -> D
         "matches_found": 7
     }
 
-def _handle_think_task(project_path: str, params: Dict[str, Any]) -> Dict[str, Any]:
-    """Handle a think task"""
+def _handle_deep_analysis_task(project_path: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    """Handle a deep analysis task (formerly 'think' task)"""
     # This would be implemented with actual mini-librarian calls
     import time
     time.sleep(2)  # Simulate work

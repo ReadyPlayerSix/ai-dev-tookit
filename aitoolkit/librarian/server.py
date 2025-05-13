@@ -4114,19 +4114,32 @@ if TASKBOARD_AVAILABLE:
     print("Registering TaskBoard tools...")
     
     @mcp.tool()
-    def think(project_path: str, query: str, priority: str = "high") -> str:
+    def think(thought: str) -> str:
         """
-        The 'think' function starts a deep analysis task that processes complex problems
+        Use this tool as a scratchpad to think about something without taking action.
+        
+        The think tool helps break down complex problems, verify requirements,
+        check if plans comply with rules, and reflect on tool results. It doesn't
+        modify any files or perform external actions.
+        
+        Example uses:
+        - List specific rules that apply to the current request
+        - Check if all required information is collected
+        - Verify that planned actions comply with policies
+        - Analyze tool results for correctness
         
         Args:
-            project_path: Path to the project
-            query: The question or problem to analyze
-            priority: Priority of the task ("high", "medium", "low")
+            thought: Your thought or reflection to process
             
         Returns:
-            Task ID for the thinking task
+            The formatted thought or reflection
         """
-        return think_task(project_path, query, priority)
+        try:
+            from aitoolkit.librarian.think_tool import think as standalone_think
+            return standalone_think(thought)
+        except ImportError:
+            # Fallback implementation if the module isn't available
+            return f"<reflection>\n{thought}\n</reflection>"
     
     @mcp.tool()
     def submit_background_task(project_path: str, task_type: str, parameters: dict, priority: str = "medium") -> str:
@@ -4142,7 +4155,9 @@ if TASKBOARD_AVAILABLE:
         Returns:
             Task ID
         """
-        return submit_background_task(project_path, task_type, parameters, priority)
+        # Call the imported function from task_board.py, not recursively call this function
+        from aitoolkit.librarian.task_board import submit_background_task as _submit_task
+        return _submit_task(project_path, task_type, parameters, priority)
     
     @mcp.tool()
     def get_task_status(project_path: str, task_id: str) -> str:

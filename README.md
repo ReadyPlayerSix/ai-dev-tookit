@@ -6,7 +6,7 @@
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-purple)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.5.2--tool--integration-orange)
+![Release](https://img.shields.io/badge/release-v0.5.3--security--integration-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -98,6 +98,7 @@ All this happens automatically - just initialize once and the system handles eve
 - **Standardized Reporting**: CWE IDs and detailed vulnerability descriptions *(Stable)*
 - **AI Toolkit-Specific Patterns**: Custom rules for AI Dev Toolkit components *(Stable)*
 - **Integration with Sanity Check**: Combined code quality and security assessment *(Stable)*
+- **Independent Security Tool**: Can be used standalone with `security_analyze()` function *(Stable)*
 
 ### Tool Index System
 - **Simple, Robust Implementation**: Single-pass indexing with no subprocesses for improved reliability and performance *(Stable)*
@@ -118,13 +119,14 @@ All this happens automatically - just initialize once and the system handles eve
 - **Advanced Context Awareness**: Rich contextual information links tasks to code *(Stable)*
 - **Distributed Knowledge System**: Intelligence distributed across specialized agents *(Stable: Code, Beta: Desktop)*
 
-### Think Tool (Beta)
-- **Advanced AI Reasoning**: Enhanced capability for Claude to reason through complex problems *(Stable)*
-- **Information Gathering Delegation**: Automatically assign research to mini-librarians *(Stable)*
-- **Knowledge Synthesis**: Combine insights from multiple specialized agents *(Beta)*
-- **Contextual Memory**: Build and maintain detailed understanding across sessions *(Stable: Code, Beta: Desktop)*
-- **Self-directed Exploration**: Allow Claude to explore code paths independently *(Beta)*
-- **Asynchronous Processing**: Process complex reasoning tasks in the background without timeouts *(Stable)*
+### Think Tool
+- **Structured Reflection**: Claude's scratchpad for reasoning through complex problems *(Stable)*
+- **Requirements Verification**: Check if all required information is collected *(Stable)*
+- **Rule Compliance Checking**: Verify if planned actions comply with policies *(Stable)*
+- **Detailed Planning**: Break down complex tasks into manageable steps *(Stable)*
+- **Results Analysis**: Process and verify the results of other tools *(Stable)*
+- **Clear Separation**: Keep internal thought processes separate from user conversation *(Stable)*
+- **Decision Support**: Compare approaches and select the best option *(Stable)*
 
 ### Robustness Features
 - **Automatic Retries**: Long-running operations automatically retry on failure *(Stable)*
@@ -208,7 +210,7 @@ python development/launch.py
 ```python
 # Initialize AI Librarian for a project
 # This one command sets up everything - AI Librarian, Unified Context, and Tool References
-initialize_librarian("path/to/your/project")
+initialize_enhanced_librarian("path/to/your/project")
 
 # Search for code implementations
 find_implementation("path/to/your/project", "login function")
@@ -262,22 +264,36 @@ add_ai_task("path/to/project", "Authentication system refactoring", "Improve sec
 list_ai_tasks("path/to/project", status="active", priority=1)
 
 # Add detailed code context to a task
-# (Coming in TaskBoard update)
+add_task_context(task_id, "code_snippet", "Task relates to authentication system")
 ```
 
-### Think Tool (Beta)
+### Think Tool
 ```python
-# Think through a complex problem asynchronously
-task_id = think("I need to understand how the authentication system works and its dependencies")
+# Use the think tool as a scratchpad for reflection
+think("""
+User wants to implement a new authentication feature.
+- Required information:
+  * User roles and permissions structure
+  * Current authentication flow
+  * Security requirements
+- Implementation approach options:
+  * Extend existing AuthManager
+  * Create new specialized AuthProvider
+  * Use third-party authentication library
+- Considerations:
+  * Performance impact
+  * Security implications
+  * Maintenance complexity
+- Decision:
+  * Extending existing AuthManager seems most appropriate
+  * Need to add role validation logic
+  * Will require unit tests for new functionality
+""")
 
-# Check status of the thinking task
+# For deeper, time-consuming analysis, use deep_analysis from the TaskBoard system
+task_id = deep_analysis(project_path, "I need to understand how the authentication system works and its dependencies")
 get_task_status(project_path, task_id)
-
-# Get final results when completed
 get_task_result(project_path, task_id)
-
-# Manage multiple tasks
-list_tasks(project_path, status="running")
 ```
 
 ### File System Operations
@@ -329,11 +345,22 @@ content_to_edit = file_content.splitlines()[10:25]
 session_bookmarks["bookmark1"] = {"file": "path/to/file.py", "start": 10, "end": 25, "content": content_to_edit}
 ```
 
+### Security Analysis
+
+```python
+# Run a comprehensive security analysis on your project
+security_report = security_analyze("path/to/your/project")
+
+# Enhanced sanity check with security analysis included
+check_report = enhanced_sanity_check("path/to/your/project", include_security=True)
+```
+
 The adapter patterns provide Claude Code with the context and steps needed to achieve equivalent functionality using native tools.
 
 ### Optimizing Performance and Handling Timeouts
 ```python
 # Initialize with robustness features automatically applied
+# This is the recommended all-in-one initialization method
 initialize_ai_dev_toolkit("path/to/your/project")
 
 # For other long-running operations, use the robustness decorators
@@ -453,7 +480,7 @@ Additional documentation is available in the [docs](docs/) directory:
 
 ### Upcoming Releases
 
-- **Beta Release**: TaskBoard System and Think Tool coming soon
+- **Beta Release**: Advanced GUI interface improvements coming soon
 - **Codebase Cleanup**: Consolidation of duplicate files and legacy code
 - **Sanity Check Improvements**: Enhanced diagnostic capabilities and reporting
 - **GUI Improvements**: Enhanced configurator interface with cleanup utilities
@@ -474,20 +501,21 @@ Additional documentation is available in the [docs](docs/) directory:
   - Improved reliability with fewer failure points
   - Simplified output format for better maintainability
 
-- **Sanity Check Refactoring**: The sanity_check tool will soon be temporarily disabled while we implement significant improvements:
-  - Modular class-based design with plugin system
-  - Severity levels for issues (critical, warning, info)
-  - Two-phase approach: quick scan and detailed analysis
-  - Improved reporting with structured JSON and Markdown outputs
-  - Better progress tracking and cancellation support
+- **Sanity Check & Security Analysis**: The sanity_check tool has been significantly improved:
+  - Integration with the Security Analyzer for comprehensive assessment
+  - Support for severity levels (critical, warning, info)
+  - Enhanced error handling and encoding fixes
+  - Professional security assessment with CWE IDs
+  - AST-based analysis for deeper code understanding
+  - Improved reporting with structured outputs
   
-- **Directory Structure Cleanup**: Planned consolidation of overlapping functionality:
+- **Directory Structure Cleanup**: Ongoing consolidation of overlapping functionality:
   - Consolidating duplicate files in the `librarian` directory:
     - Merging enhanced file editing functionality
-    - Combining validation tools into a unified module
-    - Standardizing naming conventions
+    - Standardizing naming conventions across modules
+    - Removing deprecated functionality (basic indexer has been replaced by enhanced_indexer)
   - Cleaning up the `gui` directory:
-    - Removing multiple configurator variants
+    - Standardizing on configurator_new.py as the primary GUI implementation
     - Eliminating legacy and backup files
     - Adding a GUI button for legacy file pruning
 
