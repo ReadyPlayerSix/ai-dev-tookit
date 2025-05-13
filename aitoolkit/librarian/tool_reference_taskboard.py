@@ -140,7 +140,15 @@ def cross_reference_ai_and_tool_directories(project_path: str) -> str:
                     continue
                 
                 # Check if tool applies to this component type
-                if component_type.lower() in [t.lower() for t in tool_info["applicable_to"]]:
+                # Get list of applicable component types, ensuring they're all strings
+                applicable_types = []
+                for t in tool_info["applicable_to"]:
+                    if isinstance(t, str):
+                        applicable_types.append(t.lower())
+                    else:
+                        logger.warning(f"Non-string type in applicable_to for tool {tool_id}: {t}")
+                
+                if component_type.lower() in applicable_types:
                     relevant_tools.append({
                         "id": tool_id,
                         "name": tool_info.get("name", tool_id),
@@ -171,6 +179,11 @@ def cross_reference_ai_and_tool_directories(project_path: str) -> str:
             
             # Find components that this tool works with
             for component_type in tool_info["applicable_to"]:
+                # Check if component_type is actually a string and not a dict or other object
+                if not isinstance(component_type, str):
+                    logger.warning(f"Non-string component type in applicable_to for tool {tool_id}: {component_type}")
+                    continue
+                    
                 if component_type in component_registry:
                     applicable_components.append({
                         "type": component_type,
