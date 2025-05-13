@@ -3,9 +3,10 @@
 ![AI-Assisted](https://img.shields.io/badge/AI--Assisted-Claude%203.7-yellow?logo=anthropic&logoColor=white)
 ![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-blue)
 ![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-Compatible-green)
+![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-purple)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.4.6--simple--tool--index-orange)
+![Release](https://img.shields.io/badge/release-v0.4.7--claude--code--integration-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -122,10 +123,10 @@ All this happens automatically - just initialize once and the system handles eve
 
 ### Prerequisites
 - Python 3.8 or higher
-- Claude Desktop (latest version)
+- Claude Desktop (latest version) or Claude Code
 - Git
 
-### Option 1: Install AI Librarian Server (Recommended)
+### Option 1: Install AI Librarian Server for Claude Desktop (Recommended)
 ```bash
 # Clone the repository
 git clone https://github.com/isekaizen/ai-dev-toolkit.git
@@ -138,7 +139,30 @@ pip install -r requirements.txt
 python development/install_to_claude.py
 ```
 
-### Option 2: Use the Development Launcher
+### Option 2: Install with Claude Code (Newest)
+```bash
+# Using Claude Code's terminal:
+
+# Get the installer script
+wget https://raw.githubusercontent.com/isekaizen/ai-dev-toolkit/main/scripts/install_for_claude_code.py
+# Or with curl:
+# curl -O https://raw.githubusercontent.com/isekaizen/ai-dev-toolkit/main/scripts/install_for_claude_code.py
+
+# Run the installer
+python install_for_claude_code.py
+
+# Follow the prompts to complete installation
+```
+
+The Claude Code installer will:
+- Clone the repository from GitHub
+- Install necessary dependencies
+- Configure the toolkit for your project directories
+- Set up CLAUDE.md for improved Claude Code interaction
+- Configure for Claude Desktop if requested
+- Create desktop shortcuts for the GUI (if tkinter is available)
+
+### Option 3: Use the Development Launcher
 ```bash
 # After cloning and installing dependencies
 python development/launch.py
@@ -250,7 +274,7 @@ The AI Dev Toolkit uses a modular architecture built around the Model Context Pr
 ┌───────────────────┐      ┌───────────────┐      ┌───────────┐
 │                   │      │               │      │           │
 │   Claude Desktop  │◄────►│   AI Librarian│◄────►│Your Project│
-│                   │      │     Server    │      │  Filesystem│
+│     or Code       │      │     Server    │      │  Filesystem│
 └───────────────────┘      └───────────────┘      └───────────┘
                                   ▲
                                   │
@@ -271,7 +295,7 @@ The AI Dev Toolkit uses a modular architecture built around the Model Context Pr
                   └────────────────┘     └────────────────┘
 ```
 
-The AI Librarian server provides a seamless interface between Claude Desktop and your project. The Unified Context System automatically bridges the AI Librarian's code understanding with the Tool Reference System, enabling intelligent navigation between components and tools without any manual configuration.
+The AI Librarian server provides a seamless interface between Claude (Desktop or Code) and your project. The Unified Context System automatically bridges the AI Librarian's code understanding with the Tool Reference System, enabling intelligent navigation between components and tools without any manual configuration.
 
 ## 🤖 AI-Assisted Development
 

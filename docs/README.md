@@ -2,13 +2,26 @@
 
 This directory contains documentation for the AI Dev Toolkit project.
 
-## Coming Soon
+## Main Documentation
 
-- MCP Architecture Diagrams
-- Tool Implementation Guides
-- User Tutorials
-- Installation Troubleshooting
-- Advanced Use Cases
+- [AI Librarian Guide](ai_librarian_guide.md)
+- [Claude Code Reference](claude_code_reference.md)
+- [Project Structure](project_structure.md)
+- [Tools Reference](tools_reference.md)
+
+## Setup and Configuration
+
+- [MCP Server Template](mcp-server-template.md)
+- [GUI Documentation](gui-documentation.md)
+
+## Project Information
+
+- [Project Cleanup and Organization](project_cleanup_and_organization.md)
+- [Comprehensive Cleanup](comprehensive-cleanup.md)
+
+## Architecture
+
+- [MCP Overview](architecture/mcp-overview.md)
 
 ## Documentation Structure
 
@@ -16,9 +29,10 @@ This directory contains documentation for the AI Dev Toolkit project.
 docs/
 ├── architecture/      # System architecture and design documents
 ├── guides/            # User and developer guides
-├── tutorials/         # Step-by-step tutorials
 ├── images/            # Images and diagrams
-└── api/               # API documentation
+├── claude_code_reference.md   # Guide for Claude Code users
+├── ai_librarian_guide.md      # Guide for AI Librarian
+└── project_structure.md       # Project structure overview
 ```
 
 Documentation is under active development. Check back soon for updates.
