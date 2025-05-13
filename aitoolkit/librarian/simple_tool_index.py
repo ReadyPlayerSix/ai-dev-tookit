@@ -140,7 +140,8 @@ def find_tool_modules(project_path: str) -> List[str]:
         if os.path.exists(tool_dir):
             for root, dirs, files in os.walk(tool_dir):
                 for file in files:
-                    if file.endswith(".py") and not file.startswith("__"):
+                    # Make sure file is a string before using string methods
+                    if isinstance(file, str) and file.endswith(".py") and not file.startswith("__"):
                         module_paths.append(os.path.join(root, file))
     
     return module_paths
