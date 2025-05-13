@@ -298,8 +298,11 @@ def cleanup():
     logger.info("Shutting down AI Librarian server")
 
     # Save any persistent state if needed
-    state_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ai_librarian_state.json")
     try:
+        # Use current_dir which is safely defined at the top of the file
+        # Instead of relying on __file__ which might not be available in all contexts
+        state_file = os.path.join(current_dir, "ai_librarian_state.json")
+        
         with state_lock:
             state = {
                 "active_projects": list(librarian_context["active_projects"]),
