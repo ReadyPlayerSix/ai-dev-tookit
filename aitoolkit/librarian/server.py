@@ -38,7 +38,7 @@ if parent_dir not in sys.path:
 
 # Import dependencies with absolute paths to ensure consistency
 from aitoolkit.librarian.todos import TodoManager
-from aitoolkit.librarian.sanity_check import run_sanity_check
+from aitoolkit.librarian.sanity_check_fixed import run_sanity_check
 from aitoolkit.librarian.enhanced_indexer import initialize_enhanced_librarian
 from aitoolkit.librarian.edit_bookmark import EditBookmark
 from aitoolkit.utils.logging_manager import configure_logger

@@ -64,7 +64,7 @@ except ImportError:
 
 # Import AI Librarian tools - using the same import approach as in librarian/server.py
 from aitoolkit.librarian.todos import TodoManager
-from aitoolkit.librarian.sanity_check import run_sanity_check
+from aitoolkit.librarian.sanity_check_fixed import run_sanity_check
 from aitoolkit.librarian.enhanced_indexer import initialize_enhanced_librarian
 from aitoolkit.librarian.tool_reference import initialize_tool_reference
 from aitoolkit.librarian.ai_dev_toolkit import initialize_ai_dev_toolkit
