@@ -18,7 +18,7 @@ import inspect
 import logging
 import importlib
 import importlib.util
-from typing import Dict, List, Any, Optional, Callable
+from typing import Dict, List, Any, Optional, Callable, Union
 from datetime import datetime
 from pathlib import Path
 
@@ -28,6 +28,24 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger("simple-tool-index")
+
+# Environment variable for controlling return format
+DICT_FORMAT_ENV = "SIMPLE_TOOL_INDEX_RETURN_DICT"
+
+def should_return_dict():
+    """
+    Determine if the function should return a dictionary or string format based on
+    environment variables or caller context.
+    
+    Returns:
+        True if dictionary format should be returned, False for string format
+    """
+    # Check if the environment variable is set
+    if os.environ.get(DICT_FORMAT_ENV, "").lower() in ("true", "1", "yes", "y"):
+        return True
+        
+    # Default to string format for backward compatibility
+    return False
 
 # Tool categories for organization
 TOOL_CATEGORIES = {
@@ -212,7 +230,7 @@ def find_and_index_tools(project_path: str) -> Dict[str, Dict[str, Any]]:
     
     return tool_index
 
-def initialize_tool_index(project_path: str) -> Dict[str, Any]:
+def initialize_tool_index(project_path: str) -> Union[str, Dict[str, Any]]:
     """
     Initialize the Tool Reference system for a project.
     
@@ -328,16 +346,31 @@ to use them effectively without unnecessary complexity.
         }
         
         logger.info(f"Tool index initialized with {tool_count} tools in {duration:.2f} seconds")
-        return result
+        
+        # Determine the appropriate return format
+        if should_return_dict():
+            return result
+        else:
+            # Create a string representation for backward compatibility
+            return f"✅ Successfully initialized Simple Tool Index at {tool_ref_path}\n" + \
+                   f"Indexed {tool_count} tools across {len(categories['categories'])} categories in {duration:.2f} seconds\n" + \
+                   f"Tool Count: {tool_count}"  # Added tool count at the end for server.py to extract
         
     except Exception as e:
         logger.error(f"Error initializing tool index: {str(e)}")
         import traceback
-        return {
+        error_result = {
             "status": "error",
             "message": f"Error initializing tool index: {str(e)}",
             "traceback": traceback.format_exc()
         }
+        
+        # Determine the appropriate return format
+        if should_return_dict():
+            return error_result
+        else:
+            # Create a string representation for backward compatibility
+            return f"❌ Error initializing tool index: {str(e)}"
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

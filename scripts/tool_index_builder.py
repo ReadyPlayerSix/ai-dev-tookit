@@ -49,6 +49,7 @@ def create_tool_reference_structure(project_path: str) -> str:
     Returns:
         Path to the created .tool_reference directory
     """
+    # Create the singular form directory (.tool_reference)
     tool_ref_path = os.path.join(project_path, ".tool_reference")
     
     # Create main directories
@@ -59,6 +60,28 @@ def create_tool_reference_structure(project_path: str) -> str:
     os.makedirs(os.path.join(tool_ref_path, "self_diagnostic"), exist_ok=True)
     
     logger.info(f"Created .tool_reference directory structure at {tool_ref_path}")
+    
+    # Also create the plural form (.tools_reference) for Claude Desktop compatibility
+    tools_ref_path = os.path.join(project_path, ".tools_reference")
+    if not os.path.exists(tools_ref_path):
+        try:
+            # Try to create a symlink first (preferred method)
+            if os.name == 'nt':  # Windows
+                import subprocess
+                # Windows needs CMD's internal mklink command with /J for directory junctions
+                subprocess.run(f'cmd /c mklink /J "{tools_ref_path}" "{tool_ref_path}"', shell=True)
+            else:  # Linux/Mac
+                os.symlink(tool_ref_path, tools_ref_path, target_is_directory=True)
+            logger.info(f"Created symlink from {tool_ref_path} to {tools_ref_path}")
+        except Exception as e:
+            logger.warning(f"Could not create symlink, creating directory copy instead: {str(e)}")
+            # If symlink fails, create an identical directory structure
+            os.makedirs(tools_ref_path, exist_ok=True)
+            os.makedirs(os.path.join(tools_ref_path, "tool_profiles"), exist_ok=True)
+            os.makedirs(os.path.join(tools_ref_path, "decision_trees"), exist_ok=True)
+            os.makedirs(os.path.join(tools_ref_path, "usage_patterns"), exist_ok=True)
+            os.makedirs(os.path.join(tools_ref_path, "self_diagnostic"), exist_ok=True)
+            logger.info(f"Created .tools_reference directory structure at {tools_ref_path}")
     
     # Create a README.md file
     readme_content = """# AI-Optimized Tool Index
@@ -340,7 +363,7 @@ def run_all_phases(project_path: str) -> bool:
 
 def clean_tool_reference(project_path: str) -> bool:
     """
-    Clean up the .tool_reference directory.
+    Clean up both .tool_reference and .tools_reference directories.
     
     Args:
         project_path: Path to the project
@@ -349,12 +372,19 @@ def clean_tool_reference(project_path: str) -> bool:
         True if successful, False otherwise
     """
     try:
+        # Remove both forms of the tool reference directory
         tool_ref_path = os.path.join(project_path, ".tool_reference")
+        tools_ref_path = os.path.join(project_path, ".tools_reference")
         
         if os.path.exists(tool_ref_path):
             shutil.rmtree(tool_ref_path)
             logger.info(f"Removed existing .tool_reference directory")
             print(f"✅ Removed existing .tool_reference directory")
+        
+        if os.path.exists(tools_ref_path):
+            shutil.rmtree(tools_ref_path)
+            logger.info(f"Removed existing .tools_reference directory")
+            print(f"✅ Removed existing .tools_reference directory")
         
         return True
     except Exception as e:
@@ -429,7 +459,15 @@ def main():
     
     # Next steps
     print("\nNext steps:")
-    print("1. Review the Tool Index at: " + os.path.join(project_path, ".tool_reference"))
+    tool_ref_path = os.path.join(project_path, ".tool_reference")
+    tools_ref_path = os.path.join(project_path, ".tools_reference")
+    
+    print(f"1. Review the Tool Index at:")
+    if os.path.exists(tool_ref_path):
+        print(f"   - {tool_ref_path} (singular form - for codebase access)")
+    if os.path.exists(tools_ref_path):
+        print(f"   - {tools_ref_path} (plural form - for Claude Desktop)")
+    
     print("2. Test the context validator: python context_validator.py --check all")
     print("3. Explore the tool profiles to understand how Claude will use tools")
     print("\nThis Tool Index will help Claude select and use tools more effectively,")

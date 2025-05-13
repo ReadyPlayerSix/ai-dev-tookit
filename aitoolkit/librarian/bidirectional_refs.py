@@ -17,9 +17,42 @@ import os
 import json
 import logging
 import re
+import shutil
+import subprocess
 from typing import Dict, List, Any, Optional, Set, Tuple
 from pathlib import Path
 from datetime import datetime
+
+def create_directory_symlink(source_path: str, target_path: str) -> bool:
+    """
+    Create a directory symlink or junction in a cross-platform way.
+    
+    Args:
+        source_path: Path to the source directory
+        target_path: Path to the target (link) to create
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        # Make sure source exists
+        if not os.path.exists(source_path):
+            return False
+            
+        # Create parent directory of target if needed
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+            
+        # Create the symlink based on platform
+        if os.name == 'nt':  # Windows
+            # Windows needs CMD's internal mklink command with /J for directory junctions
+            subprocess.run(f'cmd /c mklink /J "{target_path}" "{source_path}"', shell=True, check=True)
+        else:  # Linux/Mac
+            os.symlink(source_path, target_path, target_is_directory=True)
+            
+        return os.path.exists(target_path)
+    except Exception as e:
+        logger.warning(f"Could not create symlink: {str(e)}")
+        return False
 
 # Configure logging
 logger = logging.getLogger("bidirectional-refs")
@@ -941,7 +974,7 @@ def build_bidirectional_references(project_path: str) -> bool:
             "last_updated": datetime.now().isoformat()
         }
         
-        # Save to both systems for redundancy
+        # Save to all available systems for redundancy
         try:
             # Create any needed parent directories first
             os.makedirs(os.path.dirname(os.path.join(ai_ref_path, "bidirectional_refs.json")), exist_ok=True)
@@ -956,8 +989,17 @@ def build_bidirectional_references(project_path: str) -> bool:
             
             with open(unified_map_path_tool, 'w', encoding='utf-8') as f:
                 json.dump(reference_map, f, indent=2)
-                
-            logger.info("Created simplified bidirectional reference maps")
+            
+            # Also save to plural form if it exists
+            tools_ref_path = os.path.join(project_path, ".tools_reference")
+            if os.path.exists(tools_ref_path):
+                os.makedirs(os.path.dirname(os.path.join(tools_ref_path, "bidirectional_refs.json")), exist_ok=True)
+                unified_map_path_tools = os.path.join(tools_ref_path, "bidirectional_refs.json")
+                with open(unified_map_path_tools, 'w', encoding='utf-8') as f:
+                    json.dump(reference_map, f, indent=2)
+                logger.info("Created simplified bidirectional reference maps (in all reference directories)")
+            else:
+                logger.info("Created simplified bidirectional reference maps (in .ai_reference and .tool_reference)")
         except Exception as fallback_e:
             logger.error(f"Failed to save simplified references: {fallback_e}")
             # Continue anyway, don't fail hard
