@@ -47,7 +47,13 @@ from aitoolkit.utils.logging_manager import configure_logger
 try:
     from aitoolkit.librarian.unified_context_integration import register_unified_context_tools
 except ImportError:
-    logger.warning("Unified Context Integration not available")
+    print("Unified Context Integration not available")
+
+# Import TaskBoard Integration
+try:
+    from aitoolkit.librarian.server_taskboard_integration import apply_taskboard_integration
+except ImportError:
+    print("TaskBoard Integration not available")
     register_unified_context_tools = None
 
 # Import filesystem module for file operations
