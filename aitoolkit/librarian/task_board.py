@@ -794,9 +794,13 @@ def list_tasks_mcp(project_path: str, status: str = None, task_type: str = None)
     
     return "\n".join(response)
 
-def think(project_path: str, query: str, priority: str = "high") -> str:
+def task_deep_analysis(project_path: str, query: str, priority: str = "high") -> str:
     """
-    The 'think' function starts a deep analysis task that processes complex problems
+    Start a deep analysis task that processes complex problems asynchronously
+    
+    Unlike the 'think' tool which provides immediate reflection,
+    this function submits a background task for deeper analysis that
+    may take some time to complete.
     
     Args:
         project_path: Path to the project
@@ -804,9 +808,9 @@ def think(project_path: str, query: str, priority: str = "high") -> str:
         priority: Priority of the task ("high", "medium", "low")
         
     Returns:
-        Task ID for the thinking task
+        Task ID for the deep analysis task
     """
-    # Parameters for the thinking task
+    # Parameters for the deep analysis task
     parameters = {
         "query": query,
         "mode": "comprehensive",
@@ -816,9 +820,9 @@ def think(project_path: str, query: str, priority: str = "high") -> str:
     # Submit task
     task_board = get_task_board(project_path)
     task_id = task_board.submit_task(
-        task_type="think",
+        task_type="deep_analysis",  # Changed from "think" to avoid confusion
         parameters=parameters,
         priority=TaskPriority.HIGH if priority.lower() == "high" else TaskPriority.MEDIUM
     )
     
-    return f"Thinking task submitted with ID: {task_id}\n\nThis will analyze: '{query}'\n\nYou can check the status with get_task_status(\"{project_path}\", \"{task_id}\")"
+    return f"Deep analysis task submitted with ID: {task_id}\n\nThis will analyze: '{query}'\n\nYou can check the status with get_task_status(\"{project_path}\", \"{task_id}\")"
