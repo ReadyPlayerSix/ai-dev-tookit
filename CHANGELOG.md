@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.5.0-taskboard-beta] - 2025-05-13
+## [0.5.0-taskboard-release] - 2025-05-13
 
 ### Added
 - TaskBoard system for asynchronous task processing
@@ -18,6 +18,9 @@ All notable changes to this project will be documented in this file.
 - Improved timeout handling for long-running operations
 - Enhanced Claude Code compatibility with adapter patterns
 - Added detailed documentation for TaskBoard and Think Tool
+- Integrated TaskBoard directly into server for seamless experience
+- Simplified user experience with automatic tool registration
+- Eliminated need for separate installation scripts
 
 ## [0.4.8-claude-code-adapters] - 2025-05-13
 
