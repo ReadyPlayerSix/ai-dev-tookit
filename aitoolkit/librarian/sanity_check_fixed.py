@@ -228,17 +228,8 @@ class SanityChecker:
         """
         self.print_status("Checking for path references...", "info")
         
-        bad_paths = [
-            r'[\"|\'"]src[/\\]', 
-            r'[\"|\'"]\.\.\/src',
-            r'src/.*?\.py',
-            r'[\"|\'"]src.librarian',
-            r'ai_librarian_server\.py',
-            r'/src/mcp/',
-            r'join\([^\)]*[\']src[\'])\,'
-        ]
-        
-        path_pattern = re.compile('|'.join(bad_paths))
+        # Simplified approach - look for common patterns without complex regex
+        suspicious_patterns = ['src/', 'src\\\\', '../src', 'src.librarian', 'ai_librarian_server.py', '/src/mcp/']
         
         python_files = self._get_python_files()
         for file_path in python_files:
@@ -248,13 +239,11 @@ class SanityChecker:
                 with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
                     content = f.read()
                 
-                # Look for the suspicious paths
-                matches = path_pattern.findall(content)
-                if matches:
-                    for match in matches:
-                        if 'src' in match.lower():
-                            self.print_status(f"Possibly incorrect path reference in {rel_path}: {match}", "warning")
-                            self.warnings.append(f"Suspicious path reference in {rel_path}: {match}")
+                # Look for the suspicious paths with simple string matching
+                for pattern in suspicious_patterns:
+                    if pattern in content:
+                        self.print_status(f"Possibly incorrect path reference in {rel_path}: {pattern}", "warning")
+                        self.warnings.append(f"Suspicious path reference in {rel_path}: {pattern}")
             
             except Exception as e:
                 self.print_status(f"Error checking paths in {rel_path}: {e}", "error")
@@ -405,7 +394,7 @@ class SanityChecker:
             if script_validation.get("status") == "success":
                 self.print_status("Script index validation passed", "success")
                 self.info.append("Script index is accurate and complete")
-            elif script_validation.get("status") == "issues_found"):
+            elif script_validation.get("status") == "issues_found":
                 self.print_status("Script index has issues", "warning")
                 
                 # Add specific warnings
@@ -606,3 +595,26 @@ class SanityChecker:
             report.append("**Passed** - All checks passed successfully")
         
         return "\n".join(report)
+
+# Run the sanity check if this script is executed directly
+def run_sanity_check(project_path: str, create_artifact: bool = False) -> str:
+    """
+    Run a sanity check on the given project path.
+    
+    Args:
+        project_path: Path to the project to check
+        create_artifact: Whether to create a report artifact
+        
+    Returns:
+        Formatted report text
+    """
+    checker = SanityChecker(project_path)
+    return checker.generate_report(create_artifact)
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        project_path = sys.argv[1]
+    else:
+        project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+    print(run_sanity_check(project_path))
