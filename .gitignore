@@ -154,3 +154,4 @@ tests/test_filesystem/
 aitoolkit/test_file.txt
 test_directory/
 gitStatus.txt
+CLAUDE.md
