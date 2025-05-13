@@ -17,7 +17,7 @@ A powerful, extensible toolkit that dramatically enhances Claude's capabilities 
 
 ## 🌟 Overview
 
-AI Dev Toolkit elevates Claude Desktop beyond a conversational assistant to a comprehensive development partner. The toolkit creates a bidirectional bridge between your projects and Claude, enabling it to:
+AI Dev Toolkit elevates Claude beyond a conversational assistant to a comprehensive development partner. The toolkit creates a bidirectional bridge between your projects and Claude, enabling it to:
 
 - **Understand your codebase** through persistent context that spans conversations
 - **Access and modify your filesystem** with appropriate permissions
@@ -32,76 +32,81 @@ All this happens automatically - just initialize once and the system handles eve
 
 ## 🚀 Features
 
-### AI Librarian Server (Stable)
-- **Integrated Architecture**: All capabilities consolidated in one AI Librarian server
-- **Simplified Setup**: One-step installation to Claude Desktop
-- **Optimized Performance**: Reduced overhead and faster response times
-- **Full MCP Compliance**: Complete implementation of Model Context Protocol standards
-- **Tool Index Integration**: AI-optimized tool selection and usage guidance
+> **Note:** The GUI components are currently under development. Claude Desktop features are in pre-beta phase, while Claude Code features have more streamlined implementation. Feature stability is indicated for each component.
 
-### AI Librarian (Stable)
-- **Code Understanding**: Comprehensive codebase indexing with component tracking
-- **Persistent Context**: Code structure awareness persists across conversations
-- **Component Relationship Analysis**: Automatically detects dependencies and relationships
-- **Documentation Generation**: Extracts docstrings and creates documentation
-- **Real-time Updates**: Monitors project changes automatically to stay current
+### AI Librarian Server
+- **Integrated Architecture**: All capabilities consolidated in one AI Librarian server *(Stable: Code, Pre-Beta: Desktop)*
+- **Simplified Setup**: One-step installation to Claude Desktop/Code *(Stable: Code, Beta: Desktop)*
+- **Optimized Performance**: Reduced overhead and faster response times *(Stable)*
+- **Full MCP Compliance**: Complete implementation of Model Context Protocol standards *(Stable: Desktop)*
+- **Tool Index Integration**: AI-optimized tool selection and usage guidance *(Stable)*
 
-### Unified Context System (Stable)
-- **Automatic Integration**: Zero manual setup - just initialize and everything works
-- **Code-Tool Bridging**: Intelligently connects code components to relevant tools
-- **Bidirectional References**: Navigate from components to tools and vice versa
-- **Context Awareness**: Understands which tools are most useful for specific code
-- **Background Maintenance**: Continuously updates cross-references as code evolves
+### AI Librarian
+- **Code Understanding**: Comprehensive codebase indexing with component tracking *(Stable)*
+- **Persistent Context**: Code structure awareness persists across conversations *(Stable)*
+- **Component Relationship Analysis**: Automatically detects dependencies and relationships *(Stable)*
+- **Documentation Generation**: Extracts docstrings and creates documentation *(Stable)*
+- **Real-time Updates**: Monitors project changes automatically to stay current *(Stable)*
+- **Mini-Librarians**: Handle large codebases by breaking them into specialized knowledge units *(Stable: Code, Beta: Desktop)*
 
-### Enhanced Code Analysis (Stable)
-- **Reference Finding**: Locate all references to components across the codebase
-- **Pattern Detection**: Identify common patterns and anti-patterns
-- **File Overview**: Comprehensive analysis of file structure with metrics
-- **Component Details**: Rich component information with examples and documentation
-- **Usage Context**: Understand how components are used throughout the project
+### Unified Context System
+- **Automatic Integration**: Zero manual setup - just initialize and everything works *(Stable)*
+- **Code-Tool Bridging**: Intelligently connects code components to relevant tools *(Stable)*
+- **Bidirectional References**: Navigate from components to tools and vice versa *(Stable)*
+- **Context Awareness**: Understands which tools are most useful for specific code *(Stable)*
+- **Background Maintenance**: Continuously updates cross-references as code evolves *(Stable)*
 
-### File System Integration (Stable)
-- **Secure Project Access**: Controlled access to your development files
-- **Directory Navigation**: Intuitive directory navigation and exploration
-- **Code Manipulation**: Read, write, and modify code with proper error handling
-- **Edit Bookmarks**: Create, edit, and apply bookmarks for complex code section edits
-- **File Operations**: Comprehensive file management capabilities
-- **Search & Indexing**: Find files and content with powerful search tools
+### Enhanced Code Analysis
+- **Reference Finding**: Locate all references to components across the codebase *(Stable)*
+- **Pattern Detection**: Identify common patterns and anti-patterns *(Stable)*
+- **File Overview**: Comprehensive analysis of file structure with metrics *(Stable)*
+- **Component Details**: Rich component information with examples and documentation *(Stable)*
+- **Usage Context**: Understand how components are used throughout the project *(Stable)*
+- **Large Codebase Support**: Efficient handling of multi-module projects via mini-librarians *(Stable: Code, Beta: Desktop)*
 
-### Task Management System (Stable)
-- **Persistent To-Do Tracking**: Tasks persist across conversations
-- **Multi-level Task Structure**: Support for tasks, subtasks, and dependencies
-- **Priority & Status Tracking**: Organize work by importance and completion status
-- **Code Context Linking**: Associate tasks with specific code components
-- **Automatic Task Inference**: Extract potential tasks from conversations
+### File System Integration
+- **Secure Project Access**: Controlled access to your development files *(Stable)*
+- **Directory Navigation**: Intuitive directory navigation and exploration *(Stable)*
+- **Code Manipulation**: Read, write, and modify code with proper error handling *(Stable)*
+- **Edit Bookmarks**: Create, edit, and apply bookmarks for complex code section edits *(Stable: Code, Beta: Desktop)*
+- **File Operations**: Comprehensive file management capabilities *(Stable)*
+- **Search & Indexing**: Find files and content with powerful search tools *(Stable)*
 
-### Tool Index System (Stable)
-- **Simple, Robust Implementation**: Single-pass indexing with no subprocesses for improved reliability and performance
-- **AI-Optimized Tool Profiles**: Detailed metadata that helps Claude select the right tools 
-- **Direct Function Discovery**: Scans common locations for tool functions and imports/analyzes them directly
-- **Simplified Output Format**: Flat, reference-catalog style organization for easy navigation
-- **Metadata Extraction**: Uses Python's introspection capabilities for accurate tool information
+### Task Management System
+- **Persistent To-Do Tracking**: Tasks persist across conversations *(Stable)*
+- **Multi-level Task Structure**: Support for tasks, subtasks, and dependencies *(Stable)*
+- **Priority & Status Tracking**: Organize work by importance and completion status *(Stable)*
+- **Code Context Linking**: Associate tasks with specific code components *(Stable)*
+- **Automatic Task Inference**: Extract potential tasks from conversations *(Stable: Code, Beta: Desktop)*
 
-### TaskBoard System (Coming Soon - Beta)
-- **AI Mini-Librarians**: Specialized AI agents that process specific analysis tasks
-- **Asynchronous Processing**: Background task processing for complex operations
-- **AI-Optimized Shorthand**: Compressed format for efficient AI-to-AI communication
-- **Advanced Context Awareness**: Rich contextual information links tasks to code
-- **Distributed Knowledge System**: Intelligence distributed across specialized agents
+### Tool Index System
+- **Simple, Robust Implementation**: Single-pass indexing with no subprocesses for improved reliability and performance *(Stable)*
+- **AI-Optimized Tool Profiles**: Detailed metadata that helps Claude select the right tools *(Stable)*
+- **Direct Function Discovery**: Scans common locations for tool functions and imports/analyzes them directly *(Stable)*
+- **Simplified Output Format**: Flat, reference-catalog style organization for easy navigation *(Stable)*
+- **Metadata Extraction**: Uses Python's introspection capabilities for accurate tool information *(Stable)*
 
-### Think Tool (Coming Soon - Beta)
-- **Advanced AI Reasoning**: Enhanced capability for Claude to reason through complex problems
-- **Information Gathering Delegation**: Automatically assign research to mini-librarians
-- **Knowledge Synthesis**: Combine insights from multiple specialized agents
-- **Contextual Memory**: Build and maintain detailed understanding across sessions
-- **Self-directed Exploration**: Allow Claude to explore code paths independently
+### TaskBoard System (Coming Soon)
+- **AI Mini-Librarians**: Specialized AI agents that process specific analysis tasks *(Alpha)*
+- **Asynchronous Processing**: Background task processing for complex operations *(Planning)*
+- **AI-Optimized Shorthand**: Compressed format for efficient AI-to-AI communication *(Alpha: Code)*
+- **Advanced Context Awareness**: Rich contextual information links tasks to code *(Alpha)*
+- **Distributed Knowledge System**: Intelligence distributed across specialized agents *(Prototype: Code)*
 
-### Robustness Features (Stable)
-- **Automatic Retries**: Long-running operations automatically retry on failure
-- **Timeout Handling**: Graceful handling of timeouts with configurable limits
-- **Queue Management**: Clear stale requests before starting new operations
-- **Performance Tracking**: Measure and log execution times for optimization
-- **Error Recovery**: Robust error handling with detailed diagnostics
+### Think Tool (Coming Soon)
+- **Advanced AI Reasoning**: Enhanced capability for Claude to reason through complex problems *(Alpha: Code)*
+- **Information Gathering Delegation**: Automatically assign research to mini-librarians *(Prototype)*
+- **Knowledge Synthesis**: Combine insights from multiple specialized agents *(Planning)*
+- **Contextual Memory**: Build and maintain detailed understanding across sessions *(Prototype: Code)*
+- **Self-directed Exploration**: Allow Claude to explore code paths independently *(Planning)*
+
+### Robustness Features
+- **Automatic Retries**: Long-running operations automatically retry on failure *(Stable)*
+- **Timeout Handling**: Graceful handling of timeouts with configurable limits *(Stable)*
+- **Queue Management**: Clear stale requests before starting new operations *(Stable)*
+- **Performance Tracking**: Measure and log execution times for optimization *(Stable)*
+- **Error Recovery**: Robust error handling with detailed diagnostics *(Stable)*
+- **Large Codebase Handling**: Efficient processing of large repositories with segmentation *(Stable: Code, Beta: Desktop)*
 
 ## 🖼️ Screenshots
 
@@ -120,6 +125,8 @@ All this happens automatically - just initialize once and the system handles eve
 </div>
 
 ## 🛠️ Installation
+
+> **Note:** The GUI components are currently under development. Command-line and code-based interactions are fully functional, while the graphical interface for directory selection and configuration is in beta phase.
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -171,7 +178,8 @@ python development/launch.py
 ## 📊 Usage
 
 ### AI Librarian & Unified Context
-```
+
+```python
 # Initialize AI Librarian for a project
 # This one command sets up everything - AI Librarian, Unified Context, and Tool References
 initialize_librarian("path/to/your/project")
@@ -192,8 +200,23 @@ find_related_components("path/to/your/project", "edit_file")
 get_unified_context("path/to/your/project")
 ```
 
-### Task Management
+#### Large Codebase Support
+
+For larger codebases, the AI Dev Toolkit uses mini-librarians to provide efficient navigation and understanding:
+
+```python
+# Access mini-librarians directly (Claude Code)
+read_file(".ai_reference/scripts/___aitoolkit_librarian_ai_dev_toolkit_py.json")
+
+# Get component information from mini-librarians
+get_component_details("path/to/project", "ComponentName") 
+
+# Search across mini-librarians
+search_mini_librarians("path/to/project", "function_name")
 ```
+
+### Task Management
+```python
 # Add a task
 add_todo("path/to/project", "Implement login feature", priority="high")
 
@@ -205,7 +228,7 @@ update_todo_status("path/to/project", "todo-123", "completed")
 ```
 
 ### Advanced AI Task Management
-```
+```python
 # Create an AI-optimized task
 add_ai_task("path/to/project", "Authentication system refactoring", "Improve security and performance", "refactor", 2)
 
@@ -217,7 +240,7 @@ list_ai_tasks("path/to/project", status="active", priority=1)
 ```
 
 ### Think Tool (Coming Soon)
-```
+```python
 # Think through a complex problem
 think("I need to understand how the authentication system works and its dependencies")
 
@@ -226,7 +249,7 @@ get_task_results("task-12345,task-67890")
 ```
 
 ### File System Operations
-```
+```python
 # Read a file
 read_file("path/to/your/file.py")
 
@@ -244,6 +267,19 @@ list_directory("path/to/your/directory")
 # Search for files
 search_files("path/to/your/project", "pattern")
 ```
+
+### Claude Code vs Desktop Functionality
+
+Claude Code provides direct access to most toolkit functionality through built-in tools:
+
+| Feature | Claude Code | Claude Desktop |
+|---------|------------|----------------|
+| File Operations | Native tools + Toolkit | MCP Server required |
+| Mini-Librarians | Direct JSON access | Server API access |
+| Task Management | Full functionality | Full functionality |
+| GUI Configuration | Command-line installer | Visual interface (Beta) |
+| Large Codebase Handling | Native + Mini-librarians | Server-based (Beta) |
+| Installation | One-command direct install | Requires Desktop config |
 
 ### Optimizing Performance and Handling Timeouts
 ```python
@@ -268,13 +304,14 @@ This makes search operations and other long-running tasks automatically retry on
 
 ## 🔌 Architecture
 
-The AI Dev Toolkit uses a modular architecture built around the Model Context Protocol (MCP) to integrate with Claude Desktop:
+The AI Dev Toolkit uses a modular architecture built around the Model Context Protocol (MCP) to integrate with Claude:
 
+### Claude Desktop Architecture
 ```
 ┌───────────────────┐      ┌───────────────┐      ┌───────────┐
 │                   │      │               │      │           │
 │   Claude Desktop  │◄────►│   AI Librarian│◄────►│Your Project│
-│     or Code       │      │     Server    │      │  Filesystem│
+│                   │      │     Server    │      │  Filesystem│
 └───────────────────┘      └───────────────┘      └───────────┘
                                   ▲
                                   │
@@ -295,7 +332,35 @@ The AI Dev Toolkit uses a modular architecture built around the Model Context Pr
                   └────────────────┘     └────────────────┘
 ```
 
-The AI Librarian server provides a seamless interface between Claude (Desktop or Code) and your project. The Unified Context System automatically bridges the AI Librarian's code understanding with the Tool Reference System, enabling intelligent navigation between components and tools without any manual configuration.
+### Claude Code Architecture
+```
+┌───────────────────┐      ┌───────────────┐      ┌───────────┐
+│                   │      │ Built-in Tools│      │           │
+│   Claude Code     │◄────►│ + AI Librarian│◄────►│Your Project│
+│                   │      │   Components  │      │  Filesystem│
+└───────────────────┘      └───────────────┘      └───────────┘
+                                  ▲
+                                  │
+                                  ▼
+                        ┌─────────────────────┐
+                        │                     │
+                        │ .ai_reference/      │
+                        │ Mini-Librarians     │
+                        └─────────────────────┘
+                                  ▲
+                                  │
+                                  ▼
+                  ┌────────────────┐     ┌────────────────┐
+                  │                │     │                │
+                  │ AI Librarian   │◄───►│  Tool Reference│
+                  │ Persistent     │     │  System        │
+                  │ Context        │     │                │
+                  └────────────────┘     └────────────────┘
+```
+
+The AI Librarian components provide a seamless interface between Claude and your project. The Unified Context System automatically bridges the AI Librarian's code understanding with the Tool Reference System, enabling intelligent navigation between components and tools without any manual configuration.
+
+Claude Code can directly access Mini-Librarians through its file system tools, while Claude Desktop requires the MCP server to access these components.
 
 ## 🤖 AI-Assisted Development
 
