@@ -270,16 +270,34 @@ search_files("path/to/your/project", "pattern")
 
 ### Claude Code vs Desktop Functionality
 
-Claude Code provides direct access to most toolkit functionality through built-in tools:
+Claude Code can simulate toolkit functionality through mini-librarians and adapter patterns:
 
 | Feature | Claude Code | Claude Desktop |
 |---------|------------|----------------|
-| File Operations | Native tools + Toolkit | MCP Server required |
-| Mini-Librarians | Direct JSON access | Server API access |
-| Task Management | Full functionality | Full functionality |
+| File Operations | Native tools + Simulated toolkit via adapters | MCP Server with direct toolkit access |
+| Mini-Librarians | Direct JSON access and interpretation | Server API access |
+| Task Management | Simulated through adapter patterns | Direct function calls |
 | GUI Configuration | Command-line installer | Visual interface (Beta) |
-| Large Codebase Handling | Native + Mini-librarians | Server-based (Beta) |
+| Large Codebase Handling | Native tools with mini-librarian guidance | Server-based processing (Beta) |
 | Installation | One-command direct install | Requires Desktop config |
+| Toolkit Functions | Simulated via adapter patterns in `.ai_reference` | Direct function calls |
+
+#### Claude Code Adapter Patterns
+
+Claude Code uses adapter patterns stored in the `.ai_reference` directory to simulate toolkit functionality:
+
+```python
+# Example: Instead of direct toolkit call like:
+result = create_edit_bookmark("path/to/project", "path/to/file.py", 10, 25)
+
+# Claude Code reads the adapter pattern and executes:
+file_content = read_file("path/to/file.py")
+content_to_edit = file_content.splitlines()[10:25]
+# Store in memory for later application
+session_bookmarks["bookmark1"] = {"file": "path/to/file.py", "start": 10, "end": 25, "content": content_to_edit}
+```
+
+The adapter patterns provide Claude Code with the context and steps needed to achieve equivalent functionality using native tools.
 
 ### Optimizing Performance and Handling Timeouts
 ```python
