@@ -8,6 +8,7 @@ This directory contains documentation for the AI Dev Toolkit project.
 - [Claude Code Reference](claude_code_reference.md)
 - [Project Structure](project_structure.md)
 - [Tools Reference](tools_reference.md)
+- [Upgrading AI Reference](upgrading_ai_reference.md) (New in v0.5.4)
 
 ## Setup and Configuration
 

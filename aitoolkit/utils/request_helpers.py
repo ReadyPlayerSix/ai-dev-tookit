@@ -124,11 +124,12 @@ def with_queue_clearing(func: Callable[..., T]) -> Callable[..., T]:
 
 def with_timeout(timeout: float = 60.0) -> Callable[[Callable[..., T]], Callable[..., T]]:
     """
-    Decorator to add a timeout to a function.
-    This is a basic implementation that may need to be adjusted based on your needs.
+    Decorator to add a timeout to a function using threading.
+    This is a more robust implementation that works across platforms and supports
+    fractional seconds. It won't interfere with signal handlers.
     
     Args:
-        timeout: Timeout in seconds
+        timeout: Timeout in seconds (can be fractional)
         
     Returns:
         Decorated function with timeout
@@ -136,24 +137,45 @@ def with_timeout(timeout: float = 60.0) -> Callable[[Callable[..., T]], Callable
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> T:
-            # This is a simplified version - in real-world usage, you might 
-            # want to use a proper timeout mechanism like concurrent.futures
-            import signal
+            import threading
+            import queue
             
-            def handler(signum, frame):
+            result_queue = queue.Queue()
+            exception_queue = queue.Queue()
+            
+            # Function to run in thread
+            def target_func():
+                try:
+                    result = func(*args, **kwargs)
+                    result_queue.put(result)
+                except Exception as e:
+                    exception_queue.put(e)
+            
+            # Start thread
+            thread = threading.Thread(target=target_func)
+            thread.daemon = True  # Allow program to exit if thread is still running
+            thread.start()
+            
+            # Wait for thread to complete or timeout
+            thread.join(timeout)
+            
+            # Check results
+            if thread.is_alive():
+                # Thread is still running, it timed out
+                logger.warning(f"Function {func.__name__} timed out after {timeout} seconds")
                 raise TimeoutError(f"Function {func.__name__} timed out after {timeout} seconds")
             
-            # Set the timeout handler
-            original_handler = signal.signal(signal.SIGALRM, handler)
-            signal.alarm(int(timeout))
+            # Thread completed, check for results or exceptions
+            if not exception_queue.empty():
+                # Re-raise the exception that occurred in the thread
+                raise exception_queue.get()
             
-            try:
-                result = func(*args, **kwargs)
-                return result
-            finally:
-                # Restore the original handler and cancel the alarm
-                signal.alarm(0)
-                signal.signal(signal.SIGALRM, original_handler)
+            # Return the result
+            if not result_queue.empty():
+                return result_queue.get()
+            else:
+                # This shouldn't happen if the thread completes without exception
+                raise RuntimeError(f"Function {func.__name__} did not return a result or raise an exception")
         
         return wrapper
     return decorator
