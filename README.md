@@ -6,7 +6,7 @@
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-purple)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.5.3--security--integration-orange)
+![Release](https://img.shields.io/badge/release-v0.5.4--timeout--robustness-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -167,12 +167,17 @@ All this happens automatically - just initialize once and the system handles eve
 git clone https://github.com/isekaizen/ai-dev-toolkit.git
 cd ai-dev-toolkit
 
-# Install dependencies
+# Install dependencies (IMPORTANT: includes MCP package required for Claude Desktop)
 pip install -r requirements.txt
+
+# Alternative: Install MCP specifically if above command fails
+pip install mcp[cli]
 
 # Install to Claude Desktop
 python development/install_to_claude.py
 ```
+
+> **IMPORTANT:** The MCP (Model Context Protocol) package is **required** for Claude Desktop integration. Without it, the server will run in limited functionality mode with no connection to Claude Desktop. See [MCP_INSTALLATION.md](MCP_INSTALLATION.md) for details.
 
 ### Option 2: Install with Claude Code (Newest)
 ```bash
@@ -455,16 +460,39 @@ Key AI-assisted development techniques used in this project:
 
 Common issues and solutions:
 
+- **⚠️ MCP Missing - Claude Desktop Cannot Connect**: If you see "Running in limited functionality mode without Claude Desktop connection" or similar, the MCP package is not installed. Fix with:
+  ```bash
+  pip install mcp[cli]
+  ```
+  Then restart the server. See [MCP_INSTALLATION.md](MCP_INSTALLATION.md) for detailed instructions.
+
+- **Server Runs But No Claude Desktop Connection**: Verify that:
+  1. MCP package is installed (`pip list | grep mcp`)
+  2. Server is running with proper MCP initialization
+  3. Claude Desktop config points to correct server path
+  4. Timeout settings are correct (see MCP_INSTALLATION.md)
+
 - **Toolkit Not Appearing in Claude**: Ensure configuration was saved correctly and Claude Desktop was restarted
+
 - **Permission Errors**: Check allowed directories in the configuration
+
 - **Connection Issues**: Verify Claude Desktop is properly configured and restart the server
+
 - **Import Errors**: Make sure all dependencies are installed
+
 - **File Access Problems**: Verify the server has appropriate permissions to access your files
+
 - **Sanity Check Issues**: If experiencing problems with the sanity_check tool, use individual diagnostic tools like find_implementation() and query_component() as alternatives
+
 - **Legacy Files**: Use `git clean -fd` after a `git reset --hard` to ensure all untracked files are removed when reverting to a previous version
+
 - **Duplicate Files**: During our cleanup process, you may encounter duplicate files with extensions like .old, .backup, .fixed - these will be addressed in an upcoming release
+
 - **find_related_files Tool Errors**: This tool has a known issue that will be fixed in an upcoming release
-- **Timeout Errors**: For long-running operations that time out, try applying the robustness features with `@make_robust` or use the `apply_robustness.py` script
+
+- **Timeout Errors**: We've improved timeout handling in version 0.5.4 with a more reliable threading-based mechanism and longer timeouts for search and write operations. We've also extended the MCP protocol timeout from 30s to 120s to prevent server disconnections. If you're still experiencing timeouts, try running `python install_for_claude_code.py` to upgrade your projects to the latest version.
+
+- **Old .ai_reference Format**: For projects with older format .ai_reference directories, run the installer with `python install_for_claude_code.py` which will automatically detect and offer to upgrade these directories
 
 ## 📚 Documentation
 
@@ -485,6 +513,12 @@ Additional documentation is available in the [docs](docs/) directory:
 - **Sanity Check Improvements**: Enhanced diagnostic capabilities and reporting
 - **GUI Improvements**: Enhanced configurator interface with cleanup utilities
 - **Project Templates**: Starter templates for common project types
+  
+### Recent Releases
+
+- **[0.5.4] Timeout Robustness** (Current): Improved timeout handling with threading-based implementation, automatic .ai_reference upgrades, increased timeouts for long-running operations, and extended MCP protocol timeouts to prevent disconnections
+- **[0.5.2] Tool Integration**: TaskBoard integration for Tool Reference system with asynchronous processing
+- **[0.5.1] Security Analyzer**: Professional security analyzer with pattern and AST-based vulnerability detection
 
 ### Future Plans
 

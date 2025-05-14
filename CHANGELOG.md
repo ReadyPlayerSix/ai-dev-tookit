@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.4-timeout-robustness] - 2025-05-14
+
+### Added
+- Automatic detection and upgrade of existing .ai_reference directories in the installer
+- Operation-specific timeout management for different types of operations
+- Improved documentation for upgrading projects with existing .ai_reference directories
+- MCP protocol-level timeout configuration to prevent connection issues
+- Phased tool registration to prevent MCP server timeouts during startup
+- Enhanced MCP installation documentation (MCP_INSTALLATION.md)
+- Explicit MCP package requirement documentation in README.md
+
+### Changed
+- Replaced signal-based timeout mechanism with more reliable threading-based implementation
+- Increased default timeouts for write operations (120s) and search operations (120s)
+- Enhanced CLAUDE.md automatic initialization for reliable toolkit startup
+- Extended MCP protocol default timeout from 30s to 120s
+- Implemented lazy tool registration for improved server reliability
+- Added dedicated MCP tool registration timeout (10 minutes)
+
+### Fixed
+- Fixed timeout issues in write_tool and search_tool operations
+- Improved cross-platform compatibility for timeout handling (Windows support)
+- Enhanced error recovery for long-running operations
+- Addressed MCP server disconnection issues in Claude Desktop
+- Fixed tool registration timeout issues during server startup
+
 ## [0.5.2-tool-integration] - 2025-05-13
 
 ### Added
