@@ -3,7 +3,26 @@ MCP Connector Module
 
 This module provides compatibility classes for connecting with the MCP protocol.
 It serves as a backup when the official MCP package isn't available.
+
+The module also includes enhanced MCP protocol timeout settings to prevent
+connection issues in Claude Desktop.
 """
+
+# Configure MCP timeouts
+import os
+import sys
+
+# Set default MCP protocol timeouts (in milliseconds)
+# Override default timeout of 30000ms (30s)
+os.environ["MCP_DEFAULT_TIMEOUT"] = "300000"  # 5 minutes
+os.environ["MCP_MAX_REQUEST_TIMEOUT"] = "600000"  # 10 minutes
+os.environ["MCP_INITIALIZATION_TIMEOUT"] = "1200000"  # 20 minutes
+os.environ["MCP_LAZY_LOADING"] = "true"  # Enable lazy loading features
+os.environ["MCP_REDUCED_TOOLS"] = "true"  # Enable reduced tool set initially
+os.environ["MCP_DEBUG"] = "true"  # Enable additional debug logging
+
+# Ensure stderr has proper flush behavior
+sys.stderr.reconfigure(line_buffering=True)
 
 import os
 import sys

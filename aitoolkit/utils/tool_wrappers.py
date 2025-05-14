@@ -63,7 +63,16 @@ SEARCH_KEYWORDS = {
 # File operation keywords that might be used in long operations
 FILE_OPERATION_KEYWORDS = {
     'read_multiple', 'search_files', 'directory_tree', 'write_file', 
-    'edit_file', 'enhanced_edit', 'apply_bookmark'
+    'edit_file', 'enhanced_edit', 'apply_bookmark', 'write_tool', 'search_tool'
+}
+
+# Timeout multipliers for specific operations (in seconds)
+OPERATION_TIMEOUTS = {
+    'search': 120.0,  # 2 minutes for search operations
+    'write': 120.0,   # 2 minutes for write operations 
+    'find': 90.0,     # 1.5 minutes for find operations
+    'query': 90.0,    # 1.5 minutes for query operations
+    'default': 60.0   # Default timeout
 }
 
 def is_likely_long_running(func_name: str) -> bool:
@@ -90,9 +99,31 @@ def is_likely_long_running(func_name: str) -> bool:
     
     return False
 
+def determine_timeout(func_name: str, default_timeout: float = 60.0) -> float:
+    """
+    Determine the appropriate timeout for a function based on its name.
+    
+    Args:
+        func_name: Function name
+        default_timeout: Default timeout to use if no specific match
+        
+    Returns:
+        Timeout in seconds
+    """
+    func_name_lower = func_name.lower()
+    
+    # Check for specific operation types
+    for operation_type, timeout_value in OPERATION_TIMEOUTS.items():
+        if operation_type in func_name_lower:
+            logger.info(f"Using {timeout_value}s timeout for {func_name} (matched {operation_type})")
+            return timeout_value
+    
+    # Return default if no specific match
+    return default_timeout
+
 def make_robust(
     max_retries: int = 2, 
-    timeout: float = 60.0,
+    timeout: float = None,  # Now optional, will be auto-determined if None
     clear_queue: bool = True,
     force: bool = False
 ) -> Callable[[Callable[..., T]], Callable[..., T]]:
@@ -103,7 +134,7 @@ def make_robust(
     
     Args:
         max_retries: Maximum number of retry attempts
-        timeout: Timeout in seconds
+        timeout: Timeout in seconds (if None, will determine based on function name)
         clear_queue: Whether to clear the request queue before operation
         force: Whether to apply robustness features regardless of the function name
         
@@ -115,10 +146,13 @@ def make_robust(
         
         # Only apply to functions that are likely to be long-running
         if force or is_likely_long_running(func_name):
-            logger.info(f"Applying robustness features to function: {func_name}")
+            # Determine appropriate timeout if not specified
+            actual_timeout = timeout if timeout is not None else determine_timeout(func_name)
+            
+            logger.info(f"Applying robustness features to function: {func_name} (timeout: {actual_timeout}s)")
             return robust_operation(
                 max_retries=max_retries,
-                timeout=timeout,
+                timeout=actual_timeout,
                 clear_queue=clear_queue
             )(func)
         else:
@@ -129,7 +163,7 @@ def make_robust(
 def apply_robustness(
     func: Callable[..., T],
     max_retries: int = 2, 
-    timeout: float = 60.0,
+    timeout: float = None,  # Now optional, will be auto-determined if None
     clear_queue: bool = True,
     force: bool = False
 ) -> Callable[..., T]:
@@ -141,7 +175,7 @@ def apply_robustness(
     Args:
         func: The function to apply robustness features to
         max_retries: Maximum number of retry attempts
-        timeout: Timeout in seconds
+        timeout: Timeout in seconds (if None, will determine based on function name)
         clear_queue: Whether to clear the request queue before operation
         force: Whether to apply robustness features regardless of the function name
         
@@ -152,9 +186,12 @@ def apply_robustness(
     
     # Only apply to functions that are likely to be long-running
     if force or is_likely_long_running(func_name):
-        logger.info(f"Applying robustness features to function: {func_name}")
+        # Determine appropriate timeout if not specified
+        actual_timeout = timeout if timeout is not None else determine_timeout(func_name)
+        
+        logger.info(f"Applying robustness features to function: {func_name} (timeout: {actual_timeout}s)")
         decorated = func
-        decorated = with_timeout(timeout)(decorated)
+        decorated = with_timeout(actual_timeout)(decorated)
         decorated = with_retry(max_retries=max_retries)(decorated)
         
         if clear_queue:
@@ -186,8 +223,10 @@ def wrap_mcp_tool(mcp_obj, tool_func: Callable[..., T]) -> Callable[..., T]:
     def wrapped_tool(*args, **kwargs):
         # Apply robustness features based on function name
         if is_likely_long_running(func_name):
-            logger.info(f"Applying robustness to MCP tool: {func_name}")
-            robust_func = apply_robustness(tool_func)
+            # Determine appropriate timeout
+            timeout = determine_timeout(func_name)
+            logger.info(f"Applying robustness to MCP tool: {func_name} (timeout: {timeout}s)")
+            robust_func = apply_robustness(tool_func, timeout=timeout)
             return original_tool()(robust_func)
         else:
             return original_tool()(tool_func)
