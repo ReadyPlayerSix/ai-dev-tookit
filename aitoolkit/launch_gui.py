@@ -48,7 +48,7 @@ def main():
     
     try:
         # Import the unified GUI class after fixing the path
-        from legacy.unified.configurator_unified import AIDevToolkitGUI
+        from aitoolkit.gui.legacy.configurator_unified import AIDevToolkitGUI
         
         # Create and run the GUI
         root = tk.Tk()
