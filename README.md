@@ -405,6 +405,23 @@ search_files("path/to/your/project", "pattern")
 # Git repository tracking
 git_info = get_git_info("path/to/your/project")
 update_git_history("path/to/your/project", ".git_history")
+
+# Project upgrading and analysis
+from aitoolkit.utils.upgrade_manager import UpgradeManager
+
+# Check if a project needs an upgrade
+needs_upgrade, current, latest = UpgradeManager.needs_upgrade("path/to/project")
+
+# Analyze a project structure and get recommendations
+analysis = UpgradeManager.analyze_project("path/to/project")
+recommendations = analysis["recommendations"]["recommendations"]
+
+# Upgrade a project to the latest version
+results = UpgradeManager.upgrade("path/to/project", backup=True)
+
+# Or use the command-line tool
+# python scripts/upgrade_ai_toolkit.py --analyze /path/to/project
+# python scripts/upgrade_ai_toolkit.py /path/to/project
 ```
 
 ### Claude Code vs Desktop Functionality
@@ -592,6 +609,8 @@ Additional documentation is available in the [docs](docs/) directory:
 - [Project Structure](docs/project_structure.md)
 - [Tools Reference](docs/tools_reference.md)
 - [Upgrading AI Reference](docs/upgrading_ai_reference.md)
+- [Upgrade Manager](docs/upgrade_manager.md)
+- [Think Tool Guide](docs/think-tool-guide.md)
 
 ## 📅 Roadmap
 
