@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.4-optimized-tool-usage] - 2025-05-14
+
+### Added
+- Enhanced CLAUDE.md with optimized tool usage guidelines to prevent timeouts
+- New hierarchical tool selection approach for improved performance
+- Comprehensive documentation on using the .ai_reference index efficiently
+- Internal prompts for Claude to utilize indexed data structures
+- Added new section in README.md on optimized tool usage
+- Added specific timeout avoidance strategies documentation
+- Expanded upgrading_ai_reference.md with AI Reference usage guide
+
+### Changed
+- Updated documentation to promote index-first approach vs filesystem walks
+- Provided code examples for proper .ai_reference utilization
+- Added TaskBoard recommendations for long-running operations
+- Improved troubleshooting section with tool performance guidance
+
 ## [0.5.4-timeout-robustness] - 2025-05-14
 
 ### Added

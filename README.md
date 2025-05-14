@@ -210,6 +210,58 @@ python development/launch.py
 
 ## 📊 Usage
 
+### Optimized Tool Usage to Avoid Timeouts
+
+To ensure the best performance and prevent timeouts, follow these hierarchical tool selection guidelines:
+
+#### Hierarchical Tool Selection (NEW!)
+Always use tools in this priority order:
+
+1. **Component Registry First**: Check `.ai_reference/component_registry.json` before filesystem operations
+2. **Script Index Second**: Use `.ai_reference/script_index.json` to find specific files 
+3. **Direct File Operations Last**: Only as a final resort when indexed data is unavailable
+
+```python
+# PREFERRED: Query component registry directly (fastest)
+registry_path = f"{project_path}/.ai_reference/component_registry.json"
+with open(registry_path, 'r') as f:
+    registry = json.load(f)
+component = registry["components"].get(component_name)
+
+# If found, do targeted file reading
+if component:
+    file_path = component["primary_file"]
+    # Now read just this specific file
+```
+
+#### For Code Searches
+```python
+# PREFERRED: Use script index to identify exact files to check
+index_path = f"{project_path}/.ai_reference/script_index.json"
+with open(index_path, 'r') as f:
+    script_index = json.load(f)
+
+# Find files containing target class/function
+matches = []
+for file_path, info in script_index["files"].items():
+    if target_name in info["classes"] or target_name in info["functions"]:
+        matches.append(file_path)
+        
+# Read only those specific files
+```
+
+#### For Long-Running Operations
+```python
+# Use TaskBoard for operations that might time out
+task_id = submit_background_task(
+    task_type="search",
+    target_path=project_path,
+    pattern=search_pattern
+)
+# Check status and get results when ready
+task_result = get_task_result(task_id)
+```
+
 ### AI Librarian & Unified Context
 
 ```python
@@ -494,6 +546,8 @@ Common issues and solutions:
 
 - **Old .ai_reference Format**: For projects with older format .ai_reference directories, run the installer with `python install_for_claude_code.py` which will automatically detect and offer to upgrade these directories
 
+- **Tool Timeout Performance Issues**: If tools are taking too long and timing out, use the hierarchical tool selection approach described in the "Optimized Tool Usage" section above. Always query the component registry and script index before doing direct filesystem operations.
+
 ## 📚 Documentation
 
 Additional documentation is available in the [docs](docs/) directory:
@@ -503,6 +557,7 @@ Additional documentation is available in the [docs](docs/) directory:
 - [MCP Server Template](docs/mcp-server-template.md)
 - [Project Structure](docs/project_structure.md)
 - [Tools Reference](docs/tools_reference.md)
+- [Upgrading AI Reference](docs/upgrading_ai_reference.md)
 
 ## 📅 Roadmap
 
