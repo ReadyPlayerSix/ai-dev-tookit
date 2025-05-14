@@ -871,24 +871,32 @@ When you enable project directories, you are granting Claude permission to read 
                 self.ai_dev_toolkit_server_enabled.set(has_integrated or has_legacy_ai_librarian or has_legacy_file_system)
                 
                 # Load allowed directories from args
+                # Clear existing project dirs to avoid duplication
+                self.project_dirs = []
+                
+                # Load from AI Librarian server if present
                 if has_legacy_ai_librarian and "args" in config["mcpServers"]["ai-librarian"]:
                     args = config["mcpServers"]["ai-librarian"]["args"]
                     # Skip the first item which is the script path
                     dir_paths = args[1:] if len(args) > 1 else []
                     
                     # Filter existing directories and add to project list
-                    self.project_dirs = [dir_path for dir_path in dir_paths if os.path.exists(dir_path)]
-                    for dir_path in self.project_dirs:
-                        self.project_enabled[dir_path] = True
+                    for dir_path in dir_paths:
+                        if os.path.exists(dir_path) and dir_path not in self.project_dirs:
+                            self.project_dirs.append(dir_path)
+                            self.project_enabled[dir_path] = True
+                
+                # Load from integrated server if present
                 elif has_integrated and "args" in config["mcpServers"]["integrated-server"]:
                     args = config["mcpServers"]["integrated-server"]["args"]
                     # Skip the first item which is the script path
                     dir_paths = args[1:] if len(args) > 1 else []
                     
                     # Filter existing directories and add to project list
-                    self.project_dirs = [dir_path for dir_path in dir_paths if os.path.exists(dir_path)]
-                    for dir_path in self.project_dirs:
-                        self.project_enabled[dir_path] = True
+                    for dir_path in dir_paths:
+                        if os.path.exists(dir_path) and dir_path not in self.project_dirs:
+                            self.project_dirs.append(dir_path)
+                            self.project_enabled[dir_path] = True
                             
                 # Update project displays
                 self.update_projects_list()
@@ -898,55 +906,46 @@ When you enable project directories, you are granting Claude permission to read 
             print(f"Error loading config: {str(e)}")
     
     def scan_for_projects(self):
-        """Scan directories for .ai_reference folders to find existing projects"""
+        """Scan authorized directories for .ai_reference folders to find existing projects"""
         # Clear status message
         self.project_message_var.set("Scanning for projects with .ai_reference folders...")
         
-        # Keep track of found projects
+        # Keep track of found projects and their status
         found_projects = []
         
-        # Check current project_dirs for .ai_reference folders
+        # Only check for .ai_reference in directories we already have permission to access
+        # This ensures we only find projects in locations Claude can actually use
         for dir_path in self.project_dirs:
-            if os.path.exists(os.path.join(dir_path, ".ai_reference")):
-                found_projects.append(dir_path)
-        
-        # Look through common directories for potential projects
-        home_dir = os.path.expanduser("~")
-        common_project_locations = [
-            os.path.join(home_dir, "Documents"),
-            os.path.join(home_dir, "Projects"),
-            os.path.join(home_dir, "Desktop"),
-            os.path.join(home_dir, "git"),
-            os.path.join(home_dir, "source"),
-            # Add current working directory and parent
-            os.getcwd(),
-            os.path.dirname(os.getcwd())
-        ]
-        
-        # Scan a limited depth to find projects
-        for search_dir in common_project_locations:
-            if os.path.exists(search_dir) and os.path.isdir(search_dir):
-                try:
-                    # Check all first-level subdirectories
-                    for subdir in os.listdir(search_dir):
-                        full_path = os.path.join(search_dir, subdir)
+            try:
+                # Check if this directory itself has an .ai_reference folder
+                if os.path.exists(os.path.join(dir_path, ".ai_reference")):
+                    if dir_path not in found_projects:
+                        found_projects.append(dir_path)
+                
+                # Check only immediate subdirectories of authorized directories
+                # This avoids scanning unrelated system directories
+                if os.path.exists(dir_path) and os.path.isdir(dir_path):
+                    for subdir in os.listdir(dir_path):
+                        full_path = os.path.join(dir_path, subdir)
                         if os.path.isdir(full_path) and os.path.exists(os.path.join(full_path, ".ai_reference")):
                             if full_path not in self.project_dirs and full_path not in found_projects:
                                 found_projects.append(full_path)
-                                
-                except PermissionError:
-                    # Skip directories we can't access
-                    pass
+            except (PermissionError, FileNotFoundError):
+                # Skip directories we can't access
+                continue
         
-        # Add found projects 
-        if found_projects:
-            for project in found_projects:
-                if project not in self.project_dirs:
-                    self.project_dirs.append(project)
-                    self.project_enabled[project] = True
-            
+        # Add found projects that aren't already in the list
+        new_projects = []
+        for project in found_projects:
+            if project not in self.project_dirs:
+                self.project_dirs.append(project)
+                self.project_enabled[project] = True
+                new_projects.append(project)
+        
+        # Update the UI
+        if new_projects:
             self.update_projects_list()
-            self.project_message_var.set(f"Found {len(found_projects)} projects with .ai_reference folders.")
+            self.project_message_var.set(f"Found {len(new_projects)} new projects with .ai_reference folders.")
         else:
             self.project_message_var.set("No new projects with .ai_reference folders found.")
         
@@ -958,6 +957,15 @@ When you enable project directories, you are granting Claude permission to read 
         
         # Clear active projects listbox
         self.active_projects_listbox.delete(0, tk.END)
+        
+        # Remove any duplicate entries from project_dirs
+        unique_dirs = []
+        for dir_path in self.project_dirs:
+            if dir_path not in unique_dirs:
+                unique_dirs.append(dir_path)
+        
+        # Update project_dirs with the deduplicated list
+        self.project_dirs = unique_dirs
         
         # Repopulate with current projects
         for i, dir_path in enumerate(self.project_dirs):
