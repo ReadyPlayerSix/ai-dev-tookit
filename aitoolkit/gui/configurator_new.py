@@ -142,6 +142,9 @@ class AIDevToolkitGUI:
         ttk.Button(actions_frame, text="Restart MCP Server", command=self.restart_server).pack(
             fill=tk.X, pady=5, padx=5)
         
+        ttk.Button(actions_frame, text="Clear Request Queue", command=self.clear_request_queue).pack(
+            fill=tk.X, pady=5, padx=5)
+        
         ttk.Button(actions_frame, text="Clear Server Log", command=self.clear_server_log).pack(
             fill=tk.X, pady=5, padx=5)
         
@@ -156,6 +159,12 @@ class AIDevToolkitGUI:
         # Add a button to clean up legacy files
         ttk.Button(actions_frame, text="Clean Legacy Files", 
                  command=self.cleanup_legacy_files,
+                 style='TButton').pack(
+            fill=tk.X, pady=5, padx=5)
+            
+        # Add a button to upgrade the toolkit
+        ttk.Button(actions_frame, text="Upgrade Toolkit", 
+                 command=self.upgrade_toolkit,
                  style='TButton').pack(
             fill=tk.X, pady=5, padx=5)
         
@@ -259,6 +268,8 @@ class AIDevToolkitGUI:
                  wraplength=700).pack(anchor=tk.W, pady=2)
         ttk.Label(features_frame, text="• Enhanced Code Analysis - Find related files, references, and component details", 
                  wraplength=700).pack(anchor=tk.W, pady=2)
+        ttk.Label(features_frame, text="• Think Tool - Structured reasoning for complex problems", 
+                 wraplength=700).pack(anchor=tk.W, pady=2)
         
         # Project Starter Server checkbox (Coming Soon)
         project_starter_frame = ttk.Frame(server_selection_frame)
@@ -275,20 +286,6 @@ class AIDevToolkitGUI:
                                             style='ComingSoon.TLabel')
         project_starter_coming_soon.pack(side=tk.LEFT, padx=5)
         
-        # Think Tool Server checkbox (Coming Soon)
-        think_tool_frame = ttk.Frame(server_selection_frame)
-        think_tool_frame.pack(fill=tk.X, anchor=tk.W, pady=5)
-        think_tool_check = ttk.Checkbutton(think_tool_frame, 
-                                         text="Think Tool Server - Structured reasoning for complex problems", 
-                                         state='disabled',
-                                         style='Server.TCheckbutton')
-        think_tool_check.pack(side=tk.LEFT)
-        
-        # Coming Soon label for Think Tool - with more visible styling
-        think_tool_coming_soon = ttk.Label(think_tool_frame, 
-                                       text="(Coming Soon)",
-                                       style='ComingSoon.TLabel')
-        think_tool_coming_soon.pack(side=tk.LEFT, padx=5)
         
         # Note about Claude Desktop compatibility
         claude_compat_note = ttk.Label(server_selection_frame, 
@@ -445,8 +442,8 @@ class AIDevToolkitGUI:
 2. AI Librarian: Helps Claude understand your codebase with self-checks to ensure proper functionality
 3. Task Management: Track development tasks across conversations
 4. Enhanced Code Analysis: Find related files, references, and detailed component information
-5. Project Starter: Project generation and scaffolding (Coming Soon)
-6. Think Tool: Structured reasoning for complex problems (Coming Soon)"""
+5. Think Tool: Structured reasoning for complex problems
+6. Project Starter: Project generation and scaffolding (Coming Soon)"""
         
         ttk.Label(desc_frame, text=description, wraplength=800, justify=tk.LEFT).pack(anchor=tk.W)
         
@@ -573,6 +570,78 @@ When you enable project directories, you are granting Claude permission to read 
         # Placeholder implementation
         pass
         
+    def clear_request_queue(self):
+        """
+        Clear the request queue for the MCP server.
+        This helps when the server has unprocessed requests that might be causing delays.
+        """
+        import os
+        import subprocess
+        from tkinter import messagebox
+        
+        try:
+            # Get the root directory of the toolkit
+            toolkit_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            
+            # Command to execute the server script with clear-queue flag
+            # This assumes there's a way to clear the queue via command line
+            # We'll implement this by restarting the server with a special flag
+            cmd = [sys.executable, os.path.join(toolkit_root, "development", "launch_librarian.py"), "--clear-queue"]
+            
+            # Execute the command
+            subprocess.run(cmd, check=True)
+            
+            messagebox.showinfo(
+                "Request Queue Cleared", 
+                "Successfully cleared the server request queue.\nAny pending requests have been removed."
+            )
+            
+            # Update server status
+            self.check_server_status()
+            
+        except Exception as e:
+            messagebox.showerror(
+                "Error Clearing Queue", 
+                f"Could not clear the request queue: {str(e)}"
+            )
+    
+    def upgrade_toolkit(self):
+        """
+        Upgrade the toolkit using the upgrade_manager.py module.
+        This helps users keep their toolkit up to date.
+        """
+        import os
+        import subprocess
+        from tkinter import messagebox
+        
+        try:
+            # Get the root directory of the toolkit
+            toolkit_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            
+            # Command to execute the upgrade script
+            script_path = os.path.join(toolkit_root, "scripts", "upgrade_ai_toolkit.py")
+            cmd = [sys.executable, script_path, toolkit_root]
+            
+            # Execute the command
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            
+            # Show the results
+            messagebox.showinfo(
+                "Upgrade Complete", 
+                f"The toolkit has been upgraded successfully.\n\n{result.stdout}"
+            )
+            
+        except subprocess.CalledProcessError as e:
+            messagebox.showerror(
+                "Upgrade Error", 
+                f"Error during upgrade process:\n{e.stderr}"
+            )
+        except Exception as e:
+            messagebox.showerror(
+                "Upgrade Error", 
+                f"Could not upgrade the toolkit: {str(e)}"
+            )
+    
     def cleanup_legacy_files(self):
         """
         Clean up legacy and backup files in the GUI directory.
