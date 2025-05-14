@@ -14,7 +14,13 @@ Usage:
     python server.py [project_dir1] [project_dir2] ...
 """
 
+# Configure MCP protocol timeouts - Must come before other imports
 import os
+os.environ["MCP_DEFAULT_TIMEOUT"] = "300000"  # 5 minutes (milliseconds)
+os.environ["MCP_MAX_REQUEST_TIMEOUT"] = "600000"  # 10 minutes (milliseconds)
+os.environ["MCP_INITIALIZATION_TIMEOUT"] = "1200000"  # 20 minutes
+os.environ["MCP_REGISTRATION_TIMEOUT"] = "600000"  # 10 minutes for tool registration
+os.environ["MCP_LAZY_TOOL_REGISTRATION"] = "true"  # Enable lazy tool registration
 import sys
 import json
 import time
@@ -23,41 +29,8 @@ import logging
 import threading
 import ast
 import os.path
-import shutil
-import subprocess
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union, Set, Tuple, cast
-
-def create_directory_symlink(source_path: str, target_path: str) -> bool:
-    """
-    Create a directory symlink or junction in a cross-platform way.
-    
-    Args:
-        source_path: Path to the source directory
-        target_path: Path to the target (link) to create
-        
-    Returns:
-        True if successful, False otherwise
-    """
-    try:
-        # Make sure source exists
-        if not os.path.exists(source_path):
-            return False
-            
-        # Create parent directory of target if needed
-        os.makedirs(os.path.dirname(target_path), exist_ok=True)
-            
-        # Create the symlink based on platform
-        if os.name == 'nt':  # Windows
-            # Windows needs CMD's internal mklink command with /J for directory junctions
-            subprocess.run(f'cmd /c mklink /J "{target_path}" "{source_path}"', shell=True, check=True)
-        else:  # Linux/Mac
-            os.symlink(source_path, target_path, target_is_directory=True)
-            
-        return os.path.exists(target_path)
-    except Exception as e:
-        logger.warning(f"Could not create symlink: {str(e)}")
-        return False
 
 # Add the current directory to sys.path to ensure local imports work
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -90,8 +63,7 @@ try:
         get_task_status_mcp,
         get_task_result_mcp,
         cancel_task_mcp,
-        list_tasks_mcp,
-        task_deep_analysis
+        list_tasks_mcp
     )
     # Import think tool from its dedicated module
     from aitoolkit.librarian.think_tool import think
@@ -119,55 +91,34 @@ from pathlib import Path
 # Import datetime for timestamps
 import datetime
 
+# Import git tracker module
+from aitoolkit.utils.git_tracker import (
+    get_repository_status,
+    get_commit_history,
+    get_branches,
+    get_tags,
+    get_remotes,
+    update_git_history_files
+)
+
 # Try different import paths for FastMCP
 try:
     # First try the pip-installed mcp package
     from mcp.server.fastmcp import FastMCP, Context
     MCP_AVAILABLE = True
+    print("[SUCCESS] MCP package found and imported successfully")
 except ImportError:
     try:
-        # Try to install mcp package - disable automatic install since it's causing issues
-        print("MCP package not found.")
-        print("Please install it manually with: pip install mcp[cli]")
-        print("Running in limited functionality mode...")
-        MCP_AVAILABLE = False
-        
-        # Create stub classes to allow server to start
-        class StubContext:
-            def __init__(self):
-                pass
-        
-        class StubMCP:
-            def __init__(self, name, capabilities=None):
-                self.name = name
-                self.capabilities = capabilities or {}
-                print(f"Initialized stub MCP server: {name}")
-                
-            def tool(self, *args, **kwargs):
-                # Return a no-op decorator
-                return lambda f: f
-                
-            def prompt(self, *args, **kwargs):
-                # Return a no-op decorator 
-                return lambda f: f
-                
-            def subscribe(self, *args, **kwargs):
-                # Return a no-op decorator
-                return lambda f: f
-                
-            def run(self):
-                print("Stub MCP server running in limited functionality mode")
-                # Keep the process alive
-                while True:
-                    time.sleep(1)
-        
-        # Create stub objects
-        FastMCP = StubMCP
-        Context = StubContext
-        
-    except Exception as e:
-        print(f"Error setting up stub MCP: {e}")
-        raise ImportError("Could not import or simulate FastMCP.")
+        # Try to import from connector.py (which has an alternate implementation)
+        from aitoolkit.mcp.connector import FastMCP, Context
+        print("[SUCCESS] Using alternate MCP implementation from connector.py")
+        MCP_AVAILABLE = True
+    except ImportError:
+        # Don't try to auto-install as it often fails in production environments
+        print("[WARNING] MCP package not found.")
+        print("[WARNING] Please install it manually with: pip install mcp[cli]")
+        print("[WARNING] Limited functionality mode - Claude Desktop connection will not work.")
+        raise ImportError("Could not import FastMCP. Please install the mcp package: pip install mcp[cli]")
 
 # Configure logging using the centralized logging manager
 logger = configure_logger(
@@ -189,25 +140,6 @@ mcp = FastMCP(
     }
 )
 
-# Log MCP server status
-if 'MCP_AVAILABLE' in globals() and not MCP_AVAILABLE:
-    logger.warning("Running in limited functionality mode without MCP server.")
-    print("\n============================================================")
-    print("RUNNING IN LIMITED FUNCTIONALITY MODE - NO MCP CAPABILITIES")
-    print("To fix: Install MCP package manually with 'pip install mcp[cli]'")
-    print("============================================================\n")
-    
-    # Replace mcp.tool decorator with a no-op decorator to avoid errors
-    original_tool = mcp.tool
-    def dummy_tool(*args, **kwargs):
-        def decorator(func):
-            # Just return the function unchanged
-            return func
-        return decorator
-    mcp.tool = dummy_tool
-else:
-    logger.info("MCP server initialized successfully")
-
 # Thread synchronization lock
 state_lock = threading.Lock()
 
@@ -219,7 +151,12 @@ librarian_context = {
     "indexed_files": {},  # Map of project paths to their indexed files
     "components": {},  # Map of project paths to their component registries
     "paused": False,   # Flag to temporarily pause monitoring
-    "tool_index": None  # Path to Tool Index directory if available
+    "tool_index": None,  # Path to Tool Index directory if available
+    "file_cache": {},  # Cache for frequently accessed files
+    "cache_stats": {"hits": 0, "misses": 0},  # Statistics for cache performance
+    "cache_max_size": 100,  # Maximum number of files to cache
+    "cache_max_age": 60,  # Maximum age of cached files in seconds
+    "git_info": {}  # Cache for git repository information
 }
 
 # File change monitoring thread
@@ -403,6 +340,53 @@ def cleanup():
 
 atexit.register(cleanup)
 
+# Add tool to get cache statistics
+@mcp.tool()
+def get_file_cache_stats() -> Dict[str, Any]:
+    """
+    Get statistics about the file cache.
+    
+    Returns:
+        Dictionary with cache statistics including hit rate
+    """
+    with state_lock:
+        entries = len(librarian_context["file_cache"])
+        hits = librarian_context["cache_stats"]["hits"]
+        misses = librarian_context["cache_stats"]["misses"]
+        total = hits + misses
+        hit_ratio = hits / total if total > 0 else 0
+        
+        return {
+            "status": "success",
+            "cache_entries": entries,
+            "cache_size_limit": librarian_context["cache_max_size"],
+            "cache_age_limit": librarian_context["cache_max_age"],
+            "hits": hits,
+            "misses": misses,
+            "hit_ratio": hit_ratio,
+            "cached_files": list(librarian_context["file_cache"].keys())
+        }
+
+@mcp.tool()
+def clear_file_cache_tool() -> Dict[str, Any]:
+    """
+    Clear the file cache and return statistics.
+    
+    This is useful to free up memory or if you want to force fresh reads.
+    
+    Returns:
+        Dictionary with cache statistics
+    """
+    stats = clear_file_cache()
+    return {
+        "status": "success",
+        "entries_cleared": stats["entries_cleared"],
+        "hits": stats["hits"],
+        "misses": stats["misses"],
+        "hit_ratio": stats["hit_ratio"],
+        "message": f"Cache cleared. {stats['entries_cleared']} entries removed."
+    }
+
 # Load previous state if available
 state_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ai_librarian_state.json")
 if os.path.exists(state_file):
@@ -427,6 +411,108 @@ if os.path.exists(state_file):
 
 # Dictionary to store permission status of directories
 permission_status = {}
+
+# File cache management functions
+def cache_get_file(file_path: str, encoding: str = "utf-8") -> Optional[Dict[str, Any]]:
+    """
+    Get a file from the cache if available and not expired.
+    
+    Args:
+        file_path: Path to the file
+        encoding: File encoding
+        
+    Returns:
+        Cached file data or None if not available
+    """
+    with state_lock:
+        # Check if file is in cache
+        if file_path not in librarian_context["file_cache"]:
+            librarian_context["cache_stats"]["misses"] += 1
+            return None
+            
+        # Get cached entry
+        cache_entry = librarian_context["file_cache"][file_path]
+        
+        # Check if cache entry is expired
+        current_time = time.time()
+        if current_time - cache_entry["cached_at"] > librarian_context["cache_max_age"]:
+            # Entry is expired, remove it
+            del librarian_context["file_cache"][file_path]
+            librarian_context["cache_stats"]["misses"] += 1
+            return None
+            
+        # Check if the file has been modified since it was cached
+        try:
+            stats = os.stat(file_path)
+            if stats.st_mtime > cache_entry["modified"]:
+                # File has been modified, remove from cache
+                del librarian_context["file_cache"][file_path]
+                librarian_context["cache_stats"]["misses"] += 1
+                return None
+        except Exception:
+            # If there's an error checking the file, assume it's invalid
+            del librarian_context["file_cache"][file_path]
+            librarian_context["cache_stats"]["misses"] += 1
+            return None
+            
+        # Cache hit
+        librarian_context["cache_stats"]["hits"] += 1
+        # Update access time
+        cache_entry["last_accessed"] = current_time
+        
+        return cache_entry
+
+def cache_set_file(file_path: str, file_data: Dict[str, Any]) -> None:
+    """
+    Add or update a file in the cache.
+    
+    Args:
+        file_path: Path to the file
+        file_data: File data dictionary
+    """
+    with state_lock:
+        # Check if cache is full
+        if len(librarian_context["file_cache"]) >= librarian_context["cache_max_size"]:
+            # Remove the least recently accessed entry
+            lru_path = min(
+                librarian_context["file_cache"].items(),
+                key=lambda x: x[1]["last_accessed"]
+            )[0]
+            del librarian_context["file_cache"][lru_path]
+            
+        # Add the file to the cache
+        current_time = time.time()
+        librarian_context["file_cache"][file_path] = {
+            **file_data,
+            "cached_at": current_time,
+            "last_accessed": current_time
+        }
+
+def clear_file_cache() -> Dict[str, Any]:
+    """
+    Clear the file cache and return statistics.
+    
+    Returns:
+        Dictionary with cache statistics
+    """
+    with state_lock:
+        stats = {
+            "entries_cleared": len(librarian_context["file_cache"]),
+            "hits": librarian_context["cache_stats"]["hits"],
+            "misses": librarian_context["cache_stats"]["misses"],
+            "hit_ratio": 0
+        }
+        
+        # Calculate hit ratio
+        total_accesses = stats["hits"] + stats["misses"]
+        if total_accesses > 0:
+            stats["hit_ratio"] = stats["hits"] / total_accesses
+            
+        # Reset cache
+        librarian_context["file_cache"] = {}
+        librarian_context["cache_stats"] = {"hits": 0, "misses": 0}
+        
+        return stats
 
 # Parse directories from command line args
 def initialize_allowed_directories():
@@ -466,32 +552,10 @@ def initialize_tool_index():
     tool_index_path = None
 
     for project_path in ALLOWED_DIRECTORIES:
-        # First check for .tools_reference (plural - what Claude Desktop expects)
-        potential_path_plural = os.path.join(project_path, ".tools_reference")
-        if os.path.exists(potential_path_plural):
-            tool_index_path = potential_path_plural
-            logger.info(f"Found Tool Index at {tool_index_path} (plural form)")
-            break
-            
-        # Then check for .tool_reference (singular - what code currently creates)
-        potential_path_singular = os.path.join(project_path, ".tool_reference")
-        if os.path.exists(potential_path_singular):
-            tool_index_path = potential_path_singular
-            logger.info(f"Found Tool Index at {tool_index_path} (singular form)")
-            
-            # Create a symlink from .tool_reference to .tools_reference for Claude Desktop
-            plural_path = os.path.join(project_path, ".tools_reference")
-            if not os.path.exists(plural_path):
-                if create_directory_symlink(potential_path_singular, plural_path):
-                    logger.info(f"Created symlink from {potential_path_singular} to {plural_path}")
-                else:
-                    try:
-                        # If symlink fails, try a directory copy
-                        shutil.copytree(potential_path_singular, plural_path)
-                        logger.info(f"Copied {potential_path_singular} to {plural_path} for Claude Desktop")
-                    except Exception as e:
-                        logger.warning(f"Could not create .tools_reference for Claude Desktop: {str(e)}")
-            
+        potential_path = os.path.join(project_path, ".tool_reference")
+        if os.path.exists(potential_path):
+            tool_index_path = potential_path
+            logger.info(f"Found Tool Index at {tool_index_path}")
             break
 
     # Store the path in the global context
@@ -1224,13 +1288,18 @@ Diagnostic files help troubleshoot issues with code understanding and navigation
             return f"Error initializing AI Librarian: {str(e)}"
 
 @mcp.tool()
-def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
+def query_component(project_path: str, component_name: str, use_cache: bool = True) -> Dict[str, Any]:
     """
     Query information about a specific component in the project.
+    
+    This tool searches for a component (class or function) in the project and returns
+    detailed information about it. It first checks the AI Librarian index for faster lookup,
+    and uses file caching to improve performance.
     
     Args:
         project_path: The root directory of the project
         component_name: The name of the component to query
+        use_cache: Whether to use the file cache (default: True)
         
     Returns:
         Detailed information about the component
@@ -1257,6 +1326,120 @@ def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
 
             # Get script index - first check in-memory, then fallback to file
             script_index = None
+            
+            # Check for component registry first (faster lookup)
+            component_registry_path = os.path.join(ai_ref_path, "component_registry.json")
+            if os.path.exists(component_registry_path):
+                # Check cache first
+                registry_cached = False
+                if use_cache:
+                    registry_data = cache_get_file(component_registry_path)
+                    if registry_data and registry_data.get("content"):
+                        try:
+                            registry = json.loads(registry_data["content"])
+                            registry_cached = True
+                        except:
+                            logger.warning("Failed to parse cached registry, reading from disk")
+                
+                # If not cached or cache disabled, read from disk
+                if not registry_cached:
+                    try:
+                        with open(component_registry_path, 'r', encoding='utf-8') as f:
+                            registry = json.load(f)
+                            # Add to cache if enabled
+                            if use_cache:
+                                cache_set_file(component_registry_path, {
+                                    "status": "success",
+                                    "path": component_registry_path,
+                                    "content": json.dumps(registry),
+                                    "size": os.path.getsize(component_registry_path),
+                                    "mime_type": "application/json",
+                                    "encoding": "utf-8",
+                                    "modified": os.path.getmtime(component_registry_path)
+                                })
+                    except Exception as e:
+                        logger.warning(f"Error reading component registry: {str(e)}")
+                        registry = None
+                
+                # If we found the component in registry, use that info directly
+                if registry and "components" in registry and component_name in registry["components"]:
+                    component_info = registry["components"][component_name]
+                    logger.info(f"Component found directly in registry: {component_name}")
+                    
+                    # Get the file containing the component
+                    file_path = component_info.get("file", "")
+                    full_file_path = os.path.join(project_path, file_path)
+                    
+                    # Use our cached file reading for better performance
+                    file_result = None
+                    
+                    if os.path.exists(full_file_path) and os.access(full_file_path, os.R_OK):
+                        # Check cache first
+                        if use_cache:
+                            file_data = cache_get_file(full_file_path)
+                            if file_data and file_data.get("status") == "success":
+                                file_result = file_data
+                                logger.info(f"Using cached file for component: {component_name}")
+                        
+                        # If not in cache, read from disk
+                        if file_result is None:
+                            try:
+                                with open(full_file_path, 'r', encoding='utf-8') as f:
+                                    file_content = f.read()
+                                
+                                # Create file result 
+                                file_result = {
+                                    "status": "success",
+                                    "path": full_file_path,
+                                    "content": file_content,
+                                    "size": os.path.getsize(full_file_path),
+                                    "mime_type": "text/x-python",
+                                    "encoding": "utf-8",
+                                    "modified": os.path.getmtime(full_file_path)
+                                }
+                                
+                                # Add to cache if enabled
+                                if use_cache:
+                                    cache_set_file(full_file_path, file_result)
+                            except Exception as e:
+                                logger.error(f"Error reading file: {str(e)}")
+                    
+                    # Extract the component code if we have the file content
+                    code_snippet = "Code not available"
+                    if file_result and file_result.get("content"):
+                        try:
+                            # Extract the component's code
+                            tree = ast.parse(file_result["content"])
+                            for node in ast.walk(tree):
+                                if ((isinstance(node, ast.ClassDef) or isinstance(node, ast.FunctionDef)) and
+                                    node.name == component_name):
+                                    
+                                    # Get the component's source code
+                                    start_line = node.lineno
+                                    end_line = node.end_lineno if hasattr(node, 'end_lineno') else start_line + 1
+                                    
+                                    # Extract line numbers and code
+                                    lines = file_result["content"].splitlines()
+                                    code_snippet = "\n".join(lines[start_line-1:end_line])
+                                    break
+                        except Exception as e:
+                            logger.error(f"Error parsing file for component code: {str(e)}")
+                    
+                    # Return the component information with highlighted source
+                    return {
+                        "status": "success",
+                        "component": component_name,
+                        "type": component_info.get("type", "unknown"),
+                        "file": file_path,
+                        "full_path": full_file_path,
+                        "code": code_snippet,
+                        "references": component_info.get("references", []),
+                        "description": component_info.get("description", "No description available"),
+                        "using_registry": True,
+                        "from_cache": file_result and file_result.get("from_cache", False)
+                    }
+            
+            # Fall back to script index if registry approach failed
             with state_lock:
                 if project_path in librarian_context["projects"]:
                     script_index = librarian_context["projects"][project_path]
@@ -1270,11 +1453,37 @@ def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
                         "message": f"Script index not found at {script_index_path}."
                     }
 
-                with open(script_index_path, 'r', encoding='utf-8') as f:
-                    script_index = json.load(f)
-                    # Cache it for future use
-                    with state_lock:
-                        librarian_context["projects"][project_path] = script_index
+                # Try to use cache for script index
+                script_index_cached = False
+                if use_cache:
+                    index_data = cache_get_file(script_index_path)
+                    if index_data and index_data.get("content"):
+                        try:
+                            script_index = json.loads(index_data["content"])
+                            script_index_cached = True
+                            logger.info("Using cached script index")
+                        except:
+                            logger.warning("Failed to parse cached index, reading from disk")
+                
+                # If not cached or parsing failed, read from disk
+                if not script_index_cached:
+                    with open(script_index_path, 'r', encoding='utf-8') as f:
+                        script_index = json.load(f)
+                        # Cache it for future use
+                        with state_lock:
+                            librarian_context["projects"][project_path] = script_index
+                        
+                        # Add to file cache if enabled
+                        if use_cache:
+                            cache_set_file(script_index_path, {
+                                "status": "success",
+                                "path": script_index_path,
+                                "content": json.dumps(script_index),
+                                "size": os.path.getsize(script_index_path),
+                                "mime_type": "application/json",
+                                "encoding": "utf-8",
+                                "modified": os.path.getmtime(script_index_path)
+                            })
 
             # Search for the component in all files
             results = []
@@ -1285,17 +1494,58 @@ def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
 
                     # Read the mini-librarian for more details
                     mini_librarian_path = os.path.join(ai_ref_path, file_info["mini_librarian"])
-                    if os.path.exists(mini_librarian_path):
-                        with open(mini_librarian_path, 'r', encoding='utf-8') as f:
-                            mini_librarian = json.load(f)
+                    
+                    # Check cache for mini-librarian
+                    mini_librarian = None
+                    if use_cache and os.path.exists(mini_librarian_path):
+                        mini_lib_data = cache_get_file(mini_librarian_path)
+                        if mini_lib_data and mini_lib_data.get("content"):
+                            try:
+                                mini_librarian = json.loads(mini_lib_data["content"])
+                                logger.info(f"Using cached mini-librarian for {file_path}")
+                            except:
+                                logger.warning(f"Failed to parse cached mini-librarian, reading from disk: {mini_librarian_path}")
+                    
+                    # If not cached or parsing failed, read from disk
+                    if mini_librarian is None and os.path.exists(mini_librarian_path):
+                        try:
+                            with open(mini_librarian_path, 'r', encoding='utf-8') as f:
+                                mini_librarian = json.load(f)
+                                
+                                # Add to cache if enabled
+                                if use_cache:
+                                    cache_set_file(mini_librarian_path, {
+                                        "status": "success",
+                                        "path": mini_librarian_path,
+                                        "content": json.dumps(mini_librarian),
+                                        "size": os.path.getsize(mini_librarian_path),
+                                        "mime_type": "application/json",
+                                        "encoding": "utf-8",
+                                        "modified": os.path.getmtime(mini_librarian_path)
+                                    })
+                        except Exception as e:
+                            logger.warning(f"Error reading mini-librarian {mini_librarian_path}: {str(e)}")
+                            mini_librarian = None
 
-                        # Check if the file exists
-                        full_file_path = os.path.join(project_path, file_path)
-                        if os.path.exists(full_file_path):
+                    # Check if the file exists
+                    full_file_path = os.path.join(project_path, file_path)
+                    if os.path.exists(full_file_path):
+                        # Use our cached read_file implementation for better performance
+                        file_result = None
+                        
+                        # Check cache first
+                        if use_cache:
+                            file_data = cache_get_file(full_file_path)
+                            if file_data and file_data.get("status") == "success":
+                                file_result = file_data
+                                logger.info(f"Using cached file for component: {component_name}")
+                        
+                        # If not in cache, read from disk
+                        if file_result is None:
                             try:
                                 with open(full_file_path, 'r', encoding='utf-8') as f:
                                     file_content = f.read()
-
+                                
                                 # Extract the component's code
                                 import ast
                                 try:
@@ -1319,6 +1569,21 @@ def query_component(project_path: str, component_name: str) -> Dict[str, Any]:
                                                 "line_range": f"{start_line}-{end_line}",
                                                 "code": component_code
                                             })
+                                            
+                                            # Create file result and add to cache
+                                            file_result = {
+                                                "status": "success",
+                                                "path": full_file_path,
+                                                "content": file_content,
+                                                "size": os.path.getsize(full_file_path),
+                                                "mime_type": "text/x-python",
+                                                "encoding": "utf-8",
+                                                "modified": os.path.getmtime(full_file_path)
+                                            }
+                                            
+                                            # Add to cache if enabled
+                                            if use_cache:
+                                                cache_set_file(full_file_path, file_result)
                                 except Exception as e:
                                     logger.error(f"Error parsing file {full_file_path}: {str(e)}")
                                     results.append({
@@ -1508,24 +1773,7 @@ def initialize_tool_index(project_path: str) -> Dict[str, Any]:
             result = simple_initialize_tool_index(project_path)
             
             # Check if tool reference was successfully initialized
-            # Handle both string and dictionary returns for backward compatibility
-            is_success = False
-            if isinstance(result, dict):
-                is_success = result.get("status") == "success"
-                tool_count = result.get("tool_count", 0)
-                detail = result.get("detail", "")
-            else:
-                # String-based result for backward compatibility
-                is_success = isinstance(result, str) and result.startswith("✅")
-                # Try to extract tool count from the result string
-                tool_count = 0
-                if is_success and "Tool Count:" in result:
-                    try:
-                        tool_count = int(result.split("Tool Count:")[1].strip())
-                    except (IndexError, ValueError):
-                        pass
-                    
-            if is_success:
+            if result.startswith("✅"):
                 # Parse the statistics from the result
                 tool_count = 0
                 profile_count = 0
@@ -1695,12 +1943,7 @@ def initialize_ai_dev_toolkit(project_path: str) -> Dict[str, Any]:
     tool_result = simple_initialize_tool_index(project_path)
     
     # Parse tool initialization result
-    # Handle both string and dictionary returns for backward compatibility
-    if isinstance(tool_result, dict):
-        tool_success = tool_result.get("status") == "success"
-    else:
-        # String-based result for backward compatibility
-        tool_success = isinstance(tool_result, str) and tool_result.startswith("✅")
+    tool_success = tool_result.startswith("✅")
     
     # Step 3: Create cross-references between systems
     cross_ref_result = None
@@ -2558,16 +2801,19 @@ def remove_bookmark(project_path: str, bookmark_id: str) -> Dict[str, Any]:
             }
 
 @mcp.tool()
-def read_file(path: str, encoding: str = "utf-8") -> Dict[str, Any]:
+def read_file(path: str, encoding: str = "utf-8", use_cache: bool = True) -> Dict[str, Any]:
     """
     Read the complete contents of a file.
     
     This tool allows reading the contents of a file within the allowed directories,
     which is useful for examining code, configuration files, or documentation.
     
+    For improved performance, it uses a file cache to avoid reading the same file repeatedly.
+    
     Args:
         path: Path to the file to read
         encoding: File encoding (default: utf-8)
+        use_cache: Whether to use the file cache (default: True)
         
     Returns:
         Dictionary with the file content and metadata
@@ -2587,6 +2833,33 @@ def read_file(path: str, encoding: str = "utf-8") -> Dict[str, Any]:
 
             # Check if file exists
             if not os.path.isfile(path):
+                # Special case: Check if there's an index that contains info about this
+                # Look for project roots that might have an .ai_reference directory
+                for allowed_dir in ALLOWED_DIRECTORIES:
+                    if path.startswith(allowed_dir):
+                        # Check for .ai_reference in the project
+                        rel_path = os.path.relpath(path, allowed_dir)
+                        ai_ref_path = os.path.join(allowed_dir, ".ai_reference")
+                        script_index_path = os.path.join(ai_ref_path, "script_index.json")
+                        
+                        if os.path.exists(script_index_path):
+                            try:
+                                with open(script_index_path, 'r', encoding='utf-8') as f:
+                                    script_index = json.load(f)
+                                
+                                # Look for this path in the script index
+                                if rel_path in script_index.get("files", {}):
+                                    # We found a reference, suggest using indexed info
+                                    return {
+                                        "status": "indexed_only",
+                                        "path": path,
+                                        "message": f"File not found directly but exists in the index. Use index_query tool instead.",
+                                        "indexed_path": rel_path,
+                                        "index_location": script_index_path
+                                    }
+                            except Exception:
+                                pass  # Continue with normal error handling
+                
                 return {
                     "status": "error",
                     "message": f"File not found: {path}"
@@ -2598,6 +2871,16 @@ def read_file(path: str, encoding: str = "utf-8") -> Dict[str, Any]:
                     "status": "error",
                     "message": f"Permission denied: Cannot read {path}"
                 }
+                
+            # Check cache first if enabled
+            if use_cache:
+                cached_data = cache_get_file(path, encoding)
+                if cached_data:
+                    logger.info(f"Using cached data for: {path}")
+                    # Add cache hit indicator
+                    result = {**cached_data}
+                    result["from_cache"] = True
+                    return result
 
             # Try to determine MIME type
             mime_type, _ = mimetypes.guess_type(path)
@@ -2612,8 +2895,9 @@ def read_file(path: str, encoding: str = "utf-8") -> Dict[str, Any]:
 
                 # Get file stats
                 stats = os.stat(path)
-
-                return {
+                
+                # Create result
+                result = {
                     "status": "success",
                     "path": path,
                     "content": content,
@@ -2621,23 +2905,39 @@ def read_file(path: str, encoding: str = "utf-8") -> Dict[str, Any]:
                     "mime_type": mime_type,
                     "encoding": encoding,
                     "modified": stats.st_mtime,
-                    "created": stats.st_ctime
+                    "created": stats.st_ctime,
+                    "from_cache": False
                 }
+                
+                # Add to cache if enabled
+                if use_cache:
+                    cache_set_file(path, result)
+                
+                return result
+                
             except UnicodeDecodeError:
                 # Try to read as binary for non-text files
                 try:
                     with open(path, 'rb') as f:
                         binary_content = f.read()
 
-                    # Return summary for binary files
-                    return {
+                    # Create binary result
+                    result = {
                         "status": "binary",
                         "path": path,
                         "size": len(binary_content),
                         "mime_type": mime_type or "application/octet-stream",
                         "encoding": "binary",
-                        "message": f"Binary file detected ({len(binary_content)} bytes). Content not displayed."
+                        "message": f"Binary file detected ({len(binary_content)} bytes). Content not displayed.",
+                        "from_cache": False
                     }
+                    
+                    # Add to cache if enabled
+                    if use_cache:
+                        cache_set_file(path, result)
+                    
+                    return result
+                    
                 except Exception as bin_error:
                     return {
                         "status": "error",
@@ -2657,7 +2957,7 @@ def read_file(path: str, encoding: str = "utf-8") -> Dict[str, Any]:
             }
 
 @mcp.tool()
-def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
+def read_multiple_files(paths: List[str], use_cache: bool = True) -> Dict[str, Any]:
     """
     Read the contents of multiple files simultaneously.
     
@@ -2665,8 +2965,11 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
     or compare multiple files. Each file's content is returned with its path as a
     reference. Failed reads for individual files won't stop the entire operation.
     
+    For improved performance, it uses a file cache to avoid reading the same files repeatedly.
+    
     Args:
         paths: List of file paths to read
+        use_cache: Whether to use the file cache (default: True)
         
     Returns:
         Dictionary mapping file paths to their contents or error messages
@@ -2675,6 +2978,7 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
     with MonitoringPauser():
         try:
             results = {}
+            cache_stats = {"hits": 0, "misses": 0, "total": len(paths)}
 
             for path in paths:
                 try:
@@ -2691,10 +2995,40 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
 
                     # Check if file exists
                     if not os.path.isfile(path):
-                        results[path] = {
-                            "status": "error",
-                            "message": f"File not found: {path}"
-                        }
+                        # Check if indexed but not found directly
+                        indexed = False
+                        for allowed_dir in ALLOWED_DIRECTORIES:
+                            if path.startswith(allowed_dir):
+                                # Check for .ai_reference in the project
+                                rel_path = os.path.relpath(path, allowed_dir)
+                                ai_ref_path = os.path.join(allowed_dir, ".ai_reference")
+                                script_index_path = os.path.join(ai_ref_path, "script_index.json")
+                                
+                                if os.path.exists(script_index_path):
+                                    try:
+                                        with open(script_index_path, 'r', encoding='utf-8') as f:
+                                            script_index = json.load(f)
+                                        
+                                        # Look for this path in the script index
+                                        if rel_path in script_index.get("files", {}):
+                                            # Found in index but not on disk
+                                            indexed = True
+                                            results[path] = {
+                                                "status": "indexed_only",
+                                                "path": path,
+                                                "message": f"File not found directly but exists in the index.",
+                                                "indexed_path": rel_path,
+                                                "index_location": script_index_path
+                                            }
+                                            break
+                                    except Exception:
+                                        pass
+                        
+                        if not indexed:
+                            results[path] = {
+                                "status": "error",
+                                "message": f"File not found: {path}"
+                            }
                         continue
 
                     # Check if we have read permission
@@ -2704,6 +3038,21 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
                             "message": f"Permission denied: Cannot read {path}"
                         }
                         continue
+                    
+                    # Check cache first if enabled
+                    if use_cache:
+                        cached_data = cache_get_file(path, 'utf-8')
+                        if cached_data:
+                            logger.info(f"Using cached data for: {path}")
+                            # Add cache hit indicator
+                            result = {**cached_data}
+                            result["from_cache"] = True
+                            results[path] = result
+                            cache_stats["hits"] += 1
+                            continue
+                    
+                    # Cache miss, need to read the file
+                    cache_stats["misses"] += 1
 
                     # Try to determine MIME type
                     mime_type, _ = mimetypes.guess_type(path)
@@ -2719,25 +3068,45 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
                         # Get file stats
                         stats = os.stat(path)
 
-                        results[path] = {
+                        # Create result dictionary
+                        result = {
                             "status": "success",
                             "content": content,
                             "size": stats.st_size,
                             "mime_type": mime_type,
-                            "modified": stats.st_mtime
+                            "modified": stats.st_mtime,
+                            "encoding": "utf-8",
+                            "from_cache": False
                         }
+                        
+                        # Add to cache if enabled
+                        if use_cache:
+                            cache_set_file(path, result)
+                            
+                        results[path] = result
+                        
                     except UnicodeDecodeError:
                         # Try with binary mode for non-text files
                         try:
                             with open(path, 'rb') as f:
                                 binary_content = f.read()
 
-                            results[path] = {
+                            # Create binary result
+                            result = {
                                 "status": "binary",
                                 "size": len(binary_content),
                                 "mime_type": mime_type or "application/octet-stream",
-                                "message": f"Binary file detected ({len(binary_content)} bytes)"
+                                "message": f"Binary file detected ({len(binary_content)} bytes)",
+                                "encoding": "binary",
+                                "from_cache": False
                             }
+                            
+                            # Add to cache if enabled
+                            if use_cache:
+                                cache_set_file(path, result)
+                                
+                            results[path] = result
+                            
                         except Exception as bin_error:
                             results[path] = {
                                 "status": "error",
@@ -2755,6 +3124,17 @@ def read_multiple_files(paths: List[str]) -> Dict[str, Any]:
                         "status": "error",
                         "message": f"Error processing file: {str(e)}"
                     }
+            
+            # Add cache statistics to result
+            return {
+                "files": results,
+                "count": len(paths),
+                "success_count": sum(1 for r in results.values() if r.get("status") == "success"),
+                "error_count": sum(1 for r in results.values() if r.get("status") == "error"),
+                "cache_hits": cache_stats["hits"],
+                "cache_misses": cache_stats["misses"],
+                "cache_hit_ratio": cache_stats["hits"] / len(paths) if len(paths) > 0 else 0
+            }
 
             return {
                 "status": "success",
@@ -3298,6 +3678,8 @@ def search_files(path: str, pattern: str, file_pattern: str = None, excludePatte
     and directories that match the specified pattern. It can also exclude items matching
     certain patterns.
     
+    For improved performance, it first checks the AI Librarian index if available.
+    
     Args:
         path: The starting directory path to search in
         pattern: The search pattern to match (case-insensitive)
@@ -3339,7 +3721,63 @@ def search_files(path: str, pattern: str, file_pattern: str = None, excludePatte
 
             # Convert pattern to lowercase for case-insensitive matching
             pattern_lower = pattern.lower()
-
+            
+            # Check AI Librarian index first if available to improve performance
+            ai_ref_path = os.path.join(search_path, ".ai_reference")
+            script_index_path = os.path.join(ai_ref_path, "script_index.json")
+            
+            # Check if we have an index to use
+            if os.path.exists(script_index_path):
+                logger.info(f"Using AI Librarian index for search: {pattern}")
+                try:
+                    with open(script_index_path, 'r', encoding='utf-8') as f:
+                        script_index = json.load(f)
+                    
+                    # Quick search through the index
+                    matches = []
+                    
+                    # Filter based on file pattern if provided
+                    pattern_matcher = None
+                    if file_pattern:
+                        pattern_matcher = lambda p: fnmatch.fnmatch(p.lower(), file_pattern.lower())
+                    
+                    # Check each indexed file
+                    for rel_file_path, file_info in script_index.get("files", {}).items():
+                        # Skip excluded paths
+                        if any(fnmatch.fnmatch(rel_file_path.lower(), exclude.lower()) for exclude in exclude_patterns):
+                            continue
+                            
+                        # Apply file pattern filter if provided
+                        if pattern_matcher and not pattern_matcher(rel_file_path):
+                            continue
+                            
+                        # Check if the pattern is in the file path
+                        if pattern_lower in rel_file_path.lower():
+                            matches.append(rel_file_path)
+                            continue
+                            
+                        # Check if pattern matches any class or function
+                        if any(pattern_lower in cls.lower() for cls in file_info.get("classes", [])) or \
+                           any(pattern_lower in func.lower() for func in file_info.get("functions", [])):
+                            matches.append(rel_file_path)
+                    
+                    if matches:
+                        logger.info(f"Found {len(matches)} matches using index")
+                        return {
+                            "status": "success",
+                            "path": path,
+                            "pattern": pattern,
+                            "excludePatterns": exclude_patterns,
+                            "matches": matches,
+                            "count": len(matches),
+                            "source": "ai_reference_index",
+                            "message": f"Found {len(matches)} matching files in {path} (via index)"
+                        }
+                    else:
+                        logger.info("No matches found in index, falling back to filesystem search")
+                except Exception as index_error:
+                    logger.warning(f"Error using index for search: {str(index_error)}, falling back to filesystem search")
+            
             # Define function to check if a path should be excluded
             def should_exclude(item_path):
                 base_name = os.path.basename(item_path)
@@ -3356,7 +3794,8 @@ def search_files(path: str, pattern: str, file_pattern: str = None, excludePatte
                     return True
                 return False
 
-            # Collect matching files
+            # Fallback: Collect matching files with filesystem walk
+            logger.info(f"Performing filesystem search for: {pattern}")
             matches = []
 
             for root, dirs, files in os.walk(search_path):
@@ -3380,6 +3819,7 @@ def search_files(path: str, pattern: str, file_pattern: str = None, excludePatte
                 "excludePatterns": exclude_patterns,
                 "matches": matches,
                 "count": len(matches),
+                "source": "filesystem_walk",
                 "message": f"Found {len(matches)} matching files in {path}"
             }
         except Exception as e:
@@ -4270,9 +4710,12 @@ if TASKBOARD_AVAILABLE:
             The formatted thought or reflection
         """
         try:
+            print("Importing standalone think tool")
             from aitoolkit.librarian.think_tool import think as standalone_think
+            print("Successfully imported standalone think tool")
             return standalone_think(thought)
-        except ImportError:
+        except ImportError as e:
+            print(f"Error importing think_tool: {e}")
             # Fallback implementation if the module isn't available
             return f"<reflection>\n{thought}\n</reflection>"
     
@@ -4369,9 +4812,12 @@ if TASKBOARD_AVAILABLE:
             Task ID for the deep analysis task
         """
         try:
+            print("Starting deep analysis task")
             from aitoolkit.librarian.task_board import task_deep_analysis
+            print("Successfully imported task_deep_analysis")
             return task_deep_analysis(project_path, query, priority)
         except ImportError as e:
+            print(f"Error importing task_deep_analysis: {e}")
             return f"Error: Could not import deep analysis function: {e}"
 
 # Initialize TaskBoard if available
@@ -4379,11 +4825,25 @@ if TASKBOARD_AVAILABLE:
     try:
         # Apply TaskBoard integration to server context
         print("Initializing TaskBoard system...")
+        # Verify task_deep_analysis is available
+        print(f"TaskBoard tools available: {'task_deep_analysis' in globals()}")
+        
         server_context = {
             "mcp_tools": globals(),
             "project_path": os.getcwd(),  # Will be updated when project paths are set
             "initialize_server": None  # Placeholder
         }
+        
+        # Make sure the think and taskboard tools are registered properly
+        print("Re-registering TaskBoard tools with explicit paths...")
+        from aitoolkit.librarian.task_board import (
+            submit_background_task,
+            get_task_status_mcp,
+            get_task_result_mcp,
+            cancel_task_mcp,
+            list_tasks_mcp,
+            task_deep_analysis
+        )
         
         # Apply the standard TaskBoard integration
         apply_taskboard_integration(server_context)
@@ -4464,6 +4924,110 @@ if TASKBOARD_AVAILABLE:
     except Exception as e:
         print(f"Error initializing TaskBoard: {e}")
 
+# Register git tracking tools
+
+@mcp.tool()
+def get_git_info(project_path: str, refresh: bool = False) -> Dict[str, Any]:
+    """
+    Get information about the git repository for a project.
+    
+    This tool provides comprehensive git information including repository status,
+    commit history, branches, tags, and remotes. It uses a cache to improve performance
+    for repeated calls.
+    
+    Args:
+        project_path: Path to the project directory
+        refresh: Force refresh the git information cache
+        
+    Returns:
+        Dictionary containing git repository information
+    """
+    with state_lock:
+        # Check if we have cached git info and it's recent enough (5 minutes)
+        current_time = time.time()
+        cache_entry = librarian_context["git_info"].get(project_path)
+        
+        if not refresh and cache_entry and (current_time - cache_entry.get("timestamp", 0) < 300):
+            return {
+                "status": "success",
+                "message": "Retrieved git information from cache",
+                "data": cache_entry["data"],
+                "from_cache": True
+            }
+    
+    try:
+        # Gather git information
+        status = get_repository_status(repo_path=project_path)
+        commits = get_commit_history(num_commits=30, repo_path=project_path)
+        branches = get_branches(repo_path=project_path)
+        tags = get_tags(repo_path=project_path)
+        remotes = get_remotes(repo_path=project_path)
+        
+        # Combine the information
+        git_info = {
+            "status": status,
+            "commits": commits,
+            "branches": branches,
+            "tags": tags,
+            "remotes": remotes,
+            "last_updated": datetime.datetime.now().isoformat()
+        }
+        
+        # Cache the information
+        with state_lock:
+            librarian_context["git_info"][project_path] = {
+                "timestamp": time.time(),
+                "data": git_info
+            }
+        
+        return {
+            "status": "success",
+            "message": "Git information retrieved successfully",
+            "data": git_info,
+            "from_cache": False
+        }
+    except Exception as e:
+        logger.error(f"Error getting git information: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error getting git information: {str(e)}",
+            "error": str(e)
+        }
+
+@mcp.tool()
+def update_git_history(project_path: str, history_dir: str = None) -> Dict[str, Any]:
+    """
+    Update git history files for a project.
+    
+    This tool creates or updates the git history files in a specified directory.
+    These files can be used by Claude to understand the repository history.
+    
+    Args:
+        project_path: Path to the project directory
+        history_dir: Directory where to store history files (default: .git_history in project_path)
+        
+    Returns:
+        Dictionary with results of the operation
+    """
+    try:
+        result = update_git_history_files(repo_path=project_path, history_dir=history_dir)
+        
+        # Update the git info cache
+        if result["status"] == "success":
+            with state_lock:
+                # Force refresh git info on next call
+                if project_path in librarian_context["git_info"]:
+                    del librarian_context["git_info"][project_path]
+        
+        return result
+    except Exception as e:
+        logger.error(f"Error updating git history files: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Error updating git history files: {str(e)}",
+            "error": str(e)
+        }
+
 # Register Security Analyzer tools if available - only registers, doesn't analyze anything yet
 if SECURITY_ANALYZER_AVAILABLE:
     try:
@@ -4495,21 +5059,4 @@ if __name__ == "__main__":
     # Initialize any directories passed as command-line arguments
     # This will also initialize the TaskBoard for these directories
     
-    if 'MCP_AVAILABLE' in globals() and not MCP_AVAILABLE:
-        print("\n============================================================")
-        print("WARNING: RUNNING WITHOUT MCP - CLAUDE DESKTOP CONNECTION NOT AVAILABLE")
-        print("To enable Claude Desktop connection, install MCP package:")
-        print("pip install mcp[cli]")
-        print("============================================================\n")
-        print("Starting server anyway for directory scanning and indexing...")
-        
-        # Run a simple loop to keep the script running
-        try:
-            while True:
-                time.sleep(10)
-                print("Server running in limited functionality mode...")
-        except KeyboardInterrupt:
-            print("Server shutting down...")
-    else:
-        # Run the full MCP server
-        mcp.run()
+    mcp.run()

@@ -199,6 +199,46 @@ task_result = get_task_result(task_id)
 4. Avoid MonitoringPauser when possible by using indexed data
 5. Use read_multiple_files instead of multiple read_file calls
 
+## Git Repository Tracking
+
+The AI Dev Toolkit now includes Git repository tracking functionality. This feature allows the AI to understand the Git history, branches, tags, and repository status, making it easier to work with the codebase.
+
+### Using Git Tracking Tools
+
+There are two main tools for Git tracking:
+
+1. **get_git_info**: Retrieves information about the Git repository
+   ```python
+   git_info = get_git_info(project_path)
+   ```
+   This returns a comprehensive overview of the repository, including:
+   - Current branch and status
+   - Recent commits
+   - Available branches
+   - Tags
+   - Remote repositories
+   
+   The information is cached to improve performance for repeated calls.
+
+2. **update_git_history**: Creates or updates Git history files in a specified directory
+   ```python
+   result = update_git_history(project_path, history_dir=".git_history")
+   ```
+   This creates three files:
+   - `git_info.json`: Detailed repository information in JSON format
+   - `git_info.txt`: Human-readable summary of the repository
+   - `latest_version.txt`: Quick reference showing the latest tag and commit
+
+### Benefits for AI Understanding
+
+These tools help Claude better understand the project by:
+- Providing context about recent changes
+- Identifying the current branch and commit
+- Understanding the repository structure
+- Tracking project versions through tags
+
+To make the most of this feature, regularly use the `get_git_info` tool when working with code to ensure Claude has up-to-date repository context.
+
 ---
 
-*This guide helps Claude use the AI Reference System effectively, avoiding performance issues and timeouts by leveraging the indexed data structures rather than repeated filesystem operations.*
+*This guide helps Claude use the AI Reference System effectively, avoiding performance issues and timeouts by leveraging the indexed data structures rather than repeated filesystem operations. It also explains how to utilize Git tracking functionality for improved codebase understanding.*

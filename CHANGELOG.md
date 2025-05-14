@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.5-git-integration] - 2025-05-14
+
+### Added
+- Git repository tracking and analysis capabilities
+- New MCP tools for working with git repositories:
+  - `get_git_info`: Retrieves comprehensive git repository information
+  - `update_git_history`: Creates human and machine-readable git history files
+- Caching system for git information to improve performance
+- Git history output in JSON and human-readable formats
+- Documentation for git tracking functionality in upgrading_ai_reference.md
+
+### Changed
+- Enhanced librarian_context to store git repository information
+- Improved cache management for repeated git information requests
+- Extended documentation with git tracking usage guidelines
+
 ## [0.5.4-optimized-tool-usage] - 2025-05-14
 
 ### Added
