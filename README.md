@@ -6,7 +6,7 @@
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-purple)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.5.4--timeout--robustness-orange)
+![Release](https://img.shields.io/badge/release-v0.5.5--git--integration-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -73,6 +73,7 @@ All this happens automatically - just initialize once and the system handles eve
 - **Edit Bookmarks**: Create, edit, and apply bookmarks for complex code section edits *(Stable: Code, Beta: Desktop)*
 - **File Operations**: Comprehensive file management capabilities *(Stable)*
 - **Search & Indexing**: Find files and content with powerful search tools *(Stable)*
+- **Git Repository Tracking**: Analyze and track git repositories and their history *(Stable)*
 
 ### TaskBoard System
 - **Asynchronous Processing**: Execute long-running operations in the background *(Stable)*
@@ -199,8 +200,37 @@ The Claude Code installer will:
 - Install necessary dependencies
 - Configure the toolkit for your project directories
 - Set up CLAUDE.md for improved Claude Code interaction
-- Configure for Claude Desktop if requested
 - Create desktop shortcuts for the GUI (if tkinter is available)
+- Install the Claude Code adapter for optimized performance
+
+#### WSL Users (Windows Subsystem for Linux)
+
+If you're using Claude Code in WSL, there are some special considerations:
+
+```bash
+# First ensure Python and pip are properly installed in your WSL environment
+sudo apt update
+sudo apt install python3 python3-pip python3-venv
+
+# Navigate to your Windows project directory (typically mounted under /mnt/)
+cd /mnt/c/Users/YourUsername/YourProjects
+# or
+cd /mnt/d/Projects
+
+# Get the installer
+wget https://raw.githubusercontent.com/isekaizen/ai-dev-toolkit/main/scripts/install_for_claude_code.py
+
+# Run the installer with your Windows project paths
+# Make sure to specify the installation directory and allowed directories explicitly
+python3 install_for_claude_code.py --install-dir "/mnt/d/YourProjects/ai-dev-toolkit" --allowed-dirs "/mnt/d/YourProjects" "/mnt/c/Users/YourUsername/OtherProjects"
+```
+
+**Important WSL Notes:**
+- WSL users should ensure Python 3.8+ and pip are properly installed in their Linux environment
+- Your projects will likely be on Windows drives mounted at /mnt/c/, /mnt/d/, etc.
+- Always use absolute paths with the /mnt/ prefix for Windows drives
+- If you see pip-related errors, try installing dependencies manually with `pip3 install -r requirements.txt`
+- For WSL users, the indexer works best on projects stored on Linux filesystems (not mounted Windows drives)
 
 ### Option 3: Use the Development Launcher
 ```bash
@@ -371,6 +401,10 @@ list_directory("path/to/your/directory")
 
 # Search for files
 search_files("path/to/your/project", "pattern")
+
+# Git repository tracking
+git_info = get_git_info("path/to/your/project")
+update_git_history("path/to/your/project", ".git_history")
 ```
 
 ### Claude Code vs Desktop Functionality
@@ -571,7 +605,8 @@ Additional documentation is available in the [docs](docs/) directory:
   
 ### Recent Releases
 
-- **[0.5.4] Timeout Robustness** (Current): Improved timeout handling with threading-based implementation, automatic .ai_reference upgrades, increased timeouts for long-running operations, and extended MCP protocol timeouts to prevent disconnections
+- **[0.5.5] Git Integration** (Current): Added Git repository tracking and analysis capabilities, with new MCP tools to retrieve git information and generate history files for Claude
+- **[0.5.4] Timeout Robustness**: Improved timeout handling with threading-based implementation, automatic .ai_reference upgrades, increased timeouts for long-running operations, and extended MCP protocol timeouts to prevent disconnections
 - **[0.5.2] Tool Integration**: TaskBoard integration for Tool Reference system with asynchronous processing
 - **[0.5.1] Security Analyzer**: Professional security analyzer with pattern and AST-based vulnerability detection
 
