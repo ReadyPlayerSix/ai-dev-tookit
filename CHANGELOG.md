@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.6-upgrade-manager] - 2025-05-14
+
+### Added
+- Comprehensive upgrade management system for AI Development Toolkit
+- Project analysis to recommend features based on codebase structure
+- Automatic backup of existing configurations before upgrades
+- Version comparison system with semantic versioning support
+- Command-line upgrade script for easy execution
+- "Upgrade Toolkit" button in GUI Dashboard
+- "Clear Request Queue" button in GUI Dashboard
+- Documentation for the upgrade manager
+
+### Changed
+- Enhanced tooling for project maintainability and upgrades
+- Moved Think Tool from server list to capabilities in GUI
+- Improved documentation with upgrade instructions
+- Simplified version management across multiple projects
+
 ## [0.5.5-git-integration] - 2025-05-14
 
 ### Added

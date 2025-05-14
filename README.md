@@ -6,7 +6,7 @@
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-purple)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.5.5--git--integration-orange)
+![Release](https://img.shields.io/badge/release-v0.5.6--upgrade--manager-orange)
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -624,10 +624,10 @@ Additional documentation is available in the [docs](docs/) directory:
   
 ### Recent Releases
 
-- **[0.5.5] Git Integration** (Current): Added Git repository tracking and analysis capabilities, with new MCP tools to retrieve git information and generate history files for Claude
+- **[0.5.6] Upgrade Manager** (Current): Added project analysis and upgrade system with GUI integration, clear request queue functionality, and Think Tool reclassification
+- **[0.5.5] Git Integration**: Added Git repository tracking and analysis capabilities, with new MCP tools to retrieve git information and generate history files for Claude
 - **[0.5.4] Timeout Robustness**: Improved timeout handling with threading-based implementation, automatic .ai_reference upgrades, increased timeouts for long-running operations, and extended MCP protocol timeouts to prevent disconnections
 - **[0.5.2] Tool Integration**: TaskBoard integration for Tool Reference system with asynchronous processing
-- **[0.5.1] Security Analyzer**: Professional security analyzer with pattern and AST-based vulnerability detection
 
 ### Future Plans
 
