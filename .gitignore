@@ -143,6 +143,8 @@ reload_directories_method.py
 **/.ai_reference/
 .tool_reference/bidirectional_refs.json
 .tool_reference/tool_profiles/*.json
+.tools_reference
+**/ai_librarian_state.json
 
 # Test files
 test_edit_file.txt
@@ -154,4 +156,5 @@ tests/test_filesystem/
 aitoolkit/test_file.txt
 test_directory/
 gitStatus.txt
+currentGitStatus.md
 CLAUDE.md
