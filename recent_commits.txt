@@ -1,0 +1,58 @@
+b4187a7 - isekaiZen, 2 hours ago : Fix Tool Reference path inconsistency between .tool_reference and .tools_reference
+89bff90 - isekaiZen, 3 hours ago : Fix Tool Reference cross-reference issues
+4fa3f5c - isekaiZen, 3 hours ago : Fix Tool Reference initialization error
+e941ace - isekaiZen, 4 hours ago : Clean up codebase
+53de48a - isekaiZen, 4 hours ago : Fix TaskBoard and think tool imports in server.py
+40de6b6 - isekaiZen, 4 hours ago : Restore indexer.py as it's still required for tool registration
+45755e2 - isekaiZen, 4 hours ago : Add debug server launcher
+9f9b956 - isekaiZen, 4 hours ago : Fix think tool and TaskBoard tool registration
+bbb75db - isekaiZen, 4 hours ago : Fix __file__ reference in server.py cleanup function
+b89af3c - isekaiZen, 5 hours ago : Remove deprecated directories and files
+f071696 - isekaiZen, 5 hours ago : Fix imports after removing deprecated files
+1ace46e - isekaiZen, 6 hours ago : Improve sanity check and propose unified analyzer
+b235358 - isekaiZen, 6 hours ago : Implement standalone think tool and separate from TaskBoard
+1d660a9 - isekaiZen, 7 hours ago : Add security analyzer and tool reference TaskBoard integration
+7442bfa - isekaiZen, 7 hours ago : Update documentation for TaskBoard release
+80a9232 - isekaiZen, 8 hours ago : Integrate TaskBoard directly into server.py
+2f7c492 - isekaiZen, 8 hours ago : Add direct tool registration and installation scripts
+a26ea37 - isekaiZen, 8 hours ago : Add direct TaskBoard integration for Claude Desktop
+1fd2801 - isekaiZen, 8 hours ago : Update documentation for v0.5.0-taskboard-beta
+55adcdf - isekaiZen, 8 hours ago : Implement TaskBoard and Think Tool systemv0.1.0-stable   Stable version with working AI Librarian integration
+v0.2.0-alpha    AI Dev Toolkit with working AI Librarian integration
+v0.3.0          Release v0.3.0: Integrated Server
+v0.3.0-alpha    Alpha version with file-system-tools and GUI configurator improvements
+v0.3.0-pre-tool-index Version before Tool Index implementation
+v0.3.1          Release v0.3.1: Tool Index Implementation
+v0.3.2          Version 0.3.2: Enhanced sanity check implementation
+v0.4.0          Release v0.4.0: AI Librarian Server with Tool Index
+v0.4.1          Release v0.4.1: Add Edit Bookmark functionality
+v0.4.2          Release v0.4.2: Add Edit Bookmark functionality and Unified Context
+v0.4.3-cleanup-baseline Stable baseline before implementing cleanup plan
+v0.4.4          Fix bidirectional references system and implement tool profiles
+v0.4.4-bidirectional-refs Enhanced bidirectional references implementation
+v0.4.4-prep     Fixed find_related_files function
+v0.4.5-pre-fix  State before find_related_files repair
+v0.4.6-simple-tool-index Simple tool index implementation with dramatic performance improvements
+v0.4.7-claude-code-integration Add Claude Code integration with installation scripts
+v0.4.7-init-claude-md Initial setup with CLAUDE.md in gitignore
+v0.4.8-claude-code-adapters Add Claude Code adapter pattern support
+v0.5.0-taskboard-beta Add TaskBoard system with async processing
+v0.5.0-taskboard-release Release TaskBoard system with direct server integration
+v0.5.1-security-analyzer Security analyzer implementation
+v0.5.2-tool-integration Tool reference TaskBoard integration
+v0.6.0-think-tool Release v0.6.0 with standalone think tool and unified analyzer
+v0.6.1-pre-cleanup Improve sanity check and propose unified analyzer
+v0.6.2-fix-imports Fix imports after removing deprecated files
+v0.6.3-cleanup-complete Remove deprecated directories and files
+v0.6.4-fix-atexit-handler Fix __file__ reference in server.py cleanup function
+v0.6.5-fix-tool-registration Fix think tool and TaskBoard tool registration
+v0.6.6-force-tool-registration Force tool registration with multiple methods
+v0.6.7-debug-server Add debug server launcher
+v0.6.8-restore-indexer Restore indexer.py as it's still required for tool registration
+v0.6.9-fix-tool-imports Fix TaskBoard and think tool imports in server.py
+v0.7.0          AI Dev Toolkit v0.7.0 - Fix Tool Reference path inconsistency and add MCP robustness
+v0.7.0-stable   Clean up codebase
+v0.7.1-stable   Fix Tool Reference initialization error
+v0.7.2-fix-references Fix Tool Reference cross-reference issues
+  gui-improvements b97e538 Implement file-system-tools and improve GUI configurator
+* main             b4187a7 Fix Tool Reference path inconsistency between .tool_reference and .tools_reference
