@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Tool categorization for Claude",
   "categories": {
     "filesystem": {
@@ -26,7 +26,6 @@
         "query_component",
         "find_implementation",
         "generate_librarian",
-        "sanity_check",
         "find_related_files"
       ]
     },
@@ -48,6 +47,18 @@
       "tools": [
         "list_allowed_directories",
         "check_project_access"
+      ]
+    },
+    "bookmarks": {
+      "name": "bookmarks",
+      "description": "Tools related to bookmarks operations",
+      "tools": [
+        "create_edit_bookmark",
+        "get_bookmark_content",
+        "update_bookmark",
+        "apply_bookmark",
+        "list_bookmarks",
+        "remove_bookmark"
       ]
     }
   }

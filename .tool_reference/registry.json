@@ -1,67 +1,210 @@
 {
-  "version": "0.1.0",
-  "description": "AI-optimized Tool Index for Claude",
-  "last_updated": "2025-05-11T14:50:03.971686",
+  "version": "1.0.0",
+  "description": "Simple Tool Reference Catalog for Claude",
+  "last_updated": "2025-05-14T12:33:35.568232",
   "tools": {
     "read_file": {
       "id": "read_file",
+      "description": "Read the complete contents of a file.",
       "category": "filesystem",
       "profile_path": "tool_profiles/read_file.json",
-      "has_profile": false
+      "parameters_count": 3
     },
     "write_file": {
       "id": "write_file",
+      "description": "Create a new file or completely overwrite an existing file with new content.",
       "category": "filesystem",
       "profile_path": "tool_profiles/write_file.json",
-      "has_profile": false
+      "parameters_count": 3
     },
     "edit_file": {
       "id": "edit_file",
+      "description": "Edit a file by replacing a specific text segment with new text.",
       "category": "filesystem",
       "profile_path": "tool_profiles/edit_file.json",
-      "has_profile": false
+      "parameters_count": 4
     },
     "enhanced_edit_file": {
       "id": "enhanced_edit_file",
+      "description": "Edit a file by replacing a specific text segment with new text (enhanced version).",
       "category": "filesystem",
       "profile_path": "tool_profiles/enhanced_edit_file.json",
-      "has_profile": false
+      "parameters_count": 4
     },
     "search_files": {
       "id": "search_files",
+      "description": "Recursively search for files and directories matching a pattern.",
       "category": "filesystem",
       "profile_path": "tool_profiles/search_files.json",
-      "has_profile": false
+      "parameters_count": 4
     },
-    "list_allowed_directories": {
-      "id": "list_allowed_directories",
-      "category": "server",
-      "profile_path": "tool_profiles/list_allowed_directories.json",
-      "has_profile": false
+    "move_file": {
+      "id": "move_file",
+      "description": "Move or rename a file or directory.",
+      "category": "filesystem",
+      "profile_path": "tool_profiles/move_file.json",
+      "parameters_count": 2
     },
-    "check_project_access": {
-      "id": "check_project_access",
-      "category": "server",
-      "profile_path": "tool_profiles/check_project_access.json",
-      "has_profile": false
+    "directory_tree": {
+      "id": "directory_tree",
+      "description": "Get a recursive tree view of files and directories as a JSON structure.",
+      "category": "filesystem",
+      "profile_path": "tool_profiles/directory_tree.json",
+      "parameters_count": 2
+    },
+    "create_directory": {
+      "id": "create_directory",
+      "description": "Create a new directory or ensure a directory exists.",
+      "category": "filesystem",
+      "profile_path": "tool_profiles/create_directory.json",
+      "parameters_count": 2
+    },
+    "get_file_info": {
+      "id": "get_file_info",
+      "description": "Retrieve detailed metadata about a file or directory.",
+      "category": "filesystem",
+      "profile_path": "tool_profiles/get_file_info.json",
+      "parameters_count": 2
+    },
+    "read_multiple_files": {
+      "id": "read_multiple_files",
+      "description": "Read the contents of multiple files simultaneously.",
+      "category": "filesystem",
+      "profile_path": "tool_profiles/read_multiple_files.json",
+      "parameters_count": 2
     },
     "initialize_librarian": {
       "id": "initialize_librarian",
+      "description": "Initialize the AI Librarian for a project.",
       "category": "librarian",
       "profile_path": "tool_profiles/initialize_librarian.json",
-      "has_profile": false
+      "parameters_count": 1
     },
     "query_component": {
       "id": "query_component",
+      "description": "Query information about a specific component in the project.",
       "category": "librarian",
       "profile_path": "tool_profiles/query_component.json",
-      "has_profile": false
+      "parameters_count": 3
     },
     "find_implementation": {
       "id": "find_implementation",
+      "description": "Find implementations containing the specified search text.",
       "category": "librarian",
       "profile_path": "tool_profiles/find_implementation.json",
-      "has_profile": false
+      "parameters_count": 3
+    },
+    "generate_librarian": {
+      "id": "generate_librarian",
+      "description": "Generate or update the AI Librarian for a project.",
+      "category": "librarian",
+      "profile_path": "tool_profiles/generate_librarian.json",
+      "parameters_count": 1
+    },
+    "find_related_files": {
+      "id": "find_related_files",
+      "description": "Find files that are related to a specific file in the project.",
+      "category": "librarian",
+      "profile_path": "tool_profiles/find_related_files.json",
+      "parameters_count": 2
+    },
+    "add_todo": {
+      "id": "add_todo",
+      "description": "Add a new to-do item to the project's persistent to-do list.",
+      "category": "todo",
+      "profile_path": "tool_profiles/add_todo.json",
+      "parameters_count": 6
+    },
+    "list_todos": {
+      "id": "list_todos",
+      "description": "List to-do items for the project with optional filtering.",
+      "category": "todo",
+      "profile_path": "tool_profiles/list_todos.json",
+      "parameters_count": 4
+    },
+    "update_todo_status": {
+      "id": "update_todo_status",
+      "description": "Update the status of a to-do item.",
+      "category": "todo",
+      "profile_path": "tool_profiles/update_todo_status.json",
+      "parameters_count": 3
+    },
+    "add_subtask": {
+      "id": "add_subtask",
+      "description": "Add a subtask to an existing to-do item.",
+      "category": "todo",
+      "profile_path": "tool_profiles/add_subtask.json",
+      "parameters_count": 3
+    },
+    "search_todos": {
+      "id": "search_todos",
+      "description": "Search for to-do items by text in title or description.",
+      "category": "todo",
+      "profile_path": "tool_profiles/search_todos.json",
+      "parameters_count": 2
+    },
+    "infer_todos": {
+      "id": "infer_todos",
+      "description": "Analyze text and extract potential to-do items, adding them to the list.",
+      "category": "todo",
+      "profile_path": "tool_profiles/infer_todos.json",
+      "parameters_count": 2
+    },
+    "list_allowed_directories": {
+      "id": "list_allowed_directories",
+      "description": "Returns the list of directories that this server is allowed to access.",
+      "category": "server",
+      "profile_path": "tool_profiles/list_allowed_directories.json",
+      "parameters_count": 0
+    },
+    "check_project_access": {
+      "id": "check_project_access",
+      "description": "Check if the server has permission to access a specific project directory.\nThis is required before initializing the AI Librarian for a project.",
+      "category": "server",
+      "profile_path": "tool_profiles/check_project_access.json",
+      "parameters_count": 1
+    },
+    "create_edit_bookmark": {
+      "id": "create_edit_bookmark",
+      "description": "Create a bookmark for editing a section of a file.",
+      "category": "bookmarks",
+      "profile_path": "tool_profiles/create_edit_bookmark.json",
+      "parameters_count": 5
+    },
+    "get_bookmark_content": {
+      "id": "get_bookmark_content",
+      "description": "Get the content of an edit bookmark.",
+      "category": "bookmarks",
+      "profile_path": "tool_profiles/get_bookmark_content.json",
+      "parameters_count": 2
+    },
+    "update_bookmark": {
+      "id": "update_bookmark",
+      "description": "Update the content of an edit bookmark.",
+      "category": "bookmarks",
+      "profile_path": "tool_profiles/update_bookmark.json",
+      "parameters_count": 3
+    },
+    "apply_bookmark": {
+      "id": "apply_bookmark",
+      "description": "Apply a bookmark to the original file.",
+      "category": "bookmarks",
+      "profile_path": "tool_profiles/apply_bookmark.json",
+      "parameters_count": 2
+    },
+    "list_bookmarks": {
+      "id": "list_bookmarks",
+      "description": "List all active bookmarks for a project.",
+      "category": "bookmarks",
+      "profile_path": "tool_profiles/list_bookmarks.json",
+      "parameters_count": 1
+    },
+    "remove_bookmark": {
+      "id": "remove_bookmark",
+      "description": "Remove a bookmark.",
+      "category": "bookmarks",
+      "profile_path": "tool_profiles/remove_bookmark.json",
+      "parameters_count": 2
     }
   }
 }
