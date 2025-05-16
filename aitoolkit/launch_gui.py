@@ -3,8 +3,15 @@
 AI Dev Toolkit GUI Launcher
 
 This script launches the GUI configurator for the AI Dev Toolkit.
-It provides a unified control panel for managing Claude Desktop integration,
+It provides a control panel for managing Claude Desktop integration,
 server configuration, project management, and AI Librarian functionality.
+
+The launcher supports two different GUI styles:
+1. Modern - A WSL Settings-like sidebar navigation interface (default)
+2. Legacy - The original tabbed interface
+
+To use the legacy interface, run with the 'legacy' argument:
+    python launch_gui.py legacy
 """
 
 import os
@@ -47,12 +54,33 @@ def main():
         sys.path.insert(0, parent_dir)
     
     try:
-        # Import the unified GUI class after fixing the path
-        from aitoolkit.gui.legacy.configurator_unified import AIDevToolkitGUI
+        # Check for command line arguments for GUI style
+        ui_style = "modern"  # Default to modern UI
+        if len(sys.argv) > 1 and sys.argv[1].lower() in ["legacy", "classic", "old"]:
+            ui_style = "legacy"
+        
+        # Try to use the modern GUI first (if requested), then fall back to legacy if needed
+        modern_gui = False
+        if ui_style == "modern":
+            try:
+                from aitoolkit.gui.modern.configurator_sidebar import ModernAIDevToolkitGUI
+                modern_gui = True
+                print("Using modern sidebar GUI interface")
+            except ImportError:
+                print("Modern GUI not available, falling back to legacy GUI")
+        
+        # If modern UI is not available or legacy was requested, use legacy UI
+        if not modern_gui:
+            from aitoolkit.gui.legacy.configurator_unified import AIDevToolkitGUI
+            print("Using legacy tabbed GUI interface")
         
         # Create and run the GUI
         root = tk.Tk()
-        app = AIDevToolkitGUI(root)
+        if modern_gui:
+            app = ModernAIDevToolkitGUI(root)
+        else:
+            app = AIDevToolkitGUI(root)
+            
         root.mainloop()
         
     except Exception as e:

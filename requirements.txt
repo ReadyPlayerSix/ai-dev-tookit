@@ -13,3 +13,6 @@ isort>=5.12.0
 
 # Documentation
 mkdocs>=1.5.3
+
+# GUI dependencies
+psutil>=5.9.0
