@@ -2,6 +2,53 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.8-improved-gui] - 2025-05-15
+
+### Added
+- Developer tab with terminal functionality
+- Help & Troubleshooting tab with documentation links
+- Color Mode selection (Light/Match System/Dark) in Settings
+- Font selection and size adjustment in Settings
+- Text size slider control for adjustable UI font sizes
+- Settings persistence through save/load functionality 
+- Auto Save Notes toggle with Ctrl+S shortcut
+- Log file explorer with filtering capabilities
+- Documentation browser with direct access to docs folder
+- Icon-based action buttons throughout the interface
+
+### Changed
+- Replaced Claude Desktop refresh icon with llama icon (🦙)
+- Upgraded "Upgrade Toolkit" to "Check for Updates" with warning icon (⚠️)
+- Changed notes and log font to Consolas for better monospace display
+- Fixed uneven button widths between left and right columns
+- Fixed "Error saving notes" issue with proper error handling and persistent notes storage
+- Moved Help & Troubleshooting content from Dashboard to dedicated tab
+- Replaced Save Notes button with enhanced Auto Save Notes toggle with real-time saving
+- Made all headers use accent blue color for consistent styling
+- Updated button hover colors to match accent blue theme
+- Standardized all buttons to use the same consistent action button style with icons
+- Expanded notes section for more writing space
+
+### Removed
+- Removed real-time server status monitoring to prevent interference with Claude Desktop
+- Eliminated sidebar status indicator for cleaner interface
+- Replaced constant log monitoring with on-demand log explorer
+- Removed MCP Server Management text and simplified interface
+
+## [0.5.7-gui-enhancements] - 2025-05-14
+
+### Added
+- "Restart Claude Desktop" button in GUI Dashboard with process management
+- "Filter Server Log" functionality with customizable filtering options
+- GUI Dashboard reorganization for better usability
+- Process detection and management through psutil integration
+
+### Changed
+- Renamed "Open Claude Desktop Location" to "Open Claude Config Directory"
+- Removed "Clean Legacy Files" button from Quick Actions
+- Updated requirements.txt with psutil dependency
+- Improved error handling for process management operations
+
 ## [0.5.6-upgrade-manager] - 2025-05-14
 
 ### Added
