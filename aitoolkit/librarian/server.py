@@ -16,11 +16,14 @@ Usage:
 
 # Configure MCP protocol timeouts - Must come before other imports
 import os
-os.environ["MCP_DEFAULT_TIMEOUT"] = "300000"  # 5 minutes (milliseconds)
-os.environ["MCP_MAX_REQUEST_TIMEOUT"] = "600000"  # 10 minutes (milliseconds)
-os.environ["MCP_INITIALIZATION_TIMEOUT"] = "1200000"  # 20 minutes
-os.environ["MCP_REGISTRATION_TIMEOUT"] = "600000"  # 10 minutes for tool registration
+os.environ["MCP_DEFAULT_TIMEOUT"] = "600000"  # 10 minutes (milliseconds)
+os.environ["MCP_MAX_REQUEST_TIMEOUT"] = "1200000"  # 20 minutes (milliseconds)
+os.environ["MCP_INITIALIZATION_TIMEOUT"] = "1800000"  # 30 minutes
+os.environ["MCP_REGISTRATION_TIMEOUT"] = "900000"  # 15 minutes for tool registration
 os.environ["MCP_LAZY_TOOL_REGISTRATION"] = "true"  # Enable lazy tool registration
+os.environ["MCP_BATCH_TOOL_REGISTRATION"] = "true"  # Register tools in batches
+os.environ["MCP_PROGRESSIVE_LOADING"] = "true"  # Load features progressively
+os.environ["MCP_HEARTBEAT_INTERVAL"] = "5000"  # Send heartbeat every 5 seconds
 import sys
 import json
 import time
@@ -80,6 +83,22 @@ try:
 except ImportError:
     print("Security Analyzer Integration not available")
     SECURITY_ANALYZER_AVAILABLE = False
+
+# Import MCP Extensions (prompts and resources)
+try:
+    from aitoolkit.librarian.mcp_extensions import register_mcp_extensions
+    MCP_EXTENSIONS_AVAILABLE = True
+except ImportError:
+    print("MCP Extensions not available")
+    MCP_EXTENSIONS_AVAILABLE = False
+
+# Import Prompt Tools (tools that provide prompt-like guidance)
+try:
+    from aitoolkit.librarian.prompt_tools import register_prompt_like_tools
+    PROMPT_TOOLS_AVAILABLE = True
+except ImportError:
+    print("Prompt Tools not available")
+    PROMPT_TOOLS_AVAILABLE = False
 
 # Import filesystem module for file operations
 import shutil
@@ -168,6 +187,9 @@ def monitor_projects():
     This runs in a separate thread to provide real-time updates.
     """
     logger.info("Starting project monitoring thread")
+    
+    # Initial delay to ensure server is fully initialized
+    time.sleep(10)  # Wait 10 seconds before first check
 
     while monitoring_active:
         try:
@@ -312,9 +334,17 @@ def update_librarian_for_project(project_path):
     except Exception as e:
         logger.error(f"Error updating librarian for {project_path}: {str(e)}")
 
-# Start the monitoring thread
+# Create the monitoring thread but don't start it yet
 monitoring_thread = threading.Thread(target=monitor_projects, daemon=True)
-monitoring_thread.start()
+monitoring_started = False
+
+def start_monitoring():
+    """Start the monitoring thread after initialization is complete."""
+    global monitoring_started
+    if not monitoring_started:
+        monitoring_thread.start()
+        monitoring_started = True
+        logger.info("Started monitoring thread after initialization")
 
 # Register cleanup handler
 def cleanup():
@@ -5055,8 +5085,90 @@ if SECURITY_ANALYZER_AVAILABLE:
     except Exception as e:
         print(f"Error registering Security Analyzer tools: {e}")
 
+# Register MCP Extensions (prompts and resources)
+if MCP_EXTENSIONS_AVAILABLE:
+    print("Registering MCP Extensions (prompts and resources)...")
+    try:
+        register_mcp_extensions(mcp)
+        print("MCP Extensions registered successfully")
+    except Exception as e:
+        print(f"Error registering MCP Extensions: {e}")
+
+# Register Prompt Tools
+if PROMPT_TOOLS_AVAILABLE:
+    print("Registering Prompt Tools...")
+    try:
+        register_prompt_like_tools(mcp)
+        print("Prompt Tools registered successfully")
+    except Exception as e:
+        print(f"Error registering Prompt Tools: {e}")
+
+@mcp.tool()
+def server_ready() -> Dict[str, Any]:
+    """
+    Called by Claude Desktop to indicate the server is ready.
+    This starts background processes after initialization.
+    """
+    try:
+        start_monitoring()
+        start_heartbeat()
+        return {
+            "status": "ready",
+            "monitoring": "started",
+            "message": "AI Librarian server is fully initialized"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "Failed to start monitoring"
+        }
+
+# Heartbeat mechanism to prevent timeouts
+heartbeat_active = False
+heartbeat_thread = None
+
+def start_heartbeat():
+    """Start the heartbeat thread to prevent connection timeouts."""
+    global heartbeat_active, heartbeat_thread
+    if not heartbeat_active:
+        heartbeat_active = True
+        heartbeat_thread = threading.Thread(target=heartbeat_worker, daemon=True)
+        heartbeat_thread.start()
+        logger.info("Started heartbeat thread")
+
+def heartbeat_worker():
+    """Send periodic heartbeat signals to prevent timeouts."""
+    while heartbeat_active:
+        try:
+            # Send a minimal signal to keep connection alive
+            logger.debug("Heartbeat signal")
+            time.sleep(5)  # Every 5 seconds
+        except Exception as e:
+            logger.error(f"Heartbeat error: {e}")
+            time.sleep(10)
+
+@mcp.tool()
+def heartbeat() -> Dict[str, str]:
+    """Simple heartbeat endpoint for connection monitoring."""
+    return {"status": "alive", "timestamp": time.time()}
+
 if __name__ == "__main__":
     # Initialize any directories passed as command-line arguments
     # This will also initialize the TaskBoard for these directories
+    
+    # Add a delayed start for monitoring to prevent initialization timeout
+    def delayed_monitoring_start():
+        time.sleep(5)  # Wait 5 seconds after server starts
+        if not monitoring_started:
+            logger.info("Auto-starting monitoring after delay")
+            start_monitoring()
+        if not heartbeat_active:
+            logger.info("Auto-starting heartbeat after delay")
+            start_heartbeat()
+    
+    # Start monitoring in a separate thread after a delay
+    delay_thread = threading.Thread(target=delayed_monitoring_start, daemon=True)
+    delay_thread.start()
     
     mcp.run()

@@ -6,13 +6,14 @@
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-purple)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.5.8--improved--gui-orange)
+![Release](https://img.shields.io/badge/release-v0.6.0--mcp--features-orange)
+
+> ⚠️ **Alpha Testing Phase**: This toolkit is currently in Pre-Beta. If you're testing this version, please **disable all tools except the 17 recommended tools** to ensure optimal performance during our active testing phase for reducing tool count. See the installation section for more details.
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
 <div align="center">
-  <!-- Insert screenshot of GUI here when available -->
-  <img src="docs/images/ai-dev-toolkit-banner.png" alt="AI Dev Toolkit Banner" width="800"/>
+  <img src="docs/images/ai-dev-toolkit-dashboard-001.jpg" alt="AI Dev Toolkit Dashboard" width="800"/>
 </div>
 
 ## 🌟 Overview
@@ -70,7 +71,9 @@ All this happens automatically - just initialize once and the system handles eve
 - **Secure Project Access**: Controlled access to your development files *(Stable)*
 - **Directory Navigation**: Intuitive directory navigation and exploration *(Stable)*
 - **Code Manipulation**: Read, write, and modify code with proper error handling *(Stable)*
-- **Edit Bookmarks**: Create, edit, and apply bookmarks for complex code section edits *(Stable: Code, Beta: Desktop)*
+- **Enhanced Edit File**: Improved file editing with better error handling and preview *(Stable)*
+- **Edit Bookmarks**: Create, edit, and apply bookmarks for complex code section edits *(Stable)*
+- **Bookmark Management**: List, retrieve, and update bookmarks for multi-part edits *(Stable)*
 - **File Operations**: Comprehensive file management capabilities *(Stable)*
 - **Search & Indexing**: Find files and content with powerful search tools *(Stable)*
 - **Git Repository Tracking**: Analyze and track git repositories and their history *(Stable)*
@@ -129,6 +132,22 @@ All this happens automatically - just initialize once and the system handles eve
 - **Clear Separation**: Keep internal thought processes separate from user conversation *(Stable)*
 - **Decision Support**: Compare approaches and select the best option *(Stable)*
 
+### MCP Extensions (New!)
+- **MCP Prompts**: Pre-defined conversation templates for common tasks *(Stable)*
+  - `analyze-codebase`: Comprehensive project analysis
+  - `debug-issue`: Debugging assistance workflow
+  - `refactor-code`: Code refactoring guidance
+  - `add-feature`: Feature implementation workflow
+- **Dynamic Resources**: Access project metadata through MCP resources *(Beta)*
+  - `librarian://projects/*`: Project metadata and AI Librarian data
+  - `librarian://bookmarks/*`: Edit bookmark information
+  - `librarian://diagnostics/*`: Diagnostic information
+- **Prompt Tools**: Dynamic guidance generators for complex tasks *(Stable)*
+  - `get_debugging_guide`: Context-aware debugging assistance
+  - `get_refactoring_guide`: Type-specific refactoring strategies
+  - `get_feature_implementation_guide`: Feature development workflow
+  - `get_analysis_guide`: Codebase analysis approaches
+
 ### Robustness Features
 - **Automatic Retries**: Long-running operations automatically retry on failure *(Stable)*
 - **Timeout Handling**: Graceful handling of timeouts with configurable limits *(Stable)*
@@ -140,15 +159,18 @@ All this happens automatically - just initialize once and the system handles eve
 ## 🖼️ Screenshots
 
 <div align="center">
-  <!-- These are placeholders - replace with actual screenshots -->
   <table>
     <tr>
-      <td><img src="docs/images/screenshot-librarian.png" alt="AI Librarian" width="400"/></td>
-      <td><img src="docs/images/screenshot-filesystem.png" alt="File System Integration" width="400"/></td>
+      <td><img src="docs/images/ai-dev-toolkit-dashboard-001.jpg" alt="AI Dev Toolkit Dashboard" width="400"/></td>
+      <td><img src="docs/images/ai-dev-toolkit-claudedesktop-dashboard-001.jpg" alt="Claude Desktop Dashboard" width="400"/></td>
     </tr>
     <tr>
-      <td><img src="docs/images/screenshot-tasks.png" alt="Task Management" width="400"/></td>
-      <td><img src="docs/images/screenshot-configurator.png" alt="Configurator GUI" width="400"/></td>
+      <td><img src="docs/images/ai-dev-toolkit-settings-001.jpg" alt="Settings Configuration" width="400"/></td>
+      <td><img src="docs/images/ai-dev-toolkit-promptoptions-001.jpg" alt="Prompt Options" width="400"/></td>
+    </tr>
+    <tr>
+      <td><img src="docs/images/ai-dev-toolki-tools-001.jpg" alt="Tools Interface" width="400"/></td>
+      <td><img src="docs/images/ai-dev-toolkit-desktop-config-001.jpg" alt="Desktop Configuration" width="400"/></td>
     </tr>
   </table>
 </div>
@@ -156,6 +178,8 @@ All this happens automatically - just initialize once and the system handles eve
 ## 🛠️ Installation
 
 > **Note:** The GUI components are currently under development. Command-line and code-based interactions are fully functional, while the graphical interface for directory selection and configuration is in beta phase.
+
+> ⚠️ **Important for Alpha/Pre-Beta Testers**: During this testing phase, please configure Claude Desktop to use **only the 17 recommended tools** for optimal performance. This is part of our ongoing efforts to streamline and optimize the tool count. You can disable other tools in the Claude Desktop settings or through the GUI configuration tool.
 
 ### Prerequisites
 - Python 3.8 or higher

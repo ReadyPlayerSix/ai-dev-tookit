@@ -33,14 +33,22 @@ logger = logging.getLogger("tool-index-generator")
 CORE_TOOLS = [
     "read_file",
     "write_file",
-    "edit_file",
     "enhanced_edit_file",
+    "edit_file",
+    "create_edit_bookmark",
+    "list_bookmarks",
+    "get_bookmark_content",
+    "update_bookmark",
     "search_files",
     "list_allowed_directories",
     "check_project_access",
     "initialize_librarian",
     "query_component",
-    "find_implementation"
+    "find_implementation",
+    "get_debugging_guide",
+    "get_refactoring_guide",
+    "get_feature_implementation_guide",
+    "get_analysis_guide"
 ]
 
 # Define tool categories

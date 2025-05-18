@@ -35,45 +35,38 @@ def main():
         print(f"  pip install {' '.join(missing)}")
         return 1
     
-    # Get script directory
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # Make sure script directory is in the path
-    if script_dir not in sys.path:
-        sys.path.insert(0, script_dir)
-    
-    # Path to GUI module
-    gui_path = os.path.join(script_dir, "gui", "configurator.py")
-    
-    if not os.path.exists(gui_path):
-        print(f"Error: GUI module not found at {gui_path}")
-        return 1
-    
-    # Launch the GUI
+    # Use the new unified launcher 
     try:
-        print(f"Importing GUI from {gui_path}")
+        # Point the user to use launch_new_gui.py instead
+        print("NOTE: This launcher is deprecated. Please use launch_new_gui.py instead.")
+        print("Redirecting to the new unified launcher...")
         
-        # Try direct import first
+        # Try to import from the unified configurator
         try:
             import tkinter as tk
-            from gui.configurator import AIDevToolkitGUI
+            from aitoolkit.gui.legacy.configurator_unified import AIDevToolkitGUI
             
             root = tk.Tk()
             app = AIDevToolkitGUI(root)
             root.mainloop()
             
         except ImportError as ie:
-            print(f"Direct import failed: {str(ie)}")
+            print(f"Import failed: {str(ie)}")
             print("Trying alternative import method...")
             
-            # If direct import fails, try to load module spec
-            spec = importlib.util.spec_from_file_location("configurator", gui_path)
-            configurator = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(configurator)
+            # Add the parent directory to the Python path
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            project_dir = os.path.dirname(os.path.dirname(script_dir))
             
+            if project_dir not in sys.path:
+                sys.path.insert(0, project_dir)
+            
+            # Try again with the updated path
             import tkinter as tk
+            from aitoolkit.gui.legacy.configurator_unified import AIDevToolkitGUI
+            
             root = tk.Tk()
-            app = configurator.AIDevToolkitGUI(root)
+            app = AIDevToolkitGUI(root)
             root.mainloop()
     
     except Exception as e:

@@ -15,7 +15,15 @@ import time
 from pathlib import Path
 import webbrowser
 import traceback
-from typing import List, Tuple
+import re
+from typing import List, Tuple, Optional
+
+# Import psutil if available
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
 
 class AIDevToolkitGUI:
     def __init__(self, root):
@@ -25,7 +33,7 @@ class AIDevToolkitGUI:
         self.root.resizable(True, True)
         
         # Set version
-        self.version = "0.3.0"
+        self.version = "0.5.7"
         
         # Track changes
         self.has_changes = False
@@ -145,25 +153,20 @@ class AIDevToolkitGUI:
         actions_frame = ttk.LabelFrame(self.dashboard_frame, text="Quick Actions", padding="10 10 10 10")
         actions_frame.grid(row=2, column=0, sticky="nsew", pady=(0, 15), padx=(0, 10))
         
+        ttk.Button(actions_frame, text="Restart Claude Desktop", command=self.restart_claude_desktop).pack(
+            fill=tk.X, pady=5, padx=5)
+            
         ttk.Button(actions_frame, text="Restart MCP Server", command=self.restart_server).pack(
             fill=tk.X, pady=5, padx=5)
             
         ttk.Button(actions_frame, text="Clear Request Queue", command=self.clear_request_queue).pack(
             fill=tk.X, pady=5, padx=5)
         
-        ttk.Button(actions_frame, text="Clear Server Log", command=self.clear_server_log).pack(
+        ttk.Button(actions_frame, text="Filter Server Log", command=self.filter_server_log).pack(
             fill=tk.X, pady=5, padx=5)
         
-        ttk.Button(actions_frame, text="Edit Project Directories", 
-                 command=lambda: self.notebook.select(self.project_frame)).pack(
-            fill=tk.X, pady=5, padx=5)
-        
-        ttk.Button(actions_frame, text="Open Claude Desktop Location", 
+        ttk.Button(actions_frame, text="Open Claude Config Directory", 
                  command=self.open_claude_directory).pack(
-            fill=tk.X, pady=5, padx=5)
-            
-        ttk.Button(actions_frame, text="Clean Legacy Files", 
-                 command=self.show_cleanup_dialog).pack(
             fill=tk.X, pady=5, padx=5)
             
         ttk.Button(actions_frame, text="Upgrade Toolkit", 
@@ -1236,6 +1239,359 @@ When you enable project directories, you are granting Claude permission to read 
         self.log_text.config(state=tk.NORMAL)
         self.log_text.delete(1.0, tk.END)
         self.log_text.config(state=tk.DISABLED)
+    
+    def filter_server_log(self):
+        """Filter server log to show only relevant entries"""
+        # Create a dialog window for filtering options
+        filter_dialog = tk.Toplevel(self.root)
+        filter_dialog.title("Filter Server Log")
+        filter_dialog.geometry("500x400")
+        filter_dialog.transient(self.root)
+        filter_dialog.grab_set()
+        
+        # Create main frame
+        main_frame = ttk.Frame(filter_dialog, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Filter options
+        ttk.Label(main_frame, text="Filter Options", font=('Segoe UI', 12, 'bold')).pack(anchor=tk.W, pady=(0, 10))
+        
+        # Keyword filter
+        keyword_frame = ttk.Frame(main_frame)
+        keyword_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(keyword_frame, text="Keywords:").pack(side=tk.LEFT, padx=(0, 5))
+        keyword_var = tk.StringVar()
+        keyword_entry = ttk.Entry(keyword_frame, textvariable=keyword_var, width=30)
+        keyword_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        # Log level filter
+        level_frame = ttk.Frame(main_frame)
+        level_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(level_frame, text="Log Levels:").pack(side=tk.LEFT, padx=(0, 5))
+        
+        # Create log level checkboxes
+        info_var = tk.BooleanVar(value=True)
+        warning_var = tk.BooleanVar(value=True)
+        error_var = tk.BooleanVar(value=True)
+        debug_var = tk.BooleanVar(value=False)
+        
+        ttk.Checkbutton(level_frame, text="INFO", variable=info_var).pack(side=tk.LEFT, padx=5)
+        ttk.Checkbutton(level_frame, text="WARNING", variable=warning_var).pack(side=tk.LEFT, padx=5)
+        ttk.Checkbutton(level_frame, text="ERROR", variable=error_var).pack(side=tk.LEFT, padx=5)
+        ttk.Checkbutton(level_frame, text="DEBUG", variable=debug_var).pack(side=tk.LEFT, padx=5)
+        
+        # Additional options
+        options_frame = ttk.Frame(main_frame)
+        options_frame.pack(fill=tk.X, pady=5)
+        
+        show_timestamps_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(options_frame, text="Show Timestamps", variable=show_timestamps_var).pack(anchor=tk.W)
+        
+        exclude_var = tk.StringVar()
+        exclude_frame = ttk.Frame(main_frame)
+        exclude_frame.pack(fill=tk.X, pady=5)
+        ttk.Label(exclude_frame, text="Exclude:").pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Entry(exclude_frame, textvariable=exclude_var, width=30).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        # Preview area
+        preview_frame = ttk.LabelFrame(main_frame, text="Preview")
+        preview_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        preview_text = scrolledtext.ScrolledText(preview_frame, height=10)
+        preview_text.pack(fill=tk.BOTH, expand=True)
+        
+        # Get current log content
+        current_log = ""
+        if hasattr(self, 'log_text'):
+            current_log = self.log_text.get(1.0, tk.END)
+        
+        # Function to apply the filter
+        def apply_filter():
+            # Get filter parameters
+            keywords = keyword_var.get().split()
+            exclude_terms = exclude_var.get().split()
+            
+            # Log levels to include
+            levels = []
+            if info_var.get(): levels.append("INFO")
+            if warning_var.get(): levels.append("WARNING")
+            if error_var.get(): levels.append("ERROR") 
+            if debug_var.get(): levels.append("DEBUG")
+            
+            # Filter log based on selected options
+            filtered_lines = []
+            
+            for line in current_log.splitlines():
+                # Check log level match
+                level_match = False
+                for level in levels:
+                    if level in line:
+                        level_match = True
+                        break
+                
+                # Skip if no log level match
+                if not level_match and levels:
+                    continue
+                
+                # Check if any keywords match (if specified)
+                keyword_match = not keywords  # True if no keywords specified
+                for keyword in keywords:
+                    if keyword.lower() in line.lower():
+                        keyword_match = True
+                        break
+                
+                if not keyword_match:
+                    continue
+                
+                # Check exclude terms
+                exclude_match = False
+                for term in exclude_terms:
+                    if term and term.lower() in line.lower():
+                        exclude_match = True
+                        break
+                
+                if exclude_match:
+                    continue
+                
+                # Remove timestamps if not showing them
+                if not show_timestamps_var.get():
+                    # Simple timestamp pattern, adapt as needed
+                    line = re.sub(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d+', '', line)
+                
+                filtered_lines.append(line)
+            
+            # Update preview
+            preview_text.delete(1.0, tk.END)
+            preview_text.insert(tk.END, "\n".join(filtered_lines))
+        
+        # Function to apply filter to main log
+        def apply_to_main():
+            apply_filter()  # Make sure we have the latest filter applied
+            filtered_content = preview_text.get(1.0, tk.END)
+            
+            # Update main log text
+            if hasattr(self, 'log_text'):
+                self.log_text.config(state=tk.NORMAL)
+                self.log_text.delete(1.0, tk.END)
+                self.log_text.insert(tk.END, filtered_content)
+                self.log_text.config(state=tk.DISABLED)
+            
+            filter_dialog.destroy()
+        
+        # Buttons
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        ttk.Button(button_frame, text="Preview", command=apply_filter).pack(side=tk.LEFT)
+        ttk.Button(button_frame, text="Apply Filter", command=apply_to_main).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=filter_dialog.destroy).pack(side=tk.RIGHT)
+        
+        # Initial preview
+        apply_filter()
+    
+    def restart_claude_desktop(self):
+        """Restart the Claude Desktop application"""
+        if not PSUTIL_AVAILABLE:
+            messagebox.showwarning(
+                "Missing Dependency", 
+                "The psutil module is required for this feature.\n"
+                "Please install it with: pip install psutil"
+            )
+            return
+        
+        try:
+            # Find Claude Desktop process
+            claude_processes = []
+            
+            for proc in psutil.process_iter(['pid', 'name', 'exe']):
+                try:
+                    # Look for Claude in process name
+                    if proc.info['name'] and 'claude' in proc.info['name'].lower():
+                        claude_processes.append(proc)
+                    # Look for Claude in the path if available
+                    elif proc.info['exe'] and 'claude' in proc.info['exe'].lower():
+                        claude_processes.append(proc)
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    pass
+            
+            if not claude_processes:
+                messagebox.showinfo(
+                    "Claude Desktop Not Found", 
+                    "Could not find any running Claude Desktop processes."
+                )
+                return
+            
+            # Create confirmation dialog with the list of processes found
+            confirm_dialog = tk.Toplevel(self.root)
+            confirm_dialog.title("Confirm Restart")
+            confirm_dialog.geometry("500x300")
+            confirm_dialog.transient(self.root)
+            confirm_dialog.grab_set()
+            
+            # Create main frame
+            main_frame = ttk.Frame(confirm_dialog, padding="10")
+            main_frame.pack(fill=tk.BOTH, expand=True)
+            
+            ttk.Label(
+                main_frame, 
+                text="The following Claude Desktop processes will be restarted:", 
+                font=('Segoe UI', 11)
+            ).pack(pady=(0, 10))
+            
+            # List the processes
+            process_frame = ttk.Frame(main_frame)
+            process_frame.pack(fill=tk.BOTH, expand=True)
+            
+            process_text = tk.Text(process_frame, height=10, width=60)
+            process_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            
+            scrollbar = ttk.Scrollbar(process_frame, orient=tk.VERTICAL, command=process_text.yview)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            process_text.config(yscrollcommand=scrollbar.set)
+            
+            for proc in claude_processes:
+                try:
+                    name = proc.name()
+                    pid = proc.pid
+                    cmdline = " ".join(proc.cmdline()) if hasattr(proc, 'cmdline') else "Unknown"
+                    exe_path = proc.exe() if hasattr(proc, 'exe') else "Unknown"
+                    
+                    process_text.insert(tk.END, f"PID: {pid} - {name}\n")
+                    process_text.insert(tk.END, f"Path: {exe_path}\n")
+                    process_text.insert(tk.END, f"Command: {cmdline}\n\n")
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    process_text.insert(tk.END, f"PID: {proc.info['pid']} - Access Denied\n\n")
+            
+            process_text.config(state=tk.DISABLED)
+            
+            # Warning message
+            ttk.Label(
+                main_frame, 
+                text="Warning: This will close Claude Desktop. Any unsaved work may be lost.",
+                foreground="red"
+            ).pack(pady=10)
+            
+            # Function to terminate and restart processes
+            def terminate_and_restart():
+                # Gather process info for restart before terminating
+                restart_info = []
+                
+                for proc in claude_processes:
+                    try:
+                        # Store info needed for restart
+                        info = {
+                            'exe': proc.exe() if hasattr(proc, 'exe') else None,
+                            'cmdline': proc.cmdline() if hasattr(proc, 'cmdline') else None,
+                            'cwd': proc.cwd() if hasattr(proc, 'cwd') else None
+                        }
+                        restart_info.append(info)
+                        
+                        # Terminate the process
+                        proc.terminate()
+                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                        pass
+                
+                # Wait for processes to terminate
+                def check_termination():
+                    all_terminated = True
+                    for proc in claude_processes:
+                        try:
+                            if proc.is_running():
+                                all_terminated = False
+                                break
+                        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                            pass
+                    
+                    if all_terminated:
+                        # All processes are terminated, attempt to restart
+                        restart_claude(restart_info)
+                    else:
+                        # Check again in 500ms
+                        confirm_dialog.after(500, check_termination)
+                
+                # Function to restart Claude Desktop
+                def restart_claude(restart_info):
+                    try:
+                        # Try to restart Claude Desktop
+                        restarted = False
+                        
+                        for info in restart_info:
+                            exe = info['exe']
+                            cmdline = info['cmdline']
+                            cwd = info['cwd']
+                            
+                            if exe and os.path.exists(exe):
+                                # Start the process
+                                if cmdline:
+                                    subprocess.Popen(cmdline, cwd=cwd)
+                                else:
+                                    subprocess.Popen([exe], cwd=cwd)
+                                restarted = True
+                        
+                        if restarted:
+                            messagebox.showinfo(
+                                "Restart Successful", 
+                                "Claude Desktop has been restarted."
+                            )
+                        else:
+                            messagebox.showwarning(
+                                "Restart Failed", 
+                                "Terminated Claude Desktop, but couldn't restart it automatically.\n"
+                                "Please restart Claude Desktop manually."
+                            )
+                    except Exception as e:
+                        messagebox.showerror(
+                            "Restart Error", 
+                            f"Error restarting Claude Desktop: {str(e)}\n"
+                            "Please restart Claude Desktop manually."
+                        )
+                    finally:
+                        confirm_dialog.destroy()
+                
+                # Start checking for termination
+                check_termination()
+            
+            # Function to just terminate without restart
+            def just_terminate():
+                for proc in claude_processes:
+                    try:
+                        proc.terminate()
+                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                        pass
+                
+                messagebox.showinfo(
+                    "Claude Desktop Terminated", 
+                    "Claude Desktop has been terminated. Please restart it manually."
+                )
+                confirm_dialog.destroy()
+            
+            # Buttons
+            button_frame = ttk.Frame(main_frame)
+            button_frame.pack(fill=tk.X, pady=(10, 0))
+            
+            ttk.Button(
+                button_frame, 
+                text="Terminate and Restart", 
+                command=terminate_and_restart
+            ).pack(side=tk.LEFT)
+            
+            ttk.Button(
+                button_frame, 
+                text="Just Terminate", 
+                command=just_terminate
+            ).pack(side=tk.LEFT, padx=5)
+            
+            ttk.Button(
+                button_frame, 
+                text="Cancel", 
+                command=confirm_dialog.destroy
+            ).pack(side=tk.RIGHT)
+            
+        except Exception as e:
+            messagebox.showerror(
+                "Error", 
+                f"An error occurred: {str(e)}"
+            )
     
     def open_claude_directory(self):
         """Open Claude Desktop directory in file explorer"""
