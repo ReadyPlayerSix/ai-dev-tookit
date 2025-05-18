@@ -33,7 +33,79 @@ With this toolkit, Claude becomes a true development partner - remembering your 
 
 All this happens automatically - just initialize once and the system handles everything behind the scenes, continuously updating its understanding of your codebase as it evolves.
 
-## 🚀 Features
+## 🤖 AI-Assisted Development
+
+This toolkit was developed with Claude's assistance, demonstrating the power of human-AI collaboration in creating developer tools. The project itself serves as an example of enhancing AI capabilities through specialized extensions.
+
+Key AI-assisted development techniques used in this project:
+
+- **Iterative Design**: Human-AI dialogue to refine architecture and interfaces
+- **Context-Aware Coding**: Using AI Librarian to maintain project context
+- **Specialized AI Agents**: Mini-librarians handling specific cognitive tasks
+- **Task Decomposition**: Breaking complex problems into manageable chunks
+- **Knowledge Integration**: Combining domain expertise with AI capabilities
+
+## 🔌 Architecture
+
+The AI Dev Toolkit uses a modular architecture built around the Model Context Protocol (MCP) to integrate with Claude:
+
+### Claude Desktop Architecture
+```
+┌───────────────────┐      ┌───────────────┐      ┌───────────┐
+│                   │      │               │      │           │
+│   Claude Desktop  │◄────►│   AI Librarian│◄────►│Your Project│
+│                   │      │     Server    │      │  Filesystem│
+└───────────────────┘      └───────────────┘      └───────────┘
+                                  ▲
+                                  │
+                                  ▼
+                        ┌─────────────────────┐
+                        │                     │
+                        │  Unified Context System│
+                        │                     │
+                        └─────────────────────┘
+                                  ▲
+                                  │
+                                  ▼
+                  ┌────────────────┐     ┌────────────────┐
+                  │                │     │                │
+                  │ AI Librarian   │◄───►│  Tool Reference│
+                  │ Persistent     │     │  System        │
+                  │ Context        │     │                │
+                  └────────────────┘     └────────────────┘
+```
+
+### Claude Code Architecture
+```
+┌───────────────────┐      ┌───────────────┐      ┌───────────┐
+│                   │      │ Built-in Tools│      │           │
+│   Claude Code     │◄────►│ + AI Librarian│◄────►│Your Project│
+│                   │      │   Components  │      │  Filesystem│
+└───────────────────┘      └───────────────┘      └───────────┘
+                                  ▲
+                                  │
+                                  ▼
+                        ┌─────────────────────┐
+                        │                     │
+                        │ .ai_reference/      │
+                        │ Mini-Librarians     │
+                        └─────────────────────┘
+                                  ▲
+                                  │
+                                  ▼
+                  ┌────────────────┐     ┌────────────────┐
+                  │                │     │                │
+                  │ AI Librarian   │◄───►│  Tool Reference│
+                  │ Persistent     │     │  System        │
+                  │ Context        │     │                │
+                  └────────────────┘     └────────────────┘
+```
+
+The AI Librarian components provide a seamless interface between Claude and your project. The Unified Context System automatically bridges the AI Librarian's code understanding with the Tool Reference System, enabling intelligent navigation between components and tools without any manual configuration.
+
+Claude Code can directly access Mini-Librarians through its file system tools, while Claude Desktop requires the MCP server to access these components.
+
+## 🚀 Features## 🚀 Features
 
 > **Note:** The GUI components are currently under development. Claude Desktop features are in pre-beta phase, while Claude Code features have more streamlined implementation. Feature stability is indicated for each component.
 
@@ -502,86 +574,6 @@ from aitoolkit.utils.tool_wrappers import make_robust
 def my_search_function(query):
     # Implementation here
 ```
-
-You can also apply the robustness patch to your MCP server installation:
-
-```bash
-python scripts/apply_robustness.py --server-path path/to/server --timeout 120 --retries 3
-```
-
-This makes search operations and other long-running tasks automatically retry on failure and handle timeouts gracefully.
-
-## 🔌 Architecture
-
-The AI Dev Toolkit uses a modular architecture built around the Model Context Protocol (MCP) to integrate with Claude:
-
-### Claude Desktop Architecture
-```
-┌───────────────────┐      ┌───────────────┐      ┌───────────┐
-│                   │      │               │      │           │
-│   Claude Desktop  │◄────►│   AI Librarian│◄────►│Your Project│
-│                   │      │     Server    │      │  Filesystem│
-└───────────────────┘      └───────────────┘      └───────────┘
-                                  ▲
-                                  │
-                                  ▼
-                        ┌─────────────────────┐
-                        │                     │
-                        │  Unified Context System│
-                        │                     │
-                        └─────────────────────┘
-                                  ▲
-                                  │
-                                  ▼
-                  ┌────────────────┐     ┌────────────────┐
-                  │                │     │                │
-                  │ AI Librarian   │◄───►│  Tool Reference│
-                  │ Persistent     │     │  System        │
-                  │ Context        │     │                │
-                  └────────────────┘     └────────────────┘
-```
-
-### Claude Code Architecture
-```
-┌───────────────────┐      ┌───────────────┐      ┌───────────┐
-│                   │      │ Built-in Tools│      │           │
-│   Claude Code     │◄────►│ + AI Librarian│◄────►│Your Project│
-│                   │      │   Components  │      │  Filesystem│
-└───────────────────┘      └───────────────┘      └───────────┘
-                                  ▲
-                                  │
-                                  ▼
-                        ┌─────────────────────┐
-                        │                     │
-                        │ .ai_reference/      │
-                        │ Mini-Librarians     │
-                        └─────────────────────┘
-                                  ▲
-                                  │
-                                  ▼
-                  ┌────────────────┐     ┌────────────────┐
-                  │                │     │                │
-                  │ AI Librarian   │◄───►│  Tool Reference│
-                  │ Persistent     │     │  System        │
-                  │ Context        │     │                │
-                  └────────────────┘     └────────────────┘
-```
-
-The AI Librarian components provide a seamless interface between Claude and your project. The Unified Context System automatically bridges the AI Librarian's code understanding with the Tool Reference System, enabling intelligent navigation between components and tools without any manual configuration.
-
-Claude Code can directly access Mini-Librarians through its file system tools, while Claude Desktop requires the MCP server to access these components.
-
-## 🤖 AI-Assisted Development
-
-This toolkit was developed with Claude's assistance, demonstrating the power of human-AI collaboration in creating developer tools. The project itself serves as an example of enhancing AI capabilities through specialized extensions.
-
-Key AI-assisted development techniques used in this project:
-
-- **Iterative Design**: Human-AI dialogue to refine architecture and interfaces
-- **Context-Aware Coding**: Using AI Librarian to maintain project context
-- **Specialized AI Agents**: Mini-librarians handling specific cognitive tasks
-- **Task Decomposition**: Breaking complex problems into manageable chunks
-- **Knowledge Integration**: Combining domain expertise with AI capabilities
 
 ## 🔍 Troubleshooting
 
