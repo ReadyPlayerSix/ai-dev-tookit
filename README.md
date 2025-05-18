@@ -6,7 +6,7 @@
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-purple)
 ![MCP](https://img.shields.io/badge/MCP-Enabled-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Release](https://img.shields.io/badge/release-v0.6.0--mcp--features-orange)
+![Release](https://img.shields.io/badge/release-v0.7.5--alpha--tool--optimization-orange)
 
 > ⚠️ **Alpha Testing Phase**: This toolkit is currently in Pre-Beta. If you're testing this version, please **disable all tools except the 17 recommended tools** to ensure optimal performance during our active testing phase for reducing tool count. See the installation section for more details.
 

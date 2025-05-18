@@ -55,7 +55,7 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger("upgrade_manager")
 
 # Current version of the AI Development Toolkit
-CURRENT_VERSION = "0.5.5"  # Should match the current release version
+CURRENT_VERSION = "0.7.5"  # Should match the current release version
 
 
 class Version:

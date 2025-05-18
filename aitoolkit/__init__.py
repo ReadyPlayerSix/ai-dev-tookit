@@ -8,4 +8,4 @@ This package serves as both a Model Context Protocol (MCP) server for Claude Des
 and a management interface for other MCP servers.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.7.5"

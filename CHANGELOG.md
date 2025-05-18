@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.5-alpha-tool-optimization] - 2025-05-18
+
+### Added
+- Alpha/Pre-Beta testing phase notice in README
+- Real screenshots from docs/images directory
+- MCP extensions module for enhanced Claude integration
+- Internal advisors system for context management
+- Prompt tools for dynamic guidance generation
+- Timeout configuration and prevention guides
+- Hierarchical tool selection documentation
+
+### Changed
+- Updated README with prominent testing phase warnings
+- Enhanced modern GUI interface components
+- Improved timeout handling with detailed guides
+- Updated all version references for consistency
+- Added tool limitation notice for testers
+
+### Fixed
+- Version consistency across all modules
+- Tool timeout issues with optimization patterns
+
 ## [0.5.8-improved-gui] - 2025-05-15
 
 ### Added

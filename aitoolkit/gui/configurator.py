@@ -34,7 +34,7 @@ class ModernAIDevToolkitGUI:
         self.root.resizable(True, True)
         
         # Set version
-        self.version = "0.6.0"
+        self.version = "0.7.5"
         
         # Track changes
         self.has_changes = False
