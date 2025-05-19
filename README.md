@@ -1,4 +1,4 @@
-<meta name="image" property="og:image" content="https://repository-images.githubusercontent.com/646493172/e8e7f5da-2f76-47c7-abef-33e95adac306" />
+<meta name="image" property="og:image" content="https://raw.githubusercontent.com/isekaizen/ai-dev-toolkit/main/docs/images/ai-dev-toolkit-dashboard-001.jpg" />
 <meta property="og:title" content="AI Dev Toolkit" />
 <meta property="og:description" content="A comprehensive system that enhances AI assistants with persistent code understanding, filesystem access, and task management." />
 
