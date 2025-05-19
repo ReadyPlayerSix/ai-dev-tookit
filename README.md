@@ -31,7 +31,7 @@ AI Dev Toolkit elevates Claude beyond a conversational assistant to a comprehens
 
 With this toolkit, Claude becomes a true development partner - remembering your project structure, understanding component relationships, connecting code to relevant tools, tracking tasks, and assisting with development activities.
 
-All this happens automatically - just initialize once and the system handles everything behind the scenes, continuously updating its understanding of your codebase as it evolves.
+All this happens automatically - just initialize once and the system handles everything behind the scenes, continuously updating its understanding of your codebase as it evolves. **You don't need to manually call any functions or understand the internal implementation - Claude handles all of this for you.**
 
 ## 🤖 AI-Assisted Development
 
@@ -334,14 +334,38 @@ python3 install_for_claude_code.py --install-dir "/mnt/d/YourProjects/ai-dev-too
 python development/launch.py
 ```
 
-## 📊 Usage
+Once installation is complete, the AI Dev Toolkit will enhance Claude's capabilities automatically. You don't need to execute any additional commands - just start talking to Claude about your project!
+
+## 📊 How to Use AI Dev Toolkit
+
+Once installed, the AI Dev Toolkit works automatically in the background. Claude handles all the technical implementation details for you!
+
+### Getting Started
+
+Simply start a conversation with Claude and ask about your codebase. Here are some examples of what you can ask Claude to do:
+
+- "Help me understand the structure of my project"
+- "Find all implementations of the login function"
+- "Create a task to refactor the authentication system"
+- "Analyze the security of my codebase"
+- "Help me debug this error message"
+- "Examine the git history of this file"
+
+The toolkit is designed to enhance Claude's capabilities without requiring you to learn or execute any Python code.
+
+## 📝 Claude's Technical Implementation
+
+<details>
+<summary><strong>Click here to see how Claude uses these tools internally</strong> (Technical details - users don't need to execute these commands)</summary>
+
+**Important: All code examples below demonstrate how Claude uses these tools internally. These are NOT commands that you need to execute - Claude handles everything automatically!**
 
 ### Optimized Tool Usage to Avoid Timeouts
 
-To ensure the best performance and prevent timeouts, follow these hierarchical tool selection guidelines:
+To ensure the best performance and prevent timeouts, Claude follows these hierarchical tool selection guidelines:
 
-#### Hierarchical Tool Selection (NEW!)
-Always use tools in this priority order:
+#### Hierarchical Tool Selection
+Claude prioritizes tools in this order:
 
 1. **Component Registry First**: Check `.ai_reference/component_registry.json` before filesystem operations
 2. **Script Index Second**: Use `.ai_reference/script_index.json` to find specific files 
@@ -390,6 +414,8 @@ task_result = get_task_result(task_id)
 
 ### AI Librarian & Unified Context
 
+When you ask Claude to understand, analyze, or navigate your codebase, it's using these functions behind the scenes:
+
 ```python
 # Initialize AI Librarian for a project
 # This one command sets up everything - AI Librarian, Unified Context, and Tool References
@@ -413,7 +439,7 @@ get_unified_context("path/to/your/project")
 
 #### Large Codebase Support
 
-For larger codebases, the AI Dev Toolkit uses mini-librarians to provide efficient navigation and understanding:
+For larger codebases, Claude uses mini-librarians to provide efficient navigation and understanding:
 
 ```python
 # Access mini-librarians directly (Claude Code)
@@ -427,6 +453,9 @@ search_mini_librarians("path/to/project", "function_name")
 ```
 
 ### Task Management
+
+When you ask Claude to track tasks, it uses these functions internally:
+
 ```python
 # Add a task
 add_todo("path/to/project", "Implement login feature", priority="high")
@@ -439,6 +468,9 @@ update_todo_status("path/to/project", "todo-123", "completed")
 ```
 
 ### Advanced AI Task Management
+
+For more sophisticated task tracking, Claude uses these advanced functions:
+
 ```python
 # Create an AI-optimized task
 add_ai_task("path/to/project", "Authentication system refactoring", "Improve security and performance", "refactor", 2)
@@ -451,6 +483,9 @@ add_task_context(task_id, "code_snippet", "Task relates to authentication system
 ```
 
 ### Think Tool
+
+When handling complex reasoning tasks, Claude uses the Think Tool as a private scratchpad:
+
 ```python
 # Use the think tool as a scratchpad for reflection
 think("""
@@ -480,6 +515,9 @@ get_task_result(project_path, task_id)
 ```
 
 ### File System Operations
+
+Claude uses these functions to work with your project files:
+
 ```python
 # Read a file
 read_file("path/to/your/file.py")
@@ -536,7 +574,7 @@ Claude Code can simulate toolkit functionality through mini-librarians and adapt
 
 #### Claude Code Adapter Patterns
 
-Claude Code uses adapter patterns stored in the `.ai_reference` directory to simulate toolkit functionality:
+Claude Code simulates toolkit functionality through adapter patterns stored in the `.ai_reference` directory:
 
 ```python
 # Example: Instead of direct toolkit call like:
@@ -551,6 +589,8 @@ session_bookmarks["bookmark1"] = {"file": "path/to/file.py", "start": 10, "end":
 
 ### Security Analysis
 
+For security analysis tasks, Claude uses these functions internally:
+
 ```python
 # Run a comprehensive security analysis on your project
 security_report = security_analyze("path/to/your/project")
@@ -559,21 +599,24 @@ security_report = security_analyze("path/to/your/project")
 check_report = enhanced_sanity_check("path/to/your/project", include_security=True)
 ```
 
-The adapter patterns provide Claude Code with the context and steps needed to achieve equivalent functionality using native tools.
-
 ### Optimizing Performance and Handling Timeouts
+
+Claude automatically implements these optimization strategies:
+
 ```python
 # Initialize with robustness features automatically applied
 # This is the recommended all-in-one initialization method
 initialize_ai_dev_toolkit("path/to/your/project")
 
-# For other long-running operations, use the robustness decorators
+# For other long-running operations, robustness decorators are used
 from aitoolkit.utils.tool_wrappers import make_robust
 
 @make_robust(timeout=60.0, max_retries=2)
 def my_search_function(query):
     # Implementation here
 ```
+
+</details>
 
 ## 🔍 Troubleshooting
 
