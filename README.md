@@ -1,3 +1,7 @@
+<meta property="og:image" content="https://raw.githubusercontent.com/isekaizen/ai-dev-toolkit/main/docs/images/ai-dev-toolkit-dashboard-001.jpg" />
+<meta property="og:title" content="AI Dev Toolkit" />
+<meta property="og:description" content="A comprehensive system that enhances AI assistants with persistent code understanding, filesystem access, and task management." />
+
 # AI Dev Toolkit
 
 ![AI-Assisted](https://img.shields.io/badge/AI--Assisted-Claude%203.7-yellow?logo=anthropic&logoColor=white)
