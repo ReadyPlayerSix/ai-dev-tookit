@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "description": "Simple Tool Reference Catalog for Claude",
-  "last_updated": "2025-05-14T12:33:35.568232",
+  "last_updated": "2025-05-18T19:52:29.765751",
   "tools": {
     "read_file": {
       "id": "read_file",

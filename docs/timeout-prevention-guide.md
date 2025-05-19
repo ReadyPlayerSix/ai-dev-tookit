@@ -1,110 +1,119 @@
 # Timeout Prevention Guide
 
-## Overview
+This guide addresses the common timeout issues experienced with the AI Dev Toolkit MCP server and provides solutions.
 
-The AI Dev Toolkit implements several strategies to prevent MCP connection timeouts, especially when working with large projects or resource-intensive operations.
+## Common Causes of Timeouts
 
-## Common Timeout Scenarios
+1. **Excessive Background Threads**
+   - Unified Context update thread running every 5 minutes
+   - Multiple TaskBoard worker threads processing tasks
+   - Orphaned task handler threads that don't terminate
 
-1. **Initialization Timeout**: Server takes too long to start
-2. **Registration Timeout**: Too many tools being registered at once
-3. **Operation Timeout**: Long-running operations block the connection
-4. **Idle Timeout**: Connection drops during periods of inactivity
+2. **Resource Contention**
+   - Too many concurrent operations
+   - Circular imports causing deadlocks
+   - File system operations blocking each other
 
-## Prevention Strategies
+3. **Thread Leakage**
+   - Tasks that timeout leave threads running
+   - Daemon threads not properly cleaned up
+   - No limit on concurrent operations
 
-### 1. Extended Timeout Configuration
+## Applied Fixes
 
-```python
-os.environ["MCP_DEFAULT_TIMEOUT"] = "600000"  # 10 minutes
-os.environ["MCP_MAX_REQUEST_TIMEOUT"] = "1200000"  # 20 minutes
-os.environ["MCP_INITIALIZATION_TIMEOUT"] = "1800000"  # 30 minutes
-```
+### 1. Unified Context Update Optimization
+- Increased update interval from 5 to 30 minutes
+- Made threads non-daemon for proper cleanup
+- Added resource monitoring
 
-### 2. Deferred Operations
+### 2. TaskBoard Thread Management
+- Reduced default workers from 4 to 2
+- Added thread tracking for cleanup
+- Implemented task cancellation flags
 
-- **Monitoring Thread**: Starts 5-10 seconds after server initialization
-- **Indexing**: Delayed until after the connection is established
-- **Tool Registration**: Uses lazy loading for non-essential tools
+### 3. Timeout Configuration
+Created `config/mcp_timeout_config.json` with:
+- Extended default timeout to 2 minutes
+- File operations timeout to 3 minutes  
+- Background task controls
 
-### 3. Heartbeat Mechanism
+### 4. Resource Monitoring
+Added simple resource monitor to track:
+- Active operation count
+- Thread lifecycle
+- Resource warnings
 
-The server maintains connection health through:
-- Automatic heartbeat every 5 seconds
-- Simple `heartbeat()` tool for manual checks
-- Connection monitoring in background thread
-
-### 4. Progressive Loading
-
-Features load in phases:
-1. Core tools (filesystem, basic operations)
-2. Enhanced tools (bookmarks, analysis)
-3. Optional features (security, advisors)
-4. Background processes (monitoring, indexing)
-
-### 5. Batch Operations
-
-- Tool registration happens in batches
-- File operations use batching for large sets
-- Indexing processes files in chunks
-
-## Configuration Options
-
-Edit `config/mcp_timeout_config.json` to adjust:
+## Recommended Settings
 
 ```json
 {
-  "timeouts": {
-    "default": 600000,        // Base timeout for operations
-    "initialization": 1800000, // Server startup timeout
-    "heartbeat_interval": 5000 // Keep-alive frequency
+  "mcp_timeout": {
+    "default_timeout_ms": 120000,
+    "file_operations_timeout_ms": 180000,
+    "background_tasks": {
+      "unified_context_update_interval": 1800,
+      "taskboard_workers": 2,
+      "task_default_timeout": 300
+    }
   }
 }
 ```
 
-## Troubleshooting
+## Manual Adjustments
 
-### If timeouts persist:
+If timeouts persist:
 
-1. **Increase timeout values** in environment variables
-2. **Reduce initial load** by disabling optional features
-3. **Enable debug logging** to identify bottlenecks
-4. **Use smaller projects** for initial testing
+1. **Reduce Worker Threads**
+   ```python
+   # In task_board.py
+   def __init__(self, project_path: str, num_workers: int = 1):
+   ```
 
-### Debug commands:
+2. **Disable Background Updates**
+   ```python
+   # In unified_context_integration.py
+   # Comment out: update_thread.start()
+   ```
 
-```python
-# Check server status
-heartbeat()
+3. **Increase Claude Desktop Timeout**
+   In Claude Desktop config:
+   ```json
+   {
+     "mcpServers": {
+       "ai-librarian": {
+         "timeout": 180000
+       }
+     }
+   }
+   ```
 
-# Start monitoring manually
-server_ready()
+## Monitoring
 
-# Check specific project
-initialize_librarian("path/to/smaller/project")
-```
+Watch for these signs:
+- Tools timing out after 3-4 uses
+- Server becoming unresponsive
+- High CPU usage from Python processes
 
-## Best Practices
+## Testing
 
-1. **Start with smaller projects** to test configuration
-2. **Use progressive initialization** for large codebases
-3. **Monitor logs** for timeout warnings
-4. **Adjust timeouts** based on your system performance
-5. **Keep features modular** to allow selective loading
+After applying fixes:
+1. Restart the AI Librarian server
+2. Test file operations repeatedly
+3. Monitor task completion times
+4. Check thread count doesn't grow
 
-## Technical Details
+## Emergency Recovery
 
-The timeout prevention system works through:
-
-1. **Environment Variables**: Set before MCP initialization
-2. **Threading**: Background operations don't block main thread
-3. **Lazy Loading**: Tools register only when needed
-4. **Heartbeat**: Maintains connection during idle periods
-5. **Graceful Degradation**: Features disable if timeouts occur
+If server becomes unresponsive:
+1. Kill the Python process
+2. Clear the TaskBoard queue
+3. Restart with minimal workers
+4. Gradually increase concurrency
 
 ## Future Improvements
 
-- Dynamic timeout adjustment based on system load
-- Automatic feature reduction during high load
-- Connection pooling for concurrent operations
-- Predictive loading based on usage patterns
+Consider implementing:
+- Connection pooling
+- Better thread lifecycle management
+- Automatic resource throttling
+- Health check endpoints

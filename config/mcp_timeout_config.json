@@ -1,27 +1,16 @@
 {
-  "timeouts": {
-    "default": 600000,
-    "max_request": 1200000,
-    "initialization": 1800000,
-    "registration": 900000,
-    "heartbeat_interval": 5000
+  "mcp_timeout": {
+    "default_timeout_ms": 120000,
+    "file_operations_timeout_ms": 180000,
+    "background_tasks": {
+      "unified_context_update_interval": 1800,
+      "taskboard_workers": 2,
+      "task_default_timeout": 300
+    }
   },
-  "features": {
-    "lazy_tool_registration": true,
-    "batch_tool_registration": true,
-    "progressive_loading": true,
-    "automatic_heartbeat": true,
-    "deferred_monitoring": true
-  },
-  "optimization": {
-    "max_concurrent_operations": 5,
-    "indexing_batch_size": 50,
-    "monitoring_delay": 10,
-    "cache_timeout": 300000
-  },
-  "debugging": {
-    "verbose_logging": false,
-    "trace_timeouts": true,
-    "log_heartbeats": false
+  "resource_limits": {
+    "max_concurrent_operations": 3,
+    "max_background_threads": 5,
+    "thread_cleanup_interval": 60
   }
 }

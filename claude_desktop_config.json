@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "ai-librarian": {
+      "command": "python",
+      "args": [
+        "development/launch_librarian.py",
+        "."
+      ],
+      "cwd": "D:\\Projects\\isekaizen\\ai-dev-toolkit",
+      "env": {
+        "MCP_DEFAULT_TIMEOUT": "300000",
+        "MCP_MAX_REQUEST_TIMEOUT": "600000",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "timeout": 300000
+    }
+  }
+}

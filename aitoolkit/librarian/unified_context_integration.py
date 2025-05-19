@@ -32,7 +32,7 @@ unified_context_data = {
     "last_updated": 0,
     "active_projects": set(),
     "context_lock": threading.Lock(),
-    "update_interval": 300  # Update every 5 minutes
+    "update_interval": 1800  # Update every 30 minutes (changed from 5)
 }
 
 def register_unified_context_tools(mcp):
@@ -412,8 +412,8 @@ def register_unified_context_tools(mcp):
                 time.sleep(60)  # Sleep for a minute on error
     
     # Start the update thread
-    update_thread = threading.Thread(target=update_unified_context_thread, daemon=True)
-    update_thread.start()
+    update_thread = threading.Thread(target=update_unified_context_thread, daemon=False)
+    # update_thread.start()  # DISABLED FOR TIMEOUT PREVENTION
     
     logger.info("Registered unified context tools")
 

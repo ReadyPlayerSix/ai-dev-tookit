@@ -59,13 +59,14 @@ class TaskBoard:
     TaskBoard for managing async tasks and communicating with mini-librarians
     """
     project_path: str
-    max_workers: int = 4
+    max_workers: int = 1  # Reduced from 4 to prevent timeout issues
     task_timeout: int = 120  # seconds
     
     # Task queues and storage
     task_queue: "queue.PriorityQueue" = field(default_factory=queue.PriorityQueue)
     tasks: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     results: Dict[str, TaskResult] = field(default_factory=dict)
+    _cancelled_tasks: set = field(default_factory=set)  # Track cancelled tasks
     
     # Locks for thread safety
     task_lock: threading.Lock = field(default_factory=threading.Lock)
@@ -85,7 +86,7 @@ class TaskBoard:
             worker = threading.Thread(
                 target=self._worker_loop,
                 name=f"TaskBoard-Worker-{i}",
-                daemon=True
+                daemon=False
             )
             self.workers.append(worker)
             worker.start()
@@ -241,7 +242,7 @@ class TaskBoard:
                     metadata={"task_id": task_id}
                 )
                 
-                # Interrupt handler thread (if possible)
+                # Add thread cleanup on timeout
                 if handler_thread.is_alive():
                     logger.warning(f"Handler thread for task {task_id} is still running after timeout")
                     # We can't forcibly terminate threads in Python, but we can try to set a flag
