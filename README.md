@@ -121,41 +121,55 @@ The AI Librarian components provide a seamless interface between Claude and your
 
 Claude Code can directly access Mini-Librarians through its file system tools, while Claude Desktop requires the MCP server to access these components.
 
-## 🚀 Features## 🚀 Features
+## 🚀 Features
 
 > **Note:** The GUI components are currently under development. Claude Desktop features are in pre-beta phase, while Claude Code features have more streamlined implementation. Feature stability is indicated for each component.
 
-### AI Librarian Server
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🧠 AI Librarian Server</summary>
+
 - **Integrated Architecture**: All capabilities consolidated in one AI Librarian server *(Stable: Code, Pre-Beta: Desktop)*
 - **Simplified Setup**: One-step installation to Claude Desktop/Code *(Stable: Code, Beta: Desktop)*
 - **Optimized Performance**: Reduced overhead and faster response times *(Stable)*
 - **Full MCP Compliance**: Complete implementation of Model Context Protocol standards *(Stable: Desktop)*
 - **Tool Index Integration**: AI-optimized tool selection and usage guidance *(Stable)*
+</details>
 
-### AI Librarian
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">📚 AI Librarian</summary>
+
 - **Code Understanding**: Comprehensive codebase indexing with component tracking *(Stable)*
 - **Persistent Context**: Code structure awareness persists across conversations *(Stable)*
 - **Component Relationship Analysis**: Automatically detects dependencies and relationships *(Stable)*
 - **Documentation Generation**: Extracts docstrings and creates documentation *(Stable)*
 - **Real-time Updates**: Monitors project changes automatically to stay current *(Stable)*
 - **Mini-Librarians**: Handle large codebases by breaking them into specialized knowledge units *(Stable: Code, Beta: Desktop)*
+</details>
 
-### Unified Context System
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🔄 Unified Context System</summary>
+
 - **Automatic Integration**: Zero manual setup - just initialize and everything works *(Stable)*
 - **Code-Tool Bridging**: Intelligently connects code components to relevant tools *(Stable)*
 - **Bidirectional References**: Navigate from components to tools and vice versa *(Stable)*
 - **Context Awareness**: Understands which tools are most useful for specific code *(Stable)*
 - **Background Maintenance**: Continuously updates cross-references as code evolves *(Stable)*
+</details>
 
-### Enhanced Code Analysis
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🔍 Enhanced Code Analysis</summary>
+
 - **Reference Finding**: Locate all references to components across the codebase *(Stable)*
 - **Pattern Detection**: Identify common patterns and anti-patterns *(Stable)*
 - **File Overview**: Comprehensive analysis of file structure with metrics *(Stable)*
 - **Component Details**: Rich component information with examples and documentation *(Stable)*
 - **Usage Context**: Understand how components are used throughout the project *(Stable)*
 - **Large Codebase Support**: Efficient handling of multi-module projects via mini-librarians *(Stable: Code, Beta: Desktop)*
+</details>
 
-### File System Integration
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">💾 File System Integration</summary>
+
 - **Secure Project Access**: Controlled access to your development files *(Stable)*
 - **Directory Navigation**: Intuitive directory navigation and exploration *(Stable)*
 - **Code Manipulation**: Read, write, and modify code with proper error handling *(Stable)*
@@ -165,8 +179,11 @@ Claude Code can directly access Mini-Librarians through its file system tools, w
 - **File Operations**: Comprehensive file management capabilities *(Stable)*
 - **Search & Indexing**: Find files and content with powerful search tools *(Stable)*
 - **Git Repository Tracking**: Analyze and track git repositories and their history *(Stable)*
+</details>
 
-### TaskBoard System
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">⚙️ TaskBoard System</summary>
+
 - **Asynchronous Processing**: Execute long-running operations in the background *(Stable)*
 - **Prioritized Task Queue**: Manage operations by priority with automatic timeouts *(Stable)*
 - **Background Workers**: Pool of worker threads for parallel task execution *(Stable)*
@@ -174,15 +191,21 @@ Claude Code can directly access Mini-Librarians through its file system tools, w
 - **Think Tool**: Deep analytical reasoning capabilities for complex problems *(Stable)*
 - **Progress Tracking**: Monitor task status, results and execution metrics *(Stable)*
 - **Cross-component Integration**: Unified task processing across all subsystems *(Stable)*
+</details>
 
-### Task Management System
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">📋 Task Management System</summary>
+
 - **Persistent To-Do Tracking**: Tasks persist across conversations *(Stable)*
 - **Multi-level Task Structure**: Support for tasks, subtasks, and dependencies *(Stable)*
 - **Priority & Status Tracking**: Organize work by importance and completion status *(Stable)*
 - **Code Context Linking**: Associate tasks with specific code components *(Stable)*
 - **Automatic Task Inference**: Extract potential tasks from conversations *(Stable: Code, Beta: Desktop)*
+</details>
 
-### Security Analysis
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🔒 Security Analysis</summary>
+
 - **Vulnerability Assessment**: Professional-level security analysis of codebases *(Stable)*
 - **Pattern-based Scanning**: Detection of common security vulnerabilities *(Stable)*
 - **AST-based Analysis**: Sophisticated code analysis for security issues *(Stable)*
@@ -191,8 +214,11 @@ Claude Code can directly access Mini-Librarians through its file system tools, w
 - **AI Toolkit-Specific Patterns**: Custom rules for AI Dev Toolkit components *(Stable)*
 - **Integration with Sanity Check**: Combined code quality and security assessment *(Stable)*
 - **Independent Security Tool**: Can be used standalone with `security_analyze()` function *(Stable)*
+</details>
 
-### Tool Index System
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🔧 Tool Index System</summary>
+
 - **Simple, Robust Implementation**: Single-pass indexing with no subprocesses for improved reliability and performance *(Stable)*
 - **AI-Optimized Tool Profiles**: Detailed metadata that helps Claude select the right tools *(Stable)*
 - **Asynchronous Tool Indexing**: Background processing of tool indexing via TaskBoard integration *(Stable)*
@@ -201,8 +227,11 @@ Claude Code can directly access Mini-Librarians through its file system tools, w
 - **Direct Function Discovery**: Scans common locations for tool functions and imports/analyzes them directly *(Stable)*
 - **Simplified Output Format**: Flat, reference-catalog style organization for easy navigation *(Stable)*
 - **Metadata Extraction**: Uses Python's introspection capabilities for accurate tool information *(Stable)*
+</details>
 
-### TaskBoard System (New!)
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🤖 AI Mini-Librarians</summary>
+
 - **AI Mini-Librarians**: Specialized AI agents that process specific analysis tasks *(Stable)*
 - **Asynchronous Processing**: Background task processing for complex operations *(Stable)*
 - **Task Queue Management**: Prioritized task execution with timeout handling *(Stable)*
@@ -210,8 +239,11 @@ Claude Code can directly access Mini-Librarians through its file system tools, w
 - **AI-Optimized Shorthand**: Compressed format for efficient AI-to-AI communication *(Stable: Code, Beta: Desktop)*
 - **Advanced Context Awareness**: Rich contextual information links tasks to code *(Stable)*
 - **Distributed Knowledge System**: Intelligence distributed across specialized agents *(Stable: Code, Beta: Desktop)*
+</details>
 
-### Think Tool
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🤔 Think Tool</summary>
+
 - **Structured Reflection**: Claude's scratchpad for reasoning through complex problems *(Stable)*
 - **Requirements Verification**: Check if all required information is collected *(Stable)*
 - **Rule Compliance Checking**: Verify if planned actions comply with policies *(Stable)*
@@ -219,8 +251,11 @@ Claude Code can directly access Mini-Librarians through its file system tools, w
 - **Results Analysis**: Process and verify the results of other tools *(Stable)*
 - **Clear Separation**: Keep internal thought processes separate from user conversation *(Stable)*
 - **Decision Support**: Compare approaches and select the best option *(Stable)*
+</details>
 
-### MCP Extensions (New!)
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🔌 MCP Extensions</summary>
+
 - **MCP Prompts**: Pre-defined conversation templates for common tasks *(Stable)*
   - `analyze-codebase`: Comprehensive project analysis
   - `debug-issue`: Debugging assistance workflow
@@ -235,14 +270,18 @@ Claude Code can directly access Mini-Librarians through its file system tools, w
   - `get_refactoring_guide`: Type-specific refactoring strategies
   - `get_feature_implementation_guide`: Feature development workflow
   - `get_analysis_guide`: Codebase analysis approaches
+</details>
 
-### Robustness Features
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🛡️ Robustness Features</summary>
+
 - **Automatic Retries**: Long-running operations automatically retry on failure *(Stable)*
 - **Timeout Handling**: Graceful handling of timeouts with configurable limits *(Stable)*
 - **Queue Management**: Clear stale requests before starting new operations *(Stable)*
 - **Performance Tracking**: Measure and log execution times for optimization *(Stable)*
 - **Error Recovery**: Robust error handling with detailed diagnostics *(Stable)*
 - **Large Codebase Handling**: Efficient processing of large repositories with segmentation *(Stable: Code, Beta: Desktop)*
+</details>
 
 ## 🖼️ Screenshots
 
