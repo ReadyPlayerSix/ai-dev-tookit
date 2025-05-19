@@ -16,6 +16,22 @@ A powerful, extensible toolkit that dramatically enhances Claude's capabilities 
   <img src="docs/images/ai-dev-toolkit-dashboard-001.jpg" alt="AI Dev Toolkit Dashboard" width="800"/>
 </div>
 
+## 📑 Quick Navigation
+
+- [Overview](#-overview)
+- [AI-Assisted Development](#-ai-assisted-development)
+- [Architecture](#-architecture)
+- [Features](#-features)
+- [Screenshots](#-screenshots)
+- [Installation](#-installation)
+- [How to Use AI Dev Toolkit](#-how-to-use-ai-dev-toolkit)
+- [Claude's Technical Implementation](#-claudes-technical-implementation) (Collapsible)
+- [Troubleshooting](#-troubleshooting) (Collapsible)
+- [Documentation](#-documentation) (Collapsible)
+- [Roadmap](#-roadmap) (Collapsible)
+- [License](#-license)
+- [Acknowledgments](#-acknowledgments)
+
 ## 🌟 Overview
 
 AI Dev Toolkit elevates Claude beyond a conversational assistant to a comprehensive development partner. The toolkit creates a bidirectional bridge between your projects and Claude, enabling it to:
@@ -328,13 +344,14 @@ python3 install_for_claude_code.py --install-dir "/mnt/d/YourProjects/ai-dev-too
 - If you see pip-related errors, try installing dependencies manually with `pip3 install -r requirements.txt`
 - For WSL users, the indexer works best on projects stored on Linux filesystems (not mounted Windows drives)
 
-### Option 3: Use the Development Launcher
+> 🚀 **Getting Started After Installation**: Once installation is complete, the AI Dev Toolkit will enhance Claude's capabilities automatically. You don't need to execute any additional commands - just start talking to Claude about your project!
+
+### Option 3: Use the Development Launcher (For Contributors)
 ```bash
-# After cloning and installing dependencies
+# This option is primarily for toolkit contributors and developers
+# It launches the toolkit in development mode with debugging enabled
 python development/launch.py
 ```
-
-Once installation is complete, the AI Dev Toolkit will enhance Claude's capabilities automatically. You don't need to execute any additional commands - just start talking to Claude about your project!
 
 ## 📊 How to Use AI Dev Toolkit
 
@@ -356,7 +373,7 @@ The toolkit is designed to enhance Claude's capabilities without requiring you t
 ## 📝 Claude's Technical Implementation
 
 <details>
-<summary><strong>Click here to see how Claude uses these tools internally</strong> (Technical details - users don't need to execute these commands)</summary>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🔧 Click here to see how Claude uses these tools internally</summary>
 
 **Important: All code examples below demonstrate how Claude uses these tools internally. These are NOT commands that you need to execute - Claude handles everything automatically!**
 
@@ -620,6 +637,9 @@ def my_search_function(query):
 
 ## 🔍 Troubleshooting
 
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🔧 Click to expand Troubleshooting information</summary>
+
 Common issues and solutions:
 
 - **⚠️ MCP Missing - Claude Desktop Cannot Connect**: If you see "Running in limited functionality mode without Claude Desktop connection" or similar, the MCP package is not installed. Fix with:
@@ -657,8 +677,12 @@ Common issues and solutions:
 - **Old .ai_reference Format**: For projects with older format .ai_reference directories, run the installer with `python install_for_claude_code.py` which will automatically detect and offer to upgrade these directories
 
 - **Tool Timeout Performance Issues**: If tools are taking too long and timing out, use the hierarchical tool selection approach described in the "Optimized Tool Usage" section above. Always query the component registry and script index before doing direct filesystem operations.
+</details>
 
 ## 📚 Documentation
+
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">📖 Click to see additional documentation resources</summary>
 
 Additional documentation is available in the [docs](docs/) directory:
 
@@ -670,8 +694,12 @@ Additional documentation is available in the [docs](docs/) directory:
 - [Upgrading AI Reference](docs/upgrading_ai_reference.md)
 - [Upgrade Manager](docs/upgrade_manager.md)
 - [Think Tool Guide](docs/think-tool-guide.md)
+</details>
 
 ## 📅 Roadmap
+
+<details>
+<summary style="color: #0366d6; font-weight: bold; cursor: pointer;">🔮 Click to see upcoming features and development plans</summary>
 
 ### Upcoming Releases
 
@@ -728,6 +756,7 @@ Additional documentation is available in the [docs](docs/) directory:
   - Improved queue management to prevent request collisions
   - Performance metrics for identifying bottlenecks
   - Smarter timeout handling with configurable thresholds
+</details>
 
 ## 📜 License
 
