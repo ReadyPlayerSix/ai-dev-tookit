@@ -12,7 +12,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Release](https://img.shields.io/badge/release-v0.7.5--alpha--tool--optimization-orange)
 
-> ⚠️ **Alpha Testing Phase**: This toolkit is currently in Pre-Beta. If you're testing this version, please **disable all tools except the 17 recommended tools** to ensure optimal performance during our active testing phase for reducing tool count. See the installation section for more details.
+> ⚠️ **Alpha Testing Phase**: This toolkit is currently optimizing its tool architecture. The system internally manages 43+ operations through 17 high-level orchestrator tools, reducing complexity while maintaining full functionality.
 
 A powerful, extensible toolkit that dramatically enhances Claude's capabilities with persistent context, filesystem access, development tools, and AI-optimized task management.
 
@@ -68,6 +68,26 @@ Key AI-assisted development techniques used in this project:
 ## 🔌 Architecture
 
 The AI Dev Toolkit uses a modular architecture built around the Model Context Protocol (MCP) to integrate with Claude:
+
+### Intelligent Tool Orchestration
+
+The toolkit employs an advanced orchestration pattern that simplifies interaction while maintaining powerful functionality:
+
+- **High-Level Tools (17)**: User-facing tools that handle common development tasks
+  - `project_setup` - Initialize and configure projects
+  - `code_analysis` - Understand and analyze code
+  - `code_modification` - Make intelligent code changes
+  - `task_management` - Track and manage development tasks
+  - `project_exploration` - Navigate and search projects
+
+- **Internal Operations (43+)**: Behind the scenes, these high-level tools orchestrate multiple internal operations:
+  - File operations (read, write, edit, move)
+  - Component analysis (query, find implementations)
+  - Task tracking (todos, subtasks, priorities)
+  - Git operations (history, branches, commits)
+  - And many more...
+
+The orchestration happens automatically - Claude determines the best execution strategy based on your request, handles timeouts gracefully, and caches results for optimal performance.
 
 ### Claude Desktop Architecture
 ```
@@ -310,7 +330,11 @@ Claude Code can directly access Mini-Librarians through its file system tools, w
 
 > **Note:** The GUI components are currently under development. Command-line and code-based interactions are fully functional, while the graphical interface for directory selection and configuration is in beta phase.
 
-> ⚠️ **Important for Alpha/Pre-Beta Testers**: During this testing phase, please configure Claude Desktop to use **only the 17 recommended tools** for optimal performance. This is part of our ongoing efforts to streamline and optimize the tool count. You can disable other tools in the Claude Desktop settings or through the GUI configuration tool.
+> 🚀 **Tool Architecture Optimization**: The AI Dev Toolkit uses an intelligent orchestration system that consolidates 43+ internal operations into 17 high-level tools. This reduces complexity while maintaining full functionality through:
+> - **Semantic Intent Mapping**: Claude automatically understands what you want to do and routes to the appropriate internal tools
+> - **Asynchronous Execution**: Long-running operations are handled in the background via TaskBoard
+> - **Smart Caching**: Frequently accessed data is cached for instant responses
+> - **No Manual Configuration**: The optimization happens automatically - you just use the toolkit normally
 
 ### Prerequisites
 - Python 3.8 or higher

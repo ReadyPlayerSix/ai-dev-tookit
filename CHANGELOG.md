@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0-tool-orchestration] - 2025-01-18
+
+### Added
+- Intelligent tool orchestration system reducing 43+ operations to 17 high-level tools
+- Semantic intent mapping for automatic tool selection
+- Internal Claude-optimized mapping patterns (λ_ clusters)
+- Asynchronous execution strategies with TaskBoard integration
+- Smart result caching for improved performance
+- Detailed architectural documentation in docs/
+
+### Changed
+- Refactored tool architecture from direct exposure to orchestrated pattern
+- Updated README with clearer explanation of tool optimization
+- Improved timeout handling through automatic async routing
+- Enhanced user experience with simplified tool selection
+
+### Technical Details
+- High-level orchestrator tools handle user requests
+- Internal operations managed through semantic clusters
+- No human-readable translation layer needed
+- Pattern matching uses Claude's native understanding
+- All long-running operations automatically use TaskBoard
+
 ## [0.7.5-alpha-tool-optimization] - 2025-05-18
 
 ### Added
